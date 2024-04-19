@@ -1,4 +1,4 @@
-import 'package:dnd5e_dm_tools/core/enum.dart';
+import 'package:dnd5e_dm_tools/core/util/enum.dart';
 import 'package:dnd5e_dm_tools/features/header/cubit/header_states.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 

@@ -1,4 +1,4 @@
-import 'package:dnd5e_dm_tools/core/enum.dart';
+import 'package:dnd5e_dm_tools/core/util/enum.dart';
 
 class HeaderState {
   final ConnectionStatus connectionStatus;
