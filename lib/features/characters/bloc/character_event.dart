@@ -1,14 +1,14 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 
-abstract class CharacterScreenEvent extends Equatable {
-  const CharacterScreenEvent();
+abstract class CharacterEvent extends Equatable {
+  const CharacterEvent();
 
   @override
   List<Object> get props => [];
 }
 
-class TabUpdated extends CharacterScreenEvent {
+class TabUpdated extends CharacterEvent {
   final int index;
 
   const TabUpdated(this.index);

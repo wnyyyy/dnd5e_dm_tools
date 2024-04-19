@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:dnd5e_dm_tools/core/data/models/asi.dart';
 
 class Race {
+  final String slug;
   final String name;
   final String description;
   final List<ASI> asi;
@@ -11,6 +14,7 @@ class Race {
   //final List<dynamic>? subraces;
 
   Race({
+    required this.slug,
     required this.name,
     required this.description,
     required this.asi,
@@ -21,24 +25,12 @@ class Race {
     //this.subraces,
   });
 
-  static Race fromOpenApi(Map<String, dynamic> c) {
-    return Race(
-      name: c['name'] as String,
-      description: c['desc'] as String,
-      asi: c['asi'] as List<ASI>,
-      speed: c['speed']?['walk'] as int?,
-      languages: c['languages'] as String?,
-      vision: c['vision'] as String?,
-      traits: c['traits'] as String?,
-      //subraces: c['subraces'] as List
-    );
-  }
-
   static Race fromMap(Map<String, dynamic> c) {
     return Race(
+      slug: c['slug'] as String,
       name: c['name'] as String,
       description: c['description'] as String,
-      asi: c['asi'] as List<ASI>,
+      asi: jsonDecode(c['asi']) as List<ASI>,
       speed: c['speed'] as int?,
       languages: c['languages'] as String?,
       vision: c['vision'] as String?,
@@ -49,9 +41,11 @@ class Race {
 
   Map<String, Object?> toMap() {
     return {
+      'slug': slug,
       'name': name,
       'description': description,
-      'asi': asi,
+      //'asi': jsonEncode(asi.map((e) => e.toMap()).toList()),
+      'asi': jsonEncode(asi),
       'speed': speed,
       'languages': languages,
       'vision': vision,

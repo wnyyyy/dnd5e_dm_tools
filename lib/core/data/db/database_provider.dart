@@ -2,14 +2,10 @@ import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
 class DatabaseProvider {
-  static final DatabaseProvider _instance = DatabaseProvider._internal();
-  static Database? _database;
+  DatabaseProvider._();
+  static final DatabaseProvider db = DatabaseProvider._();
 
-  DatabaseProvider._internal();
-
-  factory DatabaseProvider() {
-    return _instance;
-  }
+  Database? _database;
 
   Future<Database> get database async {
     if (_database != null) return _database!;
@@ -24,29 +20,21 @@ class DatabaseProvider {
     return await openDatabase(path, version: 1, onCreate: (db, version) {
       db.execute('''
         CREATE TABLE Races(
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          slug TEXT PRIMARY KEY,
           name TEXT,
           description TEXT,
           speed INTEGER,
           languages TEXT,
           vision TEXT,
-          traits TEXT
+          traits TEXT,
+          asi TEXT
         );
 
-        CREATE TABLE ASI (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          race_id INTEGER,
-          attribute_id INTEGER,
-          value INTEGER,
-          FOREIGN KEY(race_id) REFERENCES Races(id),
+        CREATE TABLE Characters(
+          name TEXT PRIMARY KEY,
+          race_slug TEXT,
+          FOREIGN KEY (race_slug) REFERENCES race (slug)
         );
-
-        CREATE TABLE Subraces(
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          race_id INTEGER,
-          subrace_id INTEGER,
-          FOREIGN KEY(race_id) REFERENCES Races(id),
-          FOREIGN KEY(subrace_id) REFERENCES Races(id),
       ''');
     });
   }

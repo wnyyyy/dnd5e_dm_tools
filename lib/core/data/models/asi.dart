@@ -1,17 +1,17 @@
 class ASI {
-  final int raceId;
+  final String raceSlug;
   final String attribute;
   final int value;
 
   ASI({
-    required this.raceId,
+    required this.raceSlug,
     required this.attribute,
     required this.value,
   });
 
   static ASI fromMap(Map<String, dynamic> c) {
     return ASI(
-      raceId: c['race_id'] as int,
+      raceSlug: c['race_slug'] as String,
       attribute: c['attribute'] as String,
       value: c['value'] as int,
     );
@@ -19,7 +19,7 @@ class ASI {
 
   Map<String, Object?> toMap() {
     return {
-      'race_id': raceId,
+      'race_slug': raceSlug,
       'attribute': attribute,
       'value': value,
     };

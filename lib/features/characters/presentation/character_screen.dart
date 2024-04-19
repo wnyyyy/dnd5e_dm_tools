@@ -9,8 +9,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 class CharacterScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<CharacterScreenBloc, CharacterScreenState>(
+    return BlocBuilder<CharacterBloc, CharacterState>(
       builder: (context, state) {
+        if (state is CharacterStateLoading) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
         return DefaultTabController(
             length: 4,
             child: Column(

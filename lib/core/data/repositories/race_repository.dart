@@ -14,6 +14,13 @@ class RaceRepository {
     return raceList;
   }
 
+  Future<Race?> getRace(String slug) async {
+    final db = await databaseProvider.database;
+    var race = await db.query('Races', where: 'slug = ?', whereArgs: [slug]);
+    if (race.isEmpty) return null;
+    return Race.fromMap(race[0]);
+  }
+
   Future<Race> insertRace(Race race) async {
     final db = await databaseProvider.database;
     await db.insert('Races', race.toMap());
