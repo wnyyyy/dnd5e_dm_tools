@@ -1,1 +1,1 @@
-const BASE_API_URL = 'https://api.open5e.com/v1/';
+const SERVER_URL = 'http://192.168.15.6:5000/api/';

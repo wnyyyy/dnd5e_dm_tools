@@ -27,4 +27,15 @@ class CharacterRepository {
 
     return Character.fromMap(characterMap, raceMap);
   }
+
+  Future<void> updateAll(List<Character> characters) async {
+    final db = await databaseProvider.database;
+    await db.transaction((txn) async {
+      await txn.delete('Characters');
+
+      for (Character character in characters) {
+        await txn.insert('Characters', character.toMap());
+      }
+    });
+  }
 }

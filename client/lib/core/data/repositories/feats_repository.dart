@@ -38,4 +38,15 @@ class FeatRepository {
     );
     return feat;
   }
+
+  Future<void> updateAll(List<Feat> feats) async {
+    final db = await databaseProvider.database;
+    await db.transaction((txn) async {
+      await txn.delete('Feats');
+
+      for (Feat feat in feats) {
+        await txn.insert('Feats', feat.toMap());
+      }
+    });
+  }
 }

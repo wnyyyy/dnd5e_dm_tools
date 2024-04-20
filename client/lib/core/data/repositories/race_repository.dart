@@ -46,4 +46,15 @@ class RaceRepository {
       whereArgs: [name],
     );
   }
+
+  Future<void> updateAll(List<Race> races) async {
+    final db = await databaseProvider.database;
+    await db.transaction((txn) async {
+      await txn.delete('Races');
+
+      for (Race race in races) {
+        await txn.insert('Races', race.toMap());
+      }
+    });
+  }
 }

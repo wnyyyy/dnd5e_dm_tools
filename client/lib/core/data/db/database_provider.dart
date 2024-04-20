@@ -6,6 +6,7 @@ class DatabaseProvider {
   static final DatabaseProvider db = DatabaseProvider._();
 
   Database? _database;
+  DateTime? timestamp;
 
   Future<Database> get database async {
     if (_database != null) return _database!;

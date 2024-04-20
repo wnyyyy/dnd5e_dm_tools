@@ -2,8 +2,8 @@ import 'package:dnd5e_dm_tools/core/data/db/database_provider.dart';
 import 'package:dnd5e_dm_tools/core/data/repositories/character_repository.dart';
 import 'package:dnd5e_dm_tools/core/data/repositories/feats_repository.dart';
 import 'package:dnd5e_dm_tools/core/data/repositories/race_repository.dart';
-import 'package:dnd5e_dm_tools/core/util/api_sync.dart';
 import 'package:dnd5e_dm_tools/core/config/theme_cubit.dart';
+import 'package:dnd5e_dm_tools/core/util/server_sync.dart';
 import 'package:dnd5e_dm_tools/features/characters/bloc/character_bloc.dart';
 import 'package:dnd5e_dm_tools/features/characters/bloc/character_event.dart';
 import 'package:dnd5e_dm_tools/features/characters/presentation/character_screen.dart';
@@ -20,7 +20,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await DatabaseProvider.purgeDatabase();
   final databaseProvider = DatabaseProvider.db;
-  await ApiSync.sync(databaseProvider);
+  await ServerSync.checkUpdate(databaseProvider, false);
 
   runApp(const Dnd5eDmTools());
 }
@@ -42,8 +42,11 @@ class Dnd5eDmTools extends StatelessWidget {
             BlocProvider(create: (_) => HeaderCubit()),
             BlocProvider(create: (_) => ThemeCubit()),
             BlocProvider(create: (_) {
-              var bloc = CharacterBloc(context.read<CharacterRepository>(),
-                  context.read<RaceRepository>());
+              var bloc = CharacterBloc(
+                context.read<CharacterRepository>(),
+                context.read<RaceRepository>(),
+                'Sage',
+              );
               bloc.add(const CharacterLoad());
               return bloc;
             }),

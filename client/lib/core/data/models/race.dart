@@ -30,7 +30,7 @@ class Race {
       slug: c['slug'] as String,
       name: c['name'] as String,
       description: c['description'] as String,
-      asi: jsonDecode(c['asi']) as List<ASI>,
+      asi: c['asi'].map<ASI>((e) => ASI.fromMap(e)).toList(),
       speed: c['speed'] as int?,
       languages: c['languages'] as String?,
       vision: c['vision'] as String?,
