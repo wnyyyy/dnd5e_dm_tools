@@ -7,7 +7,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 class CharacterBloc extends Bloc<CharacterEvent, CharacterState> {
   final CharacterRepository characterRepository;
   final RaceRepository raceRepository;
+  final String characterName;
 
-  CharacterBloc(this.characterRepository, this.raceRepository)
+  CharacterBloc(
+      this.characterRepository, this.raceRepository, this.characterName)
       : super(CharacterStateInitial());
 }

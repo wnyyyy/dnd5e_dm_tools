@@ -8,6 +8,13 @@ abstract class CharacterEvent extends Equatable {
   List<Object> get props => [];
 }
 
+class CharacterLoad extends CharacterEvent {
+  const CharacterLoad();
+
+  @override
+  List<Object> get props => [];
+}
+
 class TabUpdated extends CharacterEvent {
   final int index;
 
