@@ -12,21 +12,11 @@ api = Api(app, version='1.0', title='D&D API',
 
 ns = api.namespace('api', description='D&D operations')
 
-race_model = api.model('Race', {
-    'slug': fields.String(required=True, description='The race slug'),
-    'name': fields.String(required=True, description='Race name'),
-    'description': fields.String(required=True, description='Race description'),
-    'asi': fields.Raw(required=True, description='Attribute Score Increases'),
-    'speed': fields.String(required=True, description='Race speed'),
-    'languages': fields.List(fields.String, description='Languages'),
-    'vision': fields.String(description='Vision abilities'),
-    'traits': fields.List(fields.String, description='Traits'),
-})
-
-DB_PATH = 'database.json'
-CUSTOM_DB_PATH = 'custom_db.json'
-TIMESTAMP_PATH = 'db_timestamp.txt'
+DB_PATH = '../database.json'
+CUSTOM_DB_PATH = '../custom_db.json'
+TIMESTAMP_PATH = '../db_timestamp.txt'
 BASE_API_URL = 'https://api.open5e.com/v1/'
+ALT_API_URL = 'https://www.dnd5eapi.co/api/'
 
 def read_db():
     try:
@@ -51,51 +41,23 @@ def read_timestamp():
     except FileNotFoundError:
         update_timestamp()
         return read_timestamp()
-
-def sync_races():
-    response = requests.get(f'{BASE_API_URL}races/')
-    races = []
-    if response.status_code == 200:        
-        races_json = response.json()['results']
-        for entry in races_json:
-            asis = []
-            asiJson = entry['asi']
-            for asiEntry in asiJson:
-                asi = {}
-                asi['attributes'] = asiEntry['attributes'][0]
-                asi['value'] = asiEntry['value']
-                asis.append(asi)
-            race = {}
-            race['slug'] = entry['slug']
-            race['name'] = entry['name']
-            race['description'] = entry['desc']
-            race['asi'] = asis
-            race['speed'] = entry['speed']['walk']
-            race['languages'] = entry['languages']
-            race['vision'] = entry['vision']
-            race['traits'] = entry['traits']
-            races.append(race)
+    
+def sync_field(field):
+    has_next = True
+    fields_json = []
+    while has_next:
+        response = requests.get(f'{BASE_API_URL}{field}/')
+        if response.status_code == 200:
+            results = response.json()['results']
+            fields_json.extend(results)
+            if not response.json()['next']:
+                has_next = False
     db = read_db()
-    db['races'] = races
+    db[field] = fields_json
     write_db(db)
 
-def sync_feats():
-    response = requests.get(f'{BASE_API_URL}feats/')
-    feats = []
-    if response.status_code == 200:
-        feats_json = response.json()['results']
-        for entry in feats_json:
-            feat = {}
-            feat['slug'] = entry['slug']
-            feat['name'] = entry['name']
-            feat['description'] = entry['desc']
-            feat['prerequisite'] = entry['prerequisite']
-            feat['effects_desc'] = entry['effects_desc']
-            feat['document_title'] = entry['document__title']
-            feats.append(feat)
-    db = read_db()
-    db['feats'] = feats
-    write_db(db)
+def sync_equipments():
+    
 
 def add_custom_db():
     with open(CUSTOM_DB_PATH, 'r') as file:
@@ -119,8 +81,17 @@ def add_custom_db():
 class ApiFetch(Resource):
     @api.doc(responses={200: 'Success'})
     def post(self):
-        sync_races()
-        sync_feats()
+        sync_field('races')
+        sync_field('feats')
+        sync_field('classes')
+        sync_field('spelllist')
+        sync_field('spells')
+        sync_field('backgrounds')
+        sync_field('monsters')
+        sync_field('conditions')
+        sync_field('magicitems')
+        sync_field('armor')
+        sync_field('weapons')
         add_custom_db()
         return {'success': True}
 
