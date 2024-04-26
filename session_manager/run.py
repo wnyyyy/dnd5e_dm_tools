@@ -57,6 +57,18 @@ def sync_field(field):
     write_db(db)
 
 def sync_equipments():
+    has_next = True
+    fields_json = []
+    while has_next:
+        response = requests.get(f'{ALT_API_URL}equipment/')
+        if response.status_code == 200:
+            results = response.json()['results']
+            fields_json.extend(results)
+            if not response.json()['next']:
+                has_next = False
+    db = read_db()
+    db['equipment'] = fields_json
+    write_db(db)
     
 
 def add_custom_db():
