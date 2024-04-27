@@ -12,13 +12,18 @@ import 'package:dnd5e_dm_tools/features/header/cubit/header_states.dart';
 import 'package:dnd5e_dm_tools/features/header/presentation/header.dart';
 import 'package:dnd5e_dm_tools/features/screen_splitter/cubit/screen_splitter_cubit.dart';
 import 'package:dnd5e_dm_tools/features/screen_splitter/presentation/screen_splitter.dart';
+import 'package:dnd5e_dm_tools/features/settings/data/settings_repository.dart';
+import 'package:dnd5e_dm_tools/firebase_options.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await DatabaseProvider.purgeDatabase();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   final databaseProvider = DatabaseProvider.db;
   await ServerSync.checkUpdate(databaseProvider, false);
 
@@ -34,6 +39,7 @@ class Dnd5eDmTools extends StatelessWidget {
         Provider(create: (_) => CharacterRepository(DatabaseProvider.db)),
         Provider(create: (_) => RaceRepository(DatabaseProvider.db)),
         Provider(create: (_) => FeatRepository(DatabaseProvider.db)),
+        Provider(create: (_) => SettingsRepository(DatabaseProvider.db)),
       ],
       builder: (context, child) {
         return MultiBlocProvider(
@@ -50,6 +56,7 @@ class Dnd5eDmTools extends StatelessWidget {
               bloc.add(const CharacterLoad());
               return bloc;
             }),
+            BlocProvider(create: (_) => ScreenSplitterCubit()),
           ],
           child: BlocBuilder<HeaderCubit, HeaderState>(
             builder: (context, state) {

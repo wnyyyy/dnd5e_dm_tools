@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "934387476513",
+    "project_id": "dnd5e-gm-tools",
+    "storage_bucket": "dnd5e-gm-tools.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:934387476513:android:917d05d2bee12fc66edb60",
+        "android_client_info": {
+          "package_name": "com.example.dnd5e_dm_tools"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDWDn4lIW5KiAn8S1lzbSH-IB2TP_12x7Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
