@@ -12,9 +12,10 @@ api = Api(app, version='1.0', title='D&D API',
 
 ns = api.namespace('api', description='D&D operations')
 
-DB_PATH = '../database.json'
-CUSTOM_DB_PATH = '../custom_db.json'
-TIMESTAMP_PATH = '../db_timestamp.txt'
+BASE_DB_PATH = './base_db.json'
+DB_PATH = './database.json'
+CUSTOM_DB_PATH = './custom_db.json'
+TIMESTAMP_PATH = './db_timestamp.txt'
 BASE_API_URL = 'https://api.open5e.com/v1/'
 ALT_API_URL = 'https://www.dnd5eapi.co/api/'
 
@@ -30,6 +31,17 @@ def write_db(data):
         json.dump(data, file)
     update_timestamp()
 
+def read_base_db():
+    try:
+        with open(BASE_DB_PATH, 'r') as file:
+            return json.load(file)
+    except FileNotFoundError:
+        return {}
+
+def write_base_db(data):
+    with open(BASE_DB_PATH, 'w') as file:
+        json.dump(data, file)
+
 def update_timestamp():
     with open(TIMESTAMP_PATH, 'w') as file:
         file.write(datetime.now().isoformat())
@@ -42,42 +54,44 @@ def read_timestamp():
         update_timestamp()
         return read_timestamp()
     
-def sync_field(field):
+def sync_from_base_api(field):
+    print("Syncing ", field)
     has_next = True
     fields_json = []
+    url = f'{BASE_API_URL}{field}/'
     while has_next:
-        response = requests.get(f'{BASE_API_URL}{field}/')
+        print("Fetching ", url)
+        response = requests.get(url, timeout=10)
         if response.status_code == 200:
             results = response.json()['results']
             fields_json.extend(results)
             if not response.json()['next']:
                 has_next = False
-    db = read_db()
+            else:
+                url = response.json()['next']
+        else:
+            print("Error fetching ", url)
+    db = read_base_db()
     db[field] = fields_json
-    write_db(db)
+    write_base_db(db)
 
-def sync_equipments():
-    has_next = True
+def sync_from_alt_api(field):
+    print("Syncing ", field)
     fields_json = []
-    while has_next:
-        response = requests.get(f'{ALT_API_URL}equipment/')
-        if response.status_code == 200:
-            results = response.json()['results']
-            fields_json.extend(results)
-            if not response.json()['next']:
-                has_next = False
-    db = read_db()
+    url = f'{ALT_API_URL}{field}'
+    print("Fetching ", url)
+    response = requests.get(url)
+    if response.status_code == 200:
+        fields_json = response.json()['results']
+    db = read_base_db()
     db['equipment'] = fields_json
-    write_db(db)
-    
+    write_base_db(db)        
 
-def add_custom_db():
+def generate_db():
+    db = read_base_db()
     with open(CUSTOM_DB_PATH, 'r') as file:
         custom_db = json.load(file)
-        db = read_db()
         for table_name in custom_db:
-            if table_name == 'characters':
-                continue
             table = db[table_name]
             for custom_entry in custom_db[table_name]:
                 fallbackSlug = custom_entry['fallback']
@@ -87,41 +101,64 @@ def add_custom_db():
                     if key != 'fallback':
                         new[key] = custom_entry[key]
                 table.append(new)
-        write_db(db)
+    write_db(db)
     
 @ns.route('/api_sync')
-class ApiFetch(Resource):
+class ApiSync(Resource):
     @api.doc(responses={200: 'Success'})
     def post(self):
-        sync_field('races')
-        sync_field('feats')
-        sync_field('classes')
-        sync_field('spelllist')
-        sync_field('spells')
-        sync_field('backgrounds')
-        sync_field('monsters')
-        sync_field('conditions')
-        sync_field('magicitems')
-        sync_field('armor')
-        sync_field('weapons')
-        add_custom_db()
+        db = read_base_db()
+        if 'races' not in db:
+            sync_from_base_api('races')
+        if 'feats' not in db:
+            sync_from_base_api('feats')
+        if 'classes' not in db:
+            sync_from_base_api('classes')
+        if 'spelllist' not in db:
+            sync_from_base_api('spelllist')
+        if 'spells' not in db:
+            sync_from_base_api('spells')
+        if 'backgrounds' not in db:
+            sync_from_base_api('backgrounds')
+        if 'monsters' not in db:
+            sync_from_base_api('monsters')
+        if 'conditions' not in db:
+            sync_from_base_api('conditions')
+        if 'magicitems' not in db:
+            sync_from_base_api('magicitems')
+        if 'armor' not in db:
+            sync_from_base_api('armor')
+        if 'weapons' not in db:
+            sync_from_base_api('weapons')
+        if 'equipment' not in db:
+            sync_from_alt_api('equipment')
         return {'success': True}
-
+    
 @ns.route('/db')
-class Sync(Resource):
+class Db(Resource):
+    @api.doc(responses={200: 'Success'})
+    def post(self):
+        
+        return {'success': True}
+    
     @api.doc(responses={200: 'Data and Timestamp'})
     def get(self):
         db = read_db()
         timestamp = read_timestamp()
         return {'data': db, 'timestamp': timestamp}
 
-@ns.route('/update')
-class Update(Resource):
-    @api.doc(responses={200: 'Database updated'}, body=race_model)
+@ns.route('/custom_db')
+class CustomDb(Resource):
+    @api.doc(responses={200: 'Custom database updated'})
     def post(self):
         data = request.json
-        write_db(data)
-        return {'success': True, 'timestamp': read_timestamp()}
+        if data:
+            with open(CUSTOM_DB_PATH, 'w') as file:
+                json.dump(data, file)
+            generate_db()
+            return {'success': True, 'timestamp': read_timestamp()}
+        else:
+            api.abort(400, 'No data provided')
 
 @ns.route('/handouts/<filename>')
 class Handouts(Resource):

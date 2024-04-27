@@ -19,7 +19,7 @@ class ScreenDivider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = Theme.of(context).colorScheme.surfaceVariant;
+    final color = Theme.of(context).colorScheme.surfaceContainerHighest;
     final screenWidth = MediaQuery.of(context).size.width;
     return Container(
       color: color,
