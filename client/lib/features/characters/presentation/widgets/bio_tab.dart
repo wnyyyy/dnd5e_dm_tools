@@ -1,11 +1,10 @@
-import 'package:dnd5e_dm_tools/core/data/models/character.dart';
-import 'package:dnd5e_dm_tools/core/data/models/feat.dart';
 import 'package:flutter/material.dart';
 
 class BioTab extends StatelessWidget {
-  final Character character;
+  final Map<String, dynamic> character;
+  final String name;
 
-  const BioTab({super.key, required this.character});
+  const BioTab({super.key, required this.character, required this.name});
 
   @override
   Widget build(BuildContext context) {
@@ -15,12 +14,11 @@ class BioTab extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Image.asset(
-                'assets/char/${character.name.toLowerCase().trim().replaceAll(' ', '_')}.png'),
+                'assets/char/${name.trim().replaceAll(' ', '_')}.png'),
           ),
-          Text('${character.name} - ${character.race}'),
           GestureDetector(
             onTap: () => _showEditLevel(context),
-            child: Text('Level: ${character.level}',
+            child: Text('Level: ${character['level']}',
                 style: const TextStyle(decoration: TextDecoration.underline)),
           ),
           ListTile(
@@ -56,9 +54,9 @@ class BioTab extends StatelessWidget {
   Widget _buildFeatList(BuildContext context) {
     return ListView.builder(
       shrinkWrap: true,
-      itemCount: character.feats.length,
+      itemCount: character['feats'].length,
       itemBuilder: (context, index) {
-        var feat = character.feats[index];
+        var feat = character['feats'][index];
         return ListTile(
           title: Text(feat.name),
           onTap: () => _showFeatDetails(context, feat),
@@ -71,18 +69,18 @@ class BioTab extends StatelessWidget {
     // Add functionality to input and add a new feat to the character
   }
 
-  void _showFeatDetails(BuildContext context, Feat feat) {
+  void _showFeatDetails(BuildContext context, Map<String, dynamic> feat) {
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text(feat.name),
-          content: Text(feat.description),
+          title: Text(feat['name']),
+          content: Text(feat['description']),
           actions: [
             TextButton(
               child: const Text('Delete'),
               onPressed: () {
-                character.feats.remove(feat);
+                character['feats'].remove(feat);
                 Navigator.pop(context);
               },
             ),

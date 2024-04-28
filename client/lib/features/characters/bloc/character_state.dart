@@ -1,4 +1,3 @@
-import 'package:dnd5e_dm_tools/core/data/models/character.dart';
 import 'package:equatable/equatable.dart';
 
 abstract class CharacterState extends Equatable {
@@ -27,9 +26,10 @@ class CharacterStateError extends CharacterState {
 }
 
 class CharacterStateLoaded extends CharacterState {
-  final Character character;
-  const CharacterStateLoaded(this.character);
+  final Map<String, dynamic> character;
+  final String name;
+  const CharacterStateLoaded(this.character, this.name);
 
   @override
-  List<Object> get props => [character];
+  List<Object> get props => [character, name];
 }

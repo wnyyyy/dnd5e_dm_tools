@@ -1,5 +1,4 @@
 import 'package:dnd5e_dm_tools/core/data/db/database_provider.dart';
-import 'package:dnd5e_dm_tools/core/data/models/feat.dart';
 
 class FeatRepository {
   final DatabaseProvider databaseProvider;
@@ -7,8 +6,8 @@ class FeatRepository {
 
   FeatRepository(this.databaseProvider);
 
-  Future<dynamic> getJson(String name) async {
-    final docSnapshot = await databaseProvider.getDocument(path: '$path$name');
+  Future<dynamic> get(String slug) async {
+    final docSnapshot = await databaseProvider.getDocument(path: '$path$slug');
     if (docSnapshot.exists) {
       final data = docSnapshot.data();
       if (data == null) {
@@ -19,39 +18,17 @@ class FeatRepository {
     return null;
   }
 
-  Future<Feat?> get(String name) async {
-    final docSnapshot = await databaseProvider.getDocument(path: '$path$name');
-    if (docSnapshot.exists) {
-      final data = docSnapshot.data();
-      if (data == null) {
-        return null;
-      }
-      return Feat.fromMap(data);
-    }
-    return null;
-  }
-
-  Future<void> create(Feat feat) async {
+  Future<void> create(String slug, Map<String, dynamic> feat) async {
     await databaseProvider.setData(
-      path: '$path${feat.slug}',
-      data: feat.toMap(),
+      path: '$path${feat['slug']}',
+      data: feat,
     );
   }
 
-  Future<void> update(Feat feat) async {
-    var json = await getJson(feat.slug);
-    if (json == null) {
-      return;
-    }
-    final featMap = feat.toMap();
-    for (var key in featMap.keys) {
-      if (json[key] != featMap[key]) {
-        json[key] = featMap[key];
-      }
-    }
+  Future<void> update(String slug, Map<String, dynamic> feat) async {
     await databaseProvider.setData(
-      path: '$path${feat.slug}',
-      data: json,
+      path: '$path${feat}',
+      data: feat,
     );
   }
 }

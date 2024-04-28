@@ -7,6 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 class CharacterBloc extends Bloc<CharacterEvent, CharacterState> {
   final CharacterRepository characterRepository;
   final RaceRepository raceRepository;
+  final String name = '';
 
   CharacterBloc(this.characterRepository, this.raceRepository)
       : super(CharacterStateInitial()) {
@@ -15,11 +16,13 @@ class CharacterBloc extends Bloc<CharacterEvent, CharacterState> {
 
   Future<void> _onCharacterLoad(
       CharacterLoad event, Emitter<CharacterState> emit) async {
+    print("Loading name: ${event.characterName}");
+    emit(CharacterStateLoading());
     try {
       final name = event.characterName;
       var character = await characterRepository.get(name);
       if (character != null) {
-        emit(CharacterStateLoaded(character));
+        emit(CharacterStateLoaded(character, name));
         return;
       }
     } catch (error) {

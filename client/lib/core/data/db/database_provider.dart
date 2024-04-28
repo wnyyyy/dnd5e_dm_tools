@@ -42,4 +42,12 @@ class DatabaseProvider {
     final reference = _db.doc(path);
     await reference.update(data);
   }
+
+  Future<List<DocumentSnapshot<Map<String, dynamic>>>> getCollection({
+    required String path,
+  }) async {
+    final reference = _db.collection(path);
+    final snapshot = await reference.get();
+    return snapshot.docs;
+  }
 }

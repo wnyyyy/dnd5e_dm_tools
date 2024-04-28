@@ -12,7 +12,6 @@ class Header extends StatelessWidget implements PreferredSizeWidget {
     return BlocBuilder<HeaderCubit, HeaderState>(
       builder: (context, state) {
         return AppBar(
-          title: Text(state.pageTitle),
           leading: IconButton(
             icon: const Icon(Icons.menu),
             onPressed: () => Scaffold.of(context).openDrawer(),
@@ -21,16 +20,6 @@ class Header extends StatelessWidget implements PreferredSizeWidget {
             IconButton(
               icon: Icon(state.isDarkMode ? Icons.dark_mode : Icons.light_mode),
               onPressed: () => context.read<HeaderCubit>().toggleDarkMode(),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Icon(
-                state.connectionStatus == ConnectionStatus.connected
-                    ? Icons.signal_cellular_alt
-                    : state.connectionStatus == ConnectionStatus.connecting
-                        ? Icons.link
-                        : Icons.link_off,
-              ),
             ),
           ],
         );

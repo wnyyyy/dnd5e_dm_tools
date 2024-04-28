@@ -14,12 +14,3 @@ class CharacterLoad extends CharacterEvent {
   @override
   List<Object> get props => [];
 }
-
-class TabUpdated extends CharacterEvent {
-  final int index;
-
-  const TabUpdated(this.index);
-
-  @override
-  List<Object> get props => [index];
-}

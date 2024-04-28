@@ -6,8 +6,7 @@ class HeaderCubit extends Cubit<HeaderState> {
   HeaderCubit()
       : super(HeaderState(
             connectionStatus: ConnectionStatus.notConnected,
-            isDarkMode: false,
-            pageTitle: ''));
+            isDarkMode: false));
 
   void updateConnectionStatus(ConnectionStatus status) {
     emit(state.copyWith(connectionStatus: status));
@@ -15,9 +14,5 @@ class HeaderCubit extends Cubit<HeaderState> {
 
   void toggleDarkMode() {
     emit(state.copyWith(isDarkMode: !state.isDarkMode));
-  }
-
-  void setPageTitle(String title) {
-    emit(state.copyWith(pageTitle: title));
   }
 }

@@ -1,5 +1,4 @@
 import 'package:dnd5e_dm_tools/core/data/db/database_provider.dart';
-import 'package:dnd5e_dm_tools/core/data/models/race.dart';
 
 class RaceRepository {
   final DatabaseProvider databaseProvider;
@@ -7,8 +6,8 @@ class RaceRepository {
 
   RaceRepository(this.databaseProvider);
 
-  Future<dynamic> getJson(String name) async {
-    final docSnapshot = await databaseProvider.getDocument(path: '$path$name');
+  Future<dynamic> get(String slug) async {
+    final docSnapshot = await databaseProvider.getDocument(path: '$path$slug');
     if (docSnapshot.exists) {
       final data = docSnapshot.data();
       if (data == null) {
@@ -19,32 +18,17 @@ class RaceRepository {
     return null;
   }
 
-  Future<Race?> get(String name) async {
-    final docSnapshot = await databaseProvider.getDocument(path: '$path$name');
-    if (docSnapshot.exists) {
-      final data = docSnapshot.data();
-      if (data == null) {
-        return null;
-      }
-      return Race.fromMap(data);
-    }
-    return null;
+  Future<void> create(String slug, Map<String, dynamic> race) async {
+    await databaseProvider.setData(
+      path: '$path${race['slug']}',
+      data: race,
+    );
   }
 
-  Future<void> update(Race race) async {
-    var json = await getJson(race.slug);
-    if (json == null) {
-      return;
-    }
-    final raceMap = race.toMap();
-    for (var key in raceMap.keys) {
-      if (json[key] != raceMap[key]) {
-        json[key] = raceMap[key];
-      }
-    }
+  Future<void> update(String slug, Map<String, dynamic> race) async {
     await databaseProvider.setData(
-      path: '$path${race.slug}',
-      data: json,
+      path: '$path${race}',
+      data: race,
     );
   }
 }

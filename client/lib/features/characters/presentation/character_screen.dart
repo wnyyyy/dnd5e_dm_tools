@@ -34,7 +34,7 @@ class CharacterScreen extends StatelessWidget {
                   Expanded(
                     child: TabBarView(
                       children: [
-                        BioTab(character: state.character),
+                        BioTab(character: state.character, name: state.name),
                         SkillsTab(),
                         const Placeholder(),
                         const Placeholder(),

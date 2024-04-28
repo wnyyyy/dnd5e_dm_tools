@@ -14,15 +14,27 @@ class MainDrawer extends StatelessWidget {
               color: Theme.of(context).primaryColor,
             ),
             child: Text(
-              'Menu',
-              style: Theme.of(context).textTheme.displayMedium,
+              'D&D 5e DM Tools',
+              style: Theme.of(context).textTheme.headlineSmall!.copyWith(
+                    color: Theme.of(context).colorScheme.onPrimary,
+                  ),
             ),
           ),
+          ListTile(
+            leading: Icon(Icons.person),
+            title: Text('Character'),
+            onTap: () {
+              BlocProvider.of<MainScreenCubit>(context).showCharacter();
+              Navigator.pop(context);
+            },
+          ),
+          Divider(),
           ListTile(
             leading: Icon(Icons.settings),
             title: Text('Settings'),
             onTap: () {
               BlocProvider.of<MainScreenCubit>(context).showSettings();
+              Navigator.pop(context);
             },
           ),
         ],
