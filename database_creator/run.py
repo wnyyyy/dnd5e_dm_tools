@@ -184,6 +184,15 @@ class CustomDb(Resource):
         else:
             api.abort(400, 'No data provided')
 
+@ns.route('/db/upload_custom')
+class UploadCustomDb(Resource):
+    @api.doc(responses={200: 'Custom database uploaded'})
+    def post(self):
+        with open(CUSTOM_DB_PATH, 'r') as file:
+            custom_db = json.load(file)
+            for table_name in custom_db:
+                upload_to_firestore(table_name, custom_db[table_name])
+
 @ns.route('/handouts/<filename>')
 class Handouts(Resource):
     @api.doc(responses={200: 'File delivered'}, params={'filename': 'The name of the file'})
