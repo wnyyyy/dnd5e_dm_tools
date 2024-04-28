@@ -4,14 +4,17 @@ import 'package:dnd5e_dm_tools/core/data/repositories/character_repository.dart'
 import 'package:dnd5e_dm_tools/core/data/repositories/feats_repository.dart';
 import 'package:dnd5e_dm_tools/core/data/repositories/race_repository.dart';
 import 'package:dnd5e_dm_tools/core/config/theme_cubit.dart';
+import 'package:dnd5e_dm_tools/features/main_screen/cubit/main_screen_cubit.dart';
+import 'package:dnd5e_dm_tools/features/main_screen/presentation/widgets/main_drawer.dart';
 import 'package:dnd5e_dm_tools/features/characters/bloc/character_bloc.dart';
-import 'package:dnd5e_dm_tools/features/characters/bloc/character_event.dart';
 import 'package:dnd5e_dm_tools/features/characters/presentation/character_screen.dart';
 import 'package:dnd5e_dm_tools/features/header/cubit/header_cubit.dart';
 import 'package:dnd5e_dm_tools/features/header/cubit/header_states.dart';
 import 'package:dnd5e_dm_tools/features/header/presentation/header.dart';
+import 'package:dnd5e_dm_tools/features/main_screen/presentation/screens/main_screen.dart';
 import 'package:dnd5e_dm_tools/features/screen_splitter/cubit/screen_splitter_cubit.dart';
 import 'package:dnd5e_dm_tools/features/screen_splitter/presentation/screen_splitter.dart';
+import 'package:dnd5e_dm_tools/features/settings/bloc/settings_bloc.dart';
 import 'package:dnd5e_dm_tools/features/settings/data/settings_repository.dart';
 import 'package:dnd5e_dm_tools/firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -49,40 +52,17 @@ class Dnd5eDmTools extends StatelessWidget {
             BlocProvider(create: (_) => ScreenSplitterCubit()),
             BlocProvider(create: (_) => HeaderCubit()),
             BlocProvider(create: (_) => ThemeCubit()),
-            BlocProvider(create: (_) {
-              var bloc = CharacterBloc(
-                context.read<CharacterRepository>(),
-                context.read<RaceRepository>(),
-                'Sage',
-              );
-              bloc.add(const CharacterLoad());
-              return bloc;
-            }),
+            BlocProvider(
+                create: (_) => CharacterBloc(
+                    context.read<CharacterRepository>(),
+                    context.read<RaceRepository>())),
             BlocProvider(create: (_) => ScreenSplitterCubit()),
+            BlocProvider(
+                create: (_) =>
+                    SettingsBloc(context.read<SettingsRepository>())),
+            BlocProvider(create: (_) => MainScreenCubit()),
           ],
-          child: BlocBuilder<HeaderCubit, HeaderState>(
-            builder: (context, state) {
-              context.read<ThemeCubit>().updateTheme(state.isDarkMode);
-              context.read<HeaderCubit>().setPageTitle('D&D 5e DM Tools');
-              return BlocBuilder<ThemeCubit, ThemeData>(
-                builder: (context, themeData) {
-                  return MaterialApp(
-                    title: 'D&D 5e DM Tools',
-                    theme: themeData,
-                    home: const Scaffold(
-                      appBar: Header(),
-                      body: Center(
-                        child: ScreenSplitter(
-                          upperChild: CharacterScreen(),
-                          lowerChild: Placeholder(),
-                        ),
-                      ),
-                    ),
-                  );
-                },
-              );
-            },
-          ),
+          child: MainScreen(),
         );
       },
     );

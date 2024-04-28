@@ -8,7 +8,8 @@ abstract class CharacterEvent extends Equatable {
 }
 
 class CharacterLoad extends CharacterEvent {
-  const CharacterLoad();
+  final String characterName;
+  const CharacterLoad(this.characterName);
 
   @override
   List<Object> get props => [];

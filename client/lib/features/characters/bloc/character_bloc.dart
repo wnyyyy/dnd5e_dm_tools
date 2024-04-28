@@ -7,9 +7,23 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 class CharacterBloc extends Bloc<CharacterEvent, CharacterState> {
   final CharacterRepository characterRepository;
   final RaceRepository raceRepository;
-  final String characterName;
 
-  CharacterBloc(
-      this.characterRepository, this.raceRepository, this.characterName)
-      : super(CharacterStateInitial());
+  CharacterBloc(this.characterRepository, this.raceRepository)
+      : super(CharacterStateInitial()) {
+    on<CharacterLoad>(_onCharacterLoad);
+  }
+
+  Future<void> _onCharacterLoad(
+      CharacterLoad event, Emitter<CharacterState> emit) async {
+    try {
+      final name = event.characterName;
+      var character = await characterRepository.get(name);
+      if (character != null) {
+        emit(CharacterStateLoaded(character));
+        return;
+      }
+    } catch (error) {
+      emit(CharacterStateError("Failed to load characters"));
+    }
+  }
 }
