@@ -4,38 +4,47 @@ import 'package:dnd5e_dm_tools/core/data/repositories/race_repository.dart';
 
 class CharacterRepository {
   final DatabaseProvider databaseProvider;
+  final path = 'feats/';
 
   CharacterRepository(this.databaseProvider);
 
-  Future<Character> insertCharacter(Character character) async {
-    final db = await databaseProvider.database;
-    await db.insert('Characters', character.toMap());
-
-    return character;
-  }
-
-  Future<Character?> getCharacter(String name) async {
-    final db = await databaseProvider.database;
-    var characterQuery =
-        await db.query('Characters', where: 'name = ?', whereArgs: [name]);
-    if (characterQuery.isEmpty) return null;
-    Map<String, dynamic> characterMap = characterQuery[0];
-    String raceSlug = characterMap['race_slug'];
-    RaceRepository raceRepository = RaceRepository(databaseProvider);
-    Map<String, dynamic> raceMap =
-        (await raceRepository.getRace(raceSlug))?.toMap() ?? {};
-
-    return Character.fromMap(characterMap, raceMap);
-  }
-
-  Future<void> updateAll(List<Character> characters) async {
-    final db = await databaseProvider.database;
-    await db.transaction((txn) async {
-      await txn.delete('Characters');
-
-      for (Character character in characters) {
-        await txn.insert('Characters', character.toMap());
+  Future<Character?> get(String name) async {
+    final raceRepository = RaceRepository(databaseProvider);
+    final docSnapshot =
+        await databaseProvider.getDocument(path: 'characters/$name');
+    if (docSnapshot.exists) {
+      final data = docSnapshot.data();
+      if (data == null) {
+        return null;
       }
-    });
+      final race_slug = data['race_slug'];
+      final race = await raceRepository.getJson(race_slug);
+      return Character.fromMap(data, race);
+    }
+    return null;
+  }
+
+  Future<void> updateCharacter(Character character) async {
+    await databaseProvider.setData(
+      path: 'characters/${character.name}',
+      data: character.toMap(),
+    );
+  }
+
+  Future<List<Character>> getAll() async {
+    final raceRepository = RaceRepository(databaseProvider);
+    var charactersJson = [];
+    databaseProvider.collectionStream(
+      path: 'characters',
+      builder: (data, documentId) => charactersJson.add(data),
+    );
+    var characters = <Character>[];
+    for (var characterJson in charactersJson) {
+      final race_slug = characterJson['raceslug'];
+      final race = await raceRepository.getJson(race_slug);
+      characters.add(Character.fromMap(characterJson, race));
+    }
+
+    return characters;
   }
 }

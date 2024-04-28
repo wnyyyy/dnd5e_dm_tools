@@ -1,20 +1,45 @@
-import 'package:mongo_dart/mongo_dart.dart';
-import 'package:path/path.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class DatabaseProvider {
-  DatabaseProvider._();
-  static final DatabaseProvider db = DatabaseProvider._();
+  final FirebaseFirestore _db = FirebaseFirestore.instance;
 
-  Db? _database;
-  DateTime? timestamp;
-
-  Future<Db> get database async {
-    if (_database != null) return _database!;
-    _database = await _initDb();
-    return _database!;
+  Stream<List<T>> collectionStream<T>({
+    required String path,
+    required T Function(Map<String, dynamic> data, String documentId) builder,
+  }) {
+    var reference = _db.collection(path);
+    return reference.snapshots().map((snapshot) => snapshot.docs
+        .map((snapshot) => builder(snapshot.data(), snapshot.id))
+        .toList());
   }
 
-  Future<Db> _initDb() async {
-    var databasesPath = await getDatabasesPath();
+  Future<void> setData({
+    required String path,
+    required Map<String, dynamic> data,
+  }) async {
+    final reference = _db.doc(path);
+    await reference.set(data);
+  }
+
+  Future<DocumentSnapshot<Map<String, dynamic>>> getDocument({
+    required String path,
+  }) async {
+    final reference = _db.doc(path);
+    return reference.get();
+  }
+
+  Future<void> deleteData({
+    required String path,
+  }) async {
+    final reference = _db.doc(path);
+    await reference.delete();
+  }
+
+  Future<void> updateData({
+    required String path,
+    required Map<String, dynamic> data,
+  }) async {
+    final reference = _db.doc(path);
+    await reference.update(data);
   }
 }

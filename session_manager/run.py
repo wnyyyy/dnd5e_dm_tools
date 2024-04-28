@@ -1,6 +1,8 @@
-from flask import Flask, request, jsonify, send_from_directory
-from flask_restx import Api, Resource, fields
+from flask import Flask, request, send_from_directory
+from flask_restx import Api, Resource
 from datetime import datetime
+import firebase_admin
+from firebase_admin import credentials, firestore
 import json
 import os
 
@@ -12,12 +14,17 @@ api = Api(app, version='1.0', title='D&D API',
 
 ns = api.namespace('api', description='D&D operations')
 
+FIREBASE_KEY_PATH = './firebase_key.json'
 BASE_DB_PATH = './base_db.json'
 DB_PATH = './database.json'
 CUSTOM_DB_PATH = './custom_db.json'
 TIMESTAMP_PATH = './db_timestamp.txt'
 BASE_API_URL = 'https://api.open5e.com/v1/'
 ALT_API_URL = 'https://www.dnd5eapi.co/api/'
+
+cred = credentials.Certificate(FIREBASE_KEY_PATH)
+firebase_admin.initialize_app(cred)
+db = firestore.client()
 
 def read_db():
     try:
@@ -81,10 +88,19 @@ def sync_from_alt_api(field):
     url = f'{ALT_API_URL}{field}'
     print("Fetching ", url)
     response = requests.get(url)
+    equipments = []
     if response.status_code == 200:
         fields_json = response.json()['results']
+    for equipment_key in fields_json:
+        url = f'{ALT_API_URL}{field}/{equipment_key["index"]}'
+        print("Fetching ", url)
+        response_eq = requests.get(url)
+        if response_eq.status_code == 200:
+            equipment = response_eq.json()
+            equipment['slug'] = equipment['index']
+            equipments.append(equipment)
     db = read_base_db()
-    db['equipment'] = fields_json
+    db['equipment'] = equipments
     write_base_db(db)        
 
 def generate_db():
@@ -102,6 +118,14 @@ def generate_db():
                         new[key] = custom_entry[key]
                 table.append(new)
     write_db(db)
+
+def upload_to_firestore(collection_name, documents):
+    collection_ref = db.collection(collection_name)
+    for doc_data in documents:
+        doc_id = doc_data['slug']
+        doc_data.pop('slug', None) 
+        collection_ref.document(doc_id).set(doc_data)
+        print(f"Document {doc_id} uploaded to {collection_name}.")
     
 @ns.route('/api_sync')
 class ApiSync(Resource):
@@ -130,15 +154,14 @@ class ApiSync(Resource):
             sync_from_base_api('armor')
         if 'weapons' not in db:
             sync_from_base_api('weapons')
-        if 'equipment' not in db:
-            sync_from_alt_api('equipment')
+        sync_from_alt_api('equipment')
         return {'success': True}
     
 @ns.route('/db')
 class Db(Resource):
     @api.doc(responses={200: 'Success'})
     def post(self):
-        
+        generate_db()        
         return {'success': True}
     
     @api.doc(responses={200: 'Data and Timestamp'})
@@ -156,6 +179,7 @@ class CustomDb(Resource):
             with open(CUSTOM_DB_PATH, 'w') as file:
                 json.dump(data, file)
             generate_db()
+            firebase_service_key = os.getenv('FIREBASE_SERVICE_ACCOUNT_KEY')
             return {'success': True, 'timestamp': read_timestamp()}
         else:
             api.abort(400, 'No data provided')
@@ -165,6 +189,15 @@ class Handouts(Resource):
     @api.doc(responses={200: 'File delivered'}, params={'filename': 'The name of the file'})
     def get(self, filename):
         return send_from_directory('static/handouts', filename)
+    
+@ns.route('/upload_db')
+class Firestore(Resource):
+    @api.doc(responses={200: 'Database uploaded to Firestore'})
+    def post(self):
+        db = read_db()
+        for category, docs in db.items():
+            if category == 'equipment':
+                upload_to_firestore(category, docs)      
 
 @ns.route('/upload_handout')
 class UploadHandout(Resource):

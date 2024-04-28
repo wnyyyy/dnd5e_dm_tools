@@ -1,9 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dnd5e_dm_tools/core/data/db/database_provider.dart';
 import 'package:dnd5e_dm_tools/core/data/repositories/character_repository.dart';
 import 'package:dnd5e_dm_tools/core/data/repositories/feats_repository.dart';
 import 'package:dnd5e_dm_tools/core/data/repositories/race_repository.dart';
 import 'package:dnd5e_dm_tools/core/config/theme_cubit.dart';
-import 'package:dnd5e_dm_tools/core/util/server_sync.dart';
 import 'package:dnd5e_dm_tools/features/characters/bloc/character_bloc.dart';
 import 'package:dnd5e_dm_tools/features/characters/bloc/character_event.dart';
 import 'package:dnd5e_dm_tools/features/characters/presentation/character_screen.dart';
@@ -24,22 +24,24 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  final databaseProvider = DatabaseProvider.db;
-  await ServerSync.checkUpdate(databaseProvider, false);
-
-  runApp(const Dnd5eDmTools());
+  FirebaseFirestore.instance.settings = const Settings(
+    persistenceEnabled: true,
+  );
+  runApp(Dnd5eDmTools());
 }
 
 class Dnd5eDmTools extends StatelessWidget {
-  const Dnd5eDmTools({super.key});
+  final DatabaseProvider databaseProvider = DatabaseProvider();
+
+  Dnd5eDmTools({super.key});
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        Provider(create: (_) => CharacterRepository(DatabaseProvider.db)),
-        Provider(create: (_) => RaceRepository(DatabaseProvider.db)),
-        Provider(create: (_) => FeatRepository(DatabaseProvider.db)),
-        Provider(create: (_) => SettingsRepository(DatabaseProvider.db)),
+        Provider(create: (_) => CharacterRepository(databaseProvider)),
+        Provider(create: (_) => RaceRepository(databaseProvider)),
+        Provider(create: (_) => FeatRepository(databaseProvider)),
+        Provider(create: (_) => SettingsRepository(databaseProvider)),
       ],
       builder: (context, child) {
         return MultiBlocProvider(

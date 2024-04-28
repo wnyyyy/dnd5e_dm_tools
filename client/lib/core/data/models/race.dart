@@ -11,7 +11,6 @@ class Race {
   final String? languages;
   final String? vision;
   final String? traits;
-  //final List<dynamic>? subraces;
 
   Race({
     required this.slug,
@@ -22,7 +21,6 @@ class Race {
     this.languages,
     this.vision,
     this.traits,
-    //this.subraces,
   });
 
   static Race fromMap(Map<String, dynamic> c) {
@@ -35,7 +33,6 @@ class Race {
       languages: c['languages'] as String?,
       vision: c['vision'] as String?,
       traits: c['traits'] as String?,
-      //subraces: c['subraces'] as List<dynamic>,
     );
   }
 
@@ -49,7 +46,6 @@ class Race {
       'languages': languages,
       'vision': vision,
       'traits': traits,
-      //'subraces': subraces,
     };
   }
 }
