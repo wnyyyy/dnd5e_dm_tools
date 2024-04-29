@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dnd5e_dm_tools/core/data/db/database_provider.dart';
 import 'package:dnd5e_dm_tools/core/data/repositories/character_repository.dart';
+import 'package:dnd5e_dm_tools/core/data/repositories/class_repository.dart';
 import 'package:dnd5e_dm_tools/core/data/repositories/feats_repository.dart';
 import 'package:dnd5e_dm_tools/core/data/repositories/race_repository.dart';
 import 'package:dnd5e_dm_tools/core/config/theme_cubit.dart';
@@ -39,6 +40,7 @@ class Dnd5eDmTools extends StatelessWidget {
         Provider(create: (_) => CharacterRepository(databaseProvider)),
         Provider(create: (_) => RaceRepository(databaseProvider)),
         Provider(create: (_) => FeatRepository(databaseProvider)),
+        Provider(create: (_) => ClassRepository(databaseProvider)),
         Provider(create: (_) => SettingsRepository(databaseProvider)),
       ],
       builder: (context, child) {
@@ -49,8 +51,10 @@ class Dnd5eDmTools extends StatelessWidget {
             BlocProvider(create: (_) => ThemeCubit()),
             BlocProvider(
                 create: (_) => CharacterBloc(
-                    context.read<CharacterRepository>(),
-                    context.read<RaceRepository>())),
+                      context.read<CharacterRepository>(),
+                      context.read<RaceRepository>(),
+                      context.read<ClassRepository>(),
+                    )),
             BlocProvider(create: (_) => ScreenSplitterCubit()),
             BlocProvider(create: (_) => SettingsCubit()),
             BlocProvider(create: (_) => MainScreenCubit()),

@@ -6,7 +6,7 @@ class FeatRepository {
 
   FeatRepository(this.databaseProvider);
 
-  Future<dynamic> get(String slug) async {
+  Future<Map<String, dynamic>?> get(String slug) async {
     final docSnapshot = await databaseProvider.getDocument(path: '$path$slug');
     if (docSnapshot.exists) {
       final data = docSnapshot.data();
@@ -16,6 +16,17 @@ class FeatRepository {
       return data;
     }
     return null;
+  }
+
+  Future<Map<String, dynamic>> getAll() async {
+    final docs = await databaseProvider.getCollection(path: path);
+    return docs.fold<Map<String, dynamic>>(
+      {},
+      (previousValue, element) {
+        previousValue[element.id] = element.data();
+        return previousValue;
+      },
+    );
   }
 
   Future<void> create(String slug, Map<String, dynamic> feat) async {

@@ -1,7 +1,7 @@
 import 'package:dnd5e_dm_tools/features/characters/bloc/character_bloc.dart';
+import 'package:dnd5e_dm_tools/features/characters/bloc/character_event.dart';
 import 'package:dnd5e_dm_tools/features/characters/bloc/character_state.dart';
-import 'package:dnd5e_dm_tools/features/characters/presentation/widgets/skills_tab.dart';
-import 'package:dnd5e_dm_tools/features/characters/presentation/widgets/bio_tab.dart';
+import 'package:dnd5e_dm_tools/features/characters/presentation/bio_tab/bio_tab.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -12,6 +12,9 @@ class CharacterScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<CharacterBloc, CharacterState>(
       builder: (context, state) {
+        if (state is CharacterStateInitial) {
+          context.read<CharacterBloc>().add(const CharacterLoad('sage'));
+        }
         if (state is CharacterStateLoading) {
           return const Center(child: CircularProgressIndicator());
         }
@@ -19,6 +22,8 @@ class CharacterScreen extends StatelessWidget {
           return Center(child: Text(state.error));
         }
         if (state is CharacterStateLoaded) {
+          if (state.showFeatDetails != null) {}
+
           return DefaultTabController(
               length: 4,
               child: Column(
@@ -34,10 +39,15 @@ class CharacterScreen extends StatelessWidget {
                   Expanded(
                     child: TabBarView(
                       children: [
-                        BioTab(character: state.character, name: state.name),
-                        SkillsTab(),
-                        const Placeholder(),
-                        const Placeholder(),
+                        BioTab(
+                          character: state.character,
+                          name: state.name,
+                          race: state.race,
+                          classs: state.classs,
+                        ),
+                        Placeholder(),
+                        Placeholder(),
+                        Placeholder(),
                       ],
                     ),
                   ),

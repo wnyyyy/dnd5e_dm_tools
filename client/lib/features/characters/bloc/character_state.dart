@@ -27,9 +27,13 @@ class CharacterStateError extends CharacterState {
 
 class CharacterStateLoaded extends CharacterState {
   final Map<String, dynamic> character;
+  final Map<String, dynamic> race;
+  final Map<String, dynamic> classs;
   final String name;
-  const CharacterStateLoaded(this.character, this.name);
+  final Map<String, dynamic>? showFeatDetails;
+  const CharacterStateLoaded(this.character, this.name, this.race, this.classs,
+      {this.showFeatDetails});
 
   @override
-  List<Object> get props => [character, name];
+  List<Object> get props => [character, name, race, classs];
 }
