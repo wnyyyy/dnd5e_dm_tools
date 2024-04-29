@@ -15,14 +15,14 @@ class TraitDescription extends StatelessWidget {
 
       if (i % 2 != 0) {
         spans.add(TextSpan(
-          text: parts[i],
+          text: '${i != 1 ? '\n' : ''}${parts[i]}',
           style: Theme.of(context).textTheme.bodyMedium!.copyWith(
                 fontWeight: FontWeight.bold,
               ),
         ));
       } else {
         spans.add(TextSpan(
-          text: parts[i],
+          text: '${parts[i]}\n',
           style: Theme.of(context).textTheme.bodyMedium,
         ));
       }

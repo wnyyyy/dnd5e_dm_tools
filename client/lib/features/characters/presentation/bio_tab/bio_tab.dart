@@ -25,7 +25,7 @@ class BioTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var feats = Map.castFrom(character['feats']).cast<String, Map>();
+    var feats = Map.castFrom(character['feats'] ?? {}).cast<String, Map>();
     return SingleChildScrollView(
       child: Flex(
         direction: Axis.vertical,
@@ -113,40 +113,34 @@ class BioTab extends StatelessWidget {
       );
     }
 
+    void _onFeatSelected(MapEntry<String, Map> feat) {
+      showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Text(feat.value['name']),
+            content: FeatDescription(
+              inputText: feat.value['desc'],
+              effectsDesc: List<String>.from(feat.value['effects_desc'] ?? []),
+            ),
+            actions: [
+              TextButton(
+                child: const Icon(Icons.close),
+                onPressed: () => Navigator.pop(context),
+              ),
+            ],
+          );
+        },
+      );
+    }
+
     return ItemList(
       items: feats,
       onItemsChanged: _onItemsChanged,
       onAddItem: _onAddItem,
       tableName: 'Feats',
       displayKey: 'name',
-    );
-  }
-
-  void _showFeatDetails(BuildContext context, Map<String, dynamic> feat) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text(feat['name']),
-          content: FeatDescription(
-            inputText: feat['desc'],
-            effectsDesc: feat['effects_desc'],
-          ),
-          actions: [
-            TextButton(
-              child: const Icon(Icons.delete),
-              onPressed: () {
-                character['feats'].remove(feat);
-                Navigator.pop(context);
-              },
-            ),
-            TextButton(
-              child: const Text('Close'),
-              onPressed: () => Navigator.pop(context),
-            ),
-          ],
-        );
-      },
+      onSelectItem: _onFeatSelected,
     );
   }
 
@@ -244,6 +238,12 @@ class BioTab extends StatelessWidget {
           content: TraitDescription(
             inputText: data['traits'],
           ),
+          actions: [
+            TextButton(
+              child: const Icon(Icons.close),
+              onPressed: () => Navigator.pop(context),
+            ),
+          ],
         );
       },
     );

@@ -4,6 +4,7 @@ class ItemList extends StatefulWidget {
   final Map<String, Map>? items;
   final Function(Map<String, Map>) onItemsChanged;
   final Function() onAddItem;
+  final Function(MapEntry<String, Map>) onSelectItem;
   final String tableName;
   final String displayKey;
 
@@ -13,6 +14,7 @@ class ItemList extends StatefulWidget {
     required this.onAddItem,
     required this.tableName,
     required this.displayKey,
+    required this.onSelectItem,
   });
 
   @override
@@ -88,6 +90,9 @@ class _ItemListState extends State<ItemList> {
           ...widget.items?.keys.map((key) {
                 return ListTile(
                   title: Text(widget.items?[key]?[widget.displayKey] ?? ''),
+                  onTap: () => widget.onSelectItem(
+                    MapEntry(key, widget.items?[key] ?? {}),
+                  ),
                   trailing: _isEditMode
                       ? IconButton(
                           icon: Icon(Icons.delete),
