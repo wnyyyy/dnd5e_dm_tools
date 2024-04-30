@@ -9,13 +9,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
-class SkillsTab extends StatelessWidget {
+class StatusTab extends StatelessWidget {
   final Map<String, dynamic> character;
   final Map<String, dynamic> race;
   final Map<String, dynamic> classs;
   final String name;
 
-  const SkillsTab({
+  const StatusTab({
     super.key,
     required this.character,
     required this.name,
@@ -25,17 +25,25 @@ class SkillsTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var feats = Map.castFrom(character['feats'] ?? {}).cast<String, Map>();
     return SingleChildScrollView(
-      child: Flex(
-        direction: Axis.vertical,
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 32),
-            child: Divider(),
-          ),
-        ],
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Flex(
+          direction: Axis.horizontal,
+          children: [
+            _buildHitpoints(),
+            _buildHitDice(),
+          ],
+        ),
       ),
     );
+  }
+
+  Widget _buildHitpoints() {
+    return Container();
+  }
+
+  Widget _buildHitDice() {
+    return Container();
   }
 }
