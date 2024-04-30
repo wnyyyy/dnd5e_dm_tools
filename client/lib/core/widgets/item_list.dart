@@ -7,6 +7,7 @@ class ItemList extends StatefulWidget {
   final Function(MapEntry<String, Map>) onSelectItem;
   final String tableName;
   final String displayKey;
+  final String emptyMessage;
 
   ItemList({
     required this.items,
@@ -15,6 +16,7 @@ class ItemList extends StatefulWidget {
     required this.tableName,
     required this.displayKey,
     required this.onSelectItem,
+    this.emptyMessage = 'No items',
   });
 
   @override
@@ -85,7 +87,8 @@ class _ItemListState extends State<ItemList> {
           if (widget.items?.isEmpty ?? true)
             Padding(
               padding: const EdgeInsets.all(16),
-              child: Text('No items'),
+              child: Text(widget.emptyMessage,
+                  style: Theme.of(context).textTheme.bodyLarge),
             ),
           ...widget.items?.keys.map((key) {
                 return ListTile(

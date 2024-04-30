@@ -15,20 +15,27 @@ class CharacterLoad extends CharacterEvent {
   List<Object> get props => [];
 }
 
-class UpdateCharacter extends CharacterEvent {
+class CharacterUpdate extends CharacterEvent {
   final Map<String, dynamic> character;
   final Map<String, dynamic> race;
   final Map<String, dynamic> classs;
   final String name;
-  const UpdateCharacter({
+  final bool persistData;
+  const CharacterUpdate({
     required this.character,
     required this.race,
     required this.classs,
     required this.name,
+    this.persistData = false,
   });
 
   @override
-  List<Object> get props => [character];
+  List<Object> get props => [
+        character,
+        race,
+        classs,
+        name,
+      ];
 }
 
 class ChangeFeats extends CharacterEvent {
@@ -45,4 +52,25 @@ class ShowFeatDetails extends CharacterEvent {
 
   @override
   List<Object> get props => [featSlug];
+}
+
+class PersistCharacter extends CharacterEvent {
+  const PersistCharacter();
+
+  @override
+  List<Object> get props => [];
+}
+
+class ToggleEditingFeats extends CharacterEvent {
+  const ToggleEditingFeats();
+
+  @override
+  List<Object> get props => [];
+}
+
+class ToggleEditingProf extends CharacterEvent {
+  const ToggleEditingProf();
+
+  @override
+  List<Object> get props => [];
 }

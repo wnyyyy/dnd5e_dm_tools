@@ -1,9 +1,10 @@
-import 'package:dnd5e_dm_tools/core/data/repositories/feats_repository.dart';
+import 'package:dnd5e_dm_tools/core/data/repositories/feat_repository.dart';
 import 'package:dnd5e_dm_tools/core/widgets/feat_description.dart';
 import 'package:dnd5e_dm_tools/core/widgets/item_list.dart';
 import 'package:dnd5e_dm_tools/core/widgets/trait_description.dart';
 import 'package:dnd5e_dm_tools/features/characters/bloc/character_bloc.dart';
-import 'package:dnd5e_dm_tools/features/characters/bloc/character_event.dart';
+import 'package:dnd5e_dm_tools/features/characters/bloc/character_events.dart';
+import 'package:dnd5e_dm_tools/features/settings/bloc/settings_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -26,17 +27,27 @@ class BioTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var feats = Map.castFrom(character['feats'] ?? {}).cast<String, Map>();
+    var proficiencies =
+        Map.castFrom(character['proficiencies'] ?? {}).cast<String, Map>();
+    final screenWidth = MediaQuery.of(context).size.width;
     return SingleChildScrollView(
       child: Flex(
         direction: Axis.vertical,
         children: [
           _buildCharImage(name, context),
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 32),
+            padding: EdgeInsets.symmetric(
+                vertical: 4, horizontal: screenWidth * 0.08),
             child: Divider(),
           ),
           Padding(
-            padding: const EdgeInsets.all(64.0),
+            padding: EdgeInsets.symmetric(
+                horizontal: screenWidth * 0.08, vertical: 8),
+            child: _buildProficiencyList(proficiencies, context),
+          ),
+          Padding(
+            padding: EdgeInsets.symmetric(
+                horizontal: screenWidth * 0.08, vertical: 8),
             child: _buildFeatsList(feats, context),
           ),
         ],
@@ -44,22 +55,133 @@ class BioTab extends StatelessWidget {
     );
   }
 
-  Widget _buildFeatsList(
-    Map<String, Map>? feats,
+  Widget _buildProficiencyList(
+    Map<String, dynamic> proficiencies,
     BuildContext context,
   ) {
-    if (feats == null) {
-      feats = {};
-    }
-
-    void _onItemsChanged(Map<String, dynamic> newFeats) {
-      character['feats'] = newFeats;
+    void _onItemsChanged(Map<String, dynamic> newProficiencies) {
+      character['proficiencies'] = newProficiencies;
       context.read<CharacterBloc>().add(
-            UpdateCharacter(
+            CharacterUpdate(
               character: character,
               name: name,
               classs: classs,
               race: race,
+              persistData: true,
+            ),
+          );
+    }
+
+    void _onAddItem() async {
+      final TextEditingController titleController = TextEditingController();
+      final TextEditingController descriptionController =
+          TextEditingController();
+
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Add proficiency'),
+            content: SingleChildScrollView(
+              child: ListBody(
+                children: <Widget>[
+                  TextFormField(
+                    controller: titleController,
+                    decoration: InputDecoration(
+                      labelText: 'Title',
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Title is required';
+                      }
+                      return null;
+                    },
+                  ),
+                  TextFormField(
+                    controller: descriptionController,
+                    decoration: InputDecoration(
+                      labelText: 'Description',
+                    ),
+                    minLines: 3,
+                    maxLines: 5,
+                  ),
+                ],
+              ),
+            ),
+            actionsAlignment: MainAxisAlignment.spaceBetween,
+            actions: <Widget>[
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Icon(Icons.close),
+              ),
+              TextButton(
+                onPressed: () {
+                  if (titleController.text.isNotEmpty) {
+                    var slug = titleController.text
+                        .toLowerCase()
+                        .trim()
+                        .replaceAll(' ', '_');
+                    var newProf = proficiencies;
+                    newProf[slug] = {
+                      'title': titleController.text,
+                      'description': descriptionController.text,
+                    };
+                    _onItemsChanged(newProf);
+                    Navigator.of(context).pop();
+                  }
+                },
+                child: Icon(Icons.add),
+              ),
+            ],
+          );
+        },
+      );
+    }
+
+    void _onProficiencySelected(MapEntry<String, Map> proficiency) {
+      showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Text(proficiency.value['title']),
+            content: Text(proficiency.value['description']),
+            actions: [
+              TextButton(
+                child: const Icon(Icons.close),
+                onPressed: () => Navigator.pop(context),
+              ),
+            ],
+          );
+        },
+      );
+    }
+
+    return ItemList(
+      items: proficiencies.cast<String, Map>(),
+      onItemsChanged: _onItemsChanged,
+      onAddItem: _onAddItem,
+      tableName: 'Proficiencies',
+      displayKey: 'title',
+      emptyMessage: 'None',
+      onSelectItem: _onProficiencySelected,
+    );
+  }
+
+  Widget _buildFeatsList(
+    Map<String, Map> feats,
+    BuildContext context,
+  ) {
+    void _onItemsChanged(Map<String, dynamic> newFeats) {
+      character['feats'] = newFeats;
+      context.read<CharacterBloc>().add(
+            CharacterUpdate(
+              character: character,
+              name: name,
+              classs: classs,
+              race: race,
+              persistData: true,
             ),
           );
     }
@@ -141,6 +263,7 @@ class BioTab extends StatelessWidget {
       tableName: 'Feats',
       displayKey: 'name',
       onSelectItem: _onFeatSelected,
+      emptyMessage: 'None',
     );
   }
 
@@ -178,7 +301,9 @@ class BioTab extends StatelessWidget {
                   ),
                   SizedBox(height: 8),
                   GestureDetector(
-                    onTap: () => _showEditLevel(context),
+                    onTap: () => context.read<SettingsCubit>().state.isEditMode
+                        ? _showEditLevel(context)
+                        : null,
                     child: Text(
                       'Level ${character['level']}',
                       style: Theme.of(context).textTheme.titleMedium,
@@ -221,6 +346,12 @@ class BioTab extends StatelessWidget {
           itemBuilder: (context, index) => ListTile(
             title: Text('Level ${index + 1}'),
             onTap: () {
+              context.read<CharacterBloc>().add(CharacterUpdate(
+                    character: character,
+                    name: name,
+                    classs: classs,
+                    race: race,
+                  ));
               Navigator.pop(context);
             },
           ),

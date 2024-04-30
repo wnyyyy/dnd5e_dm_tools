@@ -18,12 +18,12 @@ class FeatRepository {
     return null;
   }
 
-  Future<Map<String, dynamic>> getAll() async {
+  Future<Map<String, Map<String, dynamic>>> getAll() async {
     final docs = await databaseProvider.getCollection(path: path);
-    return docs.fold<Map<String, dynamic>>(
+    return docs.fold<Map<String, Map<String, dynamic>>>(
       {},
       (previousValue, element) {
-        previousValue[element.id] = element.data();
+        previousValue[element.id] = {'id': element.id, ...element.data() ?? {}};
         return previousValue;
       },
     );

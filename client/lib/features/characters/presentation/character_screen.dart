@@ -1,7 +1,9 @@
 import 'package:dnd5e_dm_tools/features/characters/bloc/character_bloc.dart';
-import 'package:dnd5e_dm_tools/features/characters/bloc/character_event.dart';
-import 'package:dnd5e_dm_tools/features/characters/bloc/character_state.dart';
+import 'package:dnd5e_dm_tools/features/characters/bloc/character_events.dart';
+import 'package:dnd5e_dm_tools/features/characters/bloc/character_states.dart';
 import 'package:dnd5e_dm_tools/features/characters/presentation/bio_tab/bio_tab.dart';
+import 'package:dnd5e_dm_tools/features/characters/presentation/skills_tab.dart/skills_tab.dart';
+import 'package:dnd5e_dm_tools/features/characters/presentation/status_tab/status_tab.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -31,8 +33,8 @@ class CharacterScreen extends StatelessWidget {
                   const TabBar(
                     tabs: [
                       Tab(text: 'Bio'),
+                      Tab(text: 'Status'),
                       Tab(text: 'Skills'),
-                      Tab(text: 'Resources'),
                       Tab(text: 'Equipment'),
                     ],
                   ),
@@ -45,8 +47,18 @@ class CharacterScreen extends StatelessWidget {
                           race: state.race,
                           classs: state.classs,
                         ),
-                        Placeholder(),
-                        Placeholder(),
+                        StatusTab(
+                          character: state.character,
+                          name: state.name,
+                          race: state.race,
+                          classs: state.classs,
+                        ),
+                        SkillsTab(
+                          character: state.character,
+                          name: state.name,
+                          race: state.race,
+                          classs: state.classs,
+                        ),
                         Placeholder(),
                       ],
                     ),
