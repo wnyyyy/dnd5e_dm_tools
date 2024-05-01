@@ -70,8 +70,7 @@ class _SavingThrowListState extends State<SavingThrowList> {
                         } else {
                           char_prof.remove(attr);
                         }
-                        isProficient =
-                            value; // Update the local state to refresh the checkbox immediately
+                        isProficient = value;
                       });
                     }
                   },

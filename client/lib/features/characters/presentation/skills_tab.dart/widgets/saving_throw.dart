@@ -27,7 +27,7 @@ class SavingThrow extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 90,
+        width: 100,
         child: Column(
           children: [
             Text(attributePrefix,
@@ -43,7 +43,7 @@ class SavingThrow extends StatelessWidget {
                   child: Text(
                     valueStr,
                     style: Theme.of(context).textTheme.displaySmall!.copyWith(
-                          fontFamily: GoogleFonts.sourceCodePro().fontFamily,
+                          fontFamily: GoogleFonts.majorMonoDisplay().fontFamily,
                           color: color,
                         ),
                   ),
