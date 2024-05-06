@@ -1,8 +1,10 @@
+import 'package:dnd5e_dm_tools/core/data/repositories/spells_repository.dart';
 import 'package:dnd5e_dm_tools/features/settings/bloc/settings_states.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class SettingsCubit extends Cubit<SettingsState> {
-  SettingsCubit()
+  final SpellsRepository spellsRepository;
+  SettingsCubit({required this.spellsRepository})
       : super(SettingsState(
           name: '',
           isEditMode: false,
@@ -19,5 +21,10 @@ class SettingsCubit extends Cubit<SettingsState> {
 
   void toggleIsCaster() {
     emit(state.copyWith(isCaster: !state.isCaster));
+  }
+
+  void toggleClassOnlySpells() {
+    spellsRepository.clearCache();
+    emit(state.copyWith(classOnlySpells: !state.classOnlySpells));
   }
 }

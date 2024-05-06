@@ -2,8 +2,10 @@ import 'package:dnd5e_dm_tools/core/data/db/database_provider.dart';
 
 class SpellsRepository {
   final DatabaseProvider databaseProvider;
-  final spellsCache = <String, Map<String, dynamic>>{};
+  var spellsCache = <String, Map<String, dynamic>>{};
   final path = 'spells/';
+  final spellListsPath = 'spelllist/';
+  final extraSuffix = ['a5e'];
 
   SpellsRepository(this.databaseProvider);
 
@@ -17,6 +19,7 @@ class SpellsRepository {
       if (data == null) {
         return null;
       }
+      spellsCache[slug] = data;
       return data;
     }
     return null;
@@ -35,5 +38,33 @@ class SpellsRepository {
         return previousValue;
       },
     );
+  }
+
+  Future<Map<String, Map<String, dynamic>>> getByClass(String classSlug) async {
+    if (spellsCache.isNotEmpty) {
+      return spellsCache;
+    }
+    final classSpells =
+        await databaseProvider.getDocument(path: '$spellListsPath$classSlug');
+    if (!classSpells.exists) {
+      return {};
+    }
+    final allSpells = await getAll();
+    Map<String, Map<String, dynamic>> spellList = {};
+    for (var spell in classSpells.data()!['spells']) {
+      spellList[spell] = allSpells[spell] ?? {};
+      for (var suffix in extraSuffix) {
+        final extraSpell = allSpells['$spell-$suffix'];
+        if (extraSpell != null) {
+          spellList['$spell-$suffix'] = extraSpell;
+        }
+      }
+    }
+    spellsCache = spellList;
+    return spellList;
+  }
+
+  void clearCache() {
+    spellsCache.clear();
   }
 }

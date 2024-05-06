@@ -15,13 +15,13 @@ class CharacterBloc extends Bloc<CharacterEvent, CharacterState> {
   final SpellsRepository spellsRepository;
   final String name = '';
 
-  CharacterBloc(
-    this.characterRepository,
-    this.raceRepository,
-    this.classRepository,
-    this.featRepository,
-    this.spellsRepository,
-  ) : super(CharacterStateInitial()) {
+  CharacterBloc({
+    required this.characterRepository,
+    required this.raceRepository,
+    required this.classRepository,
+    required this.featRepository,
+    required this.spellsRepository,
+  }) : super(CharacterStateInitial()) {
     on<CharacterLoad>(_onCharacterLoad);
     on<CharacterUpdate>(_onCharacterUpdate);
     on<PersistCharacter>(_onPersistCharacter);
@@ -126,7 +126,12 @@ class CharacterBloc extends Bloc<CharacterEvent, CharacterState> {
       return;
     }
     final currState = state as CharacterStateLoaded;
-    final spells = await spellsRepository.getAll();
+    final Map<String, Map<String, dynamic>> spells;
+    if (event.classSlug == null) {
+      spells = await spellsRepository.getAll();
+    } else {
+      spells = await spellsRepository.getByClass(event.classSlug!);
+    }
     emit(currState.copyWith(spells: spells));
   }
 }

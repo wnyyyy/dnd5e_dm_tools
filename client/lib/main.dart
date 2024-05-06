@@ -53,14 +53,17 @@ class Dnd5eDmTools extends StatelessWidget {
             BlocProvider(create: (_) => ThemeCubit()),
             BlocProvider(
                 create: (_) => CharacterBloc(
-                      context.read<CharacterRepository>(),
-                      context.read<RaceRepository>(),
-                      context.read<ClassRepository>(),
-                      context.read<FeatRepository>(),
-                      context.read<SpellsRepository>(),
+                      characterRepository: context.read<CharacterRepository>(),
+                      raceRepository: context.read<RaceRepository>(),
+                      classRepository: context.read<ClassRepository>(),
+                      featRepository: context.read<FeatRepository>(),
+                      spellsRepository: context.read<SpellsRepository>(),
                     )),
             BlocProvider(create: (_) => ScreenSplitterCubit()),
-            BlocProvider(create: (_) => SettingsCubit()),
+            BlocProvider(
+                create: (_) => SettingsCubit(
+                      spellsRepository: context.read<SpellsRepository>(),
+                    )),
             BlocProvider(create: (_) => MainScreenCubit()),
           ],
           child: const MainScreen(),

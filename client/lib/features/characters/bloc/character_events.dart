@@ -78,8 +78,9 @@ class ToggleEditingProf extends CharacterEvent {
 }
 
 class LoadSpells extends CharacterEvent {
-  const LoadSpells();
+  final String? classSlug;
+  const LoadSpells({this.classSlug});
 
   @override
-  List<Object> get props => [];
+  List<Object> get props => [classSlug ?? ''];
 }

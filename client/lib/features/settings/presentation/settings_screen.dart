@@ -56,12 +56,26 @@ class SettingsScreen extends StatelessWidget {
   Widget _buildIsCasterToggle(BuildContext context) {
     return BlocBuilder<SettingsCubit, SettingsState>(
       builder: (context, state) {
-        return SwitchListTile(
-          title: const Text('Is Caster'),
-          value: state.isCaster,
-          onChanged: (value) {
-            BlocProvider.of<SettingsCubit>(context).toggleIsCaster();
-          },
+        return Column(
+          children: [
+            SwitchListTile(
+              title: const Text('Is Caster'),
+              value: state.isCaster,
+              onChanged: (value) {
+                BlocProvider.of<SettingsCubit>(context).toggleIsCaster();
+              },
+            ),
+            Visibility(
+                visible: state.isCaster,
+                child: SwitchListTile(
+                  title: const Text('Class-only spells'),
+                  value: state.classOnlySpells,
+                  onChanged: (value) {
+                    BlocProvider.of<SettingsCubit>(context)
+                        .toggleClassOnlySpells();
+                  },
+                )),
+          ],
         );
       },
     );
