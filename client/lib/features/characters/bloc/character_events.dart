@@ -77,10 +77,9 @@ class ToggleEditingProf extends CharacterEvent {
   List<Object> get props => [];
 }
 
-class CacheSpells extends CharacterEvent {
-  final Map<String, dynamic> spells;
-  const CacheSpells(this.spells);
+class LoadSpells extends CharacterEvent {
+  const LoadSpells();
 
   @override
-  List<Object> get props => [spells];
+  List<Object> get props => [];
 }

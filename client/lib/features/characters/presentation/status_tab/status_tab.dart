@@ -13,7 +13,7 @@ class StatusTab extends StatelessWidget {
   final Map<String, dynamic> character;
   final Map<String, dynamic> race;
   final Map<String, dynamic> classs;
-  final Map<String, dynamic> spells;
+  final Map<String, dynamic>? spells;
   final String name;
 
   const StatusTab({
@@ -28,6 +28,12 @@ class StatusTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isCaster = context.read<SettingsCubit>().state.isCaster;
+    if (isCaster) {
+      if (spells?.isEmpty ?? true) {
+        context.read<CharacterBloc>().add(const LoadSpells());
+        return const Center(child: CircularProgressIndicator());
+      }
+    }
     return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -69,7 +75,7 @@ class StatusTab extends StatelessWidget {
                                 title: const Text('Spellbook'),
                                 content: Spellbook(
                                   character: character,
-                                  spells: character['spells'] ?? {},
+                                  spells: spells ?? {},
                                 ),
                                 actions: [
                                   TextButton(

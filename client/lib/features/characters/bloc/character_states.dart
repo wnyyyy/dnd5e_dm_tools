@@ -79,5 +79,6 @@ class CharacterStateLoaded extends CharacterState {
         classs,
         editingFeats,
         editingProf,
+        spells ?? {},
       ];
 }

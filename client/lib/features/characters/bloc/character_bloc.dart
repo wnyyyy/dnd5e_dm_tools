@@ -27,7 +27,7 @@ class CharacterBloc extends Bloc<CharacterEvent, CharacterState> {
     on<PersistCharacter>(_onPersistCharacter);
     on<ToggleEditingFeats>(_onToggleEditingFeats);
     on<ToggleEditingProf>(_onToggleEditingProf);
-    on<CacheSpells>(_onCacheSpells);
+    on<LoadSpells>(_onLoadSpells);
   }
 
   Future<void> _onCharacterLoad(
@@ -120,12 +120,13 @@ class CharacterBloc extends Bloc<CharacterEvent, CharacterState> {
     emit(currState.copyWith(editingProf: !currState.editingProf));
   }
 
-  Future<void> _onCacheSpells(
-      CacheSpells event, Emitter<CharacterState> emit) async {
+  Future<void> _onLoadSpells(
+      LoadSpells event, Emitter<CharacterState> emit) async {
     if (state is! CharacterStateLoaded) {
       return;
     }
     final currState = state as CharacterStateLoaded;
-    emit(currState.copyWith(spells: event.spells));
+    final spells = await spellsRepository.getAll();
+    emit(currState.copyWith(spells: spells));
   }
 }

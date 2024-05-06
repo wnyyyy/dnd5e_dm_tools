@@ -46,39 +46,6 @@ class SpellbookState extends State<Spellbook> {
             ),
           ),
         ),
-        Expanded(
-          child: ListView.builder(
-            itemCount: widget.spells.keys.length,
-            itemBuilder: (context, index) {
-              String level = widget.spells.keys.elementAt(index);
-              List<dynamic> spellsAtLevel = widget.spells[level];
-              return Visibility(
-                visible: spellsAtLevel.any((spell) =>
-                    spell['name'].toLowerCase().contains(searchText)),
-                child: ExpansionTile(
-                  title: Text('Level $level Spells'),
-                  children: spellsAtLevel.map<Widget>((spell) {
-                    bool isPrepared = preparedSpells[spell['name']] ?? false;
-                    return Visibility(
-                      visible: spell['name'].toLowerCase().contains(searchText),
-                      child: ListTile(
-                        title: Text(spell['name']),
-                        trailing: Checkbox(
-                          value: isPrepared,
-                          onChanged: (bool? value) {
-                            setState(() {
-                              preparedSpells[spell['name']] = value!;
-                            });
-                          },
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                ),
-              );
-            },
-          ),
-        ),
       ],
     );
   }
