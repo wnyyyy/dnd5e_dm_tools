@@ -4,11 +4,11 @@ class FeatDescription extends StatelessWidget {
   final String inputText;
   final List<String> effectsDesc;
 
-  FeatDescription({
-    Key? key,
+  const FeatDescription({
+    super.key,
     required this.inputText,
     required this.effectsDesc,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

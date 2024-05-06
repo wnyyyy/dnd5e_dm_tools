@@ -50,18 +50,18 @@ class _HitDiceState extends State<HitDice> {
                   children: [
                     TextField(
                       controller: maxHpController,
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                         labelText: 'Max Hitdice',
                       ),
-                      keyboardType: TextInputType.numberWithOptions(
+                      keyboardType: const TextInputType.numberWithOptions(
                           signed: false, decimal: false),
                     ),
                     TextField(
                       controller: currentHpController,
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                         labelText: 'Current Hitdice',
                       ),
-                      keyboardType: TextInputType.numberWithOptions(
+                      keyboardType: const TextInputType.numberWithOptions(
                           signed: false, decimal: false),
                     ),
                   ],
@@ -69,13 +69,13 @@ class _HitDiceState extends State<HitDice> {
                 actionsAlignment: MainAxisAlignment.spaceBetween,
                 actions: <Widget>[
                   TextButton(
-                    child: Icon(Icons.close),
+                    child: const Icon(Icons.close),
                     onPressed: () {
                       Navigator.of(context).pop();
                     },
                   ),
                   TextButton(
-                    child: Icon(Icons.check),
+                    child: const Icon(Icons.check),
                     onPressed: () {
                       widget.character['hd_max'] =
                           int.tryParse(maxHpController.text) ?? 0;
@@ -100,7 +100,7 @@ class _HitDiceState extends State<HitDice> {
       );
     }
 
-    void _changeHitPoints(int change) {
+    void changeHitPoints(int change) {
       int currentHP = character['hd_curr'];
 
       if (change < 0) {
@@ -131,9 +131,9 @@ class _HitDiceState extends State<HitDice> {
             padding: const EdgeInsets.all(8.0),
             child: Column(
               children: [
-                Text('Hit Dice  (${hd})',
+                Text('Hit Dice  ($hd)',
                     style: Theme.of(context).textTheme.titleSmall),
-                SizedBox(height: 8),
+                const SizedBox(height: 8),
                 Column(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
@@ -141,24 +141,24 @@ class _HitDiceState extends State<HitDice> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         IconButton(
-                          icon: Icon(Icons.remove_circle_outline),
+                          icon: const Icon(Icons.remove_circle_outline),
                           onPressed: () => setState(() {
-                            _changeHitPoints(-1);
+                            changeHitPoints(-1);
                           }),
                         ),
-                        Text('${currentHd}',
+                        Text('$currentHd',
                             style: Theme.of(context).textTheme.displaySmall!),
                         GestureDetector(
                           child: IconButton(
-                            icon: Icon(Icons.add_circle_outline),
+                            icon: const Icon(Icons.add_circle_outline),
                             onPressed: () => setState(() {
-                              _changeHitPoints(1);
+                              changeHitPoints(1);
                             }),
                           ),
                         ),
                       ],
                     ),
-                    SizedBox(
+                    const SizedBox(
                       width: 40,
                       child: Divider(
                         height: 5,
@@ -167,7 +167,7 @@ class _HitDiceState extends State<HitDice> {
                     ),
                     Row(
                       children: [
-                        Text('${maxHd}',
+                        Text('$maxHd',
                             style: Theme.of(context).textTheme.displaySmall),
                       ],
                     ),
@@ -187,9 +187,9 @@ class _HitDiceState extends State<HitDice> {
 
     return Column(
       children: [
-        SizedBox(height: 8),
+        const SizedBox(height: 8),
         Text('Death saves', style: Theme.of(context).textTheme.titleSmall),
-        SizedBox(height: 8),
+        const SizedBox(height: 8),
         Column(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [

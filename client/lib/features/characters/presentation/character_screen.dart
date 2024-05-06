@@ -35,7 +35,7 @@ class CharacterScreen extends StatelessWidget {
                       Tab(text: 'Bio'),
                       Tab(text: 'Status'),
                       Tab(text: 'Skills'),
-                      Tab(text: 'Equipment'),
+                      Tab(text: 'Equip'),
                     ],
                   ),
                   Expanded(
@@ -52,6 +52,7 @@ class CharacterScreen extends StatelessWidget {
                           name: state.name,
                           race: state.race,
                           classs: state.classs,
+                          spells: state.spells,
                         ),
                         SkillsTab(
                           character: state.character,
@@ -59,7 +60,7 @@ class CharacterScreen extends StatelessWidget {
                           race: state.race,
                           classs: state.classs,
                         ),
-                        Placeholder(),
+                        const Placeholder()
                       ],
                     ),
                   ),

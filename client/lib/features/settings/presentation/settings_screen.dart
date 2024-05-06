@@ -10,13 +10,23 @@ class SettingsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
     return Flex(
         direction: Axis.vertical,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-            child: _buildNameField(context),
+          Column(
+            children: [
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                child: _buildNameField(context),
+              ),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.2),
+                child: _buildIsCasterToggle(context),
+              ),
+            ],
           ),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 32),
@@ -30,7 +40,7 @@ class SettingsScreen extends StatelessWidget {
       builder: (context, state) {
         return TextFormField(
           initialValue: state.name,
-          decoration: InputDecoration(labelText: 'Name'),
+          decoration: const InputDecoration(labelText: 'Name'),
           readOnly: !state.isEditMode,
           onFieldSubmitted: (value) {
             if (state.isEditMode) {
@@ -43,8 +53,21 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
+  Widget _buildIsCasterToggle(BuildContext context) {
+    return BlocBuilder<SettingsCubit, SettingsState>(
+      builder: (context, state) {
+        return SwitchListTile(
+          title: const Text('Is Caster'),
+          value: state.isCaster,
+          onChanged: (value) {
+            BlocProvider.of<SettingsCubit>(context).toggleIsCaster();
+          },
+        );
+      },
+    );
+  }
+
   Widget _buildEditButton(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
     return BlocBuilder<SettingsCubit, SettingsState>(
       builder: (context, state) {
         if (state.isEditMode) {
@@ -55,7 +78,7 @@ class SettingsScreen extends StatelessWidget {
                 onPressed: () {
                   BlocProvider.of<SettingsCubit>(context).toggleEditMode();
                   BlocProvider.of<CharacterBloc>(context)
-                      .add(PersistCharacter());
+                      .add(const PersistCharacter());
                 },
                 child: const Text('Save'),
               ),

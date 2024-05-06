@@ -31,9 +31,9 @@ class _SavingThrowListState extends State<SavingThrowList> {
   @override
   void initState() {
     super.initState();
-    final prof_str = widget.character['prof_saving_throws'] ??
+    final profStr = widget.character['prof_saving_throws'] ??
         widget.classs['prof_saving_throws'];
-    char_prof = prof_str
+    char_prof = profStr
         .toString()
         .toLowerCase()
         .split(',')
@@ -58,7 +58,7 @@ class _SavingThrowListState extends State<SavingThrowList> {
               return AlertDialog(
                 title: Text('Edit $attributeName Saving Throw'),
                 content: CheckboxListTile(
-                  title: Text('Proficient'),
+                  title: const Text('Proficient'),
                   value: isProficient,
                   onChanged: (bool? value) {
                     if (value != null) {
@@ -78,13 +78,13 @@ class _SavingThrowListState extends State<SavingThrowList> {
                 actionsAlignment: MainAxisAlignment.spaceBetween,
                 actions: <Widget>[
                   TextButton(
-                    child: Icon(Icons.close),
+                    child: const Icon(Icons.close),
                     onPressed: () {
                       Navigator.of(context).pop();
                     },
                   ),
                   TextButton(
-                    child: Icon(Icons.check),
+                    child: const Icon(Icons.check),
                     onPressed: () {
                       widget.character['prof_saving_throws'] =
                           char_prof.join(',');
@@ -134,7 +134,7 @@ class _SavingThrowListState extends State<SavingThrowList> {
                               ? () => editSavingThrow('Strength')
                               : null,
                         ),
-                        SizedBox(height: 12),
+                        const SizedBox(height: 12),
                         SavingThrow(
                           attributePrefix: 'DEX',
                           attributeValue: asi['dexterity'],
@@ -146,7 +146,7 @@ class _SavingThrowListState extends State<SavingThrowList> {
                               ? () => editSavingThrow('Dexterity')
                               : null,
                         ),
-                        SizedBox(height: 12),
+                        const SizedBox(height: 12),
                         SavingThrow(
                           attributePrefix: 'CON',
                           attributeValue: asi['constitution'],
@@ -160,7 +160,7 @@ class _SavingThrowListState extends State<SavingThrowList> {
                         ),
                       ],
                     ),
-                    SizedBox(width: 8),
+                    const SizedBox(width: 8),
                     Column(
                       children: [
                         SavingThrow(
@@ -174,7 +174,7 @@ class _SavingThrowListState extends State<SavingThrowList> {
                               ? () => editSavingThrow('Intelligence')
                               : null,
                         ),
-                        SizedBox(height: 12),
+                        const SizedBox(height: 12),
                         SavingThrow(
                           attributePrefix: 'WIS',
                           attributeValue: asi['wisdom'],
@@ -184,7 +184,7 @@ class _SavingThrowListState extends State<SavingThrowList> {
                           onTap:
                               editMode ? () => editSavingThrow('Wisdom') : null,
                         ),
-                        SizedBox(height: 12),
+                        const SizedBox(height: 12),
                         SavingThrow(
                           attributePrefix: 'CHA',
                           attributeValue: asi['charisma'],

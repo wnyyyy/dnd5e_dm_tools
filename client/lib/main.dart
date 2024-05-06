@@ -5,6 +5,7 @@ import 'package:dnd5e_dm_tools/core/data/repositories/class_repository.dart';
 import 'package:dnd5e_dm_tools/core/data/repositories/feat_repository.dart';
 import 'package:dnd5e_dm_tools/core/data/repositories/race_repository.dart';
 import 'package:dnd5e_dm_tools/core/config/theme_cubit.dart';
+import 'package:dnd5e_dm_tools/core/data/repositories/spells_repository.dart';
 import 'package:dnd5e_dm_tools/features/main_screen/cubit/main_screen_cubit.dart';
 import 'package:dnd5e_dm_tools/features/characters/bloc/character_bloc.dart';
 import 'package:dnd5e_dm_tools/features/header/cubit/header_cubit.dart';
@@ -42,6 +43,7 @@ class Dnd5eDmTools extends StatelessWidget {
         Provider(create: (_) => FeatRepository(databaseProvider)),
         Provider(create: (_) => ClassRepository(databaseProvider)),
         Provider(create: (_) => SettingsRepository(databaseProvider)),
+        Provider(create: (_) => SpellsRepository(databaseProvider)),
       ],
       builder: (context, child) {
         return MultiBlocProvider(
@@ -55,12 +57,13 @@ class Dnd5eDmTools extends StatelessWidget {
                       context.read<RaceRepository>(),
                       context.read<ClassRepository>(),
                       context.read<FeatRepository>(),
+                      context.read<SpellsRepository>(),
                     )),
             BlocProvider(create: (_) => ScreenSplitterCubit()),
             BlocProvider(create: (_) => SettingsCubit()),
             BlocProvider(create: (_) => MainScreenCubit()),
           ],
-          child: MainScreen(),
+          child: const MainScreen(),
         );
       },
     );

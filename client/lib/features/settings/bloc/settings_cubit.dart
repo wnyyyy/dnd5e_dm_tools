@@ -6,6 +6,7 @@ class SettingsCubit extends Cubit<SettingsState> {
       : super(SettingsState(
           name: '',
           isEditMode: false,
+          isCaster: false,
         ));
 
   void changeName(String name) {
@@ -14,5 +15,9 @@ class SettingsCubit extends Cubit<SettingsState> {
 
   void toggleEditMode() {
     emit(state.copyWith(isEditMode: !state.isEditMode));
+  }
+
+  void toggleIsCaster() {
+    emit(state.copyWith(isCaster: !state.isCaster));
   }
 }

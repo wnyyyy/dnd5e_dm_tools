@@ -1,30 +1,25 @@
 import 'package:flutter/material.dart';
 
-class ItemList extends StatefulWidget {
-  final Map<String, Map>? items;
-  final Function(Map<String, Map>) onItemsChanged;
-  final Function() onAddItem;
-  final Function(MapEntry<String, Map>) onSelectItem;
-  final String tableName;
-  final String displayKey;
-  final String emptyMessage;
+class SpellList extends StatefulWidget {
+  final Map<String, dynamic> character;
+  final Map<String, dynamic>? spells;
+  final int spellLevel;
 
-  const ItemList({super.key, 
-    required this.items,
-    required this.onItemsChanged,
-    required this.onAddItem,
-    required this.tableName,
-    required this.displayKey,
-    required this.onSelectItem,
-    this.emptyMessage = 'No items',
+  const SpellList({
+    super.key,
+    required this.character,
+    required this.spellLevel,
+    this.spells,
   });
 
   @override
-  _ItemListState createState() => _ItemListState();
+  SpellListState createState() => SpellListState();
 }
 
-class _ItemListState extends State<ItemList> {
+class SpellListState extends State<SpellList> {
   bool _isEditMode = false;
+  final TextEditingController _searchController = TextEditingController();
+  List<dynamic> filteredSpells = [];
 
   void _enableEditMode() {
     setState(() {
@@ -33,7 +28,27 @@ class _ItemListState extends State<ItemList> {
   }
 
   @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _filterSpells(String query) {
+    setState(() {
+      filteredSpells = widget.spells!.entries
+          .where((entry) =>
+              entry.value['name'].toLowerCase().contains(query.toLowerCase()))
+          .map((entry) => entry.value['name'])
+          .toList();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final spells = widget.character['spells']?[widget.spellLevel] ?? {};
+    final label = widget.spellLevel == 0
+        ? 'Cantrips'
+        : 'Level ${widget.spellLevel} Spells';
     return DecoratedBox(
       decoration: BoxDecoration(
         border: Border.all(
@@ -58,7 +73,7 @@ class _ItemListState extends State<ItemList> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      widget.tableName,
+                      label,
                       style:
                           Theme.of(context).textTheme.headlineMedium!.copyWith(
                                 color: Theme.of(context)
@@ -70,7 +85,7 @@ class _ItemListState extends State<ItemList> {
                       children: [
                         if (_isEditMode)
                           IconButton(
-                            onPressed: widget.onAddItem,
+                            onPressed: () {},
                             icon: const Icon(Icons.add),
                           ),
                         IconButton(
@@ -84,24 +99,20 @@ class _ItemListState extends State<ItemList> {
               ),
             ),
           ),
-          if (widget.items?.isEmpty ?? true)
+          if (spells?.isEmpty ?? true)
             Padding(
               padding: const EdgeInsets.all(16),
-              child: Text(widget.emptyMessage,
-                  style: Theme.of(context).textTheme.bodyLarge),
+              child: Text('None', style: Theme.of(context).textTheme.bodyLarge),
             ),
-          ...widget.items?.keys.map((key) {
+          ...spells?.keys.map((key) {
                 return ListTile(
-                  title: Text(widget.items?[key]?[widget.displayKey] ?? ''),
-                  onTap: () => widget.onSelectItem(
-                    MapEntry(key, widget.items?[key] ?? {}),
-                  ),
+                  title: Text(spells?[key]?['name'] ?? ''),
+                  onTap: () => print('Select spell'),
                   trailing: _isEditMode
                       ? IconButton(
                           icon: const Icon(Icons.delete),
                           onPressed: () => setState(() {
-                            widget.items?.remove(key);
-                            widget.onItemsChanged(widget.items ?? {});
+                            spells?.remove(key);
                           }),
                         )
                       : null,

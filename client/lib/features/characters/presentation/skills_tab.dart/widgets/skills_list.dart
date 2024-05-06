@@ -72,7 +72,7 @@ class _SkillListState extends State<SkillList> {
           return StatefulBuilder(
             builder: (BuildContext context, StateSetter setDialogState) {
               return AlertDialog(
-                title: Text('Edit Skill Proficiencies'),
+                title: const Text('Edit Skill Proficiencies'),
                 content: GridView.count(
                   crossAxisCount: 2,
                   shrinkWrap: true,
@@ -108,13 +108,13 @@ class _SkillListState extends State<SkillList> {
                 actionsAlignment: MainAxisAlignment.spaceBetween,
                 actions: <Widget>[
                   TextButton(
-                    child: Icon(Icons.close),
+                    child: const Icon(Icons.close),
                     onPressed: () {
                       Navigator.of(context).pop();
                     },
                   ),
                   TextButton(
-                    child: Icon(Icons.check),
+                    child: const Icon(Icons.check),
                     onPressed: () {
                       widget.character['prof_skills'] = skillProf;
                       context.read<CharacterBloc>().add(CharacterUpdate(
@@ -167,7 +167,7 @@ class _SkillListState extends State<SkillList> {
                                     .copyWith(
                                         color: Theme.of(context).strengthColor,
                                         fontWeight: FontWeight.bold)),
-                            SizedBox(height: 2),
+                            const SizedBox(height: 2),
                             Skill(
                               skillName: 'Athletics',
                               attributeName: 'Strength',
@@ -180,7 +180,7 @@ class _SkillListState extends State<SkillList> {
                           ],
                         ),
                       ),
-                      SizedBox(height: 2),
+                      const SizedBox(height: 2),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Column(
@@ -193,7 +193,7 @@ class _SkillListState extends State<SkillList> {
                                     .copyWith(
                                         color: Theme.of(context).dexterityColor,
                                         fontWeight: FontWeight.bold)),
-                            SizedBox(height: 2),
+                            const SizedBox(height: 2),
                             Skill(
                               skillName: 'Acrobatics',
                               attributeName: 'Dexterity',
@@ -224,7 +224,7 @@ class _SkillListState extends State<SkillList> {
                           ],
                         ),
                       ),
-                      SizedBox(height: 2),
+                      const SizedBox(height: 2),
                       Padding(
                         padding: const EdgeInsets.all(8),
                         child: Column(
@@ -238,7 +238,7 @@ class _SkillListState extends State<SkillList> {
                                         color:
                                             Theme.of(context).intelligenceColor,
                                         fontWeight: FontWeight.bold)),
-                            SizedBox(height: 2),
+                            const SizedBox(height: 2),
                             Skill(
                               skillName: 'Arcana',
                               attributeName: 'Intelligence',
@@ -304,7 +304,7 @@ class _SkillListState extends State<SkillList> {
                                     .copyWith(
                                         color: Theme.of(context).wisdomColor,
                                         fontWeight: FontWeight.bold)),
-                            SizedBox(height: 2),
+                            const SizedBox(height: 2),
                             Skill(
                               skillName: 'Animal Handling',
                               attributeName: 'Wisdom',
@@ -353,7 +353,7 @@ class _SkillListState extends State<SkillList> {
                           ],
                         ),
                       ),
-                      SizedBox(height: 12),
+                      const SizedBox(height: 12),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Column(
@@ -366,7 +366,7 @@ class _SkillListState extends State<SkillList> {
                                     .copyWith(
                                         color: Theme.of(context).charismaColor,
                                         fontWeight: FontWeight.bold)),
-                            SizedBox(height: 2),
+                            const SizedBox(height: 2),
                             Skill(
                               skillName: 'Deception',
                               attributeName: 'Charisma',

@@ -19,6 +19,7 @@ class CharacterUpdate extends CharacterEvent {
   final Map<String, dynamic> character;
   final Map<String, dynamic> race;
   final Map<String, dynamic> classs;
+  final Map<String, dynamic>? spells;
   final String name;
   final bool persistData;
   const CharacterUpdate({
@@ -26,6 +27,7 @@ class CharacterUpdate extends CharacterEvent {
     required this.race,
     required this.classs,
     required this.name,
+    this.spells,
     this.persistData = false,
   });
 
@@ -73,4 +75,12 @@ class ToggleEditingProf extends CharacterEvent {
 
   @override
   List<Object> get props => [];
+}
+
+class CacheSpells extends CharacterEvent {
+  final Map<String, dynamic> spells;
+  const CacheSpells(this.spells);
+
+  @override
+  List<Object> get props => [spells];
 }

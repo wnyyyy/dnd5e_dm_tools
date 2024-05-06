@@ -3,7 +3,6 @@ import 'package:dnd5e_dm_tools/core/util/helper.dart';
 import 'package:dnd5e_dm_tools/features/characters/bloc/character_bloc.dart';
 import 'package:dnd5e_dm_tools/features/characters/bloc/character_events.dart';
 import 'package:dnd5e_dm_tools/features/characters/presentation/skills_tab.dart/widgets/attribute.dart';
-import 'package:dnd5e_dm_tools/features/characters/presentation/skills_tab.dart/widgets/saving_throw.dart';
 import 'package:dnd5e_dm_tools/features/characters/presentation/skills_tab.dart/widgets/saving_throw_list.dart';
 import 'package:dnd5e_dm_tools/features/characters/presentation/skills_tab.dart/widgets/skills_list.dart';
 import 'package:dnd5e_dm_tools/features/settings/bloc/settings_cubit.dart';
@@ -37,7 +36,7 @@ class SkillsTab extends StatelessWidget {
               direction: Axis.horizontal,
               children: [
                 _buildAttributesList(context),
-                SizedBox(width: 8),
+                const SizedBox(width: 8),
                 Flex(
                   direction: Axis.vertical,
                   children: [
@@ -65,7 +64,7 @@ class SkillsTab extends StatelessWidget {
     final asi = character['asi'];
 
     void editAttribute(String attributeName, int currentValue) {
-      final TextEditingController _controller =
+      final TextEditingController controller =
           TextEditingController(text: currentValue.toString());
       showDialog(
         context: context,
@@ -74,23 +73,23 @@ class SkillsTab extends StatelessWidget {
             title: Text('Edit $attributeName'),
             content: TextField(
               keyboardType: TextInputType.number,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: 'Enter new value',
               ),
-              controller: _controller,
+              controller: controller,
             ),
             actionsAlignment: MainAxisAlignment.spaceBetween,
             actions: <Widget>[
               TextButton(
-                child: Icon(Icons.close),
+                child: const Icon(Icons.close),
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
               ),
               TextButton(
-                child: Icon(Icons.check),
+                child: const Icon(Icons.check),
                 onPressed: () {
-                  final newValue = int.tryParse(_controller.text);
+                  final newValue = int.tryParse(controller.text);
                   if (newValue != null &&
                       newValue != currentValue &&
                       newValue >= 0) {
@@ -187,7 +186,7 @@ class SkillsTab extends StatelessWidget {
                         fontFamily: GoogleFonts.majorMonoDisplay().fontFamily,
                       ),
                 ),
-                Icon(
+                const Icon(
                   Icons.star_outline,
                   size: 32,
                 ),
@@ -205,32 +204,32 @@ class SkillsTab extends StatelessWidget {
       child: GestureDetector(
         onTap: editMode
             ? () {
-                final TextEditingController _controller = TextEditingController(
+                final TextEditingController controller = TextEditingController(
                     text: character['passive_perception']?.toString() ?? '');
                 showDialog(
                   context: context,
                   builder: (BuildContext context) {
                     return AlertDialog(
-                      title: Text('Edit Passive Perception'),
+                      title: const Text('Edit Passive Perception'),
                       content: TextField(
                         keyboardType: TextInputType.number,
-                        decoration: InputDecoration(
+                        decoration: const InputDecoration(
                           labelText: 'Enter new value',
                         ),
-                        controller: _controller,
+                        controller: controller,
                       ),
                       actionsAlignment: MainAxisAlignment.spaceBetween,
                       actions: <Widget>[
                         TextButton(
-                          child: Icon(Icons.close),
+                          child: const Icon(Icons.close),
                           onPressed: () {
                             Navigator.of(context).pop();
                           },
                         ),
                         TextButton(
-                          child: Icon(Icons.check),
+                          child: const Icon(Icons.check),
                           onPressed: () {
-                            final newValue = int.tryParse(_controller.text);
+                            final newValue = int.tryParse(controller.text);
                             if (newValue != null &&
                                 newValue != character['passive_perception'] &&
                                 newValue >= 0) {
@@ -271,8 +270,8 @@ class SkillsTab extends StatelessWidget {
                     child: Text('${character['passive_perception'] ?? 0}',
                         style: Theme.of(context).textTheme.displaySmall),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.only(right: 8.0),
+                  const Padding(
+                    padding: EdgeInsets.only(right: 8.0),
                     child: Icon(
                       Icons.search_outlined,
                       size: 32,

@@ -8,30 +8,30 @@ class AttributeCard extends StatelessWidget {
   final Color color;
   final VoidCallback? onTap;
 
-  AttributeCard({
-    Key? key,
+  const AttributeCard({
+    super.key,
     required this.attributeName,
     required this.attributeValue,
     required this.color,
     this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
     var mod = getModifier(attributeValue) >= 0
         ? '+${getModifier(attributeValue)}'
         : getModifier(attributeValue).toString();
-    final minWidth = 120.0;
+    const minWidth = 120.0;
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        constraints: BoxConstraints(
+        constraints: const BoxConstraints(
           minWidth: minWidth,
           maxWidth: minWidth,
         ),
         child: Card(
           elevation: 3,
-          surfaceTintColor: this.color,
+          surfaceTintColor: color,
           child: Column(
             children: <Widget>[
               Padding(
@@ -49,7 +49,7 @@ class AttributeCard extends StatelessWidget {
                   direction: Axis.horizontal,
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    Container(
+                    SizedBox(
                       width: minWidth - 60,
                       child: Text(
                         mod.padLeft(2),
@@ -63,7 +63,7 @@ class AttributeCard extends StatelessWidget {
                         textAlign: TextAlign.right,
                       ),
                     ),
-                    SizedBox(
+                    const SizedBox(
                       width: 8,
                     ),
                     SizedBox(

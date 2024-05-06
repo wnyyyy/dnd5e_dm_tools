@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class MainDrawer extends StatelessWidget {
+  const MainDrawer({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Drawer(
@@ -21,17 +23,17 @@ class MainDrawer extends StatelessWidget {
             ),
           ),
           ListTile(
-            leading: Icon(Icons.person),
-            title: Text('Character'),
+            leading: const Icon(Icons.person),
+            title: const Text('Character'),
             onTap: () {
               BlocProvider.of<MainScreenCubit>(context).showCharacter();
               Navigator.pop(context);
             },
           ),
-          Divider(),
+          const Divider(),
           ListTile(
-            leading: Icon(Icons.settings),
-            title: Text('Settings'),
+            leading: const Icon(Icons.settings),
+            title: const Text('Settings'),
             onTap: () {
               BlocProvider.of<MainScreenCubit>(context).showSettings();
               Navigator.pop(context);

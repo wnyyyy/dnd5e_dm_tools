@@ -29,6 +29,7 @@ class CharacterStateLoaded extends CharacterState {
   final Map<String, dynamic> character;
   final Map<String, dynamic> race;
   final Map<String, dynamic> classs;
+  final Map<String, dynamic>? spells;
   final String name;
   final bool editingFeats;
   final bool editingProf;
@@ -39,6 +40,7 @@ class CharacterStateLoaded extends CharacterState {
     required this.name,
     required this.race,
     required this.classs,
+    this.spells,
     this.showFeatDetails,
     this.availableFeats,
     this.editingFeats = false,
@@ -49,6 +51,7 @@ class CharacterStateLoaded extends CharacterState {
     Map<String, dynamic>? character,
     Map<String, dynamic>? race,
     Map<String, dynamic>? classs,
+    Map<String, dynamic>? spells,
     String? name,
     Map<String, dynamic>? showFeatDetails,
     Map<String, Map>? availableFeats,
@@ -60,6 +63,7 @@ class CharacterStateLoaded extends CharacterState {
       race: race ?? this.race,
       classs: classs ?? this.classs,
       name: name ?? this.name,
+      spells: spells ?? this.spells,
       availableFeats: availableFeats ?? this.availableFeats,
       showFeatDetails: showFeatDetails ?? this.showFeatDetails,
       editingFeats: editingFeats ?? this.editingFeats,

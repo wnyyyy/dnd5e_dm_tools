@@ -2,6 +2,7 @@ import 'package:dnd5e_dm_tools/core/data/repositories/character_repository.dart'
 import 'package:dnd5e_dm_tools/core/data/repositories/class_repository.dart';
 import 'package:dnd5e_dm_tools/core/data/repositories/feat_repository.dart';
 import 'package:dnd5e_dm_tools/core/data/repositories/race_repository.dart';
+import 'package:dnd5e_dm_tools/core/data/repositories/spells_repository.dart';
 import 'package:dnd5e_dm_tools/features/characters/bloc/character_events.dart';
 import 'package:dnd5e_dm_tools/features/characters/bloc/character_states.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -11,6 +12,7 @@ class CharacterBloc extends Bloc<CharacterEvent, CharacterState> {
   final RaceRepository raceRepository;
   final ClassRepository classRepository;
   final FeatRepository featRepository;
+  final SpellsRepository spellsRepository;
   final String name = '';
 
   CharacterBloc(
@@ -18,12 +20,14 @@ class CharacterBloc extends Bloc<CharacterEvent, CharacterState> {
     this.raceRepository,
     this.classRepository,
     this.featRepository,
+    this.spellsRepository,
   ) : super(CharacterStateInitial()) {
     on<CharacterLoad>(_onCharacterLoad);
     on<CharacterUpdate>(_onCharacterUpdate);
     on<PersistCharacter>(_onPersistCharacter);
     on<ToggleEditingFeats>(_onToggleEditingFeats);
     on<ToggleEditingProf>(_onToggleEditingProf);
+    on<CacheSpells>(_onCacheSpells);
   }
 
   Future<void> _onCharacterLoad(
@@ -43,18 +47,18 @@ class CharacterBloc extends Bloc<CharacterEvent, CharacterState> {
         classs: classs,
       ));
     } catch (error) {
-      emit(CharacterStateError("Failed to load characters"));
+      emit(const CharacterStateError("Failed to load characters"));
     }
   }
 
   Future<void> _onCharacterUpdate(
       CharacterUpdate event, Emitter<CharacterState> emit) async {
     try {
-      if (this.state is! CharacterStateLoaded) {
+      if (state is! CharacterStateLoaded) {
         return;
       }
       var character = Map.from(event.character).cast<String, dynamic>();
-      var newState = (this.state as CharacterStateLoaded).copyWith(
+      var newState = (state as CharacterStateLoaded).copyWith(
         character: character,
       );
 
@@ -66,7 +70,7 @@ class CharacterBloc extends Bloc<CharacterEvent, CharacterState> {
         );
       }
     } catch (error) {
-      emit(CharacterStateError("Failed to update character"));
+      emit(const CharacterStateError("Failed to update character"));
     }
   }
 
@@ -82,17 +86,17 @@ class CharacterBloc extends Bloc<CharacterEvent, CharacterState> {
         state.character,
       );
     } catch (error) {
-      emit(CharacterStateError("Failed to persist character"));
+      emit(const CharacterStateError("Failed to persist character"));
     }
   }
 
   Future<void> _onToggleEditingFeats(
       ToggleEditingFeats event, Emitter<CharacterState> emit) async {
     try {
-      if (this.state is! CharacterStateLoaded) {
+      if (state is! CharacterStateLoaded) {
         return;
       }
-      final currState = this.state as CharacterStateLoaded;
+      final currState = state as CharacterStateLoaded;
       if (currState.availableFeats != null) {
         return;
       }
@@ -103,16 +107,25 @@ class CharacterBloc extends Bloc<CharacterEvent, CharacterState> {
       );
       emit(newState);
     } catch (error) {
-      emit(CharacterStateError("Failed to load feats"));
+      emit(const CharacterStateError("Failed to load feats"));
     }
   }
 
   Future<void> _onToggleEditingProf(
       ToggleEditingProf event, Emitter<CharacterState> emit) async {
-    if (this.state is! CharacterStateLoaded) {
+    if (state is! CharacterStateLoaded) {
       return;
     }
-    final currState = this.state as CharacterStateLoaded;
+    final currState = state as CharacterStateLoaded;
     emit(currState.copyWith(editingProf: !currState.editingProf));
+  }
+
+  Future<void> _onCacheSpells(
+      CacheSpells event, Emitter<CharacterState> emit) async {
+    if (state is! CharacterStateLoaded) {
+      return;
+    }
+    final currState = state as CharacterStateLoaded;
+    emit(currState.copyWith(spells: event.spells));
   }
 }

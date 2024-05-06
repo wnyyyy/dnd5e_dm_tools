@@ -9,14 +9,14 @@ class SavingThrow extends StatelessWidget {
   final Color color;
   final VoidCallback? onTap;
 
-  SavingThrow({
-    Key? key,
+  const SavingThrow({
+    super.key,
     required this.attributePrefix,
     required this.attributeValue,
     this.proficiency,
     required this.color,
     this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +26,7 @@ class SavingThrow extends StatelessWidget {
     final valueStr = value >= 0 ? '+$value' : value.toString();
     return GestureDetector(
       onTap: onTap,
-      child: Container(
+      child: SizedBox(
         width: 100,
         child: Column(
           children: [
@@ -48,7 +48,7 @@ class SavingThrow extends StatelessWidget {
                         ),
                   ),
                 ),
-                SizedBox(width: 2),
+                const SizedBox(width: 2),
                 if (proficiency != null) ...[
                   Padding(
                     padding: const EdgeInsets.only(bottom: 4),

@@ -2,6 +2,7 @@ import 'package:dnd5e_dm_tools/features/characters/bloc/character_bloc.dart';
 import 'package:dnd5e_dm_tools/features/characters/bloc/character_events.dart';
 import 'package:dnd5e_dm_tools/features/settings/bloc/settings_cubit.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttericon/rpg_awesome_icons.dart';
 import 'package:provider/provider.dart';
 
 class Hitpoints extends StatefulWidget {
@@ -57,26 +58,26 @@ class _HitpointsState extends State<Hitpoints> {
                   children: [
                     TextField(
                       controller: maxHpController,
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                         labelText: 'Max Hitpoints',
                       ),
-                      keyboardType: TextInputType.numberWithOptions(
+                      keyboardType: const TextInputType.numberWithOptions(
                           signed: false, decimal: false),
                     ),
                     TextField(
                       controller: currentHpController,
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                         labelText: 'Current Hitpoints',
                       ),
-                      keyboardType: TextInputType.numberWithOptions(
+                      keyboardType: const TextInputType.numberWithOptions(
                           signed: false, decimal: false),
                     ),
                     TextField(
                       controller: tempHpController,
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                         labelText: 'Temporary Hitpoints',
                       ),
-                      keyboardType: TextInputType.numberWithOptions(
+                      keyboardType: const TextInputType.numberWithOptions(
                           signed: false, decimal: false),
                     ),
                   ],
@@ -84,13 +85,13 @@ class _HitpointsState extends State<Hitpoints> {
                 actionsAlignment: MainAxisAlignment.spaceBetween,
                 actions: <Widget>[
                   TextButton(
-                    child: Icon(Icons.close),
+                    child: const Icon(Icons.close),
                     onPressed: () {
                       Navigator.of(context).pop();
                     },
                   ),
                   TextButton(
-                    child: Icon(Icons.check),
+                    child: const Icon(Icons.check),
                     onPressed: () {
                       widget.character['hp_max'] =
                           int.tryParse(maxHpController.text) ?? 0;
@@ -118,7 +119,7 @@ class _HitpointsState extends State<Hitpoints> {
       );
     }
 
-    void _changeHitPoints(int change) {
+    void changeHitPoints(int change) {
       int currentHP = character['hp_curr'];
       int tempHP = character['hp_temp'] ?? 0;
 
@@ -166,9 +167,17 @@ class _HitpointsState extends State<Hitpoints> {
             padding: const EdgeInsets.all(8.0),
             child: Column(
               children: [
-                Text('Hit Points',
-                    style: Theme.of(context).textTheme.titleSmall),
-                SizedBox(height: 8),
+                Row(
+                  children: [
+                    const Icon(Icons.favorite_outline),
+                    const SizedBox(width: 8),
+                    Text('Hit Points',
+                        style: Theme.of(context).textTheme.titleSmall),
+                    const SizedBox(width: 8),
+                    const Icon(Icons.favorite_outline),
+                  ],
+                ),
+                const SizedBox(height: 8),
                 Column(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
@@ -176,12 +185,12 @@ class _HitpointsState extends State<Hitpoints> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         IconButton(
-                          icon: Icon(Icons.remove_circle_outline),
+                          icon: const Icon(Icons.remove_circle_outline),
                           onPressed: () => setState(() {
-                            _changeHitPoints(-1);
+                            changeHitPoints(-1);
                           }),
                         ),
-                        Text('${currentHp}'.padLeft(2, '0'),
+                        Text('$currentHp'.padLeft(2, '0'),
                             style: Theme.of(context)
                                 .textTheme
                                 .displaySmall!
@@ -199,16 +208,16 @@ class _HitpointsState extends State<Hitpoints> {
                             tempHpMode = !tempHpMode;
                           }),
                           child: IconButton(
-                            icon: Icon(Icons.add_circle_outline),
+                            icon: const Icon(Icons.add_circle_outline),
                             color: tempHpMode ? Colors.green : null,
                             onPressed: () => setState(() {
-                              _changeHitPoints(1);
+                              changeHitPoints(1);
                             }),
                           ),
                         ),
                       ],
                     ),
-                    SizedBox(
+                    const SizedBox(
                       width: 40,
                       child: Divider(
                         height: 5,
@@ -217,12 +226,12 @@ class _HitpointsState extends State<Hitpoints> {
                     ),
                     Row(
                       children: [
-                        Text('${maxHp}',
+                        Text('$maxHp',
                             style: Theme.of(context).textTheme.displaySmall),
                         if (tempHp > 0)
                           Padding(
                             padding: const EdgeInsets.only(left: 8),
-                            child: Text('+${tempHp}',
+                            child: Text('+$tempHp',
                                 style: Theme.of(context)
                                     .textTheme
                                     .titleLarge!
@@ -249,9 +258,9 @@ class _HitpointsState extends State<Hitpoints> {
 
     return Column(
       children: [
-        SizedBox(height: 8),
+        const SizedBox(height: 8),
         Text('Death saves', style: Theme.of(context).textTheme.titleSmall),
-        SizedBox(height: 8),
+        const SizedBox(height: 8),
         Column(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [

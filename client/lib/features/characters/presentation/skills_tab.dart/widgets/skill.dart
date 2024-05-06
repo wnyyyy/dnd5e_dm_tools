@@ -9,14 +9,14 @@ class Skill extends StatelessWidget {
   final Color color;
   final Map<String, dynamic> character;
 
-  Skill({
-    Key? key,
+  const Skill({
+    super.key,
     required this.skillName,
     required this.attributeName,
     this.proficiency,
     required this.color,
     required this.character,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

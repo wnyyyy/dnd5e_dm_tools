@@ -6,11 +6,11 @@ class StatsView extends StatelessWidget {
   final Map<String, dynamic> character;
   final VoidCallback? onSave;
 
-  StatsView({
-    Key? key,
+  const StatsView({
+    super.key,
     required this.character,
     this.onSave,
-  }) : super(key: key);
+  });
 
   void editStats(BuildContext context) {
     final TextEditingController acController =
@@ -25,32 +25,32 @@ class StatsView extends StatelessWidget {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Edit Stats'),
+          title: const Text('Edit Stats'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
                 controller: acController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Armor Class',
                 ),
-                keyboardType: TextInputType.numberWithOptions(
+                keyboardType: const TextInputType.numberWithOptions(
                     signed: false, decimal: false),
               ),
               TextField(
                 controller: initiativeController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Initiative',
                 ),
-                keyboardType: TextInputType.numberWithOptions(
+                keyboardType: const TextInputType.numberWithOptions(
                     signed: true, decimal: false),
               ),
               TextField(
                 controller: speedController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Speed',
                 ),
-                keyboardType: TextInputType.numberWithOptions(
+                keyboardType: const TextInputType.numberWithOptions(
                     signed: false, decimal: false),
               ),
             ],
@@ -58,11 +58,11 @@ class StatsView extends StatelessWidget {
           actionsAlignment: MainAxisAlignment.spaceBetween,
           actions: <Widget>[
             TextButton(
-              child: Icon(Icons.close),
+              child: const Icon(Icons.close),
               onPressed: () => Navigator.of(context).pop(),
             ),
             TextButton(
-              child: Icon(Icons.check),
+              child: const Icon(Icons.check),
               onPressed: () {
                 character['ac'] = int.tryParse(acController.text) ?? 0;
                 character['initiative'] =
@@ -94,11 +94,11 @@ class StatsView extends StatelessWidget {
           child: Column(
             children: [
               buildStat(context, 'Armor Class', Icons.shield_outlined, ac),
-              Divider(),
+              const Divider(),
               buildStat(
                   context, 'Initiative', RpgAwesome.lightning_bolt, initiative,
                   showSign: true),
-              Divider(),
+              const Divider(),
               buildStat(context, 'Speed', Icons.directions_run, speed),
             ],
           ),

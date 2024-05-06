@@ -20,7 +20,7 @@ class ClassRepository {
 
   Future<void> update(String slug, Map<String, dynamic> feat) async {
     await databaseProvider.setData(
-      path: '$path${feat}',
+      path: '$path$feat',
       data: feat,
     );
   }

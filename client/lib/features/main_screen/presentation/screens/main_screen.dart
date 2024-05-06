@@ -12,6 +12,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class MainScreen extends StatelessWidget {
+  const MainScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<HeaderCubit, HeaderState>(
@@ -22,13 +24,13 @@ class MainScreen extends StatelessWidget {
             return MaterialApp(
               theme: themeData,
               home: Scaffold(
-                drawer: MainDrawer(),
-                appBar: Header(),
+                drawer: const MainDrawer(),
+                appBar: const Header(),
                 body: PopScope(
                   child: BlocBuilder<MainScreenCubit, MainScreenState>(
                     builder: (context, state) {
                       if (state is MainScreenStateCharacter) {
-                        return Center(
+                        return const Center(
                           child: ScreenSplitter(
                             upperChild: CharacterScreen(),
                             lowerChild: Placeholder(),
@@ -36,12 +38,12 @@ class MainScreen extends StatelessWidget {
                         );
                       }
                       if (state is MainScreenStateParty) {
-                        return Center(
+                        return const Center(
                           child: Placeholder(),
                         );
                       }
                       if (state is MainScreenStateSettings) {
-                        return Center(
+                        return const Center(
                           child: SettingsScreen(),
                         );
                       }

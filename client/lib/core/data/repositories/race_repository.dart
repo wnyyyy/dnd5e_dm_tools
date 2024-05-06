@@ -27,7 +27,7 @@ class RaceRepository {
 
   Future<void> update(String slug, Map<String, dynamic> race) async {
     await databaseProvider.setData(
-      path: '$path${race}',
+      path: '$path$race',
       data: race,
     );
   }

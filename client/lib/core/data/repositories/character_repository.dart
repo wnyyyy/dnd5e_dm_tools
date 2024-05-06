@@ -23,7 +23,7 @@ class CharacterRepository {
   Future<void> updateCharacter(
       String name, Map<String, dynamic> character) async {
     await databaseProvider.setData(
-      path: 'characters/${name}',
+      path: 'characters/$name',
       data: character,
     );
   }

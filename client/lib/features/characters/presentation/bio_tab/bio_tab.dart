@@ -38,7 +38,7 @@ class BioTab extends StatelessWidget {
           Padding(
             padding: EdgeInsets.symmetric(
                 vertical: 4, horizontal: screenWidth * 0.08),
-            child: Divider(),
+            child: const Divider(),
           ),
           Padding(
             padding: EdgeInsets.symmetric(
@@ -59,7 +59,7 @@ class BioTab extends StatelessWidget {
     Map<String, dynamic> proficiencies,
     BuildContext context,
   ) {
-    void _onItemsChanged(Map<String, dynamic> newProficiencies) {
+    void onItemsChanged(Map<String, dynamic> newProficiencies) {
       character['proficiencies'] = newProficiencies;
       context.read<CharacterBloc>().add(
             CharacterUpdate(
@@ -72,7 +72,7 @@ class BioTab extends StatelessWidget {
           );
     }
 
-    void _onAddItem() async {
+    void onAddItem() async {
       final TextEditingController titleController = TextEditingController();
       final TextEditingController descriptionController =
           TextEditingController();
@@ -81,13 +81,13 @@ class BioTab extends StatelessWidget {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text('Add proficiency'),
+            title: const Text('Add proficiency'),
             content: SingleChildScrollView(
               child: ListBody(
                 children: <Widget>[
                   TextFormField(
                     controller: titleController,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       labelText: 'Title',
                     ),
                     validator: (value) {
@@ -99,7 +99,7 @@ class BioTab extends StatelessWidget {
                   ),
                   TextFormField(
                     controller: descriptionController,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       labelText: 'Description',
                     ),
                     minLines: 3,
@@ -114,7 +114,7 @@ class BioTab extends StatelessWidget {
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
-                child: Icon(Icons.close),
+                child: const Icon(Icons.close),
               ),
               TextButton(
                 onPressed: () {
@@ -128,11 +128,11 @@ class BioTab extends StatelessWidget {
                       'title': titleController.text,
                       'description': descriptionController.text,
                     };
-                    _onItemsChanged(newProf);
+                    onItemsChanged(newProf);
                     Navigator.of(context).pop();
                   }
                 },
-                child: Icon(Icons.add),
+                child: const Icon(Icons.add),
               ),
             ],
           );
@@ -140,7 +140,7 @@ class BioTab extends StatelessWidget {
       );
     }
 
-    void _onProficiencySelected(MapEntry<String, Map> proficiency) {
+    void onProficiencySelected(MapEntry<String, Map> proficiency) {
       showDialog(
         context: context,
         builder: (context) {
@@ -160,12 +160,12 @@ class BioTab extends StatelessWidget {
 
     return ItemList(
       items: proficiencies.cast<String, Map>(),
-      onItemsChanged: _onItemsChanged,
-      onAddItem: _onAddItem,
+      onItemsChanged: onItemsChanged,
+      onAddItem: onAddItem,
       tableName: 'Proficiencies',
       displayKey: 'title',
       emptyMessage: 'None',
-      onSelectItem: _onProficiencySelected,
+      onSelectItem: onProficiencySelected,
     );
   }
 
@@ -173,7 +173,7 @@ class BioTab extends StatelessWidget {
     Map<String, Map> feats,
     BuildContext context,
   ) {
-    void _onItemsChanged(Map<String, dynamic> newFeats) {
+    void onItemsChanged(Map<String, dynamic> newFeats) {
       character['feats'] = newFeats;
       context.read<CharacterBloc>().add(
             CharacterUpdate(
@@ -186,7 +186,7 @@ class BioTab extends StatelessWidget {
           );
     }
 
-    void _onAddItem() async {
+    void onAddItem() async {
       final FeatRepository featRepository = context.read<FeatRepository>();
       Map<String, dynamic> availableFeats = await featRepository.getAll();
       if (availableFeats.isEmpty) {
@@ -197,7 +197,7 @@ class BioTab extends StatelessWidget {
         builder: (BuildContext context) {
           var selectedFeat = availableFeats.entries.first;
           return AlertDialog(
-            title: Text('Select a Feat'),
+            title: const Text('Select a Feat'),
             content: DropdownButtonFormField<String>(
               value: selectedFeat.key,
               items: availableFeats.entries
@@ -217,17 +217,17 @@ class BioTab extends StatelessWidget {
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
-                child: Icon(Icons.close),
+                child: const Icon(Icons.close),
               ),
               TextButton(
                 onPressed: () {
                   if (selectedFeat.key.isNotEmpty) {
                     character['feats'][selectedFeat.key] = selectedFeat.value;
-                    _onItemsChanged(character['feats']);
+                    onItemsChanged(character['feats']);
                     Navigator.of(context).pop();
                   }
                 },
-                child: Icon(Icons.add),
+                child: const Icon(Icons.add),
               ),
             ],
           );
@@ -235,7 +235,7 @@ class BioTab extends StatelessWidget {
       );
     }
 
-    void _onFeatSelected(MapEntry<String, Map> feat) {
+    void onFeatSelected(MapEntry<String, Map> feat) {
       showDialog(
         context: context,
         builder: (context) {
@@ -258,11 +258,11 @@ class BioTab extends StatelessWidget {
 
     return ItemList(
       items: feats,
-      onItemsChanged: _onItemsChanged,
-      onAddItem: _onAddItem,
+      onItemsChanged: onItemsChanged,
+      onAddItem: onAddItem,
       tableName: 'Feats',
       displayKey: 'name',
-      onSelectItem: _onFeatSelected,
+      onSelectItem: onFeatSelected,
       emptyMessage: 'None',
     );
   }
@@ -299,7 +299,7 @@ class BioTab extends StatelessWidget {
                           fontFamily: GoogleFonts.patuaOne().fontFamily,
                         ),
                   ),
-                  SizedBox(height: 8),
+                  const SizedBox(height: 8),
                   GestureDetector(
                     onTap: () => context.read<SettingsCubit>().state.isEditMode
                         ? _showEditLevel(context)
@@ -323,7 +323,7 @@ class BioTab extends StatelessWidget {
                       style: Theme.of(context).textTheme.headlineMedium,
                     ),
                   ),
-                  SizedBox(height: 8),
+                  const SizedBox(height: 8),
                   Text(
                     '${classs['name']}',
                     style: Theme.of(context).textTheme.headlineMedium,
