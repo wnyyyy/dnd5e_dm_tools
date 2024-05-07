@@ -16,7 +16,7 @@ class MainDrawer extends StatelessWidget {
               color: Theme.of(context).primaryColor,
             ),
             child: Text(
-              'D&D 5e DM Tools',
+              'D&D 5e Toolbox',
               style: Theme.of(context).textTheme.headlineSmall!.copyWith(
                     color: Theme.of(context).colorScheme.onPrimary,
                   ),

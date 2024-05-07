@@ -6,6 +6,8 @@ import 'package:dnd5e_dm_tools/features/header/presentation/header.dart';
 import 'package:dnd5e_dm_tools/features/main_screen/cubit/main_screen_cubit.dart';
 import 'package:dnd5e_dm_tools/features/main_screen/cubit/main_screen_states.dart';
 import 'package:dnd5e_dm_tools/features/main_screen/presentation/widgets/main_drawer.dart';
+import 'package:dnd5e_dm_tools/features/rules/rules_bloc.dart';
+import 'package:dnd5e_dm_tools/features/rules/rules_states.dart';
 import 'package:dnd5e_dm_tools/features/screen_splitter/presentation/screen_splitter.dart';
 import 'package:dnd5e_dm_tools/features/settings/presentation/settings_screen.dart';
 import 'package:flutter/material.dart';
@@ -27,27 +29,42 @@ class MainScreen extends StatelessWidget {
                 drawer: const MainDrawer(),
                 appBar: const Header(),
                 body: PopScope(
-                  child: BlocBuilder<MainScreenCubit, MainScreenState>(
-                    builder: (context, state) {
-                      if (state is MainScreenStateCharacter) {
+                  child: BlocBuilder<RulesCubit, RulesState>(
+                    builder: (BuildContext context, RulesState state) {
+                      if (state is RulesStateLoading ||
+                          state is RulesStateInitial) {
                         return const Center(
-                          child: ScreenSplitter(
-                            upperChild: CharacterScreen(),
-                            lowerChild: Placeholder(),
-                          ),
+                          child: CircularProgressIndicator(),
                         );
                       }
-                      if (state is MainScreenStateParty) {
-                        return const Center(
-                          child: Placeholder(),
+                      if (state is RulesStateError) {
+                        return Center(
+                          child: Text(state.message),
                         );
                       }
-                      if (state is MainScreenStateSettings) {
-                        return const Center(
-                          child: SettingsScreen(),
-                        );
-                      }
-                      return Container();
+                      return BlocBuilder<MainScreenCubit, MainScreenState>(
+                        builder: (context, state) {
+                          if (state is MainScreenStateCharacter) {
+                            return const Center(
+                              child: ScreenSplitter(
+                                upperChild: CharacterScreen(),
+                                lowerChild: Placeholder(),
+                              ),
+                            );
+                          }
+                          if (state is MainScreenStateParty) {
+                            return const Center(
+                              child: Placeholder(),
+                            );
+                          }
+                          if (state is MainScreenStateSettings) {
+                            return const Center(
+                              child: SettingsScreen(),
+                            );
+                          }
+                          return Container();
+                        },
+                      );
                     },
                   ),
                 ),

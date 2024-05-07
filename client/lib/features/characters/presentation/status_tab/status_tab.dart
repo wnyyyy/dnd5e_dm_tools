@@ -74,9 +74,23 @@ class StatusTab extends StatelessWidget {
                               return AlertDialog(
                                 title: const Text('Spellbook'),
                                 content: Spellbook(
-                                  character: character,
-                                  spells: spells ?? {},
-                                ),
+                                    character: character,
+                                    spells: spells ?? {},
+                                    updateCharacter: () =>
+                                        context.read<CharacterBloc>().add(
+                                              CharacterUpdate(
+                                                character: character,
+                                                race: race,
+                                                classs: classs,
+                                                name: name,
+                                              ),
+                                            ),
+                                    onDone: () {
+                                      context
+                                          .read<CharacterBloc>()
+                                          .add(const PersistCharacter());
+                                      Navigator.of(context).pop();
+                                    }),
                                 actions: [
                                   TextButton(
                                     onPressed: () {
