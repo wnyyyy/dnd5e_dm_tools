@@ -1,88 +1,46 @@
-import 'package:equatable/equatable.dart';
+abstract class SettingsState {
+  var name = '';
+  var isEditMode = false;
+  var isCaster = false;
+  var classOnlySpells = false;
 
-abstract class SettingsState extends Equatable {
-  const SettingsState();
-
-  SettingsState copyWith({
-    String? name,
-    bool? isEditMode,
-    bool? isCaster,
-  });
-
-  @override
-  List<Object> get props => [];
+  SettingsState();
 }
 
-class SettingsInitial extends SettingsState {
-  @override
-  List<Object> get props => [];
+class SettingsInitial extends SettingsState {}
 
-  @override
-  SettingsInitial copyWith({
-    String? name,
-    bool? isEditMode,
-    bool? isCaster,
-  }) {
-    return SettingsInitial();
-  }
-}
-
-class SettingsLoading extends SettingsState {
-  @override
-  List<Object> get props => [];
-
-  @override
-  SettingsLoading copyWith({
-    String? name,
-    bool? isEditMode,
-    bool? isCaster,
-  }) {
-    return SettingsLoading();
-  }
-}
+class SettingsLoading extends SettingsState {}
 
 class SettingsError extends SettingsState {
   final String message;
 
-  const SettingsError(this.message);
-
-  @override
-  List<Object> get props => [message];
-
-  @override
-  SettingsError copyWith({
-    String? name,
-    bool? isEditMode,
-    bool? isCaster,
-  }) {
-    return SettingsError(message);
-  }
+  SettingsError(this.message);
 }
 
 class SettingsLoaded extends SettingsState {
-  final String name;
-  final bool isEditMode;
-  final bool isCaster;
+  SettingsLoaded({
+    required String name,
+    required bool isEditMode,
+    required bool isCaster,
+    required bool classOnlySpells,
+  }) {
+    this.name = name;
+    this.isEditMode = isEditMode;
+    this.isCaster = isCaster;
+    this.classOnlySpells = classOnlySpells;
+  }
 
-  const SettingsLoaded({
-    required this.name,
-    required this.isEditMode,
-    required this.isCaster,
-  });
-
-  @override
   SettingsLoaded copyWith({
     String? name,
     bool? isEditMode,
     bool? isCaster,
+    bool? classOnlySpells,
   }) {
     return SettingsLoaded(
       name: name ?? this.name,
       isEditMode: isEditMode ?? this.isEditMode,
       isCaster: isCaster ?? this.isCaster,
+      classOnlySpells: classOnlySpells ?? this.classOnlySpells,
     );
   }
-
-  @override
-  List<Object> get props => [name, isEditMode, isCaster];
 }
