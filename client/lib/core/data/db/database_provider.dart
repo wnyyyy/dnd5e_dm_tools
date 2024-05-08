@@ -1,5 +1,9 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hive/hive.dart';
+import 'package:path_provider/path_provider.dart';
 
 class DatabaseProvider {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
@@ -80,5 +84,26 @@ class DatabaseProvider {
     }
 
     return data;
+  }
+
+  Future<Map<String, dynamic>> fetchAllDataFromHive(String boxName) async {
+    var box = await Hive.openBox<Map<String, dynamic>>(boxName);
+    Map<String, dynamic> data = {};
+    for (var key in box.keys) {
+      data[key] = box.get(key);
+    }
+    await box.close();
+    return data;
+  }
+
+  Future<void> saveDataToJsonFile(String boxName, String fileName) async {
+    Map<String, dynamic> data = await fetchAllDataFromHive(boxName);
+    String jsonString = json.encode(data);
+
+    final directory = await getApplicationDocumentsDirectory();
+    final file = File('${directory.path}/$fileName');
+    await file.writeAsString(jsonString);
+
+    print('Data saved to ${file.path}');
   }
 }

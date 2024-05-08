@@ -9,6 +9,7 @@ import 'package:dnd5e_dm_tools/core/data/repositories/races_repository.dart';
 import 'package:dnd5e_dm_tools/core/config/theme_cubit.dart';
 import 'package:dnd5e_dm_tools/core/data/repositories/conditions_repository.dart';
 import 'package:dnd5e_dm_tools/core/data/repositories/spells_repository.dart';
+import 'package:dnd5e_dm_tools/core/util/const.dart';
 import 'package:dnd5e_dm_tools/features/main_screen/cubit/main_screen_cubit.dart';
 import 'package:dnd5e_dm_tools/features/characters/bloc/character_bloc.dart';
 import 'package:dnd5e_dm_tools/features/header/cubit/header_cubit.dart';
@@ -30,9 +31,9 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final appDocumentDir = await getApplicationDocumentsDirectory();
   await Hive.initFlutter(appDocumentDir.path);
-  var box = await Hive.openBox<Map<String, dynamic>>('firestore_cache');
+  var box = await Hive.openBox<Map<String, dynamic>>(cacheBoxName);
   if (box.isEmpty) {
-    String data = await rootBundle.loadString('assets/default_data.json');
+    String data = await rootBundle.loadString('assets/$defaultDatabaseName');
     Map<String, dynamic> defaultData = json.decode(data);
     for (var key in defaultData.keys) {
       await box.put(key, defaultData[key]);
