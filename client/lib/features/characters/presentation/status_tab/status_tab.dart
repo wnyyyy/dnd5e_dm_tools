@@ -4,6 +4,7 @@ import 'package:dnd5e_dm_tools/features/characters/presentation/status_tab/widge
 import 'package:dnd5e_dm_tools/features/characters/presentation/status_tab/widgets/hp.dart';
 import 'package:dnd5e_dm_tools/features/characters/presentation/status_tab/widgets/spellbook.dart';
 import 'package:dnd5e_dm_tools/features/characters/presentation/status_tab/widgets/stats.dart';
+import 'package:dnd5e_dm_tools/features/rules/rules_bloc.dart';
 import 'package:dnd5e_dm_tools/features/settings/bloc/settings_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -11,27 +12,30 @@ import 'package:fluttericon/octicons_icons.dart';
 
 class StatusTab extends StatelessWidget {
   final Map<String, dynamic> character;
-  final Map<String, dynamic> classs;
-  final Map<String, dynamic>? spells;
-  final String name;
+  final String slug;
 
   const StatusTab({
     super.key,
     required this.character,
-    required this.name,
-    required this.classs,
-    required this.spells,
+    required this.slug,
   });
 
   @override
   Widget build(BuildContext context) {
     final isCaster = context.read<SettingsCubit>().state.isCaster;
+    final Map<String, dynamic> spells;
     if (isCaster) {
-      if (spells?.isEmpty ?? true) {
-        context.read<CharacterBloc>().add(const LoadSpells());
-        return const Center(child: CircularProgressIndicator());
+      final classOnly = context.read<SettingsCubit>().state.classOnlySpells;
+      if (classOnly) {
+        spells =
+            context.read<RulesCubit>().getSpellsByClass(character['class']);
+      } else {
+        spells = context.read<RulesCubit>().getAllSpells();
       }
+    } else {
+      spells = {};
     }
+    final classs = context.read<RulesCubit>().getClass(character['class']);
     return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -44,13 +48,14 @@ class StatusTab extends StatelessWidget {
               children: [
                 Hitpoints(
                   character: character,
-                  name: name,
+                  slug: slug,
                 ),
-                HitDice(
-                  character: character,
-                  classs: classs,
-                  name: name,
-                )
+                if (classs != null)
+                  HitDice(
+                    character: character,
+                    classs: classs,
+                    slug: slug,
+                  )
               ],
             ),
             Flex(
@@ -71,12 +76,12 @@ class StatusTab extends StatelessWidget {
                                 title: const Text('Spellbook'),
                                 content: Spellbook(
                                     character: character,
-                                    spells: spells ?? {},
+                                    spells: spells,
                                     updateCharacter: () =>
                                         context.read<CharacterBloc>().add(
                                               CharacterUpdate(
                                                 character: character,
-                                                name: name,
+                                                slug: slug,
                                               ),
                                             ),
                                     onDone: () {
@@ -102,7 +107,7 @@ class StatusTab extends StatelessWidget {
                     onSave: () =>
                         context.read<CharacterBloc>().add(CharacterUpdate(
                               character: character,
-                              name: name,
+                              slug: slug,
                             )),
                     character: character),
               ],

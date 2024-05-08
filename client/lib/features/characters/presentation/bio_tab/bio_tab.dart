@@ -5,12 +5,12 @@ import 'package:flutter/material.dart';
 
 class BioTab extends StatelessWidget {
   final Map<String, dynamic> character;
-  final String name;
+  final String slug;
 
   const BioTab({
     super.key,
     required this.character,
-    required this.name,
+    required this.slug,
   });
 
   @override
@@ -22,7 +22,7 @@ class BioTab extends StatelessWidget {
         children: [
           CharacterPortrait(
             character: character,
-            name: name,
+            slug: slug,
           ),
           Padding(
             padding: EdgeInsets.symmetric(
@@ -34,7 +34,7 @@ class BioTab extends StatelessWidget {
                 horizontal: screenWidth * 0.08, vertical: 8),
             child: ProficiencyList(
               character: character,
-              name: name,
+              slug: slug,
             ),
           ),
           Padding(
@@ -42,7 +42,7 @@ class BioTab extends StatelessWidget {
                 horizontal: screenWidth * 0.08, vertical: 8),
             child: FeatsList(
               character: character,
-              name: name,
+              slug: slug,
             ),
           ),
         ],

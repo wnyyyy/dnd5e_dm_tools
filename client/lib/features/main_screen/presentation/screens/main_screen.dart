@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dnd5e_dm_tools/core/config/theme_cubit.dart';
 import 'package:dnd5e_dm_tools/features/characters/presentation/character_screen.dart';
 import 'package:dnd5e_dm_tools/features/header/cubit/header_cubit.dart';
@@ -10,7 +9,6 @@ import 'package:dnd5e_dm_tools/features/main_screen/presentation/widgets/main_dr
 import 'package:dnd5e_dm_tools/features/rules/rules_bloc.dart';
 import 'package:dnd5e_dm_tools/features/rules/rules_states.dart';
 import 'package:dnd5e_dm_tools/features/screen_splitter/presentation/screen_splitter.dart';
-import 'package:dnd5e_dm_tools/features/settings/bloc/settings_cubit.dart';
 import 'package:dnd5e_dm_tools/features/settings/presentation/settings_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -35,8 +33,6 @@ class MainScreen extends StatelessWidget {
                     builder: (BuildContext context, RulesState state) {
                       if (state is RulesStateInitial) {
                         context.read<RulesCubit>().loadRules();
-                        final isCaster =
-                            context.read<SettingsCubit>().state.isCaster;
                         return Container();
                       }
                       if (state is RulesStateLoading) {

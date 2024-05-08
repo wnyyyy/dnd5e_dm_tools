@@ -5,7 +5,6 @@ import 'package:dnd5e_dm_tools/features/characters/bloc/character_states.dart';
 import 'package:dnd5e_dm_tools/features/characters/presentation/bio_tab/bio_tab.dart';
 import 'package:dnd5e_dm_tools/features/characters/presentation/skills_tab.dart/skills_tab.dart';
 import 'package:dnd5e_dm_tools/features/characters/presentation/status_tab/status_tab.dart';
-import 'package:dnd5e_dm_tools/features/rules/rules_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -26,15 +25,10 @@ class CharacterScreen extends StatelessWidget {
           return ErrorHandler(
               error: state.error,
               onRetry: () {
-                context.read<CharacterBloc>().add(const CharacterLoad('sage'));
+                context.read<CharacterBloc>().add(CharacterLoad(state.slug));
               });
         }
         if (state is CharacterStateLoaded) {
-          final classs =
-              context.read<RulesCubit>().getClass(state.character['class']);
-          if (classs == null) {
-            return const ErrorHandler(error: "Class not found");
-          }
           return DefaultTabController(
               length: 4,
               child: Column(
@@ -52,18 +46,15 @@ class CharacterScreen extends StatelessWidget {
                       children: [
                         BioTab(
                           character: state.character,
-                          name: state.slug,
+                          slug: state.slug,
                         ),
                         StatusTab(
                           character: state.character,
-                          name: state.slug,
-                          classs: classs,
-                          spells: state.spells,
+                          slug: state.slug,
                         ),
                         SkillsTab(
                           character: state.character,
-                          name: state.slug,
-                          classs: classs,
+                          slug: state.slug,
                         ),
                         const Placeholder()
                       ],

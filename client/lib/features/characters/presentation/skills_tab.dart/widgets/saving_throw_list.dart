@@ -12,12 +12,12 @@ class SavingThrowList extends StatefulWidget {
     super.key,
     required this.character,
     required this.classs,
-    required this.name,
+    required this.slug,
   });
 
   final Map<String, dynamic> character;
   final Map<String, dynamic> classs;
-  final String name;
+  final String slug;
 
   @override
   State<SavingThrowList> createState() => _SavingThrowListState();
@@ -88,7 +88,7 @@ class _SavingThrowListState extends State<SavingThrowList> {
                           charProf.join(',');
                       context.read<CharacterBloc>().add(CharacterUpdate(
                             character: widget.character,
-                            name: widget.name,
+                            slug: widget.slug,
                           ));
                       Navigator.of(context).pop();
                     },

@@ -36,12 +36,10 @@ class AttributeCard extends StatelessWidget {
             children: <Widget>[
               Padding(
                 padding: const EdgeInsets.only(top: 4),
-                child: Container(
-                  child: Text(attributeName,
-                      style: Theme.of(context).textTheme.titleSmall!.copyWith(
-                            color: color,
-                          )),
-                ),
+                child: Text(attributeName,
+                    style: Theme.of(context).textTheme.titleSmall!.copyWith(
+                          color: color,
+                        )),
               ),
               Padding(
                 padding: const EdgeInsets.only(bottom: 6),

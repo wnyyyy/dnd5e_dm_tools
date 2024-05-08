@@ -10,12 +10,12 @@ import 'package:google_fonts/google_fonts.dart';
 
 class CharacterPortrait extends StatelessWidget {
   final Map<String, dynamic> character;
-  final String name;
+  final String slug;
 
   const CharacterPortrait({
     super.key,
     required this.character,
-    required this.name,
+    required this.slug,
   });
 
   void _showEditLevel(BuildContext context) {
@@ -29,7 +29,7 @@ class CharacterPortrait extends StatelessWidget {
             onTap: () {
               context.read<CharacterBloc>().add(CharacterUpdate(
                     character: character,
-                    name: name,
+                    slug: slug,
                   ));
               Navigator.pop(context);
             },
@@ -78,7 +78,7 @@ class CharacterPortrait extends StatelessWidget {
                         color: Theme.of(context).colorScheme.outline, width: 3),
                   ),
                   child: Image.asset(
-                    'assets/char/${name.trim().replaceAll(' ', '_')}.png',
+                    'assets/char/$slug.png',
                     fit: BoxFit.cover,
                     alignment: Alignment.centerLeft,
                   ),
@@ -93,7 +93,7 @@ class CharacterPortrait extends StatelessWidget {
                     children: [
                       Text(
                         textAlign: TextAlign.center,
-                        name[0].toUpperCase() + name.substring(1).toLowerCase(),
+                        name,
                         style:
                             Theme.of(context).textTheme.displaySmall!.copyWith(
                                   fontFamily: GoogleFonts.patuaOne().fontFamily,
@@ -120,13 +120,13 @@ class CharacterPortrait extends StatelessWidget {
                       GestureDetector(
                         onTap: () => _showRaceModal(context, race),
                         child: Text(
-                          '${race?['name'] ?? 'Unknown'}',
+                          '${race?['name'] ?? 'Race not found'}',
                           style: Theme.of(context).textTheme.headlineMedium,
                         ),
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        '${classs?['name'] ?? 'Unknown'}',
+                        '${classs?['name'] ?? 'Class not found'}',
                         style: Theme.of(context).textTheme.headlineMedium,
                       ),
                     ],

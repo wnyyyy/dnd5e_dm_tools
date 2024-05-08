@@ -26,9 +26,27 @@ class RulesCubit extends Cubit<RulesState> {
       final conditions = conditionsRepository.getConditions();
       final races = racesRepository.getAll();
       final classes = classesRepository.getAll();
-      final results = await Future.wait([conditions, races, classes]);
-      emit(RulesStateLoaded(
-          conditions: results[0], races: results[1], classes: results[2]));
+      final spells = spellsRepository.getAll();
+      final feats = featsRepository.getAll();
+      final spellLists = spellsRepository.getSpellLists();
+      final results = await Future.wait([
+        conditions,
+        races,
+        classes,
+        spells,
+        feats,
+        spellLists,
+      ]);
+      emit(
+        RulesStateLoaded(
+          conditions: results[0],
+          races: results[1],
+          classes: results[2],
+          spells: results[3],
+          feats: results[4],
+          spellLists: results[5],
+        ),
+      );
     } catch (e) {
       emit(RulesStateError(e.toString()));
     }
@@ -48,27 +66,45 @@ class RulesCubit extends Cubit<RulesState> {
     return null;
   }
 
-  Future<Map<String, dynamic>?> getFeat(String slug) async {
+  Map<String, dynamic>? getFeat(String slug) {
     if (state is RulesStateLoaded) {
-      if ((state as RulesStateLoaded).feats != null) {
-        return (state as RulesStateLoaded).feats![slug];
-      }
-      final feats = await featsRepository.getAll();
-      emit((state as RulesStateLoaded).copyWith(feats: feats));
-      return feats[slug];
+      return (state as RulesStateLoaded).feats[slug];
     }
     return null;
   }
 
-  Future<Map<String, dynamic>?> getAllFeats() async {
+  Map<String, dynamic> getAllFeats() {
     if (state is RulesStateLoaded) {
-      if ((state as RulesStateLoaded).feats != null) {
-        return (state as RulesStateLoaded).feats;
-      }
-      final feats = await featsRepository.getAll();
-      emit((state as RulesStateLoaded).copyWith(feats: feats));
-      return feats;
+      return (state as RulesStateLoaded).feats;
     }
-    return null;
+    return {};
+  }
+
+  Map<String, dynamic> getAllSpells() {
+    if (state is RulesStateLoaded) {
+      return (state as RulesStateLoaded).spells;
+    }
+    return {};
+  }
+
+  Map<String, dynamic> getSpellsByClass(String classs) {
+    if (state is RulesStateLoaded) {
+      Map<String, Map<String, dynamic>> spellList = {};
+      final allSpells = (state as RulesStateLoaded).spells;
+      final extraSuffix = ['a5e'];
+      final classSpells =
+          (state as RulesStateLoaded).spellLists[classs]['spells'];
+      for (var spell in classSpells) {
+        spellList[spell] = allSpells[spell] ?? {};
+        for (var suffix in extraSuffix) {
+          final extraSpell = allSpells['$spell-$suffix'];
+          if (extraSpell != null) {
+            spellList['$spell-$suffix'] = extraSpell;
+          }
+        }
+      }
+      return spellList;
+    }
+    return {};
   }
 }

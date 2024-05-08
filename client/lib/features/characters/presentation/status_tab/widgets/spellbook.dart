@@ -76,8 +76,6 @@ class SpellbookState extends State<Spellbook> {
         level == 0 ? 'Cantrips' : '${spells[0].value['level']} spells';
     String spellCountLabel =
         '${spells.length} ${spells.length == 1 ? 'spell' : 'spells'}';
-    Map<String, dynamic> classs = widget.character['class'];
-    int spellSlots = widget.character['spellSlots'][level];
     return ExpansionTile(
       title: Text(label),
       subtitle: Row(

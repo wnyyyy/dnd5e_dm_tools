@@ -6,10 +6,9 @@ class CharactersRepository {
 
   CharactersRepository(this.databaseProvider);
 
-  Future<dynamic> get(String name) async {
-    final nameL = name.toLowerCase();
+  Future<dynamic> get(String slug) async {
     final docSnapshot =
-        await databaseProvider.getDocument(path: 'characters/$nameL');
+        await databaseProvider.getDocument(path: 'characters/$slug');
     if (docSnapshot.exists) {
       final data = docSnapshot.data();
       if (data == null) {
@@ -21,9 +20,9 @@ class CharactersRepository {
   }
 
   Future<void> updateCharacter(
-      String name, Map<String, dynamic> character) async {
+      String slug, Map<String, dynamic> character) async {
     await databaseProvider.setData(
-      path: 'characters/$name',
+      path: 'characters/$slug',
       data: character,
     );
   }

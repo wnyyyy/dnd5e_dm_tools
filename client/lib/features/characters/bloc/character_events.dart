@@ -17,35 +17,19 @@ class CharacterLoad extends CharacterEvent {
 
 class CharacterUpdate extends CharacterEvent {
   final Map<String, dynamic> character;
-  final String name;
+  final String slug;
   final bool persistData;
   const CharacterUpdate({
     required this.character,
-    required this.name,
+    required this.slug,
     this.persistData = false,
   });
 
   @override
   List<Object> get props => [
         character,
-        name,
+        slug,
       ];
-}
-
-class ChangeFeats extends CharacterEvent {
-  final List<String> featSlugs;
-  const ChangeFeats(this.featSlugs);
-
-  @override
-  List<Object> get props => [featSlugs];
-}
-
-class ShowFeatDetails extends CharacterEvent {
-  final String featSlug;
-  const ShowFeatDetails(this.featSlug);
-
-  @override
-  List<Object> get props => [featSlug];
 }
 
 class PersistCharacter extends CharacterEvent {
@@ -53,26 +37,4 @@ class PersistCharacter extends CharacterEvent {
 
   @override
   List<Object> get props => [];
-}
-
-class ToggleEditingFeats extends CharacterEvent {
-  const ToggleEditingFeats();
-
-  @override
-  List<Object> get props => [];
-}
-
-class ToggleEditingProf extends CharacterEvent {
-  const ToggleEditingProf();
-
-  @override
-  List<Object> get props => [];
-}
-
-class LoadSpells extends CharacterEvent {
-  final String? classSlug;
-  const LoadSpells({this.classSlug});
-
-  @override
-  List<Object> get props => [classSlug ?? ''];
 }

@@ -30,15 +30,17 @@ class RulesStateLoaded extends RulesState {
   final Map<String, dynamic> races;
   final Map<String, dynamic> classes;
   final Map<String, dynamic> conditions;
-  final Map<String, dynamic>? feats;
-  final Map<String, dynamic>? spells;
+  final Map<String, dynamic> feats;
+  final Map<String, dynamic> spells;
+  final Map<String, dynamic> spellLists;
 
   const RulesStateLoaded({
     required this.conditions,
     required this.races,
     required this.classes,
-    this.feats,
-    this.spells,
+    required this.feats,
+    required this.spells,
+    required this.spellLists,
   });
 
   RulesStateLoaded copyWith({
@@ -47,6 +49,7 @@ class RulesStateLoaded extends RulesState {
     final Map<String, dynamic>? conditions,
     final Map<String, dynamic>? feats,
     final Map<String, dynamic>? spells,
+    final Map<String, dynamic>? spellLists,
   }) {
     return RulesStateLoaded(
       classes: classes ?? this.classes,
@@ -54,6 +57,7 @@ class RulesStateLoaded extends RulesState {
       races: races ?? this.races,
       feats: feats ?? this.feats,
       spells: spells ?? this.spells,
+      spellLists: spells ?? this.spellLists,
     );
   }
 
@@ -62,7 +66,8 @@ class RulesStateLoaded extends RulesState {
         conditions,
         races,
         classes,
-        ...feats?.values ?? [],
-        ...spells?.values ?? [],
+        feats,
+        spells,
+        spellLists,
       ];
 }

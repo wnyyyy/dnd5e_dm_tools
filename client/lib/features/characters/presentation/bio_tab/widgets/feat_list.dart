@@ -9,12 +9,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 class FeatsList extends StatelessWidget {
   final Map<String, dynamic> character;
-  final String name;
+  final String slug;
 
   const FeatsList({
     super.key,
     required this.character,
-    required this.name,
+    required this.slug,
   });
 
   @override
@@ -26,7 +26,7 @@ class FeatsList extends StatelessWidget {
         final characterFeats = {}.cast<String, Map>();
         characterFeatSlugs.forEach(
           (key, value) async {
-            final feat = await context.read<RulesCubit>().getFeat(key);
+            final feat = context.read<RulesCubit>().getFeat(key);
             if (feat != null) {
               characterFeats[key] = feat;
             }
@@ -38,7 +38,7 @@ class FeatsList extends StatelessWidget {
           context.read<CharacterBloc>().add(
                 CharacterUpdate(
                   character: character,
-                  name: name,
+                  slug: slug,
                   persistData: true,
                 ),
               );
@@ -118,7 +118,7 @@ class FeatsList extends StatelessWidget {
           items: characterFeats,
           onItemsChanged: onItemsChanged,
           onAddItem: () async {
-            final feats = await context.read<RulesCubit>().getAllFeats() ?? {};
+            final feats = context.read<RulesCubit>().getAllFeats();
             onAddItem(feats);
           },
           tableName: 'Feats',

@@ -8,11 +8,11 @@ class Hitpoints extends StatefulWidget {
   const Hitpoints({
     super.key,
     required this.character,
-    required this.name,
+    required this.slug,
   });
 
   final Map<String, dynamic> character;
-  final String name;
+  final String slug;
 
   @override
   State<Hitpoints> createState() => _HitpointsState();
@@ -98,7 +98,7 @@ class _HitpointsState extends State<Hitpoints> {
                           int.tryParse(tempHpController.text) ?? 0;
 
                       context.read<CharacterBloc>().add(CharacterUpdate(
-                          character: widget.character, name: widget.name));
+                          character: widget.character, slug: widget.slug));
 
                       Navigator.of(context).pop();
                     },
@@ -144,7 +144,7 @@ class _HitpointsState extends State<Hitpoints> {
       character['hp_curr'] = currentHP;
       context.read<CharacterBloc>().add(CharacterUpdate(
             character: character,
-            name: widget.name,
+            slug: widget.slug,
             persistData: false,
           ));
     }
@@ -266,7 +266,7 @@ class _HitpointsState extends State<Hitpoints> {
                           character['death_save'] = deathSave;
                           context.read<CharacterBloc>().add(CharacterUpdate(
                                 character: character,
-                                name: widget.name,
+                                slug: widget.slug,
                                 persistData: false,
                               ));
                         });
@@ -285,7 +285,7 @@ class _HitpointsState extends State<Hitpoints> {
                           character['death_save'] = deathSave;
                           context.read<CharacterBloc>().add(CharacterUpdate(
                                 character: character,
-                                name: widget.name,
+                                slug: widget.slug,
                                 persistData: false,
                               ));
                         });

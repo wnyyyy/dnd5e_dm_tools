@@ -12,12 +12,12 @@ class SkillList extends StatefulWidget {
     super.key,
     required this.character,
     required this.classs,
-    required this.name,
+    required this.slug,
   });
 
   final Map<String, dynamic> character;
   final Map<String, dynamic> classs;
-  final String name;
+  final String slug;
 
   @override
   State<SkillList> createState() => _SkillListState();
@@ -117,7 +117,7 @@ class _SkillListState extends State<SkillList> {
                       widget.character['prof_skills'] = skillProf;
                       context.read<CharacterBloc>().add(CharacterUpdate(
                             character: widget.character,
-                            name: widget.name,
+                            slug: widget.slug,
                           ));
                       Navigator.of(context).pop();
                     },

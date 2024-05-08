@@ -23,6 +23,7 @@ dependencies:
   google_sign_in: ^6.2.1
   google_fonts: ^6.2.1
   fluttericon: ^2.0.0
+  shared_preferences: ^2.2.3
 
 dev_dependencies:
   flutter_test:
@@ -31,6 +32,3 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
-  assets:
-    - assets/char/
-    - assets/database/

@@ -7,12 +7,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 class ProficiencyList extends StatelessWidget {
   final Map<String, dynamic> character;
-  final String name;
+  final String slug;
 
   const ProficiencyList({
     super.key,
     required this.character,
-    required this.name,
+    required this.slug,
   });
 
   @override
@@ -27,7 +27,7 @@ class ProficiencyList extends StatelessWidget {
           context.read<CharacterBloc>().add(
                 CharacterUpdate(
                   character: character,
-                  name: name,
+                  slug: slug,
                   persistData: true,
                 ),
               );

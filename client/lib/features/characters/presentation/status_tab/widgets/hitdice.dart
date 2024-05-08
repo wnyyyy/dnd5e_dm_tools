@@ -9,12 +9,12 @@ class HitDice extends StatefulWidget {
     super.key,
     required this.character,
     required this.classs,
-    required this.name,
+    required this.slug,
   });
 
   final Map<String, dynamic> character;
   final Map<String, dynamic> classs;
-  final String name;
+  final String slug;
 
   @override
   State<HitDice> createState() => _HitDiceState();
@@ -82,7 +82,7 @@ class _HitDiceState extends State<HitDice> {
                               int.tryParse(maxHpController.text) ??
                               0;
                       context.read<CharacterBloc>().add(CharacterUpdate(
-                          character: widget.character, name: widget.name));
+                          character: widget.character, slug: widget.slug));
 
                       Navigator.of(context).pop();
                     },
@@ -111,7 +111,7 @@ class _HitDiceState extends State<HitDice> {
       character['hd_curr'] = currentHP;
       context.read<CharacterBloc>().add(CharacterUpdate(
             character: character,
-            name: widget.name,
+            slug: widget.slug,
             persistData: true,
           ));
     }
@@ -198,7 +198,7 @@ class _HitDiceState extends State<HitDice> {
                           character['death_save'] = deathSave;
                           context.read<CharacterBloc>().add(CharacterUpdate(
                                 character: character,
-                                name: widget.name,
+                                slug: widget.slug,
                                 persistData: false,
                               ));
                         });
@@ -217,7 +217,7 @@ class _HitDiceState extends State<HitDice> {
                           character['death_save'] = deathSave;
                           context.read<CharacterBloc>().add(CharacterUpdate(
                                 character: character,
-                                name: widget.name,
+                                slug: widget.slug,
                                 persistData: false,
                               ));
                         });

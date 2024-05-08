@@ -5,6 +5,7 @@ import 'package:dnd5e_dm_tools/features/characters/bloc/character_events.dart';
 import 'package:dnd5e_dm_tools/features/characters/presentation/skills_tab.dart/widgets/attribute.dart';
 import 'package:dnd5e_dm_tools/features/characters/presentation/skills_tab.dart/widgets/saving_throw_list.dart';
 import 'package:dnd5e_dm_tools/features/characters/presentation/skills_tab.dart/widgets/skills_list.dart';
+import 'package:dnd5e_dm_tools/features/rules/rules_bloc.dart';
 import 'package:dnd5e_dm_tools/features/settings/bloc/settings_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -12,18 +13,22 @@ import 'package:provider/provider.dart';
 
 class SkillsTab extends StatelessWidget {
   final Map<String, dynamic> character;
-  final Map<String, dynamic> classs;
-  final String name;
+  final String slug;
 
   const SkillsTab({
     super.key,
     required this.character,
-    required this.classs,
-    required this.name,
+    required this.slug,
   });
 
   @override
   Widget build(BuildContext context) {
+    final classs = context.read<RulesCubit>().getClass(character['class']);
+    if (classs == null) {
+      return const Center(
+        child: Text('Class not found'),
+      );
+    }
     return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -41,7 +46,7 @@ class SkillsTab extends StatelessWidget {
                     _buildProficiencyBonus(context),
                     SavingThrowList(
                       character: character,
-                      name: name,
+                      slug: slug,
                       classs: classs,
                     ),
                     _buildPassivePerception(context),
@@ -52,7 +57,7 @@ class SkillsTab extends StatelessWidget {
             SkillList(
               character: character,
               classs: classs,
-              name: name,
+              slug: slug,
             )
           ],
         ),
@@ -97,7 +102,7 @@ class SkillsTab extends StatelessWidget {
                     character['asi'][attributeName.toLowerCase()] = newValue;
                     context
                         .read<CharacterBloc>()
-                        .add(CharacterUpdate(character: character, name: name));
+                        .add(CharacterUpdate(character: character, slug: slug));
                     Navigator.of(context).pop();
                   }
                 },
@@ -234,7 +239,7 @@ class SkillsTab extends StatelessWidget {
                                 newValue >= 0) {
                               character['passive_perception'] = newValue;
                               context.read<CharacterBloc>().add(CharacterUpdate(
-                                  character: character, name: name));
+                                  character: character, slug: slug));
                               Navigator.of(context).pop();
                             }
                           },

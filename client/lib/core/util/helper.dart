@@ -1,9 +1,21 @@
+import 'package:shared_preferences/shared_preferences.dart';
+
 int getModifier(int value) {
   return (value - 10) ~/ 2;
 }
 
 int getProfBonus(int level) {
   return ((level - 1) ~/ 4) + 2;
+}
+
+Future<String?> readConfig(String key) async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  return prefs.getString(key);
+}
+
+Future<void> saveConfig(String key, String value) async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  await prefs.setString(key, value);
 }
 
 List<Map<String, dynamic>> parseTable(String table) {
