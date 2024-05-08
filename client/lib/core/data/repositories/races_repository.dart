@@ -18,7 +18,8 @@ class RacesRepository {
   }
 
   Future<Map<String, Map<String, dynamic>>> getAll() async {
-    final data = await databaseProvider.getCollection(path: path);
+    final data = await databaseProvider.getCollection(
+        path: path, cacheBoxName: cacheRacesName);
     return data;
   }
 }

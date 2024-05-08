@@ -59,10 +59,12 @@ class SettingsCubit extends Cubit<SettingsState> {
       await classesRepository.init();
       await conditionsRepository.init();
       await racesRepository.init();
-      emit((state as SettingsLoaded).copyWith(
+      print('Settings loaded');
+      emit(SettingsLoaded(
         name: name,
         isCaster: isCaster == 'true',
         classOnlySpells: classOnly == 'true',
+        isEditMode: false,
       ));
     } catch (error) {
       emit(SettingsError('Failed to load settings'));

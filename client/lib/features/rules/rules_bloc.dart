@@ -3,6 +3,7 @@ import 'package:dnd5e_dm_tools/core/data/repositories/conditions_repository.dart
 import 'package:dnd5e_dm_tools/core/data/repositories/feats_repository.dart';
 import 'package:dnd5e_dm_tools/core/data/repositories/races_repository.dart';
 import 'package:dnd5e_dm_tools/core/data/repositories/spells_repository.dart';
+import 'package:dnd5e_dm_tools/core/util/const.dart';
 import 'package:dnd5e_dm_tools/features/rules/rules_states.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -22,6 +23,7 @@ class RulesCubit extends Cubit<RulesState> {
 
   void loadRules() async {
     emit(RulesStateLoading());
+    var results = [];
     try {
       final conditions = conditionsRepository.getAll();
       final races = racesRepository.getAll();
@@ -29,7 +31,7 @@ class RulesCubit extends Cubit<RulesState> {
       final spells = spellsRepository.getAll();
       final feats = featsRepository.getAll();
       final spellLists = spellsRepository.getSpellLists();
-      final results = await Future.wait([
+      results = await Future.wait([
         conditions,
         races,
         classes,
@@ -37,6 +39,17 @@ class RulesCubit extends Cubit<RulesState> {
         feats,
         spellLists,
       ]);
+    } catch (e) {
+      emit(RulesStateError(e.toString()));
+    }
+    try {
+      await conditionsRepository.databaseProvider
+          .persistCache(cacheConditionsName);
+      await racesRepository.databaseProvider.persistCache(cacheRacesName);
+      await classesRepository.databaseProvider.persistCache(cacheClassesName);
+      await spellsRepository.databaseProvider.persistCache(cacheSpellsName);
+      await featsRepository.databaseProvider.persistCache(cacheFeatsName);
+      await spellsRepository.databaseProvider.persistCache(cacheSpellsName);
       emit(
         RulesStateLoaded(
           conditions: results[0],

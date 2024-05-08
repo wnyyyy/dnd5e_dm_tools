@@ -32,61 +32,66 @@ class MainScreen extends StatelessWidget {
                 drawer: const MainDrawer(),
                 appBar: const Header(),
                 body: PopScope(
-                  child: BlocBuilder<RulesCubit, RulesState>(
-                    builder: (BuildContext context, RulesState state) {
-                      if (state is RulesStateInitial) {
-                        context.read<RulesCubit>().loadRules();
-                        return Container();
+                  child: BlocBuilder<SettingsCubit, SettingsState>(
+                    builder: (BuildContext context, SettingsState state) {
+                      if (state is SettingsInitial) {
+                        context.read<SettingsCubit>().init();
                       }
-                      if (state is RulesStateLoading) {
+                      if (state is SettingsLoading) {
                         return const Center(
                           child: CircularProgressIndicator(),
                         );
                       }
-                      if (state is RulesStateError) {
+                      if (state is SettingsError) {
                         return Center(
-                          child: Text(state.message),
+                          child: ErrorHandler(error: state.message),
                         );
                       }
-                      return BlocBuilder<SettingsCubit, SettingsState>(
-                        builder: (context, state) {
-                          if (state is SettingsError) {
-                            return ErrorHandler(error: state.message);
-                          }
-                          if (state is SettingsLoading) {
-                            return const Center(
-                              child: CircularProgressIndicator(),
-                            );
-                          }
-                          if (state is SettingsLoaded) {
-                            return BlocBuilder<MainScreenCubit,
-                                MainScreenState>(
-                              builder: (context, state) {
-                                if (state is MainScreenStateCharacter) {
-                                  return const Center(
-                                    child: ScreenSplitter(
-                                      upperChild: CharacterScreen(),
-                                      lowerChild: Placeholder(),
-                                    ),
-                                  );
-                                }
-                                if (state is MainScreenStateParty) {
-                                  return const Center(
-                                    child: Placeholder(),
-                                  );
-                                }
-                                if (state is MainScreenStateSettings) {
-                                  return const Center(
-                                    child: SettingsScreen(),
-                                  );
-                                }
-                                return Container();
-                              },
-                            );
-                          }
-                          return Container();
-                        },
-                      );
+                      if (state is SettingsLoaded) {
+                        return BlocBuilder<RulesCubit, RulesState>(
+                          builder: (context, state) {
+                            if (state is RulesStateInitial) {
+                              context.read<RulesCubit>().loadRules();
+                            }
+                            if (state is RulesStateError) {
+                              return ErrorHandler(error: state.message);
+                            }
+                            if (state is RulesStateLoading) {
+                              return const Center(
+                                child: CircularProgressIndicator(),
+                              );
+                            }
+                            if (state is RulesStateLoaded) {
+                              return BlocBuilder<MainScreenCubit,
+                                  MainScreenState>(
+                                builder: (context, state) {
+                                  if (state is MainScreenStateCharacter) {
+                                    return const Center(
+                                      child: ScreenSplitter(
+                                        upperChild: CharacterScreen(),
+                                        lowerChild: Placeholder(),
+                                      ),
+                                    );
+                                  }
+                                  if (state is MainScreenStateParty) {
+                                    return const Center(
+                                      child: Placeholder(),
+                                    );
+                                  }
+                                  if (state is MainScreenStateSettings) {
+                                    return const Center(
+                                      child: SettingsScreen(),
+                                    );
+                                  }
+                                  return Container();
+                                },
+                              );
+                            }
+                            return Container();
+                          },
+                        );
+                      }
+                      return Container();
                     },
                   ),
                 ),

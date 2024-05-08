@@ -10,6 +10,7 @@ class SpellsRepository {
 
   Future<void> init() async {
     await databaseProvider.loadCache(cacheSpellsName);
+    await databaseProvider.loadCache(cacheSpellListsName);
   }
 
   Future<dynamic> get(String slug) async {
@@ -19,13 +20,14 @@ class SpellsRepository {
   }
 
   Future<Map<String, Map<String, dynamic>>> getAll() async {
-    return Map<String, Map<String, dynamic>>();
-    final data = await databaseProvider.getCollection(path: path);
+    final data = await databaseProvider.getCollection(
+        path: path, cacheBoxName: cacheSpellsName);
     return data;
   }
 
   Future<Map<String, Map<String, dynamic>>> getSpellLists() async {
-    final data = await databaseProvider.getCollection(path: spellListsPath);
+    final data = await databaseProvider.getCollection(
+        path: spellListsPath, cacheBoxName: cacheSpellListsName);
     return data;
   }
 }

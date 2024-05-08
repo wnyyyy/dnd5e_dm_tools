@@ -8,7 +8,7 @@ class ClassesRepository {
   ClassesRepository(this.databaseProvider);
 
   Future<void> init() async {
-    await databaseProvider.loadCache(cacheSpellsName);
+    await databaseProvider.loadCache(cacheClassesName);
   }
 
   Future<dynamic> get(String slug) async {
@@ -25,7 +25,8 @@ class ClassesRepository {
   }
 
   Future<Map<String, Map<String, dynamic>>> getAll() async {
-    final data = await databaseProvider.getCollection(path: path);
+    final data = await databaseProvider.getCollection(
+        path: path, cacheBoxName: cacheClassesName);
     return data;
   }
 }
