@@ -3,36 +3,25 @@ import 'package:dnd5e_dm_tools/core/data/db/database_provider.dart';
 class ClassesRepository {
   final DatabaseProvider databaseProvider;
   final path = 'classes/';
+  final shouldCache = true;
 
   ClassesRepository(this.databaseProvider);
 
   Future<dynamic> get(String slug) async {
-    final docSnapshot = await databaseProvider.getDocument(path: '$path$slug');
-    if (docSnapshot.exists) {
-      final data = docSnapshot.data();
-      if (data == null) {
-        return null;
-      }
-      return data;
-    }
-    return null;
+    final data = await databaseProvider.getDocument(
+        path: '$path$slug', cache: shouldCache);
+    return data;
+  }
+
+  Future<void> updateClass(String slug, Map<String, dynamic> classs) async {
+    await databaseProvider.setData(
+      path: '$path$slug',
+      data: classs,
+    );
   }
 
   Future<Map<String, Map<String, dynamic>>> getAll() async {
-    final docs = await databaseProvider.getCollection(path: path);
-    return docs.fold<Map<String, Map<String, dynamic>>>(
-      {},
-      (previousValue, element) {
-        previousValue[element.id] = {'id': element.id, ...element.data() ?? {}};
-        return previousValue;
-      },
-    );
-  }
-
-  Future<void> update(String slug, Map<String, dynamic> feat) async {
-    await databaseProvider.setData(
-      path: '$path$feat',
-      data: feat,
-    );
+    final data = await databaseProvider.getCollection(path: path);
+    return data;
   }
 }

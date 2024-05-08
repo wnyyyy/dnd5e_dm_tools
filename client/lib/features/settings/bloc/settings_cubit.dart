@@ -36,13 +36,18 @@ class SettingsCubit extends Cubit<SettingsState> {
   }
 
   void loadPersistent() async {
-    final name = await readConfig('char_name') ?? '';
-    final isCaster = await readConfig('is_caster') ?? 'false';
-    final classOnly = await readConfig('class_only_spells') ?? 'false';
-    emit((state as SettingsLoaded).copyWith(
-      name: name,
-      isCaster: isCaster == 'true',
-      classOnlySpells: classOnly == 'true',
-    ));
+    emit(SettingsLoading());
+    try {
+      final name = await readConfig('char_name') ?? '';
+      final isCaster = await readConfig('is_caster') ?? 'false';
+      final classOnly = await readConfig('class_only_spells') ?? 'false';
+      emit((state as SettingsLoaded).copyWith(
+        name: name,
+        isCaster: isCaster == 'true',
+        classOnlySpells: classOnly == 'true',
+      ));
+    } catch (error) {
+      emit(SettingsError('Failed to load settings'));
+    }
   }
 }

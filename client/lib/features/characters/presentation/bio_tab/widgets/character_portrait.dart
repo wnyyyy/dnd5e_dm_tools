@@ -77,11 +77,7 @@ class CharacterPortrait extends StatelessWidget {
                     border: Border.all(
                         color: Theme.of(context).colorScheme.outline, width: 3),
                   ),
-                  child: Image.asset(
-                    'assets/char/$slug.png',
-                    fit: BoxFit.cover,
-                    alignment: Alignment.centerLeft,
-                  ),
+                  child: Image.network(character['image_url']),
                 ),
               ),
             ),
@@ -137,7 +133,6 @@ class CharacterPortrait extends StatelessWidget {
           ],
         );
       }
-
       return Container();
     });
   }

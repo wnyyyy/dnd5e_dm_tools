@@ -23,7 +23,7 @@ class RulesCubit extends Cubit<RulesState> {
   void loadRules() async {
     emit(RulesStateLoading());
     try {
-      final conditions = conditionsRepository.getConditions();
+      final conditions = conditionsRepository.getAll();
       final races = racesRepository.getAll();
       final classes = classesRepository.getAll();
       final spells = spellsRepository.getAll();
