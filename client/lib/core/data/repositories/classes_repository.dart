@@ -1,15 +1,19 @@
 import 'package:dnd5e_dm_tools/core/data/db/database_provider.dart';
+import 'package:dnd5e_dm_tools/core/util/const.dart';
 
 class ClassesRepository {
   final DatabaseProvider databaseProvider;
   final path = 'classes/';
-  final shouldCache = true;
 
   ClassesRepository(this.databaseProvider);
 
+  Future<void> init() async {
+    await databaseProvider.loadCache(cacheSpellsName);
+  }
+
   Future<dynamic> get(String slug) async {
     final data = await databaseProvider.getDocument(
-        path: '$path$slug', cache: shouldCache);
+        path: '$path$slug', cacheBoxName: cacheClassesName);
     return data;
   }
 

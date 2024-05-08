@@ -4,26 +4,31 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hive/hive.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:flutter/services.dart' show rootBundle;
 
 class DatabaseProvider {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
-  final Box<Map<String, dynamic>> _cacheBox = Hive.box('firestore_cache');
 
   Future<void> setData({
     required String path,
     required Map<String, dynamic> data,
+    String? cacheBoxName,
   }) async {
     final reference = _db.doc(path);
     await reference.set(data);
-    await _cacheBox.put(path, data);
+    if (cacheBoxName != null) {
+      final cacheBox = Hive.box<Map<String, dynamic>>(cacheBoxName);
+      await cacheBox.put(path, data);
+    }
   }
 
   Future<Map<String, dynamic>?> getDocument({
     required String path,
-    bool cache = true,
+    String? cacheBoxName,
   }) async {
-    if (cache) {
-      var cachedData = _cacheBox.get(path);
+    if (cacheBoxName != null) {
+      final cacheBox = Hive.box<Map<String, dynamic>>(cacheBoxName);
+      var cachedData = cacheBox.get(path);
       if (cachedData != null) {
         return cachedData;
       }
@@ -32,8 +37,9 @@ class DatabaseProvider {
     final reference = _db.doc(path);
     var snapshot = await reference.get();
     if (snapshot.exists) {
-      if (cache) {
-        await _cacheBox.put(path, snapshot.data()!);
+      if (cacheBoxName != null) {
+        final cacheBox = Hive.box<Map<String, dynamic>>(cacheBoxName);
+        await cacheBox.put(path, snapshot.data()!);
       }
       return snapshot.data();
     }
@@ -42,35 +48,40 @@ class DatabaseProvider {
 
   Future<void> deleteData({
     required String path,
+    String? cacheBoxName,
   }) async {
     final reference = _db.doc(path);
     await reference.delete();
-    await _cacheBox.delete(path);
+    if (cacheBoxName != null) {
+      final cacheBox = Hive.box<Map<String, dynamic>>(cacheBoxName);
+      await cacheBox.delete(path);
+    }
   }
 
   Future<void> updateData({
     required String path,
     required Map<String, dynamic> data,
+    String? cacheBoxName,
   }) async {
     final reference = _db.doc(path);
     await reference.update(data);
-    await _cacheBox.put(path, data);
+    if (cacheBoxName != null) {
+      final cacheBox = Hive.box<Map<String, dynamic>>(cacheBoxName);
+      await cacheBox.put(path, data);
+    }
   }
 
   Future<Map<String, Map<String, dynamic>>> getCollection({
     required String path,
-    bool cache = true,
+    String? cacheBoxName,
   }) async {
     final Map<String, Map<String, dynamic>> data = {};
 
-    if (cache && _cacheBox.isNotEmpty) {
-      for (var key in _cacheBox.keys) {
-        var cachedData = _cacheBox.get(key);
-        if (cachedData != null) {
-          data[key] = cachedData.cast<String, dynamic>();
-        }
+    if (cacheBoxName != null) {
+      final cacheBox = Hive.box<Map<String, dynamic>>(cacheBoxName);
+      if (cacheBox.isNotEmpty) {
+        return cacheBox.toMap().cast<String, Map<String, dynamic>>();
       }
-      return data;
     }
 
     final reference = _db.collection(path);
@@ -78,26 +89,27 @@ class DatabaseProvider {
 
     for (var doc in snapshot.docs) {
       data[doc.id] = doc.data();
-      if (cache) {
-        _cacheBox.put(doc.id, doc.data());
-      }
+    }
+    if (cacheBoxName != null) {
+      Hive.box<Map<String, dynamic>>(cacheBoxName).putAll(data);
     }
 
     return data;
   }
 
-  Future<Map<String, dynamic>> fetchAllDataFromHive(String boxName) async {
-    var box = await Hive.openBox<Map<String, dynamic>>(boxName);
-    Map<String, dynamic> data = {};
-    for (var key in box.keys) {
-      data[key] = box.get(key);
+  Future<void> loadCache(String cacheBoxName) async {
+    var box = await Hive.openBox<Map<String, dynamic>>(cacheBoxName);
+    if (box.isEmpty) {
+      String data = await rootBundle.loadString('assets/$cacheBoxName');
+      Map<String, dynamic> defaultData = json.decode(data);
+      for (var key in defaultData.keys) {
+        await box.put(key, defaultData[key]);
+      }
     }
-    await box.close();
-    return data;
   }
 
   Future<void> saveDataToJsonFile(String boxName, String fileName) async {
-    Map<String, dynamic> data = await fetchAllDataFromHive(boxName);
+    Map<String, dynamic> data = await _fetchAllDataFromHive(boxName);
     String jsonString = json.encode(data);
 
     final directory = await getApplicationDocumentsDirectory();
@@ -105,5 +117,16 @@ class DatabaseProvider {
     await file.writeAsString(jsonString);
 
     print('Data saved to ${file.path}');
+  }
+
+  Future<Map<String, dynamic>> _fetchAllDataFromHive(String boxName) async {
+    var box = await Hive.openBox<Map<String, dynamic>>(boxName);
+    Map<String, dynamic> data = {};
+    for (var key in box.keys) {
+      data[key] = box.get(key);
+    }
+    await box.close();
+
+    return data;
   }
 }

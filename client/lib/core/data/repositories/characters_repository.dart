@@ -3,13 +3,11 @@ import 'package:dnd5e_dm_tools/core/data/db/database_provider.dart';
 class CharactersRepository {
   final DatabaseProvider databaseProvider;
   final path = 'characters/';
-  final shouldCache = false;
 
   CharactersRepository(this.databaseProvider);
 
   Future<dynamic> get(String slug) async {
-    final data = await databaseProvider.getDocument(
-        path: '$path$slug', cache: shouldCache);
+    final data = await databaseProvider.getDocument(path: '$path$slug');
     return data;
   }
 

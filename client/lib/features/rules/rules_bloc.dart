@@ -3,7 +3,6 @@ import 'package:dnd5e_dm_tools/core/data/repositories/conditions_repository.dart
 import 'package:dnd5e_dm_tools/core/data/repositories/feats_repository.dart';
 import 'package:dnd5e_dm_tools/core/data/repositories/races_repository.dart';
 import 'package:dnd5e_dm_tools/core/data/repositories/spells_repository.dart';
-import 'package:dnd5e_dm_tools/core/util/const.dart';
 import 'package:dnd5e_dm_tools/features/rules/rules_states.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -30,8 +29,6 @@ class RulesCubit extends Cubit<RulesState> {
       final spells = spellsRepository.getAll();
       final feats = featsRepository.getAll();
       final spellLists = spellsRepository.getSpellLists();
-      await racesRepository.databaseProvider
-          .saveDataToJsonFile(cacheBoxName, defaultDatabaseName);
       final results = await Future.wait([
         conditions,
         races,
