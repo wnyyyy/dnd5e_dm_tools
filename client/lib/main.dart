@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dnd5e_dm_tools/core/data/db/database_provider.dart';
 import 'package:dnd5e_dm_tools/core/data/repositories/characters_repository.dart';
@@ -22,12 +24,20 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter/services.dart' show rootBundle;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final appDocumentDir = await getApplicationDocumentsDirectory();
   await Hive.initFlutter(appDocumentDir.path);
-  await Hive.openBox<Map<String, dynamic>>('firestore_cache');
+  var box = await Hive.openBox<Map<String, dynamic>>('firestore_cache');
+  if (box.isEmpty) {
+    String data = await rootBundle.loadString('assets/default_data.json');
+    Map<String, dynamic> defaultData = json.decode(data);
+    for (var key in defaultData.keys) {
+      await box.put(key, defaultData[key]);
+    }
+  }
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
