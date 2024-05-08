@@ -1,26 +1,18 @@
-import 'package:dnd5e_dm_tools/core/data/repositories/character_repository.dart';
-import 'package:dnd5e_dm_tools/core/data/repositories/class_repository.dart';
-import 'package:dnd5e_dm_tools/core/data/repositories/feat_repository.dart';
-import 'package:dnd5e_dm_tools/core/data/repositories/race_repository.dart';
+import 'package:dnd5e_dm_tools/core/data/repositories/characters_repository.dart';
+import 'package:dnd5e_dm_tools/core/data/repositories/classes_repository.dart';
+import 'package:dnd5e_dm_tools/core/data/repositories/feats_repository.dart';
+import 'package:dnd5e_dm_tools/core/data/repositories/races_repository.dart';
 import 'package:dnd5e_dm_tools/core/data/repositories/spells_repository.dart';
 import 'package:dnd5e_dm_tools/features/characters/bloc/character_events.dart';
 import 'package:dnd5e_dm_tools/features/characters/bloc/character_states.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class CharacterBloc extends Bloc<CharacterEvent, CharacterState> {
-  final CharacterRepository characterRepository;
-  final RaceRepository raceRepository;
-  final ClassRepository classRepository;
-  final FeatRepository featRepository;
-  final SpellsRepository spellsRepository;
+  final CharactersRepository charactersRepository;
   final String name = '';
 
   CharacterBloc({
-    required this.characterRepository,
-    required this.raceRepository,
-    required this.classRepository,
-    required this.featRepository,
-    required this.spellsRepository,
+    required this.charactersRepository,
   }) : super(CharacterStateInitial()) {
     on<CharacterLoad>(_onCharacterLoad);
     on<CharacterUpdate>(_onCharacterUpdate);
@@ -36,15 +28,10 @@ class CharacterBloc extends Bloc<CharacterEvent, CharacterState> {
     emit(CharacterStateLoading());
     try {
       final name = event.characterName;
-      Map<String, dynamic> character = await characterRepository.get(name);
-      Map<String, dynamic> race = await raceRepository.get(character['race']);
-      Map<String, dynamic> classs =
-          await classRepository.get(character['class']);
+      Map<String, dynamic> character = await charactersRepository.get(name);
       emit(CharacterStateLoaded(
         character: character,
         name: name,
-        race: race,
-        classs: classs,
       ));
     } catch (error) {
       emit(const CharacterStateError("Failed to load characters"));
@@ -64,7 +51,7 @@ class CharacterBloc extends Bloc<CharacterEvent, CharacterState> {
 
       emit(newState);
       if (event.persistData) {
-        await characterRepository.updateCharacter(
+        await charactersRepository.updateCharacter(
           event.name,
           event.character,
         );
@@ -81,7 +68,7 @@ class CharacterBloc extends Bloc<CharacterEvent, CharacterState> {
         return;
       }
       final state = this.state as CharacterStateLoaded;
-      await characterRepository.updateCharacter(
+      await charactersRepository.updateCharacter(
         state.name,
         state.character,
       );

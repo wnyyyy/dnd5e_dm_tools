@@ -1,10 +1,10 @@
 import 'package:dnd5e_dm_tools/core/data/db/database_provider.dart';
 
-class RaceRepository {
+class RacesRepository {
   final DatabaseProvider databaseProvider;
   final path = 'races/';
 
-  RaceRepository(this.databaseProvider);
+  RacesRepository(this.databaseProvider);
 
   Future<dynamic> get(String slug) async {
     final docSnapshot = await databaseProvider.getDocument(path: '$path$slug');
@@ -16,6 +16,17 @@ class RaceRepository {
       return data;
     }
     return null;
+  }
+
+  Future<dynamic> getAll() async {
+    final docs = await databaseProvider.getCollection(path: path);
+    return docs.fold<Map<String, Map<String, dynamic>>>(
+      {},
+      (previousValue, element) {
+        previousValue[element.id] = {'id': element.id, ...element.data() ?? {}};
+        return previousValue;
+      },
+    );
   }
 
   Future<void> create(String slug, Map<String, dynamic> race) async {

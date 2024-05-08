@@ -1,10 +1,10 @@
 import 'package:dnd5e_dm_tools/core/data/db/database_provider.dart';
 
-class RulesRepository {
+class ConditionsRepository {
   final DatabaseProvider databaseProvider;
   final conditionsPath = 'conditions/';
 
-  RulesRepository(this.databaseProvider);
+  ConditionsRepository(this.databaseProvider);
 
   Future<Map<String, Map<String, dynamic>>> getConditions() async {
     final docs = await databaseProvider.getCollection(path: conditionsPath);

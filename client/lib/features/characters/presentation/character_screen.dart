@@ -1,9 +1,11 @@
+import 'package:dnd5e_dm_tools/core/widgets/error_handler.dart';
 import 'package:dnd5e_dm_tools/features/characters/bloc/character_bloc.dart';
 import 'package:dnd5e_dm_tools/features/characters/bloc/character_events.dart';
 import 'package:dnd5e_dm_tools/features/characters/bloc/character_states.dart';
 import 'package:dnd5e_dm_tools/features/characters/presentation/bio_tab/bio_tab.dart';
 import 'package:dnd5e_dm_tools/features/characters/presentation/skills_tab.dart/skills_tab.dart';
 import 'package:dnd5e_dm_tools/features/characters/presentation/status_tab/status_tab.dart';
+import 'package:dnd5e_dm_tools/features/rules/rules_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -15,17 +17,24 @@ class CharacterScreen extends StatelessWidget {
     return BlocBuilder<CharacterBloc, CharacterState>(
       builder: (context, state) {
         if (state is CharacterStateInitial) {
-          context.read<CharacterBloc>().add(const CharacterLoad('sage'));
+          return Container();
         }
         if (state is CharacterStateLoading) {
           return const Center(child: CircularProgressIndicator());
         }
         if (state is CharacterStateError) {
-          return Center(child: Text(state.error));
+          return ErrorHandler(
+              error: state.error,
+              onRetry: () {
+                context.read<CharacterBloc>().add(const CharacterLoad('sage'));
+              });
         }
         if (state is CharacterStateLoaded) {
-          if (state.showFeatDetails != null) {}
-
+          final classs =
+              context.read<RulesCubit>().getClass(state.character['class']);
+          if (classs == null) {
+            return const ErrorHandler(error: "Class not found");
+          }
           return DefaultTabController(
               length: 4,
               child: Column(
@@ -43,22 +52,18 @@ class CharacterScreen extends StatelessWidget {
                       children: [
                         BioTab(
                           character: state.character,
-                          name: state.name,
-                          race: state.race,
-                          classs: state.classs,
+                          name: state.slug,
                         ),
                         StatusTab(
                           character: state.character,
-                          name: state.name,
-                          race: state.race,
-                          classs: state.classs,
+                          name: state.slug,
+                          classs: classs,
                           spells: state.spells,
                         ),
                         SkillsTab(
                           character: state.character,
-                          name: state.name,
-                          race: state.race,
-                          classs: state.classs,
+                          name: state.slug,
+                          classs: classs,
                         ),
                         const Placeholder()
                       ],

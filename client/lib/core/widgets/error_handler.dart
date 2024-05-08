@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class ErrorHandler extends StatelessWidget {
-  final Error error;
+  final String error;
   final VoidCallback? onRetry;
 
   const ErrorHandler({super.key, required this.error, this.onRetry});
@@ -11,7 +11,7 @@ class ErrorHandler extends StatelessWidget {
     return Center(
       child: Column(
         children: [
-          Text('An error occurred: ${error.toString()}'),
+          Text('An error occurred: $error'),
           ElevatedButton(
             onPressed: () {
               if (onRetry != null) {

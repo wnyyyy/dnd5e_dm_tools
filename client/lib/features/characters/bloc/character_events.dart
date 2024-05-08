@@ -17,25 +17,17 @@ class CharacterLoad extends CharacterEvent {
 
 class CharacterUpdate extends CharacterEvent {
   final Map<String, dynamic> character;
-  final Map<String, dynamic> race;
-  final Map<String, dynamic> classs;
-  final Map<String, dynamic>? spells;
   final String name;
   final bool persistData;
   const CharacterUpdate({
     required this.character,
-    required this.race,
-    required this.classs,
     required this.name,
-    this.spells,
     this.persistData = false,
   });
 
   @override
   List<Object> get props => [
         character,
-        race,
-        classs,
         name,
       ];
 }

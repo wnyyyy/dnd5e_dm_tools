@@ -1,20 +1,17 @@
 import 'package:dnd5e_dm_tools/core/widgets/description_text.dart';
-import 'package:dnd5e_dm_tools/features/characters/bloc/character_bloc.dart';
-import 'package:dnd5e_dm_tools/features/characters/bloc/character_events.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
 class Spellbook extends StatefulWidget {
   final Map<String, dynamic> character;
   final Map<String, dynamic> spells;
-  final VoidCallback onDone;
   final VoidCallback? updateCharacter;
+  final VoidCallback? onDone;
 
   const Spellbook({
     super.key,
     required this.character,
     required this.spells,
-    required this.onDone,
+    this.onDone,
     this.updateCharacter,
   });
 
@@ -58,6 +55,46 @@ class SpellbookState extends State<Spellbook> {
       }
     }
     return searchResults;
+  }
+
+  Widget _buildSpellList(int level) {
+    List<dynamic> spellSlugs = widget.character['knownSpells'] ?? [];
+    if (spellSlugs.isEmpty) {
+      return Container();
+    }
+    List<MapEntry<String, dynamic>> spells = [];
+    for (var spellSlug in spellSlugs) {
+      final spell = widget.spells[spellSlug];
+      if (spell['level_int'] == level) {
+        spells.add(MapEntry(spellSlug, spell));
+      }
+    }
+    if (spells.isEmpty) {
+      return Container();
+    }
+    String label =
+        level == 0 ? 'Cantrips' : '${spells[0].value['level']} spells';
+    String spellCountLabel =
+        '${spells.length} ${spells.length == 1 ? 'spell' : 'spells'}';
+    Map<String, dynamic> classs = widget.character['class'];
+    int spellSlots = widget.character['spellSlots'][level];
+    return ExpansionTile(
+      title: Text(label),
+      subtitle: Row(
+        children: [
+          Text(spellCountLabel),
+        ],
+      ),
+      children: [
+        for (var entry in spells)
+          ListTile(
+            title: Text(entry.value['name']),
+            onTap: () {
+              _showSpellDialog(entry.key);
+            },
+          ),
+      ],
+    );
   }
 
   void _showSpellDialog(String spellSlug) {
@@ -275,7 +312,7 @@ class SpellbookState extends State<Spellbook> {
                       ],
                     ),
                     TextButton(
-                      onPressed: () => widget.onDone(),
+                      onPressed: () => widget.onDone?.call(),
                       child: const Icon(Icons.done),
                     ),
                   ],
@@ -308,21 +345,33 @@ class SpellbookState extends State<Spellbook> {
               border: const OutlineInputBorder(),
               suffixIcon: searchText.isEmpty
                   ? const Icon(Icons.search)
-                  : IconButton(
-                      icon: const Icon(Icons.clear),
-                      onPressed: () {
-                        setState(() {
-                          searchText = '';
-                          textEditingController.clear();
-                        });
-                      },
+                  : Flex(
+                      direction: Axis.horizontal,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.done),
+                          onPressed: () {
+                            FocusScope.of(context).unfocus();
+                          },
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.clear),
+                          onPressed: () {
+                            setState(() {
+                              searchText = '';
+                              textEditingController.clear();
+                            });
+                          },
+                        ),
+                      ],
                     ),
             ),
           ),
         ),
-        Expanded(
-          child: Visibility(
-            visible: searchText.isNotEmpty,
+        Visibility(
+          visible: searchText.isNotEmpty,
+          child: Expanded(
             child: Container(
               decoration: BoxDecoration(
                 border: Border.all(),
@@ -343,6 +392,13 @@ class SpellbookState extends State<Spellbook> {
                       ),
                     ),
             ),
+          ),
+        ),
+        Expanded(
+          child: ListView(
+            children: [
+              for (int i = 0; i < 10; i++) _buildSpellList(i),
+            ],
           ),
         ),
       ],

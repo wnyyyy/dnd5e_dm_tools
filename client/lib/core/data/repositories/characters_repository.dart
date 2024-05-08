@@ -1,10 +1,10 @@
 import 'package:dnd5e_dm_tools/core/data/db/database_provider.dart';
 
-class CharacterRepository {
+class CharactersRepository {
   final DatabaseProvider databaseProvider;
   final path = 'feats/';
 
-  CharacterRepository(this.databaseProvider);
+  CharactersRepository(this.databaseProvider);
 
   Future<dynamic> get(String name) async {
     final nameL = name.toLowerCase();

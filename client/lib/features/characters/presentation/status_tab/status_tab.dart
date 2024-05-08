@@ -11,7 +11,6 @@ import 'package:fluttericon/octicons_icons.dart';
 
 class StatusTab extends StatelessWidget {
   final Map<String, dynamic> character;
-  final Map<String, dynamic> race;
   final Map<String, dynamic> classs;
   final Map<String, dynamic>? spells;
   final String name;
@@ -20,7 +19,6 @@ class StatusTab extends StatelessWidget {
     super.key,
     required this.character,
     required this.name,
-    required this.race,
     required this.classs,
     required this.spells,
   });
@@ -46,15 +44,13 @@ class StatusTab extends StatelessWidget {
               children: [
                 Hitpoints(
                   character: character,
-                  classs: classs,
-                  race: race,
                   name: name,
                 ),
                 HitDice(
-                    character: character,
-                    classs: classs,
-                    race: race,
-                    name: name)
+                  character: character,
+                  classs: classs,
+                  name: name,
+                )
               ],
             ),
             Flex(
@@ -80,8 +76,6 @@ class StatusTab extends StatelessWidget {
                                         context.read<CharacterBloc>().add(
                                               CharacterUpdate(
                                                 character: character,
-                                                race: race,
-                                                classs: classs,
                                                 name: name,
                                               ),
                                             ),
@@ -105,12 +99,11 @@ class StatusTab extends StatelessWidget {
                     ),
                   ),
                 StatsView(
-                    onSave: () => context.read<CharacterBloc>().add(
-                        CharacterUpdate(
-                            character: character,
-                            race: race,
-                            classs: classs,
-                            name: name)),
+                    onSave: () =>
+                        context.read<CharacterBloc>().add(CharacterUpdate(
+                              character: character,
+                              name: name,
+                            )),
                     character: character),
               ],
             ),

@@ -12,13 +12,11 @@ class SavingThrowList extends StatefulWidget {
     super.key,
     required this.character,
     required this.classs,
-    required this.race,
     required this.name,
   });
 
   final Map<String, dynamic> character;
   final Map<String, dynamic> classs;
-  final Map<String, dynamic> race;
   final String name;
 
   @override
@@ -26,14 +24,14 @@ class SavingThrowList extends StatefulWidget {
 }
 
 class _SavingThrowListState extends State<SavingThrowList> {
-  late List<String> char_prof;
+  late List<String> charProf;
 
   @override
   void initState() {
     super.initState();
     final profStr = widget.character['prof_saving_throws'] ??
         widget.classs['prof_saving_throws'];
-    char_prof = profStr
+    charProf = profStr
         .toString()
         .toLowerCase()
         .split(',')
@@ -52,7 +50,7 @@ class _SavingThrowListState extends State<SavingThrowList> {
         context: context,
         builder: (BuildContext context) {
           final attr = attributeName.toLowerCase();
-          bool isProficient = char_prof.contains(attr);
+          bool isProficient = charProf.contains(attr);
           return StatefulBuilder(
             builder: (BuildContext context, StateSetter setDialogState) {
               return AlertDialog(
@@ -64,11 +62,11 @@ class _SavingThrowListState extends State<SavingThrowList> {
                     if (value != null) {
                       setDialogState(() {
                         if (value) {
-                          if (!char_prof.contains(attr)) {
-                            char_prof.add(attr);
+                          if (!charProf.contains(attr)) {
+                            charProf.add(attr);
                           }
                         } else {
-                          char_prof.remove(attr);
+                          charProf.remove(attr);
                         }
                         isProficient = value;
                       });
@@ -87,12 +85,11 @@ class _SavingThrowListState extends State<SavingThrowList> {
                     child: const Icon(Icons.check),
                     onPressed: () {
                       widget.character['prof_saving_throws'] =
-                          char_prof.join(',');
+                          charProf.join(',');
                       context.read<CharacterBloc>().add(CharacterUpdate(
-                          character: widget.character,
-                          race: widget.race,
-                          classs: widget.classs,
-                          name: widget.name));
+                            character: widget.character,
+                            name: widget.name,
+                          ));
                       Navigator.of(context).pop();
                     },
                   ),
@@ -129,7 +126,7 @@ class _SavingThrowListState extends State<SavingThrowList> {
                           attributeValue: asi['strength'],
                           color: Theme.of(context).strengthColor,
                           proficiency:
-                              char_prof.contains('strength') ? profBonus : null,
+                              charProf.contains('strength') ? profBonus : null,
                           onTap: editMode
                               ? () => editSavingThrow('Strength')
                               : null,
@@ -139,9 +136,8 @@ class _SavingThrowListState extends State<SavingThrowList> {
                           attributePrefix: 'DEX',
                           attributeValue: asi['dexterity'],
                           color: Theme.of(context).dexterityColor,
-                          proficiency: char_prof.contains('dexterity')
-                              ? profBonus
-                              : null,
+                          proficiency:
+                              charProf.contains('dexterity') ? profBonus : null,
                           onTap: editMode
                               ? () => editSavingThrow('Dexterity')
                               : null,
@@ -151,7 +147,7 @@ class _SavingThrowListState extends State<SavingThrowList> {
                           attributePrefix: 'CON',
                           attributeValue: asi['constitution'],
                           color: Theme.of(context).constitutionColor,
-                          proficiency: char_prof.contains('constitution')
+                          proficiency: charProf.contains('constitution')
                               ? profBonus
                               : null,
                           onTap: editMode
@@ -167,7 +163,7 @@ class _SavingThrowListState extends State<SavingThrowList> {
                           attributePrefix: 'INT',
                           attributeValue: asi['intelligence'],
                           color: Theme.of(context).intelligenceColor,
-                          proficiency: char_prof.contains('intelligence')
+                          proficiency: charProf.contains('intelligence')
                               ? profBonus
                               : null,
                           onTap: editMode
@@ -180,7 +176,7 @@ class _SavingThrowListState extends State<SavingThrowList> {
                           attributeValue: asi['wisdom'],
                           color: Theme.of(context).wisdomColor,
                           proficiency:
-                              char_prof.contains('wisdom') ? profBonus : null,
+                              charProf.contains('wisdom') ? profBonus : null,
                           onTap:
                               editMode ? () => editSavingThrow('Wisdom') : null,
                         ),
@@ -190,7 +186,7 @@ class _SavingThrowListState extends State<SavingThrowList> {
                           attributeValue: asi['charisma'],
                           color: Theme.of(context).charismaColor,
                           proficiency:
-                              char_prof.contains('charisma') ? profBonus : null,
+                              charProf.contains('charisma') ? profBonus : null,
                           onTap: editMode
                               ? () => editSavingThrow('Charisma')
                               : null,

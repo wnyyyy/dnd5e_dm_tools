@@ -13,72 +13,49 @@ class CharacterStateInitial extends CharacterState {
 }
 
 class CharacterStateLoading extends CharacterState {
+  final String slug;
+
+  const CharacterStateLoading({
+    required this.slug,
+  });
+
   @override
-  List<Object> get props => [];
+  List<Object> get props => [slug];
 }
 
 class CharacterStateError extends CharacterState {
+  final String slug;
   final String error;
-  const CharacterStateError(this.error);
+  const CharacterStateError({
+    required this.error,
+    required this.slug,
+  });
 
   @override
-  List<Object> get props => [error];
+  List<Object> get props => [error, slug];
 }
 
 class CharacterStateLoaded extends CharacterState {
   final Map<String, dynamic> character;
-  final Map<String, dynamic> race;
-  final Map<String, dynamic> classs;
-  final Map<String, dynamic>? spells;
-  final String name;
-  final bool editingFeats;
-  final bool editingProf;
-  final Map<String, dynamic>? showFeatDetails;
-  final Map<String, Map>? availableFeats;
+  final String slug;
   const CharacterStateLoaded({
     required this.character,
-    required this.name,
-    required this.race,
-    required this.classs,
-    this.spells,
-    this.showFeatDetails,
-    this.availableFeats,
-    this.editingFeats = false,
-    this.editingProf = false,
+    required this.slug,
   });
 
-  CharacterStateLoaded copyWith({
-    Map<String, dynamic>? character,
-    Map<String, dynamic>? race,
-    Map<String, dynamic>? classs,
-    Map<String, dynamic>? spells,
-    String? name,
-    Map<String, dynamic>? showFeatDetails,
-    Map<String, Map>? availableFeats,
-    bool? editingFeats,
-    bool? editingProf,
-  }) {
+  CharacterStateLoaded copyWith(
+      {Map<String, dynamic>? character,
+      String? slug,
+      Map<String, dynamic>? spells}) {
     return CharacterStateLoaded(
       character: character ?? this.character,
-      race: race ?? this.race,
-      classs: classs ?? this.classs,
-      name: name ?? this.name,
-      spells: spells ?? this.spells,
-      availableFeats: availableFeats ?? this.availableFeats,
-      showFeatDetails: showFeatDetails ?? this.showFeatDetails,
-      editingFeats: editingFeats ?? this.editingFeats,
-      editingProf: editingProf ?? this.editingProf,
+      slug: slug ?? this.slug,
     );
   }
 
   @override
   List<Object> get props => [
         ...character.entries,
-        name,
-        race,
-        classs,
-        editingFeats,
-        editingProf,
-        spells ?? {},
+        slug,
       ];
 }

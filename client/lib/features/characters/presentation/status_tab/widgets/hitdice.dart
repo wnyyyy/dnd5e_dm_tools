@@ -9,13 +9,11 @@ class HitDice extends StatefulWidget {
     super.key,
     required this.character,
     required this.classs,
-    required this.race,
     required this.name,
   });
 
   final Map<String, dynamic> character;
   final Map<String, dynamic> classs;
-  final Map<String, dynamic> race;
   final String name;
 
   @override
@@ -84,10 +82,7 @@ class _HitDiceState extends State<HitDice> {
                               int.tryParse(maxHpController.text) ??
                               0;
                       context.read<CharacterBloc>().add(CharacterUpdate(
-                          character: widget.character,
-                          race: widget.race,
-                          classs: widget.classs,
-                          name: widget.name));
+                          character: widget.character, name: widget.name));
 
                       Navigator.of(context).pop();
                     },
@@ -116,8 +111,6 @@ class _HitDiceState extends State<HitDice> {
       character['hd_curr'] = currentHP;
       context.read<CharacterBloc>().add(CharacterUpdate(
             character: character,
-            race: widget.race,
-            classs: widget.classs,
             name: widget.name,
             persistData: true,
           ));
@@ -205,8 +198,6 @@ class _HitDiceState extends State<HitDice> {
                           character['death_save'] = deathSave;
                           context.read<CharacterBloc>().add(CharacterUpdate(
                                 character: character,
-                                race: widget.race,
-                                classs: widget.classs,
                                 name: widget.name,
                                 persistData: false,
                               ));
@@ -226,8 +217,6 @@ class _HitDiceState extends State<HitDice> {
                           character['death_save'] = deathSave;
                           context.read<CharacterBloc>().add(CharacterUpdate(
                                 character: character,
-                                race: widget.race,
-                                classs: widget.classs,
                                 name: widget.name,
                                 persistData: false,
                               ));

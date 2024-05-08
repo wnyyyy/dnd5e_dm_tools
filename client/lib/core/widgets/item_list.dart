@@ -9,7 +9,8 @@ class ItemList extends StatefulWidget {
   final String displayKey;
   final String emptyMessage;
 
-  const ItemList({super.key, 
+  const ItemList({
+    super.key,
     required this.items,
     required this.onItemsChanged,
     required this.onAddItem,
@@ -20,10 +21,10 @@ class ItemList extends StatefulWidget {
   });
 
   @override
-  _ItemListState createState() => _ItemListState();
+  ItemListState createState() => ItemListState();
 }
 
-class _ItemListState extends State<ItemList> {
+class ItemListState extends State<ItemList> {
   bool _isEditMode = false;
 
   void _enableEditMode() {

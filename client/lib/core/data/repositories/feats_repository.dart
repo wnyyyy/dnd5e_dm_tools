@@ -1,10 +1,10 @@
 import 'package:dnd5e_dm_tools/core/data/db/database_provider.dart';
 
-class FeatRepository {
+class FeatsRepository {
   final DatabaseProvider databaseProvider;
   final path = 'feats/';
 
-  FeatRepository(this.databaseProvider);
+  FeatsRepository(this.databaseProvider);
 
   Future<Map<String, dynamic>?> get(String slug) async {
     final docSnapshot = await databaseProvider.getDocument(path: '$path$slug');

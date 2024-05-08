@@ -12,16 +12,14 @@ import 'package:provider/provider.dart';
 
 class SkillsTab extends StatelessWidget {
   final Map<String, dynamic> character;
-  final Map<String, dynamic> race;
   final Map<String, dynamic> classs;
   final String name;
 
   const SkillsTab({
     super.key,
     required this.character,
-    required this.name,
-    required this.race,
     required this.classs,
+    required this.name,
   });
 
   @override
@@ -42,17 +40,20 @@ class SkillsTab extends StatelessWidget {
                   children: [
                     _buildProficiencyBonus(context),
                     SavingThrowList(
-                        character: character,
-                        classs: classs,
-                        race: race,
-                        name: name),
+                      character: character,
+                      name: name,
+                      classs: classs,
+                    ),
                     _buildPassivePerception(context),
                   ],
                 ),
               ],
             ),
             SkillList(
-                character: character, classs: classs, race: race, name: name)
+              character: character,
+              classs: classs,
+              name: name,
+            )
           ],
         ),
       ),
@@ -94,11 +95,9 @@ class SkillsTab extends StatelessWidget {
                       newValue != currentValue &&
                       newValue >= 0) {
                     character['asi'][attributeName.toLowerCase()] = newValue;
-                    context.read<CharacterBloc>().add(CharacterUpdate(
-                        character: character,
-                        race: race,
-                        classs: classs,
-                        name: name));
+                    context
+                        .read<CharacterBloc>()
+                        .add(CharacterUpdate(character: character, name: name));
                     Navigator.of(context).pop();
                   }
                 },
@@ -235,10 +234,7 @@ class SkillsTab extends StatelessWidget {
                                 newValue >= 0) {
                               character['passive_perception'] = newValue;
                               context.read<CharacterBloc>().add(CharacterUpdate(
-                                  character: character,
-                                  race: race,
-                                  classs: classs,
-                                  name: name));
+                                  character: character, name: name));
                               Navigator.of(context).pop();
                             }
                           },

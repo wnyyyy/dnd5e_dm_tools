@@ -2,21 +2,16 @@ import 'package:dnd5e_dm_tools/features/characters/bloc/character_bloc.dart';
 import 'package:dnd5e_dm_tools/features/characters/bloc/character_events.dart';
 import 'package:dnd5e_dm_tools/features/settings/bloc/settings_cubit.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttericon/rpg_awesome_icons.dart';
 import 'package:provider/provider.dart';
 
 class Hitpoints extends StatefulWidget {
   const Hitpoints({
     super.key,
     required this.character,
-    required this.classs,
-    required this.race,
     required this.name,
   });
 
   final Map<String, dynamic> character;
-  final Map<String, dynamic> classs;
-  final Map<String, dynamic> race;
   final String name;
 
   @override
@@ -24,7 +19,7 @@ class Hitpoints extends StatefulWidget {
 }
 
 class _HitpointsState extends State<Hitpoints> {
-  late List<String> char_prof;
+  late List<String> charProf;
   bool tempHpMode = false;
   bool deathSaveMode = false;
 
@@ -103,10 +98,7 @@ class _HitpointsState extends State<Hitpoints> {
                           int.tryParse(tempHpController.text) ?? 0;
 
                       context.read<CharacterBloc>().add(CharacterUpdate(
-                          character: widget.character,
-                          race: widget.race,
-                          classs: widget.classs,
-                          name: widget.name));
+                          character: widget.character, name: widget.name));
 
                       Navigator.of(context).pop();
                     },
@@ -152,8 +144,6 @@ class _HitpointsState extends State<Hitpoints> {
       character['hp_curr'] = currentHP;
       context.read<CharacterBloc>().add(CharacterUpdate(
             character: character,
-            race: widget.race,
-            classs: widget.classs,
             name: widget.name,
             persistData: false,
           ));
@@ -276,8 +266,6 @@ class _HitpointsState extends State<Hitpoints> {
                           character['death_save'] = deathSave;
                           context.read<CharacterBloc>().add(CharacterUpdate(
                                 character: character,
-                                race: widget.race,
-                                classs: widget.classs,
                                 name: widget.name,
                                 persistData: false,
                               ));
@@ -297,8 +285,6 @@ class _HitpointsState extends State<Hitpoints> {
                           character['death_save'] = deathSave;
                           context.read<CharacterBloc>().add(CharacterUpdate(
                                 character: character,
-                                race: widget.race,
-                                classs: widget.classs,
                                 name: widget.name,
                                 persistData: false,
                               ));
