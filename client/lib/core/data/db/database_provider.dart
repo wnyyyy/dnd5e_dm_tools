@@ -1,10 +1,5 @@
-import 'dart:convert';
-import 'dart:io';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hive/hive.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:flutter/services.dart' show rootBundle;
 
 class DatabaseProvider {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
@@ -113,6 +108,10 @@ class DatabaseProvider {
 
     for (var doc in snapshot.docs) {
       data[doc.id] = doc.data();
+      if (cacheBoxName != null) {
+        final cacheBox = Hive.box<Map>(cacheBoxName);
+        await cacheBox.put(doc.id, doc.data());
+      }
     }
 
     print('Fetched $path from Firestore');
@@ -121,41 +120,11 @@ class DatabaseProvider {
 
   Future<void> loadCache(String cacheBoxName) async {
     print('Checking cache for $cacheBoxName...');
-    var box = await Hive.openBox<Map>(cacheBoxName);
-    if (box.isEmpty) {
-      print('Building cache for: $cacheBoxName...');
-      try {
-        String data = await rootBundle.loadString('assets/$cacheBoxName');
-        Map<String, dynamic> defaultData = json.decode(data);
-        for (var key in defaultData.keys) {
-          await box.put(key, defaultData[key]);
-        }
-        print('Cache built for: $cacheBoxName');
-      } catch (e) {
-        print('Error loading cache asset: $e // $cacheBoxName');
-      }
+    try {
+      var box = await Hive.openBox<Map>(cacheBoxName);
+      print('Cache for $cacheBoxName loaded with ${box.length} items');
+    } catch (e) {
+      print('Error loading cache from .hive file: $e // $cacheBoxName');
     }
-    print('Cache for $cacheBoxName loaded with ${box.length} items');
-  }
-
-  Future<void> persistCache(String boxName) async {
-    Map<String, dynamic> data = await _fetchAllDataFromHive(boxName);
-    String jsonString = json.encode(data);
-
-    final directory = await getApplicationDocumentsDirectory();
-    final file = File('${directory.path}/$boxName');
-    await file.writeAsString(jsonString);
-
-    print('Data saved to ${file.path} // $boxName');
-  }
-
-  Future<Map<String, dynamic>> _fetchAllDataFromHive(String boxName) async {
-    var box = await Hive.openBox<Map>(boxName);
-    Map<String, dynamic> data = {};
-    for (var key in box.keys) {
-      data[key] = box.get(key);
-    }
-
-    return data;
   }
 }

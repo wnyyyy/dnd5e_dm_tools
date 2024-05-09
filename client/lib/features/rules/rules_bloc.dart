@@ -43,13 +43,6 @@ class RulesCubit extends Cubit<RulesState> {
       emit(RulesStateError(e.toString()));
     }
     try {
-      await conditionsRepository.databaseProvider
-          .persistCache(cacheConditionsName);
-      await racesRepository.databaseProvider.persistCache(cacheRacesName);
-      await classesRepository.databaseProvider.persistCache(cacheClassesName);
-      await spellsRepository.databaseProvider.persistCache(cacheSpellsName);
-      await featsRepository.databaseProvider.persistCache(cacheFeatsName);
-      await spellsRepository.databaseProvider.persistCache(cacheSpellsName);
       emit(
         RulesStateLoaded(
           conditions: results[0],
