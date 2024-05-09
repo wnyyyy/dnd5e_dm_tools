@@ -22,7 +22,6 @@ enum ThemeColor {
   crimsonRed,
   forestGreen,
   midnightBlue,
-  skyBlue,
   lavenderViolet,
   slateGrey,
 }

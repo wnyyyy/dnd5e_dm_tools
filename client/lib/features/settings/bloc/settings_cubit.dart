@@ -65,7 +65,8 @@ class SettingsCubit extends Cubit<SettingsState> {
       final name = await readConfig('char_name') ?? '';
       final isCaster = await readConfig('is_caster') ?? 'false';
       final classOnly = await readConfig('class_only_spells') ?? 'false';
-      final themeColorName = await readConfig('theme_color') ?? 'Light Brown';
+      final themeColorName =
+          await readConfig('theme_color') ?? ThemeColor.chestnutBrown.name;
       final isDarkMode = await readConfig('is_dark_mode') ?? 'false';
       final themeColor = ThemeColor.values.firstWhere(
           (e) => e.name == themeColorName,

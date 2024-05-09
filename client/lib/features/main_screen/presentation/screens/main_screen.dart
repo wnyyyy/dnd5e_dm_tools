@@ -1,9 +1,7 @@
-import 'package:dnd5e_dm_tools/core/config/theme_cubit.dart';
+import 'package:dnd5e_dm_tools/core/config/app_themes.dart';
 import 'package:dnd5e_dm_tools/core/widgets/error_handler.dart';
 import 'package:dnd5e_dm_tools/features/characters/presentation/character_screen.dart';
-import 'package:dnd5e_dm_tools/features/header/cubit/header_cubit.dart';
-import 'package:dnd5e_dm_tools/features/header/cubit/header_states.dart';
-import 'package:dnd5e_dm_tools/features/header/presentation/header.dart';
+import 'package:dnd5e_dm_tools/features/header/header.dart';
 import 'package:dnd5e_dm_tools/features/main_screen/cubit/main_screen_cubit.dart';
 import 'package:dnd5e_dm_tools/features/main_screen/cubit/main_screen_states.dart';
 import 'package:dnd5e_dm_tools/features/main_screen/presentation/widgets/main_drawer.dart';
@@ -21,51 +19,46 @@ class MainScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<HeaderCubit, HeaderState>(
-      builder: (context, headerState) {
-        context.read<ThemeCubit>().updateTheme(headerState.isDarkMode);
-        return BlocBuilder<ThemeCubit, ThemeData>(
-          builder: (context, themeData) {
-            return MaterialApp(
-              theme: themeData,
-              home: Scaffold(
-                drawer: const MainDrawer(),
-                appBar: const Header(),
-                body: PopScope(
-                  child: BlocBuilder<SettingsCubit, SettingsState>(
-                    builder:
-                        (BuildContext context, SettingsState settingsState) {
-                      if (settingsState is SettingsInitial) {
-                        context.read<SettingsCubit>().init();
-                      }
-                      if (settingsState is SettingsLoading) {
-                        return const Center(
-                          child: CircularProgressIndicator(),
-                        );
-                      }
-                      if (settingsState is SettingsError) {
-                        return Center(
-                          child: ErrorHandler(error: settingsState.message),
-                        );
-                      }
-                      if (settingsState is SettingsLoaded) {
-                        if (settingsState.name.isEmpty) {
-                          return Center(
-                            child: SettingsScreen(),
-                          );
-                        } else {
-                          return _loadMainScreen(context, settingsState);
-                        }
-                      }
-
-                      return Container();
-                    },
-                  ),
+    return BlocBuilder<SettingsCubit, SettingsState>(
+      builder: (context, state) {
+        if (state is SettingsInitial) {
+          context.read<SettingsCubit>().init();
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+        if (state is SettingsError) {
+          return ErrorHandler(error: state.message);
+        }
+        if (state is SettingsLoading) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+        if (state is SettingsLoaded) {
+          final appTheme =
+              AppThemes.buildThemeData(state.themeColor, state.isDarkMode);
+          return MaterialApp(
+            theme: appTheme,
+            home: Scaffold(
+              drawer: const MainDrawer(),
+              appBar: const Header(),
+              body: PopScope(
+                child: Builder(
+                  builder: (context) {
+                    if (state.name.isEmpty) {
+                      return Center(
+                        child: SettingsScreen(),
+                      );
+                    }
+                    return _loadMainScreen(context, state);
+                  },
                 ),
               ),
-            );
-          },
-        );
+            ),
+          );
+        }
+        return Container();
       },
     );
   }

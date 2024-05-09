@@ -6,13 +6,11 @@ import 'package:dnd5e_dm_tools/core/data/repositories/classes_repository.dart';
 import 'package:dnd5e_dm_tools/core/data/repositories/feats_repository.dart';
 import 'package:dnd5e_dm_tools/core/data/repositories/items_repository.dart';
 import 'package:dnd5e_dm_tools/core/data/repositories/races_repository.dart';
-import 'package:dnd5e_dm_tools/core/config/theme_cubit.dart';
 import 'package:dnd5e_dm_tools/core/data/repositories/conditions_repository.dart';
 import 'package:dnd5e_dm_tools/core/data/repositories/spells_repository.dart';
 import 'package:dnd5e_dm_tools/core/util/const.dart';
 import 'package:dnd5e_dm_tools/features/main_screen/cubit/main_screen_cubit.dart';
 import 'package:dnd5e_dm_tools/features/characters/bloc/character_bloc.dart';
-import 'package:dnd5e_dm_tools/features/header/cubit/header_cubit.dart';
 import 'package:dnd5e_dm_tools/features/main_screen/presentation/screens/main_screen.dart';
 import 'package:dnd5e_dm_tools/features/rules/rules_cubit.dart';
 import 'package:dnd5e_dm_tools/features/screen_splitter/cubit/screen_splitter_cubit.dart';
@@ -101,16 +99,6 @@ class Dnd5eDmTools extends StatelessWidget {
       builder: (context, child) {
         return MultiBlocProvider(
           providers: [
-            BlocProvider(create: (_) => ScreenSplitterCubit()),
-            BlocProvider(create: (_) => HeaderCubit()),
-            BlocProvider(create: (_) => MainScreenCubit()),
-            BlocProvider(create: (_) => ThemeCubit()),
-            BlocProvider(
-                create: (_) => CharacterBloc(
-                      charactersRepository:
-                          context.read<CharactersRepository>(),
-                    )),
-            BlocProvider(create: (_) => ScreenSplitterCubit()),
             BlocProvider(
                 create: (_) => SettingsCubit(
                       racesRepository: context.read<RacesRepository>(),
@@ -121,6 +109,14 @@ class Dnd5eDmTools extends StatelessWidget {
                           context.read<ConditionsRepository>(),
                       itemsRepository: context.read<ItemsRepository>(),
                     )),
+            BlocProvider(create: (_) => ScreenSplitterCubit()),
+            BlocProvider(create: (_) => MainScreenCubit()),
+            BlocProvider(
+                create: (_) => CharacterBloc(
+                      charactersRepository:
+                          context.read<CharactersRepository>(),
+                    )),
+            BlocProvider(create: (_) => ScreenSplitterCubit()),
             BlocProvider(
                 create: (_) => RulesCubit(
                       conditionsRepository:
