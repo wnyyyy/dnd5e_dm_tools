@@ -1,1 +1,17 @@
-
+enum EquipmentType {
+  ammunition,
+  adventure,
+  magic,
+  armor,
+  profession,
+  misc,
+  mount,
+  rangedWeapons,
+  meleeWeapons,
+  special,
+  consumable,
+  accessories,
+  shield,
+  scroll,
+  unknown,
+}

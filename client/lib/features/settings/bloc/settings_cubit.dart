@@ -1,6 +1,7 @@
 import 'package:dnd5e_dm_tools/core/data/repositories/classes_repository.dart';
 import 'package:dnd5e_dm_tools/core/data/repositories/conditions_repository.dart';
 import 'package:dnd5e_dm_tools/core/data/repositories/feats_repository.dart';
+import 'package:dnd5e_dm_tools/core/data/repositories/items_repository.dart';
 import 'package:dnd5e_dm_tools/core/data/repositories/races_repository.dart';
 import 'package:dnd5e_dm_tools/core/data/repositories/spells_repository.dart';
 import 'package:dnd5e_dm_tools/core/util/helper.dart';
@@ -13,6 +14,7 @@ class SettingsCubit extends Cubit<SettingsState> {
   final ClassesRepository classesRepository;
   final ConditionsRepository conditionsRepository;
   final RacesRepository racesRepository;
+  final ItemsRepository itemsRepository;
 
   SettingsCubit({
     required this.spellsRepository,
@@ -20,6 +22,7 @@ class SettingsCubit extends Cubit<SettingsState> {
     required this.classesRepository,
     required this.conditionsRepository,
     required this.racesRepository,
+    required this.itemsRepository,
   }) : super(SettingsInitial());
 
   void changeName(String name) async {
@@ -59,6 +62,7 @@ class SettingsCubit extends Cubit<SettingsState> {
       await classesRepository.init();
       await conditionsRepository.init();
       await racesRepository.init();
+      await itemsRepository.init();
       print('Settings loaded');
       emit(SettingsLoaded(
         name: name,

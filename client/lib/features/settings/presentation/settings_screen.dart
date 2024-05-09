@@ -6,50 +6,55 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class SettingsScreen extends StatelessWidget {
-  const SettingsScreen({super.key});
+  SettingsScreen({super.key});
+
+  final TextEditingController _nameController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    return Flex(
-        direction: Axis.vertical,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Column(
-            children: [
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                child: _buildNameField(context),
-              ),
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.2),
-                child: _buildIsCasterToggle(context),
-              ),
-            ],
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 32),
-            child: _buildEditButton(context),
-          ),
-        ]);
+    return BlocConsumer<SettingsCubit, SettingsState>(
+      listenWhen: (previous, current) => previous.name != current.name,
+      listener: (context, state) {
+        _nameController.text = state.name;
+      },
+      buildWhen: (previous, current) => previous.name != current.name,
+      builder: (context, state) {
+        if (_nameController.text != state.name) {
+          _nameController.text = state.name;
+        }
+        return Flex(
+          direction: Axis.vertical,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Column(
+              children: [
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                  child: _buildNameField(context),
+                ),
+                Padding(
+                  padding: EdgeInsets.symmetric(
+                      horizontal: MediaQuery.of(context).size.width * 0.2),
+                  child: _buildIsCasterToggle(context),
+                ),
+              ],
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 32),
+              child: _buildEditButton(context),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   Widget _buildNameField(BuildContext context) {
-    return BlocBuilder<SettingsCubit, SettingsState>(
-      builder: (context, state) {
-        return TextFormField(
-          initialValue: state.name,
-          decoration: const InputDecoration(labelText: 'Name'),
-          readOnly: !state.isEditMode,
-          onFieldSubmitted: (value) {
-            if (state.isEditMode) {
-              BlocProvider.of<SettingsCubit>(context).changeName(value);
-              BlocProvider.of<CharacterBloc>(context).add(CharacterLoad(value));
-            }
-          },
-        );
-      },
+    return TextFormField(
+      controller: _nameController,
+      decoration: const InputDecoration(labelText: 'Name'),
+      readOnly: !BlocProvider.of<SettingsCubit>(context).state.isEditMode,
     );
   }
 
@@ -90,6 +95,10 @@ class SettingsScreen extends StatelessWidget {
             children: [
               ElevatedButton(
                 onPressed: () {
+                  BlocProvider.of<SettingsCubit>(context)
+                      .changeName(_nameController.text);
+                  BlocProvider.of<CharacterBloc>(context)
+                      .add(CharacterLoad(_nameController.text));
                   BlocProvider.of<SettingsCubit>(context).toggleEditMode();
                   BlocProvider.of<CharacterBloc>(context)
                       .add(const PersistCharacter());

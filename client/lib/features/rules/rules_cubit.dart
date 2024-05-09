@@ -1,9 +1,9 @@
 import 'package:dnd5e_dm_tools/core/data/repositories/classes_repository.dart';
 import 'package:dnd5e_dm_tools/core/data/repositories/conditions_repository.dart';
 import 'package:dnd5e_dm_tools/core/data/repositories/feats_repository.dart';
+import 'package:dnd5e_dm_tools/core/data/repositories/items_repository.dart';
 import 'package:dnd5e_dm_tools/core/data/repositories/races_repository.dart';
 import 'package:dnd5e_dm_tools/core/data/repositories/spells_repository.dart';
-import 'package:dnd5e_dm_tools/core/util/const.dart';
 import 'package:dnd5e_dm_tools/features/rules/rules_states.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -13,12 +13,14 @@ class RulesCubit extends Cubit<RulesState> {
   final FeatsRepository featsRepository;
   final ClassesRepository classesRepository;
   final SpellsRepository spellsRepository;
+  final ItemsRepository itemsRepository;
   RulesCubit({
     required this.conditionsRepository,
     required this.racesRepository,
     required this.featsRepository,
     required this.classesRepository,
     required this.spellsRepository,
+    required this.itemsRepository,
   }) : super(RulesStateInitial());
 
   void loadRules() async {
@@ -31,6 +33,8 @@ class RulesCubit extends Cubit<RulesState> {
       final spells = spellsRepository.getAll();
       final feats = featsRepository.getAll();
       final spellLists = spellsRepository.getSpellLists();
+      final items = itemsRepository.getAll();
+      final magicItems = itemsRepository.getAllMagicItems();
       results = await Future.wait([
         conditions,
         races,
@@ -38,6 +42,8 @@ class RulesCubit extends Cubit<RulesState> {
         spells,
         feats,
         spellLists,
+        items,
+        magicItems,
       ]);
     } catch (e) {
       emit(RulesStateError(e.toString()));
@@ -51,6 +57,8 @@ class RulesCubit extends Cubit<RulesState> {
           spells: results[3],
           feats: results[4],
           spellLists: results[5],
+          items: results[6],
+          magicItems: results[7],
         ),
       );
     } catch (e) {
@@ -110,6 +118,27 @@ class RulesCubit extends Cubit<RulesState> {
         }
       }
       return spellList;
+    }
+    return {};
+  }
+
+  Map<String, dynamic>? getItem(String slug) {
+    if (state is RulesStateLoaded) {
+      return (state as RulesStateLoaded).items[slug];
+    }
+    return null;
+  }
+
+  Map<String, dynamic> getAllItems() {
+    if (state is RulesStateLoaded) {
+      return (state as RulesStateLoaded).items;
+    }
+    return {};
+  }
+
+  Map<String, dynamic> getAllMagicItems() {
+    if (state is RulesStateLoaded) {
+      return (state as RulesStateLoaded).magicItems;
     }
     return {};
   }

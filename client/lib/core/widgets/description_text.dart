@@ -1,6 +1,6 @@
 import 'package:dnd5e_dm_tools/core/config/app_colors.dart';
 import 'package:dnd5e_dm_tools/core/widgets/trait_description.dart';
-import 'package:dnd5e_dm_tools/features/rules/rules_bloc.dart';
+import 'package:dnd5e_dm_tools/features/rules/rules_cubit.dart';
 import 'package:dnd5e_dm_tools/features/rules/rules_states.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -101,6 +101,7 @@ class DescriptionText extends StatelessWidget {
             ),
           ));
         }
+          spans.add(const TextSpan(text: ' '));
         return '';
       },
       onNonMatch: (String text) {
@@ -143,7 +144,9 @@ class DescriptionText extends StatelessWidget {
                 },
             ));
           } else {
-            spans.add(TextSpan(text: '$word ', style: baseStyle));
+            if (word.isNotEmpty) {
+              spans.add(TextSpan(text: '$word ', style: baseStyle));
+            }
           }
         }
         return '';

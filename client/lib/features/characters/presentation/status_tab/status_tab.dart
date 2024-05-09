@@ -4,7 +4,7 @@ import 'package:dnd5e_dm_tools/features/characters/presentation/status_tab/widge
 import 'package:dnd5e_dm_tools/features/characters/presentation/status_tab/widgets/hp.dart';
 import 'package:dnd5e_dm_tools/features/characters/presentation/status_tab/widgets/spellbook.dart';
 import 'package:dnd5e_dm_tools/features/characters/presentation/status_tab/widgets/stats.dart';
-import 'package:dnd5e_dm_tools/features/rules/rules_bloc.dart';
+import 'package:dnd5e_dm_tools/features/rules/rules_cubit.dart';
 import 'package:dnd5e_dm_tools/features/settings/bloc/settings_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -13,11 +13,13 @@ import 'package:fluttericon/octicons_icons.dart';
 class StatusTab extends StatelessWidget {
   final Map<String, dynamic> character;
   final String slug;
+  final List<Map<String, dynamic>> table;
 
   const StatusTab({
     super.key,
     required this.character,
     required this.slug,
+    required this.table,
   });
 
   @override
@@ -36,6 +38,9 @@ class StatusTab extends StatelessWidget {
       spells = {};
     }
     final classs = context.read<RulesCubit>().getClass(character['class']);
+    if (classs == null) {
+      return Container();
+    }
     return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -50,12 +55,11 @@ class StatusTab extends StatelessWidget {
                   character: character,
                   slug: slug,
                 ),
-                if (classs != null)
-                  HitDice(
-                    character: character,
-                    classs: classs,
-                    slug: slug,
-                  )
+                HitDice(
+                  character: character,
+                  classs: classs,
+                  slug: slug,
+                )
               ],
             ),
             Flex(
@@ -77,6 +81,7 @@ class StatusTab extends StatelessWidget {
                                 content: Spellbook(
                                     character: character,
                                     spells: spells,
+                                    table: table,
                                     updateCharacter: () =>
                                         context.read<CharacterBloc>().add(
                                               CharacterUpdate(

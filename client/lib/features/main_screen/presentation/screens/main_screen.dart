@@ -7,7 +7,7 @@ import 'package:dnd5e_dm_tools/features/header/presentation/header.dart';
 import 'package:dnd5e_dm_tools/features/main_screen/cubit/main_screen_cubit.dart';
 import 'package:dnd5e_dm_tools/features/main_screen/cubit/main_screen_states.dart';
 import 'package:dnd5e_dm_tools/features/main_screen/presentation/widgets/main_drawer.dart';
-import 'package:dnd5e_dm_tools/features/rules/rules_bloc.dart';
+import 'package:dnd5e_dm_tools/features/rules/rules_cubit.dart';
 import 'package:dnd5e_dm_tools/features/rules/rules_states.dart';
 import 'package:dnd5e_dm_tools/features/screen_splitter/presentation/screen_splitter.dart';
 import 'package:dnd5e_dm_tools/features/settings/bloc/settings_cubit.dart';
@@ -22,8 +22,8 @@ class MainScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<HeaderCubit, HeaderState>(
-      builder: (context, state) {
-        context.read<ThemeCubit>().updateTheme(state.isDarkMode);
+      builder: (context, headerState) {
+        context.read<ThemeCubit>().updateTheme(headerState.isDarkMode);
         return BlocBuilder<ThemeCubit, ThemeData>(
           builder: (context, themeData) {
             return MaterialApp(
@@ -33,64 +33,31 @@ class MainScreen extends StatelessWidget {
                 appBar: const Header(),
                 body: PopScope(
                   child: BlocBuilder<SettingsCubit, SettingsState>(
-                    builder: (BuildContext context, SettingsState state) {
-                      if (state is SettingsInitial) {
+                    builder:
+                        (BuildContext context, SettingsState settingsState) {
+                      if (settingsState is SettingsInitial) {
                         context.read<SettingsCubit>().init();
                       }
-                      if (state is SettingsLoading) {
+                      if (settingsState is SettingsLoading) {
                         return const Center(
                           child: CircularProgressIndicator(),
                         );
                       }
-                      if (state is SettingsError) {
+                      if (settingsState is SettingsError) {
                         return Center(
-                          child: ErrorHandler(error: state.message),
+                          child: ErrorHandler(error: settingsState.message),
                         );
                       }
-                      if (state is SettingsLoaded) {
-                        return BlocBuilder<RulesCubit, RulesState>(
-                          builder: (context, state) {
-                            if (state is RulesStateInitial) {
-                              context.read<RulesCubit>().loadRules();
-                            }
-                            if (state is RulesStateError) {
-                              return ErrorHandler(error: state.message);
-                            }
-                            if (state is RulesStateLoading) {
-                              return const Center(
-                                child: CircularProgressIndicator(),
-                              );
-                            }
-                            if (state is RulesStateLoaded) {
-                              return BlocBuilder<MainScreenCubit,
-                                  MainScreenState>(
-                                builder: (context, state) {
-                                  if (state is MainScreenStateCharacter) {
-                                    return const Center(
-                                      child: ScreenSplitter(
-                                        upperChild: CharacterScreen(),
-                                        lowerChild: Placeholder(),
-                                      ),
-                                    );
-                                  }
-                                  if (state is MainScreenStateParty) {
-                                    return const Center(
-                                      child: Placeholder(),
-                                    );
-                                  }
-                                  if (state is MainScreenStateSettings) {
-                                    return const Center(
-                                      child: SettingsScreen(),
-                                    );
-                                  }
-                                  return Container();
-                                },
-                              );
-                            }
-                            return Container();
-                          },
-                        );
+                      if (settingsState is SettingsLoaded) {
+                        if (settingsState.name.isEmpty) {
+                          return Center(
+                            child: SettingsScreen(),
+                          );
+                        } else {
+                          return _loadMainScreen(context, settingsState);
+                        }
                       }
+
                       return Container();
                     },
                   ),
@@ -101,5 +68,54 @@ class MainScreen extends StatelessWidget {
         );
       },
     );
+  }
+
+  Widget _loadMainScreen(BuildContext context, SettingsLoaded settingsState) {
+    return BlocBuilder<RulesCubit, RulesState>(
+      builder: (context, rulesState) {
+        if (rulesState is RulesStateInitial) {
+          context.read<RulesCubit>().loadRules();
+        }
+        if (rulesState is RulesStateError) {
+          return ErrorHandler(error: rulesState.message);
+        }
+        if (rulesState is RulesStateLoading) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+        if (rulesState is RulesStateLoaded) {
+          return BlocBuilder<MainScreenCubit, MainScreenState>(
+            builder: (context, mainScreenState) {
+              return _buildMainContent(mainScreenState);
+            },
+          );
+        }
+
+        return Container();
+      },
+    );
+  }
+
+  Widget _buildMainContent(MainScreenState state) {
+    if (state is MainScreenStateCharacter) {
+      return const Center(
+        child: ScreenSplitter(
+          upperChild: CharacterScreen(),
+          lowerChild: Placeholder(),
+        ),
+      );
+    }
+    if (state is MainScreenStateParty) {
+      return const Center(
+        child: Placeholder(),
+      );
+    }
+    if (state is MainScreenStateSettings) {
+      return Center(
+        child: SettingsScreen(),
+      );
+    }
+    return Container();
   }
 }
