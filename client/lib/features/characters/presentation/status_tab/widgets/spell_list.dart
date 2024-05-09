@@ -33,16 +33,6 @@ class SpellListState extends State<SpellList> {
     super.dispose();
   }
 
-  void _filterSpells(String query) {
-    setState(() {
-      filteredSpells = widget.spells!.entries
-          .where((entry) =>
-              entry.value['name'].toLowerCase().contains(query.toLowerCase()))
-          .map((entry) => entry.value['name'])
-          .toList();
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     final spells = widget.character['spells']?[widget.spellLevel] ?? {};

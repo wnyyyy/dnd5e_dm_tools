@@ -16,3 +16,13 @@ enum EquipmentType {
   music,
   unknown,
 }
+
+enum ThemeColor {
+  chestnutBrown,
+  crimsonRed,
+  forestGreen,
+  midnightBlue,
+  skyBlue,
+  lavenderViolet,
+  slateGrey,
+}
