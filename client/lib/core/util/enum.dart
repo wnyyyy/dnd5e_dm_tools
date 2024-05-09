@@ -13,5 +13,6 @@ enum EquipmentType {
   accessories,
   shield,
   scroll,
+  music,
   unknown,
 }

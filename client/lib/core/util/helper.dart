@@ -1,4 +1,8 @@
 import 'package:dnd5e_dm_tools/core/util/enum.dart';
+import 'package:flutter/material.dart';
+import 'package:fluttericon/font_awesome5_icons.dart';
+import 'package:fluttericon/octicons_icons.dart';
+import 'package:fluttericon/rpg_awesome_icons.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 int getModifier(int value) {
@@ -81,6 +85,8 @@ EquipmentType getEquipmentType(String equipment) {
       return EquipmentType.meleeWeapons;
 
     case 'musical-instruments':
+      return EquipmentType.music;
+
     case 'wondrous-items':
       return EquipmentType.special;
 
@@ -98,6 +104,43 @@ EquipmentType getEquipmentType(String equipment) {
 
     default:
       return EquipmentType.unknown;
+  }
+}
+
+Icon equipmentTypeToIcon(EquipmentType type) {
+  switch (type) {
+    case EquipmentType.ammunition:
+      return const Icon(RpgAwesome.arrow_cluster);
+    case EquipmentType.adventure:
+      return const Icon(Icons.backpack);
+    case EquipmentType.magic:
+      return const Icon(RpgAwesome.fairy_wand);
+    case EquipmentType.armor:
+      return const Icon(FontAwesome5.tshirt);
+    case EquipmentType.profession:
+      return const Icon(Icons.star);
+    case EquipmentType.music:
+      return const Icon(Icons.music_note);
+    case EquipmentType.misc:
+      return const Icon(FontAwesome5.tools);
+    case EquipmentType.mount:
+      return const Icon(FontAwesome5.horse);
+    case EquipmentType.rangedWeapons:
+      return const Icon(RpgAwesome.crossbow);
+    case EquipmentType.meleeWeapons:
+      return const Icon(RpgAwesome.broadsword);
+    case EquipmentType.special:
+      return const Icon(Octicons.north_star);
+    case EquipmentType.consumable:
+      return const Icon(FontAwesome5.flask);
+    case EquipmentType.accessories:
+      return const Icon(FontAwesome5.ring);
+    case EquipmentType.shield:
+      return const Icon(Octicons.shield);
+    case EquipmentType.scroll:
+      return const Icon(RpgAwesome.book);
+    default:
+      return const Icon(Icons.help);
   }
 }
 
