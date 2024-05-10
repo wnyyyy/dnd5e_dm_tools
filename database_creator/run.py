@@ -131,30 +131,7 @@ def upload_to_firestore(collection_name, documents):
 class ApiSync(Resource):
     @api.doc(responses={200: 'Success'})
     def post(self):
-        db = read_base_db()
-        if 'races' not in db:
-            sync_from_base_api('races')
-        if 'feats' not in db:
-            sync_from_base_api('feats')
-        if 'classes' not in db:
-            sync_from_base_api('classes')
-        if 'spelllist' not in db:
-            sync_from_base_api('spelllist')
-        if 'spells' not in db:
-            sync_from_base_api('spells')
-        if 'backgrounds' not in db:
-            sync_from_base_api('backgrounds')
-        if 'monsters' not in db:
-            sync_from_base_api('monsters')
-        if 'conditions' not in db:
-            sync_from_base_api('conditions')
-        if 'magicitems' not in db:
-            sync_from_base_api('magicitems')
-        if 'armor' not in db:
-            sync_from_base_api('armor')
-        if 'weapons' not in db:
-            sync_from_base_api('weapons')
-        sync_from_alt_api('equipment')
+        sync_from_alt_api('magic-items')
         return {'success': True}
     
 @ns.route('/db')
@@ -205,7 +182,7 @@ class Firestore(Resource):
     def post(self):
         db = read_db()
         for category, docs in db.items():
-            if category == 'equipment':
+            if category == 'magic-items':
                 upload_to_firestore(category, docs)      
 
 @ns.route('/upload_handout')

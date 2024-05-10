@@ -9,11 +9,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 class DescriptionText extends StatelessWidget {
   final String inputText;
   final TextStyle baseStyle;
+  final bool addTabSpace;
 
   const DescriptionText({
     super.key,
     required this.inputText,
     required this.baseStyle,
+    this.addTabSpace = false,
   });
 
   @override
@@ -29,6 +31,10 @@ class DescriptionText extends StatelessWidget {
     final conditions =
         (context.read<RulesCubit>().state as RulesStateLoaded).conditions;
     final List<TextSpan> spans = [];
+    final String tabSpace = addTabSpace ? '    ' : '';
+    if (addTabSpace) {
+      spans.add(TextSpan(text: tabSpace, style: baseStyle));
+    }
 
     final attributeColors = {
       'wis': Theme.of(context).wisdomColor,
@@ -101,7 +107,7 @@ class DescriptionText extends StatelessWidget {
             ),
           ));
         }
-          spans.add(const TextSpan(text: ' '));
+        spans.add(const TextSpan(text: ' '));
         return '';
       },
       onNonMatch: (String text) {
