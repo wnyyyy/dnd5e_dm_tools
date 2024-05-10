@@ -159,13 +159,14 @@ class EquipTab extends StatelessWidget {
             },
           ),
           SizedBox(
-              height: MediaQuery.of(context).size.height * 0.7 < 300
-                  ? 500
-                  : MediaQuery.of(context).size.height * 0.7,
-              child: BackpackWidget(
-                character: character,
-                slug: slug,
-              )),
+            height: MediaQuery.of(context).size.height * 0.7 < 300
+                ? 500
+                : MediaQuery.of(context).size.height * 0.7,
+            child: BackpackWidget(
+              character: character,
+              slug: slug,
+            ),
+          ),
         ],
       ),
     );

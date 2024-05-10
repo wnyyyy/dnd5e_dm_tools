@@ -34,20 +34,23 @@ String getOrdinal(int number) {
 }
 
 EquipmentType getEquipmentTypeFromItem(Map<String, dynamic> item) {
-  var type = EquipmentType.unknown;
-  while (type == EquipmentType.unknown) {
-    type = getEquipmentType(getItemDescriptor(item));
-    if (item['equipment_category'] != null) {
-      type = getEquipmentType(item['tool_category'] ?? '');
-    } else if (item['gear_category'] != null) {
-      type = getEquipmentType(item['gear_category']?['name'] ?? '');
-    } else if (item['tool_category'] != null) {
-      type = getEquipmentType(item['equipment_category']?['name'] ?? '');
-    } else {
-      return EquipmentType.unknown;
-    }
+  var type = getEquipmentType(getItemDescriptor(item));
+  if (type != EquipmentType.unknown) {
+    return type;
   }
-  return type;
+  type = getEquipmentType(item['tool_category'] ?? '');
+  if (type != EquipmentType.unknown) {
+    return type;
+  }
+  type = getEquipmentType(item['gear_category']?['name'] ?? '');
+  if (type != EquipmentType.unknown) {
+    return type;
+  }
+  type = getEquipmentType(item['equipment_category']?['name'] ?? '');
+  if (type != EquipmentType.unknown) {
+    return type;
+  }
+  return EquipmentType.unknown;
 }
 
 EquipmentType getEquipmentType(String name) {
@@ -55,10 +58,9 @@ EquipmentType getEquipmentType(String name) {
     return EquipmentType.unknown;
   }
   final equipment = name.toLowerCase().replaceAll(' ', '-').replaceAll("'", '');
-  if (equipment == 'torch') {
-    return EquipmentType.torch;
-  }
   switch (equipment) {
+    case 'torch':
+      return EquipmentType.torch;
     case 'ammunition':
       return EquipmentType.ammunition;
 

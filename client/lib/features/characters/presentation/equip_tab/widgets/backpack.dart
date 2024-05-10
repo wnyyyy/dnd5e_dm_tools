@@ -41,9 +41,10 @@ class BackpackWidget extends StatelessWidget {
                   return const SizedBox();
                 }
                 return ItemWidget(
-                    item: item,
-                    quantity: backpackItem.value['quantity'],
-                    isEquipped: backpackItem.value['isEquipped']);
+                  item: item,
+                  quantity: backpackItem.value['quantity'],
+                  isEquipped: backpackItem.value['isEquipped'],
+                );
               },
             ),
           ),
