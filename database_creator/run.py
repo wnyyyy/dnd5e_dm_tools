@@ -105,18 +105,18 @@ def sync_from_alt_api(field):
 
 def generate_db():
     db = read_base_db()
-    with open(CUSTOM_DB_PATH, 'r') as file:
-        custom_db = json.load(file)
-        for table_name in custom_db:
-            table = db[table_name]
-            for custom_entry in custom_db[table_name]:
-                fallbackSlug = custom_entry['fallback']
-                newRef = [x for x in table if x['slug'] == fallbackSlug][0]
-                new = newRef.copy()
-                for key in custom_entry:
-                    if key != 'fallback':
-                        new[key] = custom_entry[key]
-                table.append(new)
+    # with open(CUSTOM_DB_PATH, 'r') as file:
+    #     custom_db = json.load(file)
+    #     for table_name in custom_db:
+    #         table = db[table_name]
+    #         for custom_entry in custom_db[table_name]:
+    #             fallbackSlug = custom_entry['fallback']
+    #             newRef = [x for x in table if x['slug'] == fallbackSlug][0]
+    #             new = newRef.copy()
+    #             for key in custom_entry:
+    #                 if key != 'fallback':
+    #                     new[key] = custom_entry[key]
+    #             table.append(new)
     write_db(db)
 
 def upload_to_firestore(collection_name, documents):
@@ -182,7 +182,7 @@ class Firestore(Resource):
     def post(self):
         db = read_db()
         for category, docs in db.items():
-            if category == 'magic-items':
+            if category == 'equipment':
                 upload_to_firestore(category, docs)      
 
 @ns.route('/upload_handout')

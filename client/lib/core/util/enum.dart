@@ -26,3 +26,12 @@ enum ThemeColor {
   lavenderViolet,
   slateGrey,
 }
+
+enum Rarity {
+  common,
+  uncommon,
+  rare,
+  veryRare,
+  legendary,
+  artifact,
+}

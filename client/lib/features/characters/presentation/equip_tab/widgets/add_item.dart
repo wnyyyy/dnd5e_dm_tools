@@ -23,15 +23,18 @@ class AddItemButtonState extends State<AddItemButton> {
     super.initState();
   }
 
-  List<Widget> _buildSearchResults(Map<String, dynamic> items,
-      Map<String, dynamic> magicItems, String searchText) {
+  List<Widget> _buildSearchResults(
+      Map<String, dynamic> items, String searchText) {
     List<Widget> searchResults = [];
     if (searchText.isEmpty) {
       return searchResults;
     }
-    if (magicItems.containsKey(searchText)) {
+    if (items.containsKey(searchText) && items[searchText]['rarity'] != null) {
       searchResults.add(ListTile(
-        title: Text(magicItems[searchText]['name']),
+        title: Text(
+          items[searchText]['name'],
+        ),
+        subtitle: Text(items[searchText]?['rarity']?['name'].toString() ?? ''),
         onTap: () {
           widget.onAdd(searchText, true);
         },
@@ -43,7 +46,8 @@ class AddItemButtonState extends State<AddItemButton> {
 
     for (var entry in items.entries) {
       final item = entry.value;
-      if (item['name'].toLowerCase().contains(searchText)) {
+      if (item['name'].toLowerCase().contains(searchText) &&
+          (item['rarity'] == null || item['rarity']['name'] == 'Common')) {
         item['entryKey'] = entry.key;
         filteredItems.add(item);
       }
@@ -118,12 +122,10 @@ class AddItemButtonState extends State<AddItemButton> {
                             builder: (context) {
                               final items =
                                   context.read<RulesCubit>().getAllItems();
-                              final magicItems =
-                                  context.read<RulesCubit>().getAllMagicItems();
                               final searchText =
                                   textEditingController.text.toLowerCase();
-                              final searchResults = _buildSearchResults(
-                                  items, magicItems, searchText);
+                              final searchResults =
+                                  _buildSearchResults(items, searchText);
                               return Padding(
                                 padding: const EdgeInsets.only(
                                     left: 12, right: 12, bottom: 24),
@@ -161,7 +163,7 @@ class AddItemButtonState extends State<AddItemButton> {
           },
         );
       },
-      child: const Text('Add Item'),
+      child: const Icon(Icons.add_box_outlined, size: 36),
     );
   }
 

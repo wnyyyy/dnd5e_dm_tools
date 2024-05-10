@@ -37,6 +37,38 @@ bool isEquipable(Map<String, dynamic> item) {
   return item['armor_class'] != null || item['damage'] != null;
 }
 
+double getCostTotal(String costUnit, int costValue, double quantity) {
+  switch (costUnit) {
+    case 'cp':
+      return costValue.toDouble() / 100.0 * quantity;
+    case 'sp':
+      return costValue.toDouble() / 10.0 * quantity;
+    case 'gp':
+      return costValue.toDouble() * quantity;
+    default:
+      return 0;
+  }
+}
+
+Color? rarityToColor(String? rarity) {
+  switch (rarity) {
+    case 'Common':
+      return null;
+    case 'Uncommon':
+      return Colors.green;
+    case 'Rare':
+      return Colors.blue;
+    case 'Very Rare':
+      return Colors.purple;
+    case 'Legendary':
+      return Colors.orange;
+    case 'Artifact':
+      return Colors.red;
+    default:
+      return null;
+  }
+}
+
 EquipmentType getEquipmentTypeFromItem(Map<String, dynamic> item) {
   var type = getEquipmentType(item['index']);
   if (type != EquipmentType.unknown) {
@@ -136,6 +168,24 @@ EquipmentType getEquipmentType(String name) {
     default:
       return EquipmentType.unknown;
   }
+}
+
+Icon? itemToIcon(Map<String, dynamic> item) {
+  if (item['index'].isEmpty) {
+    return null;
+  }
+  if (item['index'].contains('bow')) {
+    return const Icon(RpgAwesome.crossbow);
+  }
+  if (item['index'].contains('dagger')) {
+    return const Icon(RpgAwesome.plain_dagger);
+  }
+  if (item['armor_category'] != null &&
+      (item['armor_category'].toString().toLowerCase().contains('medium') ||
+          item['armor_category'].toString().toLowerCase().contains('heavy'))) {
+    return const Icon(RpgAwesome.vest);
+  }
+  return null;
 }
 
 Icon equipmentTypeToIcon(EquipmentType type) {
