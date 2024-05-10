@@ -170,6 +170,28 @@ EquipmentType getEquipmentType(String name) {
   }
 }
 
+int getTotalWeight(Map<String, dynamic> backpack, Map<String, dynamic> items) {
+  int totalWeight = 0;
+  if (backpack.isEmpty) {
+    return totalWeight;
+  }
+  for (var itemBackpack in backpack.entries) {
+    final item = items[itemBackpack.key];
+    if (item == null ||
+        item['cost'] == null ||
+        item['cost']['unit'] == null ||
+        item['cost']['quantity'] == null ||
+        itemBackpack.value['quantity'] == null) {
+      continue;
+    }
+    final cost = int.tryParse(item['cost']['quantity'].toString()) ?? 0;
+    final costTotal = getCostTotal(
+        item['cost']['unit'], cost, itemBackpack.value['quantity'].toDouble());
+    totalWeight += costTotal.toInt();
+  }
+  return totalWeight;
+}
+
 Icon? itemToIcon(Map<String, dynamic> item) {
   if (item['index'].isEmpty) {
     return null;

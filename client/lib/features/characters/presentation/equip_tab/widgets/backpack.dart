@@ -31,7 +31,7 @@ class _BackpackWidgetState extends State<BackpackWidget> {
     return [
       const DropdownMenuItem(value: "name", child: Text("Name")),
       const DropdownMenuItem(value: "value", child: Text("Value")),
-      const DropdownMenuItem(value: "equipable", child: Text("Equipable")),
+      const DropdownMenuItem(value: "equipable", child: Text("Can Equip")),
     ];
   }
 
@@ -267,7 +267,7 @@ class _BackpackWidgetState extends State<BackpackWidget> {
               },
             ),
             ChoiceChip(
-              label: const Text('Equippable'),
+              label: const Text('Can Equip'),
               selected: filterCriteria == 'equippable',
               onSelected: (bool selected) {
                 setState(() {
@@ -288,7 +288,8 @@ class _BackpackWidgetState extends State<BackpackWidget> {
         ),
         Expanded(
           child: Card(
-            margin: EdgeInsets.all(screenWidth * 0.10),
+            margin: EdgeInsets.symmetric(
+                horizontal: screenWidth * 0.1, vertical: 8),
             child: Column(
               children: [
                 Expanded(
@@ -360,6 +361,20 @@ class _BackpackWidgetState extends State<BackpackWidget> {
                     ))
                   ],
                 ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.only(
+                            left: 16.0, top: 8.0, bottom: 8.0),
+                        child: Text(
+                          'Total Weight: ${getTotalWeight(backpackItems, items)}',
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      ),
+                    ),
+                  ],
+                )
               ],
             ),
           ),

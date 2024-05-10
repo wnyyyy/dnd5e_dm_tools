@@ -56,6 +56,7 @@ class ItemWidgetState extends State<ItemWidget> {
                 onTap: () {
                   setState(() {
                     isEquipped = !isEquipped;
+                    widget.onEquip?.call(widget.item['index'], isEquipped);
                   });
                 },
                 child: Row(
@@ -64,11 +65,13 @@ class ItemWidgetState extends State<ItemWidget> {
                       width: 16,
                       child: Checkbox(
                         materialTapTargetSize: MaterialTapTargetSize.padded,
-                        value: isEquipped,
+                        value: widget.isEquipped,
                         onChanged: (bool? newValue) {
                           if (newValue != null) {
                             setState(() {
                               isEquipped = newValue;
+                              widget.onEquip
+                                  ?.call(widget.item['index'], isEquipped);
                             });
                           }
                         },
@@ -373,6 +376,9 @@ class ItemWidgetState extends State<ItemWidget> {
         : costUnit == 'sp'
             ? Theme.of(context).silverColor
             : Theme.of(context).copperColor;
+    if (costTotal == 0) {
+      return const SizedBox();
+    }
 
     return IntrinsicWidth(
       child: Container(
@@ -410,6 +416,10 @@ class ItemWidgetState extends State<ItemWidget> {
         (ignoreBase ? 1 : baseQuantity);
     final TextStyle textStyle = Theme.of(context).textTheme.bodyMedium!;
     final bool isInt = weight % 1 == 0;
+
+    if (weight == 0) {
+      return const SizedBox();
+    }
 
     return IntrinsicWidth(
       child: Container(
