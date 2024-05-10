@@ -27,7 +27,7 @@ class BackpackWidget extends StatelessWidget {
     }
 
     return Card(
-      margin: EdgeInsets.all(screenWidth * 0.15),
+      margin: EdgeInsets.all(screenWidth * 0.10),
       child: Column(
         children: [
           Expanded(

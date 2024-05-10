@@ -1,3 +1,4 @@
+import 'package:dnd5e_dm_tools/core/util/helper.dart';
 import 'package:dnd5e_dm_tools/features/rules/rules_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -60,11 +61,7 @@ class AddItemButtonState extends State<AddItemButton> {
 
     for (var item in filteredItems) {
       if (searchResults.length >= 15) break;
-
-      final gearCategory = item['gear_category'];
-      final equipmentCategory = item['equipment_category'];
-      final String subtitle =
-          gearCategory?['name'] ?? equipmentCategory?['name'] ?? '';
+      final String subtitle = getItemDescriptor(item);
 
       searchResults.add(ListTile(
         title: Text(item['name']),
@@ -97,8 +94,7 @@ class AddItemButtonState extends State<AddItemButton> {
                         child: TextField(
                           controller: textEditingController,
                           onChanged: (value) {
-                            setDialogState(
-                                () {}); // Updates internal state of the dialog
+                            setDialogState(() {});
                           },
                           decoration: InputDecoration(
                             labelText: 'Search Items',

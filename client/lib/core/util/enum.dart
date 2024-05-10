@@ -14,6 +14,7 @@ enum EquipmentType {
   shield,
   scroll,
   music,
+  torch,
   unknown,
 }
 

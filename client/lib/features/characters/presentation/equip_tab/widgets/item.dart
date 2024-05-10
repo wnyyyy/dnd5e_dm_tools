@@ -16,7 +16,7 @@ class ItemWidget extends StatefulWidget {
 
 class ItemWidgetState extends State<ItemWidget> {
   late bool isEquipped;
- 
+
   @override
   void initState() {
     super.initState();
@@ -25,25 +25,45 @@ class ItemWidgetState extends State<ItemWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final type = getEquipmentType(
-        widget.item['equipment_category']?['index'] ?? 'Unknown');
+    final type = getEquipmentTypeFromItem(widget.item);
     final title = (widget.quantity ?? 1) > 1
         ? '${widget.item['name']} x${widget.quantity}'
         : widget.item['name'];
 
+    final equipable =
+        widget.item['armor_class'] != null || widget.item['damage'] != null;
+
     return ListTile(
       leading: equipmentTypeToIcon(type),
       title: Text(title),
-      subtitle: _getItemDescription(context),
-      trailing: Checkbox(
-        value: isEquipped,
-        onChanged: (bool? newValue) {
-          if (newValue != null) {
-            setState(() {
-              isEquipped = newValue;
-            });
-          }
-        },
+      subtitle: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 8.0),
+            child: _getItemDescription(context),
+          ),
+          equipable
+              ? Row(
+                  children: [
+                    Checkbox(
+                      value: isEquipped,
+                      onChanged: (bool? newValue) {
+                        if (newValue != null) {
+                          setState(() {
+                            isEquipped = newValue;
+                          });
+                        }
+                      },
+                    ),
+                    Text(isEquipped ? 'Equipped' : 'Not Equipped')
+                  ],
+                )
+              : Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: Text(getItemDescriptor(widget.item)),
+                ),
+        ],
       ),
       onTap: () => showDialog(
         context: context,
@@ -88,7 +108,19 @@ class ItemWidgetState extends State<ItemWidget> {
             ],
           ),
         ),
-        Text('$weight lbs', style: textStyle),
+        const SizedBox(width: 8),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              FontAwesome5.weight_hanging,
+              size: textStyle.fontSize,
+              color: textStyle.color,
+            ),
+            const SizedBox(width: 4),
+            Text('$weight lbs', style: textStyle),
+          ],
+        ),
       ],
     );
   }

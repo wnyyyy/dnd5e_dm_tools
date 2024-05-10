@@ -81,6 +81,7 @@ class StatusTab extends StatelessWidget {
                                 content: Spellbook(
                                     character: character,
                                     spells: spells,
+                                    slug: slug,
                                     table: table,
                                     updateCharacter: () =>
                                         context.read<CharacterBloc>().add(

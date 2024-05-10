@@ -1,9 +1,14 @@
 import 'package:dnd5e_dm_tools/core/util/helper.dart';
 import 'package:dnd5e_dm_tools/core/widgets/description_text.dart';
+import 'package:dnd5e_dm_tools/features/characters/bloc/character_bloc.dart';
+import 'package:dnd5e_dm_tools/features/characters/bloc/character_events.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:recase/recase.dart';
 
 class Spellbook extends StatefulWidget {
   final Map<String, dynamic> character;
+  final String slug;
   final Map<String, dynamic> spells;
   final List<Map<String, dynamic>> table;
   final VoidCallback? updateCharacter;
@@ -13,6 +18,7 @@ class Spellbook extends StatefulWidget {
     super.key,
     required this.character,
     required this.spells,
+    required this.slug,
     required this.table,
     this.onDone,
     this.updateCharacter,
@@ -45,18 +51,44 @@ class SpellbookState extends State<Spellbook> {
     if (searchText.isEmpty) {
       return searchResults;
     }
+
+    List<MapEntry<String, dynamic>> matchingEntries = [];
     for (var entry in widget.spells.entries) {
       final spell = entry.value;
-      if (spell['name'].toLowerCase().contains(searchText) &&
-          searchResults.length < 5) {
+      if (spell['name'].toLowerCase().contains(searchText.toLowerCase())) {
+        matchingEntries.add(entry);
+      }
+    }
+
+    matchingEntries.sort(
+      (a, b) {
+        int levelA = a.value['level_int'] ?? 0;
+        int levelB = b.value['level_int'] ?? 0;
+        return levelA.compareTo(levelB);
+      },
+    );
+
+    for (var entry in matchingEntries) {
+      if (searchResults.length < 5) {
+        final spell = entry.value;
         searchResults.add(ListTile(
-          title: Text(spell['name']),
+          title: Text(spell['name'] ?? ''),
+          subtitle: Row(
+            children: [
+              Text(spell['level'] ?? ''),
+              const Spacer(),
+              Text(spell['school'].toString().sentenceCase),
+            ],
+          ),
           onTap: () {
             _showSpellDialog(entry.key);
           },
         ));
+      } else {
+        break;
       }
     }
+
     return searchResults;
   }
 
@@ -92,6 +124,7 @@ class SpellbookState extends State<Spellbook> {
           for (var entry in spells)
             ListTile(
               title: Text(entry.value['name']),
+              subtitle: Text(entry.value['school'].toString().sentenceCase),
               onTap: () {
                 _showSpellDialog(entry.key);
               },
@@ -104,7 +137,8 @@ class SpellbookState extends State<Spellbook> {
   Widget _buildSpellSlotsList() {
     Map<int, int> slots =
         getSpellSlotsForLevel(widget.table, widget.character['level'] ?? 1);
-    final expendedSlots = widget.character['expendedSpellSlots'] ?? {};
+    final expendedSlots =
+        Map<String, int>.from(widget.character['expendedSpellSlots'] ?? {});
 
     List<Padding> texts = [];
     for (var entry in slots.entries) {
@@ -126,9 +160,9 @@ class SpellbookState extends State<Spellbook> {
                       'Total: ${entry.value}',
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
-                    if (expendedSlots.containsKey(entry.key))
+                    if (expendedSlots.containsKey(entry.key.toString()))
                       Text(
-                        'Used: ${expendedSlots[entry.key]}',
+                        'Used: ${expendedSlots[entry.key.toString()]}',
                         style: Theme.of(context).textTheme.bodyMedium,
                       ),
                   ],
@@ -141,11 +175,109 @@ class SpellbookState extends State<Spellbook> {
     }
     return Padding(
       padding: const EdgeInsets.all(8.0),
-      child: ExpansionTile(
-        title: const Text('Spell Slots'),
-        initiallyExpanded: true,
-        children: texts,
+      child: GestureDetector(
+        onLongPress: () => _editSpellSlots(context, expendedSlots, slots),
+        child: ExpansionTile(
+          title: const Text('Spell Slots'),
+          initiallyExpanded: true,
+          children: texts,
+        ),
       ),
+    );
+  }
+
+  void _editSpellSlots(
+      BuildContext context, Map<String, int> expended, Map<int, int> total) {
+    Map<int, int> slots = Map<int, int>.from(expended);
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Edit Spell Slots'),
+          content: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return ListView.builder(
+                itemBuilder: (context, index) {
+                  final level = index + 1;
+                  final max = total[level] ?? 0;
+                  final curr =
+                      (slots[level] ?? max) - (expended[level.toString()] ?? 0);
+
+                  return ListTile(
+                    title: Text('${getOrdinal(level)} Level'),
+                    subtitle: Row(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(right: 6),
+                          child: IconButton(
+                            onPressed: () {
+                              setState(() {
+                                slots[level] = (slots[level] ?? max) - 1;
+                                if (slots[level]! < 0) {
+                                  slots[level] = 0;
+                                }
+                              });
+                            },
+                            iconSize: 32,
+                            icon: const Icon(Icons.remove_circle_outline),
+                          ),
+                        ),
+                        Text(
+                          '$curr/$max',
+                          style: Theme.of(context).textTheme.displaySmall,
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 6),
+                          child: IconButton(
+                            onPressed: () {
+                              setState(() {
+                                slots[level] = (slots[level] ?? max) + 1;
+                                if (slots[level]! > max) {
+                                  slots[level] = max;
+                                }
+                              });
+                            },
+                            iconSize: 32,
+                            icon: const Icon(Icons.add_circle_outline),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+                itemCount: total.length,
+              );
+            },
+          ),
+          actionsAlignment: MainAxisAlignment.spaceBetween,
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Icon(Icons.close),
+            ),
+            TextButton(
+              onPressed: () {
+                final expendedNew = Map<String, int>.from(expended);
+                for (var entry in slots.entries) {
+                  expendedNew[entry.key.toString()] =
+                      total[entry.key]! - entry.value;
+                }
+                widget.character['expendedSpellSlots'] = expendedNew;
+                context.read<CharacterBloc>().add(
+                      CharacterUpdate(
+                        character: widget.character,
+                        slug: widget.slug,
+                        persistData: true,
+                      ),
+                    );
+                Navigator.of(context).pop();
+              },
+              child: const Icon(Icons.done),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -426,7 +558,9 @@ class SpellbookState extends State<Spellbook> {
           child: Expanded(
             child: Container(
               decoration: BoxDecoration(
-                border: Border.all(),
+                border: Border.all(
+                  color: Theme.of(context).dividerColor,
+                ),
                 borderRadius: BorderRadius.circular(8.0),
               ),
               child: searchResults.isEmpty
@@ -446,14 +580,20 @@ class SpellbookState extends State<Spellbook> {
             ),
           ),
         ),
-        Expanded(
-          child: ListView(
-            children: [
-              for (int i = 0; i < 10; i++) _buildSpellList(i),
-            ],
+        Visibility(
+          visible: searchText.isEmpty,
+          child: Expanded(
+            child: ListView(
+              children: [
+                for (int i = 0; i < 10; i++) _buildSpellList(i),
+              ],
+            ),
           ),
         ),
-        _buildSpellSlotsList(),
+        Visibility(
+          visible: searchText.isEmpty,
+          child: _buildSpellSlotsList(),
+        ),
       ],
     );
   }

@@ -33,7 +33,31 @@ String getOrdinal(int number) {
   }
 }
 
-EquipmentType getEquipmentType(String equipment) {
+EquipmentType getEquipmentTypeFromItem(Map<String, dynamic> item) {
+  var type = EquipmentType.unknown;
+  while (type == EquipmentType.unknown) {
+    type = getEquipmentType(getItemDescriptor(item));
+    if (item['equipment_category'] != null) {
+      type = getEquipmentType(item['tool_category'] ?? '');
+    } else if (item['gear_category'] != null) {
+      type = getEquipmentType(item['gear_category']?['name'] ?? '');
+    } else if (item['tool_category'] != null) {
+      type = getEquipmentType(item['equipment_category']?['name'] ?? '');
+    } else {
+      return EquipmentType.unknown;
+    }
+  }
+  return type;
+}
+
+EquipmentType getEquipmentType(String name) {
+  if (name.isEmpty) {
+    return EquipmentType.unknown;
+  }
+  final equipment = name.toLowerCase().replaceAll(' ', '-').replaceAll("'", '');
+  if (equipment == 'torch') {
+    return EquipmentType.torch;
+  }
   switch (equipment) {
     case 'ammunition':
       return EquipmentType.ammunition;
@@ -85,6 +109,7 @@ EquipmentType getEquipmentType(String equipment) {
       return EquipmentType.meleeWeapons;
 
     case 'musical-instruments':
+    case 'music':
       return EquipmentType.music;
 
     case 'wondrous-items':
@@ -139,6 +164,8 @@ Icon equipmentTypeToIcon(EquipmentType type) {
       return const Icon(Octicons.shield);
     case EquipmentType.scroll:
       return const Icon(RpgAwesome.book);
+    case EquipmentType.torch:
+      return const Icon(RpgAwesome.torch);
     default:
       return const Icon(Icons.help);
   }
@@ -170,6 +197,13 @@ Map<int, int> getSpellSlotsForLevel(List<dynamic> table, int level) {
     }
   }
   return slots;
+}
+
+String getItemDescriptor(Map<String, dynamic> item) {
+  return item['tool_category'] ??
+      item['gear_category']?['name'] ??
+      item['equipment_category']?['name'] ??
+      'Misc';
 }
 
 final Map<int, List<Map<String, dynamic>>> _tableCache = {};
