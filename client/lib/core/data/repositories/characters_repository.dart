@@ -21,12 +21,22 @@ class CharactersRepository {
   }
 
   Future<void> updateCharacter(
-      String slug, Map<String, dynamic> character, bool offline) async {
+    String slug,
+    Map<String, dynamic> character,
+    bool offline, {
+    bool online = false,
+  }) async {
     await databaseProvider.setData(
       path: '$path$slug',
       data: character,
       cacheBoxName: offline ? cacheCharacterName : null,
     );
+    if (online) {
+      await databaseProvider.setData(
+        path: '$path$slug',
+        data: character,
+      );
+    }
   }
 
   Future<Map<String, Map<String, dynamic>>> getAll() async {

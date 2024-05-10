@@ -72,6 +72,7 @@ class SettingsScreen extends StatelessWidget {
                 onPressed: () {
                   BlocProvider.of<CharacterBloc>(context).add(PersistCharacter(
                     offline: context.read<SettingsCubit>().state.offlineMode,
+                    online: true,
                   ));
                 },
                 child: const Text('Persist'),

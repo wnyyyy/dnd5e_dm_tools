@@ -9,11 +9,12 @@ class DatabaseProvider {
     required Map<String, dynamic> data,
     String? cacheBoxName,
   }) async {
-    final reference = _db.doc(path);
-    await reference.set(data);
     if (cacheBoxName != null) {
       final cacheBox = Hive.box<Map>(cacheBoxName);
       await cacheBox.put(path, data);
+    } else {
+      final reference = _db.doc(path);
+      await reference.set(data);
     }
   }
 

@@ -75,6 +75,7 @@ class CharacterBloc extends Bloc<CharacterEvent, CharacterState> {
         state.slug,
         state.character,
         event.offline,
+        online: event.online,
       );
     } catch (error) {
       emit(
