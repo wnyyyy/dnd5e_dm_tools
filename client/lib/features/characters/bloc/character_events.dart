@@ -19,9 +19,11 @@ class CharacterUpdate extends CharacterEvent {
   final Map<String, dynamic> character;
   final String slug;
   final bool persistData;
+  final bool offline;
   const CharacterUpdate({
     required this.character,
     required this.slug,
+    required this.offline,
     this.persistData = false,
   });
 
@@ -33,7 +35,8 @@ class CharacterUpdate extends CharacterEvent {
 }
 
 class PersistCharacter extends CharacterEvent {
-  const PersistCharacter();
+  final bool offline;
+  const PersistCharacter({required this.offline});
 
   @override
   List<Object> get props => [];

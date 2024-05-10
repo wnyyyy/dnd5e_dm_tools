@@ -33,8 +33,12 @@ String getOrdinal(int number) {
   }
 }
 
+bool isEquipable(Map<String, dynamic> item) {
+  return item['armor_class'] != null || item['damage'] != null;
+}
+
 EquipmentType getEquipmentTypeFromItem(Map<String, dynamic> item) {
-  var type = getEquipmentType(getItemDescriptor(item));
+  var type = getEquipmentType(item['index']);
   if (type != EquipmentType.unknown) {
     return type;
   }

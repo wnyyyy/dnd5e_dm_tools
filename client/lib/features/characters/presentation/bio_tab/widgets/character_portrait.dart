@@ -18,6 +18,7 @@ class CharacterPortrait extends StatelessWidget {
   });
 
   void _showEditLevel(BuildContext context) {
+    final offline = context.read<SettingsCubit>().state.offlineMode;
     showModalBottomSheet(
       context: context,
       builder: (BuildContext context) {
@@ -29,6 +30,7 @@ class CharacterPortrait extends StatelessWidget {
               context.read<CharacterBloc>().add(CharacterUpdate(
                     character: character,
                     slug: slug,
+                    offline: offline,
                   ));
               Navigator.pop(context);
             },

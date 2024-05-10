@@ -108,6 +108,8 @@ class Dnd5eDmTools extends StatelessWidget {
                       conditionsRepository:
                           context.read<ConditionsRepository>(),
                       itemsRepository: context.read<ItemsRepository>(),
+                      charactersRepository:
+                          context.read<CharactersRepository>(),
                     )),
             BlocProvider(create: (_) => ScreenSplitterCubit()),
             BlocProvider(create: (_) => MainScreenCubit()),

@@ -118,6 +118,8 @@ class _SkillListState extends State<SkillList> {
                       context.read<CharacterBloc>().add(CharacterUpdate(
                             character: widget.character,
                             slug: widget.slug,
+                            offline:
+                                context.read<SettingsCubit>().state.offlineMode,
                           ));
                       Navigator.of(context).pop();
                     },

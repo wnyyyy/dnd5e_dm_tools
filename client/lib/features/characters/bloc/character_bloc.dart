@@ -21,11 +21,14 @@ class CharacterBloc extends Bloc<CharacterEvent, CharacterState> {
     emit(CharacterStateLoading(slug: event.characterName));
     try {
       final slug = event.characterName;
-      Map<String, dynamic> character = await charactersRepository.get(slug);
-      emit(CharacterStateLoaded(
-        character: character,
-        slug: slug,
-      ));
+      Map<String, dynamic> character =
+          await charactersRepository.get(slug, true);
+      emit(
+        CharacterStateLoaded(
+          character: character,
+          slug: slug,
+        ),
+      );
     } catch (error) {
       emit(
         CharacterStateError(
@@ -50,6 +53,7 @@ class CharacterBloc extends Bloc<CharacterEvent, CharacterState> {
         await charactersRepository.updateCharacter(
           event.slug,
           event.character,
+          event.offline,
         );
       }
     } catch (error) {
@@ -70,6 +74,7 @@ class CharacterBloc extends Bloc<CharacterEvent, CharacterState> {
       await charactersRepository.updateCharacter(
         state.slug,
         state.character,
+        event.offline,
       );
     } catch (error) {
       emit(

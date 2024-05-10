@@ -100,9 +100,12 @@ class SkillsTab extends StatelessWidget {
                       newValue != currentValue &&
                       newValue >= 0) {
                     character['asi'][attributeName.toLowerCase()] = newValue;
-                    context
-                        .read<CharacterBloc>()
-                        .add(CharacterUpdate(character: character, slug: slug));
+                    context.read<CharacterBloc>().add(CharacterUpdate(
+                          character: character,
+                          slug: slug,
+                          offline:
+                              context.read<SettingsCubit>().state.offlineMode,
+                        ));
                     Navigator.of(context).pop();
                   }
                 },
@@ -239,7 +242,13 @@ class SkillsTab extends StatelessWidget {
                                 newValue >= 0) {
                               character['passive_perception'] = newValue;
                               context.read<CharacterBloc>().add(CharacterUpdate(
-                                  character: character, slug: slug));
+                                    character: character,
+                                    slug: slug,
+                                    offline: context
+                                        .read<SettingsCubit>()
+                                        .state
+                                        .offlineMode,
+                                  ));
                               Navigator.of(context).pop();
                             }
                           },

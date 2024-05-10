@@ -1,3 +1,4 @@
+import 'package:dnd5e_dm_tools/core/util/helper.dart';
 import 'package:dnd5e_dm_tools/features/characters/presentation/equip_tab/widgets/coins.dart';
 import 'package:dnd5e_dm_tools/features/characters/presentation/equip_tab/widgets/item.dart';
 import 'package:dnd5e_dm_tools/features/rules/rules_cubit.dart';
@@ -31,21 +32,29 @@ class BackpackWidget extends StatelessWidget {
       child: Column(
         children: [
           Expanded(
-            child: ListView.builder(
+            child: ListView.separated(
               itemCount: backpackItems.length,
               itemBuilder: (context, index) {
                 final backpackItem = backpackItems.entries.elementAt(index);
                 final item =
                     Map<String, dynamic>.from(items[backpackItem.key] ?? {});
                 if (item.isEmpty) {
-                  return const SizedBox();
+                  return const SizedBox.shrink();
                 }
-                return ItemWidget(
-                  item: item,
-                  quantity: backpackItem.value['quantity'],
-                  isEquipped: backpackItem.value['isEquipped'],
+                final equipable = isEquipable(item);
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: ItemWidget(
+                      item: item,
+                      quantity: backpackItem.value['quantity'],
+                      isEquipped: backpackItem.value['isEquipped']),
                 );
               },
+              separatorBuilder: (context, index) => const SizedBox(
+                child: Divider(
+                  height: 0,
+                ),
+              ),
             ),
           ),
           const SizedBox(

@@ -88,12 +88,21 @@ class StatusTab extends StatelessWidget {
                                               CharacterUpdate(
                                                 character: character,
                                                 slug: slug,
+                                                offline: context
+                                                    .read<SettingsCubit>()
+                                                    .state
+                                                    .offlineMode,
                                               ),
                                             ),
                                     onDone: () {
                                       context
                                           .read<CharacterBloc>()
-                                          .add(const PersistCharacter());
+                                          .add(PersistCharacter(
+                                            offline: context
+                                                .read<SettingsCubit>()
+                                                .state
+                                                .offlineMode,
+                                          ));
                                       Navigator.of(context).pop();
                                     }),
                                 actions: [
@@ -114,6 +123,10 @@ class StatusTab extends StatelessWidget {
                         context.read<CharacterBloc>().add(CharacterUpdate(
                               character: character,
                               slug: slug,
+                              offline: context
+                                  .read<SettingsCubit>()
+                                  .state
+                                  .offlineMode,
                             )),
                     character: character),
               ],

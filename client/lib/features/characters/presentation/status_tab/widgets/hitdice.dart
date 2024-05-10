@@ -74,8 +74,12 @@ class HitDice extends StatelessWidget {
                           int.tryParse(currentHpController.text) ??
                               int.tryParse(maxHpController.text) ??
                               0;
-                      context.read<CharacterBloc>().add(
-                          CharacterUpdate(character: character, slug: slug));
+                      context.read<CharacterBloc>().add(CharacterUpdate(
+                            character: character,
+                            slug: slug,
+                            offline:
+                                context.read<SettingsCubit>().state.offlineMode,
+                          ));
 
                       Navigator.of(context).pop();
                     },

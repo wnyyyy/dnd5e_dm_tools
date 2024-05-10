@@ -2,6 +2,7 @@ import 'package:dnd5e_dm_tools/core/util/helper.dart';
 import 'package:dnd5e_dm_tools/core/widgets/description_text.dart';
 import 'package:dnd5e_dm_tools/features/characters/bloc/character_bloc.dart';
 import 'package:dnd5e_dm_tools/features/characters/bloc/character_events.dart';
+import 'package:dnd5e_dm_tools/features/settings/bloc/settings_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:recase/recase.dart';
@@ -269,6 +270,8 @@ class SpellbookState extends State<Spellbook> {
                         character: widget.character,
                         slug: widget.slug,
                         persistData: true,
+                        offline:
+                            context.read<SettingsCubit>().state.offlineMode,
                       ),
                     );
                 Navigator.of(context).pop();

@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:dnd5e_dm_tools/core/config/app_colors.dart';
 import 'package:dnd5e_dm_tools/features/characters/bloc/character_bloc.dart';
 import 'package:dnd5e_dm_tools/features/characters/bloc/character_events.dart';
+import 'package:dnd5e_dm_tools/features/settings/bloc/settings_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttericon/font_awesome5_icons.dart';
@@ -238,6 +239,8 @@ class CoinsWidget extends StatelessWidget {
                             character: character,
                             slug: slug,
                             persistData: true,
+                            offline:
+                                context.read<SettingsCubit>().state.offlineMode,
                           ),
                         );
                     Navigator.pop(context);

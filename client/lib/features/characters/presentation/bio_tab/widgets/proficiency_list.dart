@@ -1,6 +1,7 @@
 import 'package:dnd5e_dm_tools/core/widgets/item_list.dart';
 import 'package:dnd5e_dm_tools/features/characters/bloc/character_bloc.dart';
 import 'package:dnd5e_dm_tools/features/characters/bloc/character_events.dart';
+import 'package:dnd5e_dm_tools/features/settings/bloc/settings_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -18,7 +19,7 @@ class ProficiencyList extends StatelessWidget {
   Widget build(BuildContext context) {
     final proficiencies =
         Map<String, Map>.from(character['proficiencies'] ?? {});
-
+    final offline = context.read<SettingsCubit>().state.offlineMode;
     void onItemsChanged(Map<String, dynamic> newProficiencies) {
       character['proficiencies'] = newProficiencies;
       context.read<CharacterBloc>().add(
@@ -26,6 +27,7 @@ class ProficiencyList extends StatelessWidget {
               character: character,
               slug: slug,
               persistData: true,
+              offline: offline,
             ),
           );
     }

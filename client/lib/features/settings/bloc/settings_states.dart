@@ -7,6 +7,7 @@ abstract class SettingsState {
   var classOnlySpells = false;
   var isDarkMode = false;
   var themeColor = ThemeColor.chestnutBrown;
+  var offlineMode = false;
 
   SettingsState();
 }
@@ -29,6 +30,7 @@ class SettingsLoaded extends SettingsState {
     required bool classOnlySpells,
     required bool isDarkMode,
     required ThemeColor themeColor,
+    required bool offlineMode,
   }) {
     this.name = name;
     this.isEditMode = isEditMode;
@@ -36,6 +38,7 @@ class SettingsLoaded extends SettingsState {
     this.classOnlySpells = classOnlySpells;
     this.isDarkMode = isDarkMode;
     this.themeColor = themeColor;
+    this.offlineMode = offlineMode;
   }
 
   SettingsLoaded copyWith({
@@ -45,6 +48,7 @@ class SettingsLoaded extends SettingsState {
     bool? classOnlySpells,
     bool? isDarkMode,
     ThemeColor? themeColor,
+    bool? offlineMode,
   }) {
     return SettingsLoaded(
       name: name ?? this.name,
@@ -53,6 +57,7 @@ class SettingsLoaded extends SettingsState {
       classOnlySpells: classOnlySpells ?? this.classOnlySpells,
       isDarkMode: isDarkMode ?? this.isDarkMode,
       themeColor: themeColor ?? this.themeColor,
+      offlineMode: offlineMode ?? this.offlineMode,
     );
   }
 }

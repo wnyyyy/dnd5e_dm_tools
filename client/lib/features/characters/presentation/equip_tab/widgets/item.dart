@@ -30,23 +30,24 @@ class ItemWidgetState extends State<ItemWidget> {
         ? '${widget.item['name']} x${widget.quantity}'
         : widget.item['name'];
 
-    final equipable =
-        widget.item['armor_class'] != null || widget.item['damage'] != null;
+    final equipable = isEquipable(widget.item);
 
     return ListTile(
       leading: equipmentTypeToIcon(type),
       title: Text(title),
-      subtitle: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(top: 8.0),
-            child: _getItemDescription(context),
-          ),
-          equipable
-              ? Row(
-                  children: [
-                    Checkbox(
+      subtitle: equipable
+          ? GestureDetector(
+              onTap: () {
+                setState(() {
+                  isEquipped = !isEquipped;
+                });
+              },
+              child: Row(
+                children: [
+                  SizedBox(
+                    width: 16,
+                    child: Checkbox(
+                      materialTapTargetSize: MaterialTapTargetSize.padded,
                       value: isEquipped,
                       onChanged: (bool? newValue) {
                         if (newValue != null) {
@@ -56,13 +57,24 @@ class ItemWidgetState extends State<ItemWidget> {
                         }
                       },
                     ),
-                    Text(isEquipped ? 'Equipped' : 'Not Equipped')
-                  ],
-                )
-              : Padding(
-                  padding: const EdgeInsets.only(top: 8.0),
-                  child: Text(getItemDescriptor(widget.item)),
-                ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(isEquipped ? 'Equipped' : 'Not Equipped',
+                      style: Theme.of(context).textTheme.labelSmall)
+                ],
+              ),
+            )
+          : Padding(
+              padding: const EdgeInsets.only(top: 8.0),
+              child: Text(getItemDescriptor(widget.item)),
+            ),
+      trailing: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _getItemWeight(context),
+          const SizedBox(height: 8),
+          _getItemValue(context),
         ],
       ),
       onTap: () => showDialog(
@@ -81,47 +93,54 @@ class ItemWidgetState extends State<ItemWidget> {
     );
   }
 
-  Widget _getItemDescription(BuildContext context) {
+  Widget _getItemValue(BuildContext context) {
     final costUnit = widget.item['cost']?['unit'] ?? 'gp';
     final costValue = widget.item['cost']?['quantity'] ?? 0;
-    final weight = widget.item['weight'] ?? 0;
 
     final double costTotal = _getCostTotal(costUnit, costValue);
     final TextStyle textStyle = Theme.of(context).textTheme.bodyMedium!;
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        RichText(
-          text: TextSpan(
-            text: '${costTotal.toStringAsFixed(2)} ',
-            style: textStyle,
-            children: [
-              WidgetSpan(
-                alignment: PlaceholderAlignment.middle,
-                child: Icon(
-                  FontAwesome5.coins,
-                  size: textStyle.fontSize,
-                  color: textStyle.color,
-                ),
-              ),
-            ],
+    return RichText(
+      text: TextSpan(
+        children: [
+          WidgetSpan(
+            alignment: PlaceholderAlignment.middle,
+            child: Icon(
+              FontAwesome5.coins,
+              size: textStyle.fontSize,
+              color: textStyle.color,
+            ),
           ),
-        ),
-        const SizedBox(width: 8),
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
+          TextSpan(
+            text: '  ${costTotal.toStringAsFixed(2)} ',
+            style: textStyle,
+          )
+        ],
+      ),
+    );
+  }
+
+  Widget _getItemWeight(BuildContext context) {
+    final weight = widget.item['weight'] ?? 0;
+    final TextStyle textStyle = Theme.of(context).textTheme.bodyMedium!;
+
+    return RichText(
+      text: TextSpan(
+        children: [
+          WidgetSpan(
+            alignment: PlaceholderAlignment.middle,
+            child: Icon(
               FontAwesome5.weight_hanging,
               size: textStyle.fontSize,
               color: textStyle.color,
             ),
-            const SizedBox(width: 4),
-            Text('$weight lbs', style: textStyle),
-          ],
-        ),
-      ],
+          ),
+          TextSpan(
+            text: '  $weight lbs',
+            style: textStyle,
+          )
+        ],
+      ),
     );
   }
 

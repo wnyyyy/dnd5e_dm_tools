@@ -41,9 +41,42 @@ class SettingsScreen extends StatelessWidget {
               ],
             ),
             Padding(
+              padding: EdgeInsets.symmetric(
+                  horizontal: MediaQuery.of(context).size.width * 0.2),
+              child: _buildIsOfflineModeToggle(context),
+            ),
+            Padding(
               padding: const EdgeInsets.symmetric(vertical: 32),
               child: _buildEditButton(context),
             ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildIsOfflineModeToggle(BuildContext context) {
+    return BlocBuilder<SettingsCubit, SettingsState>(
+      builder: (context, state) {
+        return Column(
+          children: [
+            SwitchListTile(
+              title: const Text('Offline Mode'),
+              value: state.offlineMode,
+              onChanged: (value) {
+                BlocProvider.of<SettingsCubit>(context).toggleOfflineMode();
+              },
+            ),
+            if (state.offlineMode)
+              ElevatedButton(
+                onPressed: () {
+                  BlocProvider.of<CharacterBloc>(context).add(PersistCharacter(
+                    offline: context.read<SettingsCubit>().state.offlineMode,
+                  ));
+                },
+                child: const Text('Persist'),
+              ),
+            const SizedBox(height: 16),
           ],
         );
       },
@@ -100,8 +133,9 @@ class SettingsScreen extends StatelessWidget {
                   BlocProvider.of<CharacterBloc>(context)
                       .add(CharacterLoad(_nameController.text));
                   BlocProvider.of<SettingsCubit>(context).toggleEditMode();
-                  BlocProvider.of<CharacterBloc>(context)
-                      .add(const PersistCharacter());
+                  BlocProvider.of<CharacterBloc>(context).add(PersistCharacter(
+                    offline: context.read<SettingsCubit>().state.offlineMode,
+                  ));
                 },
                 child: const Text('Save'),
               ),

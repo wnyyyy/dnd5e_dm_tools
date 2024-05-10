@@ -43,10 +43,10 @@ class HitpointsState extends State<Hitpoints> {
     super.dispose();
   }
 
-  void _startTimer(int delta) {
+  void _startTimer(int delta, bool offline) {
     _timer?.cancel();
     _timer = Timer.periodic(const Duration(milliseconds: 50), (timer) {
-      _updateHp(delta);
+      _updateHp(delta, offline);
     });
   }
 
@@ -66,17 +66,18 @@ class HitpointsState extends State<Hitpoints> {
     widget.character['hp_max'] = maxHp;
     widget.character['hp_curr'] = currentHp;
     widget.character['hp_temp'] = tempHp;
-    print('sent');
-    // context.read<CharacterBloc>().add(CharacterUpdate(
-    //       character: widget.character,
-    //       slug: widget.slug,
-    //       persistData: true,
-    //     ));
+    context.read<CharacterBloc>().add(CharacterUpdate(
+          character: widget.character,
+          slug: widget.slug,
+          persistData: true,
+          offline: context.read<SettingsCubit>().state.offlineMode,
+        ));
   }
 
   @override
   Widget build(BuildContext context) {
     final editMode = Provider.of<SettingsCubit>(context).state.isEditMode;
+    final offline = context.read<SettingsCubit>().state.offlineMode;
 
     return GestureDetector(
       onTap: editMode ? () => _editHpModal(context) : null,
@@ -108,12 +109,12 @@ class HitpointsState extends State<Hitpoints> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   GestureDetector(
-                    onLongPress: () => _startTimer(-1),
+                    onLongPress: () => _startTimer(-1, offline),
                     onLongPressEnd: (details) => _stopTimer(),
                     child: Padding(
                       padding: const EdgeInsets.only(right: 6),
                       child: IconButton(
-                          onPressed: () => _updateHp(-1),
+                          onPressed: () => _updateHp(-1, offline),
                           iconSize: 32,
                           icon: const Icon(Icons.remove_circle_outline)),
                     ),
@@ -133,13 +134,13 @@ class HitpointsState extends State<Hitpoints> {
                                 )),
                   ),
                   GestureDetector(
-                    onLongPress: () => _startTimer(1),
+                    onLongPress: () => _startTimer(1, offline),
                     onLongPressEnd: (details) => _stopTimer(),
                     child: Padding(
                       padding: const EdgeInsets.only(left: 6.0),
                       child: IconButton(
                           iconSize: 32,
-                          onPressed: () => _updateHp(1),
+                          onPressed: () => _updateHp(1, offline),
                           icon: const Icon(Icons.add_circle_outline)),
                     ),
                   ),
@@ -259,7 +260,8 @@ class HitpointsState extends State<Hitpoints> {
     if (!increaseHp) {
       changeValue = -changeValue;
     }
-    _updateHp(changeValue);
+    final offline = context.read<SettingsCubit>().state.offlineMode;
+    _updateHp(changeValue, offline);
     focusNode.dispose();
     Navigator.of(context).pop();
   }
@@ -290,6 +292,10 @@ class HitpointsState extends State<Hitpoints> {
                                 character: character,
                                 slug: widget.slug,
                                 persistData: false,
+                                offline: context
+                                    .read<SettingsCubit>()
+                                    .state
+                                    .offlineMode,
                               ));
                         });
                       }),
@@ -309,6 +315,10 @@ class HitpointsState extends State<Hitpoints> {
                                 character: character,
                                 slug: widget.slug,
                                 persistData: false,
+                                offline: context
+                                    .read<SettingsCubit>()
+                                    .state
+                                    .offlineMode,
                               ));
                         });
                       }),
@@ -394,7 +404,7 @@ class HitpointsState extends State<Hitpoints> {
     );
   }
 
-  void _updateHp(int delta) {
+  void _updateHp(int delta, bool offline) {
     if (delta == 0) return;
     setState(() {
       if (delta > 0) {
@@ -419,7 +429,11 @@ class HitpointsState extends State<Hitpoints> {
           currentHp = max(0, currentHp - remainingDamage);
         }
       }
-      _debouncePersistCharacter();
+      if (offline) {
+        _persistCharacter();
+      } else {
+        _debouncePersistCharacter();
+      }
     });
   }
 }

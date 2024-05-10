@@ -5,6 +5,7 @@ import 'package:dnd5e_dm_tools/features/characters/bloc/character_bloc.dart';
 import 'package:dnd5e_dm_tools/features/characters/bloc/character_events.dart';
 import 'package:dnd5e_dm_tools/features/characters/presentation/equip_tab/widgets/add_item.dart';
 import 'package:dnd5e_dm_tools/features/characters/presentation/equip_tab/widgets/backpack.dart';
+import 'package:dnd5e_dm_tools/features/settings/bloc/settings_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -20,6 +21,7 @@ class EquipTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final offline = context.read<SettingsCubit>().state.offlineMode;
     if (character['backpack'] == null) {
       character['backpack'] = {
         'cp': 0,
@@ -130,6 +132,7 @@ class EquipTab extends StatelessWidget {
                                         character: character,
                                         slug: slug,
                                         persistData: true,
+                                        offline: offline,
                                       ),
                                     );
                                 Navigator.pop(context);
@@ -152,6 +155,7 @@ class EquipTab extends StatelessWidget {
                         character: character,
                         slug: slug,
                         persistData: true,
+                        offline: offline,
                       ),
                     );
                 Navigator.pop(context);

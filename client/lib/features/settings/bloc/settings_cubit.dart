@@ -1,3 +1,4 @@
+import 'package:dnd5e_dm_tools/core/data/repositories/characters_repository.dart';
 import 'package:dnd5e_dm_tools/core/util/enum.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:dnd5e_dm_tools/core/data/repositories/classes_repository.dart';
@@ -16,6 +17,7 @@ class SettingsCubit extends Cubit<SettingsState> {
   final ConditionsRepository conditionsRepository;
   final RacesRepository racesRepository;
   final ItemsRepository itemsRepository;
+  final CharactersRepository charactersRepository;
 
   SettingsCubit({
     required this.spellsRepository,
@@ -24,6 +26,7 @@ class SettingsCubit extends Cubit<SettingsState> {
     required this.conditionsRepository,
     required this.racesRepository,
     required this.itemsRepository,
+    required this.charactersRepository,
   }) : super(SettingsInitial());
 
   void changeName(String name) async {
@@ -59,12 +62,20 @@ class SettingsCubit extends Cubit<SettingsState> {
     emit((state as SettingsLoaded).copyWith(classOnlySpells: classOnly));
   }
 
+  void toggleOfflineMode() async {
+    if (state is! SettingsLoaded) return;
+    final offlineMode = !state.offlineMode;
+    await saveConfig('offline_mode', offlineMode.toString());
+    emit((state as SettingsLoaded).copyWith(offlineMode: offlineMode));
+  }
+
   void init() async {
     emit(SettingsLoading());
     try {
       final name = await readConfig('char_name') ?? '';
       final isCaster = await readConfig('is_caster') ?? 'false';
       final classOnly = await readConfig('class_only_spells') ?? 'false';
+      final offlineMode = await readConfig('offline_mode') ?? 'false';
       final themeColorName =
           await readConfig('theme_color') ?? ThemeColor.chestnutBrown.name;
       final isDarkMode = await readConfig('is_dark_mode') ?? 'false';
@@ -78,6 +89,7 @@ class SettingsCubit extends Cubit<SettingsState> {
       await conditionsRepository.init();
       await racesRepository.init();
       await itemsRepository.init();
+      await charactersRepository.init();
       print('Settings loaded');
 
       emit(SettingsLoaded(
@@ -87,6 +99,7 @@ class SettingsCubit extends Cubit<SettingsState> {
         isEditMode: false,
         themeColor: themeColor,
         isDarkMode: isDarkMode == 'true',
+        offlineMode: offlineMode == 'true',
       ));
     } catch (error) {
       emit(SettingsError('Failed to load settings'));
