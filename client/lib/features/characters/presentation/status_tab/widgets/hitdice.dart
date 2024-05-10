@@ -32,61 +32,214 @@ class HitDice extends StatelessWidget {
       showDialog(
         context: context,
         builder: (BuildContext context) {
-          return StatefulBuilder(
-            builder: (BuildContext context, StateSetter setDialogState) {
-              return AlertDialog(
-                title: Text('Edit $attributeName Hitpoints'),
-                content: Column(
+          return AlertDialog(
+            title: Text('Edit $attributeName Hitpoints'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: maxHpController,
+                  decoration: const InputDecoration(
+                    labelText: 'Max Hitdice',
+                  ),
+                  keyboardType: const TextInputType.numberWithOptions(
+                      signed: false, decimal: false),
+                ),
+                TextField(
+                  controller: currentHpController,
+                  decoration: const InputDecoration(
+                    labelText: 'Current Hitdice',
+                  ),
+                  keyboardType: const TextInputType.numberWithOptions(
+                      signed: false, decimal: false),
+                ),
+              ],
+            ),
+            actionsAlignment: MainAxisAlignment.spaceBetween,
+            actions: <Widget>[
+              TextButton(
+                child: const Icon(Icons.close),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+              TextButton(
+                child: const Icon(Icons.check),
+                onPressed: () {
+                  character['hd_max'] = int.tryParse(maxHpController.text) ?? 0;
+                  character['hd_curr'] =
+                      int.tryParse(currentHpController.text) ??
+                          int.tryParse(maxHpController.text) ??
+                          0;
+                  context.read<CharacterBloc>().add(CharacterUpdate(
+                        character: character,
+                        slug: slug,
+                        offline:
+                            context.read<SettingsCubit>().state.offlineMode,
+                      ));
+
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        },
+      );
+    }
+
+    void showRestDialog(int currHitDie, maxHitDie) {
+      bool isShort = true;
+      int currHitDieInput = currHitDie;
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('Rest'),
+            content: StatefulBuilder(
+              builder: (context, setState) {
+                return Column(
                   mainAxisSize: MainAxisSize.min,
-                  children: [
-                    TextField(
-                      controller: maxHpController,
-                      decoration: const InputDecoration(
-                        labelText: 'Max Hitdice',
-                      ),
-                      keyboardType: const TextInputType.numberWithOptions(
-                          signed: false, decimal: false),
-                    ),
-                    TextField(
-                      controller: currentHpController,
-                      decoration: const InputDecoration(
-                        labelText: 'Current Hitdice',
-                      ),
-                      keyboardType: const TextInputType.numberWithOptions(
-                          signed: false, decimal: false),
+                  children: <Widget>[
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: <Widget>[
+                        ChoiceChip(
+                            label: const Text('Short'),
+                            selected: isShort,
+                            onSelected: (selected) {
+                              setState(() {
+                                isShort = selected;
+                              });
+                            }),
+                        const SizedBox(width: 24),
+                        ChoiceChip(
+                            label: const Text('Long'),
+                            selected: !isShort,
+                            onSelected: (selected) {
+                              setState(() {
+                                isShort = !selected;
+                              });
+                            }),
+                      ],
                     ),
                   ],
-                ),
-                actionsAlignment: MainAxisAlignment.spaceBetween,
-                actions: <Widget>[
-                  TextButton(
-                    child: const Icon(Icons.close),
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                  ),
-                  TextButton(
-                    child: const Icon(Icons.check),
-                    onPressed: () {
-                      character['hd_max'] =
-                          int.tryParse(maxHpController.text) ?? 0;
-                      character['hd_curr'] =
-                          int.tryParse(currentHpController.text) ??
-                              int.tryParse(maxHpController.text) ??
-                              0;
-                      context.read<CharacterBloc>().add(CharacterUpdate(
-                            character: character,
-                            slug: slug,
-                            offline:
-                                context.read<SettingsCubit>().state.offlineMode,
-                          ));
-
-                      Navigator.of(context).pop();
-                    },
-                  ),
-                ],
-              );
-            },
+                );
+              },
+            ),
+            actionsAlignment: MainAxisAlignment.spaceBetween,
+            actions: [
+              TextButton(
+                child: const Icon(Icons.close),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+              TextButton(
+                child: const Icon(Icons.check),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  if (isShort) {
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: const Text('Rest'),
+                          content: StatefulBuilder(
+                            builder: (context, setState) {
+                              return Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: <Widget>[
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Padding(
+                                        padding:
+                                            const EdgeInsets.only(right: 6),
+                                        child: IconButton(
+                                            onPressed: () {
+                                              if (currHitDieInput > 0) {
+                                                setState(() {
+                                                  currHitDieInput--;
+                                                });
+                                              }
+                                            },
+                                            iconSize: 32,
+                                            icon: const Icon(
+                                                Icons.remove_circle_outline)),
+                                      ),
+                                      Text('$currHitDieInput',
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .displaySmall),
+                                      Padding(
+                                        padding:
+                                            const EdgeInsets.only(left: 6.0),
+                                        child: IconButton(
+                                            iconSize: 32,
+                                            onPressed: () {
+                                              if (currHitDieInput <
+                                                  currHitDie) {
+                                                setState(() {
+                                                  currHitDieInput++;
+                                                });
+                                              }
+                                            },
+                                            icon: const Icon(
+                                                Icons.add_circle_outline)),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              );
+                            },
+                          ),
+                          actionsAlignment: MainAxisAlignment.spaceBetween,
+                          actions: <Widget>[
+                            TextButton(
+                              child: const Icon(Icons.close),
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                            ),
+                            TextButton(
+                              child: const Icon(Icons.check),
+                              onPressed: () {
+                                if (currHitDieInput > 0) {
+                                  character['hd_curr'] =
+                                      currHitDie - currHitDieInput;
+                                  context
+                                      .read<CharacterBloc>()
+                                      .add(CharacterUpdate(
+                                        character: character,
+                                        slug: slug,
+                                        offline: context
+                                            .read<SettingsCubit>()
+                                            .state
+                                            .offlineMode,
+                                      ));
+                                }
+                                Navigator.of(context).pop();
+                              },
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  } else {
+                    character['hd_curr'] = maxHitDie;
+                    character['expendedSpellSlots'] = {};
+                    context.read<CharacterBloc>().add(CharacterUpdate(
+                          character: character,
+                          slug: slug,
+                          offline:
+                              context.read<SettingsCubit>().state.offlineMode,
+                        ));
+                  }
+                },
+              ),
+            ],
           );
         },
       );
@@ -94,7 +247,7 @@ class HitDice extends StatelessWidget {
 
     return GestureDetector(
       onTap: editMode ? () => editHd('Hit Dice') : null,
-      child: Card.filled(
+      child: Card(
         child: SizedBox(
           child: Padding(
             padding: const EdgeInsets.all(8.0),
@@ -127,6 +280,10 @@ class HitDice extends StatelessWidget {
                       ],
                     ),
                   ],
+                ),
+                TextButton(
+                  onPressed: () => showRestDialog(currentHd, maxHd),
+                  child: const Text('Rest'),
                 ),
               ],
             ),
