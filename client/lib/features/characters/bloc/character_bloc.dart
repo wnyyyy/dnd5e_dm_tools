@@ -22,7 +22,7 @@ class CharacterBloc extends Bloc<CharacterEvent, CharacterState> {
     try {
       final slug = event.characterName;
       Map<String, dynamic> character =
-          await charactersRepository.get(slug, true);
+          await charactersRepository.get(slug, event.offline);
       emit(
         CharacterStateLoaded(
           character: character,

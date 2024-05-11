@@ -1,4 +1,5 @@
 import 'package:dnd5e_dm_tools/core/util/enum.dart';
+import 'package:dnd5e_dm_tools/features/characters/presentation/status_tab/widgets/action_menu/action_item.dart';
 import 'package:dnd5e_dm_tools/features/characters/presentation/status_tab/widgets/action_menu/add_action.dart';
 import 'package:flutter/material.dart';
 
@@ -19,7 +20,7 @@ class ActionMenu extends StatefulWidget {
 class _ActionMenuState extends State<ActionMenu> {
   bool _isEditMode = false;
   final ActionMenuMode _mode = ActionMenuMode.all;
-  late Map<String, Map<String, dynamic>> _items;
+  late Map<String, Map<String, dynamic>> _actions;
 
   void _enableEditMode() {
     setState(() {
@@ -30,13 +31,13 @@ class _ActionMenuState extends State<ActionMenu> {
   @override
   void initState() {
     super.initState();
-    _items =
-        Map<String, Map<String, dynamic>>.from(widget.character['items'] ?? {});
+    _actions = Map<String, Map<String, dynamic>>.from(
+        widget.character['actions'] ?? {});
   }
 
   @override
   Widget build(BuildContext context) {
-    final items = _getFilteredItems();
+    final actions = _getFilteredItems();
     return DecoratedBox(
       decoration: BoxDecoration(
         border: Border.all(
@@ -71,7 +72,11 @@ class _ActionMenuState extends State<ActionMenu> {
                     ),
                     Row(
                       children: [
-                        if (_isEditMode) const AddActionButton(),
+                        if (_isEditMode)
+                          AddActionButton(
+                            character: widget.character,
+                            slug: widget.slug,
+                          ),
                         IconButton(
                           onPressed: _enableEditMode,
                           icon: Icon(_isEditMode ? Icons.check : Icons.edit),
@@ -83,15 +88,16 @@ class _ActionMenuState extends State<ActionMenu> {
               ),
             ),
           ),
-          if (items.isEmpty)
+          if (actions.isEmpty)
             Padding(
               padding: const EdgeInsets.all(16),
               child: Text('No actions.',
                   style: Theme.of(context).textTheme.bodyLarge),
             ),
-          ...items.keys.map(
+          ...actions.keys.map(
             (key) {
-              return Container();
+              return ActionItem(
+                  action: actions[key], character: widget.character);
             },
           ),
         ],
@@ -100,7 +106,7 @@ class _ActionMenuState extends State<ActionMenu> {
   }
 
   Map<String, dynamic> _getFilteredItems() {
-    return _items;
+    return _actions;
   }
 
   void _persist() {}

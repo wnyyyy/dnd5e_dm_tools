@@ -11,4 +11,8 @@ class MainScreenCubit extends Cubit<MainScreenState> {
   void showSettings() {
     emit(MainScreenStateSettings());
   }
+
+  void showDatabase() {
+    emit(MainScreenStateDatabase());
+  }
 }

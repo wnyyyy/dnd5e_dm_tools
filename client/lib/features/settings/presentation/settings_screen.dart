@@ -131,8 +131,10 @@ class SettingsScreen extends StatelessWidget {
                 onPressed: () {
                   BlocProvider.of<SettingsCubit>(context)
                       .changeName(_nameController.text);
-                  BlocProvider.of<CharacterBloc>(context)
-                      .add(CharacterLoad(_nameController.text));
+                  BlocProvider.of<CharacterBloc>(context).add(CharacterLoad(
+                    _nameController.text,
+                    offline: context.read<SettingsCubit>().state.offlineMode,
+                  ));
                   BlocProvider.of<SettingsCubit>(context).toggleEditMode();
                   BlocProvider.of<CharacterBloc>(context).add(PersistCharacter(
                     offline: context.read<SettingsCubit>().state.offlineMode,
@@ -144,8 +146,10 @@ class SettingsScreen extends StatelessWidget {
               ElevatedButton(
                 onPressed: () {
                   BlocProvider.of<SettingsCubit>(context).toggleEditMode();
-                  BlocProvider.of<CharacterBloc>(context)
-                      .add(CharacterLoad(state.name));
+                  BlocProvider.of<CharacterBloc>(context).add(CharacterLoad(
+                    state.name,
+                    offline: context.read<SettingsCubit>().state.offlineMode,
+                  ));
                 },
                 child: const Text('Cancel'),
               ),

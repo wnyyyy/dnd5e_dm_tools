@@ -1,5 +1,7 @@
 import 'package:dnd5e_dm_tools/core/util/helper.dart';
+import 'package:dnd5e_dm_tools/features/settings/bloc/settings_cubit.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttericon/rpg_awesome_icons.dart';
 
 class StatsView extends StatelessWidget {
@@ -85,8 +87,9 @@ class StatsView extends StatelessWidget {
     final initiative = int.tryParse(character['initiative'].toString()) ??
         getModifier(character['asi']?['dexterity']);
     final speed = int.tryParse(character['speed'].toString()) ?? 30;
+    final editMode = context.read<SettingsCubit>().state.isEditMode;
     return GestureDetector(
-      onTap: () => editStats(context),
+      onTap: () => editMode ? editStats(context) : null,
       child: Card(
         child: Container(
           width: 140,

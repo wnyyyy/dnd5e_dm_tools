@@ -39,6 +39,14 @@ class MainDrawer extends StatelessWidget {
               Navigator.pop(context);
             },
           ),
+          ListTile(
+            leading: const Icon(Icons.storage),
+            title: const Text('Database'),
+            onTap: () {
+              BlocProvider.of<MainScreenCubit>(context).showDatabase();
+              Navigator.pop(context);
+            },
+          ),
         ],
       ),
     );

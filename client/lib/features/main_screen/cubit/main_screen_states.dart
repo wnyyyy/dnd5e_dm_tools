@@ -16,3 +16,8 @@ class MainScreenStateSettings extends MainScreenState {
   @override
   List<Object?> get props => [];
 }
+
+class MainScreenStateDatabase extends MainScreenState {
+  @override
+  List<Object?> get props => [];
+}

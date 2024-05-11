@@ -9,7 +9,8 @@ abstract class CharacterEvent extends Equatable {
 
 class CharacterLoad extends CharacterEvent {
   final String characterName;
-  const CharacterLoad(this.characterName);
+  final bool offline;
+  const CharacterLoad(this.characterName, {this.offline = false});
 
   @override
   List<Object> get props => [];
