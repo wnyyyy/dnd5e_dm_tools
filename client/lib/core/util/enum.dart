@@ -35,3 +35,18 @@ enum Rarity {
   legendary,
   artifact,
 }
+
+enum ActionMenuMode {
+  all,
+  abilities,
+  items,
+  spells,
+}
+
+enum ResourceType {
+  item,
+  shortRest,
+  longRest,
+  spell,
+  none,
+}

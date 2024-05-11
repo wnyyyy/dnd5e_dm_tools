@@ -259,26 +259,8 @@ class HitDice extends StatelessWidget {
                 Column(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text('$currentHd',
-                            style: Theme.of(context).textTheme.displaySmall!),
-                      ],
-                    ),
-                    const SizedBox(
-                      width: 40,
-                      child: Divider(
-                        height: 5,
-                        thickness: 2,
-                      ),
-                    ),
-                    Row(
-                      children: [
-                        Text('$maxHd',
-                            style: Theme.of(context).textTheme.displaySmall),
-                      ],
-                    ),
+                    Text('$currentHd/$maxHd',
+                        style: Theme.of(context).textTheme.displaySmall),
                   ],
                 ),
                 TextButton(

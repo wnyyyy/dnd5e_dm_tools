@@ -1,6 +1,7 @@
-import 'package:dnd5e_dm_tools/core/widgets/trait_description.dart';
+import 'package:dnd5e_dm_tools/core/widgets/trait_description2.dart';
 import 'package:dnd5e_dm_tools/features/characters/bloc/character_bloc.dart';
 import 'package:dnd5e_dm_tools/features/characters/bloc/character_events.dart';
+import 'package:dnd5e_dm_tools/features/characters/presentation/bio_tab/widgets/class_description.dart';
 import 'package:dnd5e_dm_tools/features/rules/rules_cubit.dart';
 import 'package:dnd5e_dm_tools/features/settings/bloc/settings_cubit.dart';
 import 'package:flutter/material.dart';
@@ -46,7 +47,7 @@ class CharacterPortrait extends StatelessWidget {
       builder: (context) {
         return AlertDialog(
           title: Text(data?['name'] ?? "Error"),
-          content: TraitDescription(
+          content: TraitDescription2(
             inputText: data?['traits'] ?? "Could not load race",
           ),
           actions: [
@@ -117,9 +118,21 @@ class CharacterPortrait extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  Text(
-                    '${classs?['name'] ?? 'Class not found'}',
-                    style: Theme.of(context).textTheme.headlineMedium,
+                  GestureDetector(
+                    onTap: () => showDialog(
+                      context: context,
+                      builder: (context) {
+                        if (classs == null) return Container();
+                        return ClassDescription(
+                            classs: classs,
+                            character: character,
+                            editMode: false);
+                      },
+                    ),
+                    child: Text(
+                      '${classs?['name'] ?? 'Class not found'}',
+                      style: Theme.of(context).textTheme.headlineMedium,
+                    ),
                   ),
                 ],
               ),

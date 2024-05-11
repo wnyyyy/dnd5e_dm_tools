@@ -56,7 +56,7 @@ extension ThemeColorExtension on ThemeColor {
       case ThemeColor.chestnutBrown:
         return "Classic";
       case ThemeColor.crimsonRed:
-        return "Crimson Red";
+        return "Flamingo Red";
       case ThemeColor.forestGreen:
         return "Forest Green";
       case ThemeColor.midnightBlue:

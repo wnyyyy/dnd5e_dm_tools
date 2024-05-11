@@ -1,5 +1,6 @@
 import 'package:dnd5e_dm_tools/features/characters/bloc/character_bloc.dart';
 import 'package:dnd5e_dm_tools/features/characters/bloc/character_events.dart';
+import 'package:dnd5e_dm_tools/features/characters/presentation/status_tab/widgets/action_menu/action_menu.dart';
 import 'package:dnd5e_dm_tools/features/characters/presentation/status_tab/widgets/hitdice.dart';
 import 'package:dnd5e_dm_tools/features/characters/presentation/status_tab/widgets/hp.dart';
 import 'package:dnd5e_dm_tools/features/characters/presentation/status_tab/widgets/spellbook.dart';
@@ -44,93 +45,101 @@ class StatusTab extends StatelessWidget {
     return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Flex(
-          direction: Axis.horizontal,
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        child: Column(
           children: [
             Flex(
-              direction: Axis.vertical,
+              direction: Axis.horizontal,
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                Hitpoints(
-                  character: character,
-                  slug: slug,
+                Flex(
+                  direction: Axis.vertical,
+                  children: [
+                    Hitpoints(
+                      character: character,
+                      slug: slug,
+                    ),
+                    HitDice(
+                      character: character,
+                      classs: classs,
+                      slug: slug,
+                    )
+                  ],
                 ),
-                HitDice(
-                  character: character,
-                  classs: classs,
-                  slug: slug,
-                )
-              ],
-            ),
-            Flex(
-              direction: Axis.vertical,
-              children: [
-                if (isCaster)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
-                    child: IconButton.outlined(
-                      padding: const EdgeInsets.all(12),
-                      iconSize: 36,
-                      icon: const Icon(Octicons.book),
-                      onPressed: () {
-                        showDialog(
-                            context: context,
-                            builder: (context) {
-                              return AlertDialog(
-                                title: const Text('Spellbook'),
-                                content: Spellbook(
-                                    character: character,
-                                    spells: spells,
-                                    slug: slug,
-                                    table: table,
-                                    updateCharacter: () =>
-                                        context.read<CharacterBloc>().add(
-                                              CharacterUpdate(
-                                                character: character,
-                                                slug: slug,
+                Flex(
+                  direction: Axis.vertical,
+                  children: [
+                    if (isCaster)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: IconButton.outlined(
+                          padding: const EdgeInsets.all(12),
+                          iconSize: 36,
+                          icon: const Icon(Octicons.book),
+                          onPressed: () {
+                            showDialog(
+                                context: context,
+                                builder: (context) {
+                                  return AlertDialog(
+                                    title: const Text('Spellbook'),
+                                    content: Spellbook(
+                                        character: character,
+                                        spells: spells,
+                                        slug: slug,
+                                        table: table,
+                                        updateCharacter: () =>
+                                            context.read<CharacterBloc>().add(
+                                                  CharacterUpdate(
+                                                    character: character,
+                                                    slug: slug,
+                                                    offline: context
+                                                        .read<SettingsCubit>()
+                                                        .state
+                                                        .offlineMode,
+                                                  ),
+                                                ),
+                                        onDone: () {
+                                          context
+                                              .read<CharacterBloc>()
+                                              .add(PersistCharacter(
                                                 offline: context
                                                     .read<SettingsCubit>()
                                                     .state
                                                     .offlineMode,
-                                              ),
-                                            ),
-                                    onDone: () {
-                                      context
-                                          .read<CharacterBloc>()
-                                          .add(PersistCharacter(
-                                            offline: context
-                                                .read<SettingsCubit>()
-                                                .state
-                                                .offlineMode,
-                                          ));
-                                      Navigator.of(context).pop();
-                                    }),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
-                                    },
-                                    child: const Icon(Icons.done),
-                                  ),
-                                ],
-                              );
-                            });
-                      },
-                    ),
-                  ),
-                StatsView(
-                    onSave: () =>
-                        context.read<CharacterBloc>().add(CharacterUpdate(
-                              character: character,
-                              slug: slug,
-                              offline: context
-                                  .read<SettingsCubit>()
-                                  .state
-                                  .offlineMode,
-                            )),
-                    character: character),
+                                              ));
+                                          Navigator.of(context).pop();
+                                        }),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                        },
+                                        child: const Icon(Icons.done),
+                                      ),
+                                    ],
+                                  );
+                                });
+                          },
+                        ),
+                      ),
+                    StatsView(
+                        onSave: () =>
+                            context.read<CharacterBloc>().add(CharacterUpdate(
+                                  character: character,
+                                  slug: slug,
+                                  offline: context
+                                      .read<SettingsCubit>()
+                                      .state
+                                      .offlineMode,
+                                )),
+                        character: character),
+                  ],
+                ),
               ],
             ),
+            const SizedBox(
+              height: 16,
+            ),
+            ActionMenu(character: character, slug: slug)
           ],
         ),
       ),

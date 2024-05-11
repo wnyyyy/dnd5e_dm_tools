@@ -87,6 +87,7 @@ class HitpointsState extends State<Hitpoints> {
           child: Column(
             children: [
               Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
                   GestureDetector(
                     onLongPress: () => setState(() {
@@ -101,7 +102,15 @@ class HitpointsState extends State<Hitpoints> {
                   Text('Hit Points',
                       style: Theme.of(context).textTheme.titleSmall),
                   const SizedBox(width: 8),
-                  const Icon(Icons.favorite_outline),
+                  GestureDetector(
+                    onLongPress: () => setState(() {
+                      tempHpMode = !tempHpMode;
+                    }),
+                    child: Icon(
+                      color: tempHpMode ? Colors.blue : null,
+                      Icons.favorite_outline,
+                    ),
+                  ),
                 ],
               ),
               const SizedBox(height: 8),

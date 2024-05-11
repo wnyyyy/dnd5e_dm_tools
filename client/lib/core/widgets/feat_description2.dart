@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
-class FeatDescription extends StatelessWidget {
+class FeatDescription2 extends StatelessWidget {
   final String inputText;
   final List<String> effectsDesc;
 
-  const FeatDescription({
+  const FeatDescription2({
     super.key,
     required this.inputText,
     required this.effectsDesc,

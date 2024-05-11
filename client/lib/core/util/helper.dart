@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:dnd5e_dm_tools/core/util/enum.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttericon/font_awesome5_icons.dart';
@@ -31,6 +33,64 @@ String getOrdinal(int number) {
     default:
       return '${number}th';
   }
+}
+
+Map<String, dynamic> getClassFeatures(
+    String desc, List<Map<String, dynamic>> table,
+    {int level = 20}) {
+  var features = <String, dynamic>{};
+  List<String> lines = desc.split('\n');
+  lines = lines
+      .map((line) => line.trim())
+      .where((line) => line.isNotEmpty)
+      .toList();
+
+  String currentFeatureKey = '';
+  String currentSubFeatureKey = '';
+  List<String> currentFeatureDescription = [];
+  List<String> currentSubFeatureDescription = [];
+
+  for (var line in lines) {
+    if (line.startsWith('### ')) {
+      if (currentFeatureKey.isNotEmpty) {
+        if (currentSubFeatureKey.isNotEmpty) {
+          features[currentFeatureKey][currentSubFeatureKey] =
+              currentSubFeatureDescription.join('\n');
+          currentSubFeatureKey = '';
+          currentSubFeatureDescription = [];
+        }
+        features[currentFeatureKey]['description'] =
+            currentFeatureDescription.join('\n');
+      }
+      currentFeatureKey = line.substring(4).trim();
+      currentFeatureDescription = [];
+      features[currentFeatureKey] = {};
+    } else if (line.startsWith('#### ')) {
+      if (currentSubFeatureKey.isNotEmpty) {
+        features[currentFeatureKey][currentSubFeatureKey] =
+            currentSubFeatureDescription.join('\n');
+      }
+      currentSubFeatureKey = line.substring(5).trim();
+      currentSubFeatureDescription = [];
+    } else {
+      if (currentSubFeatureKey.isNotEmpty) {
+        currentSubFeatureDescription.add(line.trim());
+      } else {
+        currentFeatureDescription.add(line.trim());
+      }
+    }
+  }
+
+  if (currentFeatureKey.isNotEmpty) {
+    if (currentSubFeatureKey.isNotEmpty) {
+      features[currentFeatureKey][currentSubFeatureKey] =
+          currentSubFeatureDescription.join('\n');
+    }
+    features[currentFeatureKey]['description'] =
+        currentFeatureDescription.join('\n');
+  }
+
+  return features;
 }
 
 bool isEquipable(Map<String, dynamic> item) {

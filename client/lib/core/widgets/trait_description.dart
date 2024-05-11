@@ -1,56 +1,45 @@
 import 'package:flutter/material.dart';
 
 class TraitDescription extends StatelessWidget {
-  final String inputText;
-  final String separator;
-  final bool boldify;
+  final Map<String, dynamic> traits;
 
   const TraitDescription({
     super.key,
-    required this.inputText,
-    this.separator = '***',
-    this.boldify = true,
+    required this.traits,
   });
 
   @override
   Widget build(BuildContext context) {
-    List<TextSpan> spans = [];
-    final parts = inputText.split(separator);
+    List<Text> texts = [];
 
-    if (boldify) {
-      for (int i = 0; i < parts.length; i++) {
-        if (parts[i].isEmpty) continue;
-
-        if (i % 2 != 0) {
-          spans.add(TextSpan(
-            text: '${i != 1 ? '\n' : ''}${parts[i]}',
-            style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+    for (final trait in traits.entries) {
+      texts.add(
+        Text(
+          trait.key,
+          style: Theme.of(context).textTheme.headlineMedium,
+        ),
+      );
+      texts.add(
+        Text(
+          trait.value['description'],
+          style: Theme.of(context).textTheme.bodyMedium,
+        ),
+      );
+      if (Map<String, dynamic>.from(trait.value).length > 1) {
+        for (final subtrait in trait.value.entries) {
+          if (subtrait.key == 'description') continue;
+          texts.add(Text(
+            '• ${subtrait.key}',
+            style: Theme.of(context).textTheme.titleMedium,
           ));
-        } else {
-          spans.add(TextSpan(
-            text: '${parts[i]}\n',
+          texts.add(Text(
+            subtrait.value,
             style: Theme.of(context).textTheme.bodyMedium,
           ));
         }
       }
-    } else {
-      for (int i = 0; i < parts.length; i++) {
-        if (parts[i].isEmpty) continue;
-
-        spans.add(TextSpan(
-          text: '${i != 1 ? '\n' : ''}${parts[i]}',
-          style: Theme.of(context).textTheme.bodyMedium,
-        ));
-      }
     }
 
-    return RichText(
-      text: TextSpan(
-        children: spans,
-        style: Theme.of(context).textTheme.bodyMedium,
-      ),
-    );
+    return Column(children: texts);
   }
 }

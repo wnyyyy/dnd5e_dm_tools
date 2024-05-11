@@ -1,4 +1,4 @@
-import 'package:dnd5e_dm_tools/core/widgets/feat_description.dart';
+import 'package:dnd5e_dm_tools/core/widgets/feat_description2.dart';
 import 'package:dnd5e_dm_tools/core/widgets/item_list.dart';
 import 'package:dnd5e_dm_tools/features/characters/bloc/character_bloc.dart';
 import 'package:dnd5e_dm_tools/features/characters/bloc/character_events.dart';
@@ -87,7 +87,7 @@ class FeatsList extends StatelessWidget {
         builder: (context) {
           return AlertDialog(
             title: Text(feat.value['name']),
-            content: FeatDescription(
+            content: FeatDescription2(
               inputText: feat.value['desc'],
               effectsDesc: List<String>.from(feat.value['effects_desc'] ?? []),
             ),
