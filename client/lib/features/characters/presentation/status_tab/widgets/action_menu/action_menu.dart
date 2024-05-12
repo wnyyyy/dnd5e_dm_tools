@@ -108,6 +108,4 @@ class _ActionMenuState extends State<ActionMenu> {
   Map<String, dynamic> _getFilteredItems() {
     return _actions;
   }
-
-  void _persist() {}
 }

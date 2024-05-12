@@ -22,34 +22,36 @@ class SettingsScreen extends StatelessWidget {
         if (_nameController.text != state.name) {
           _nameController.text = state.name;
         }
-        return Flex(
-          direction: Axis.vertical,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Column(
-              children: [
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                  child: _buildNameField(context),
-                ),
-                Padding(
-                  padding: EdgeInsets.symmetric(
-                      horizontal: MediaQuery.of(context).size.width * 0.2),
-                  child: _buildIsCasterToggle(context),
-                ),
-              ],
-            ),
-            Padding(
-              padding: EdgeInsets.symmetric(
-                  horizontal: MediaQuery.of(context).size.width * 0.2),
-              child: _buildIsOfflineModeToggle(context),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 32),
-              child: _buildEditButton(context),
-            ),
-          ],
+        return SingleChildScrollView(
+          child: Flex(
+            direction: Axis.vertical,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 32, vertical: 16),
+                    child: _buildNameField(context),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.symmetric(
+                        horizontal: MediaQuery.of(context).size.width * 0.2),
+                    child: _buildIsCasterToggle(context),
+                  ),
+                ],
+              ),
+              Padding(
+                padding: EdgeInsets.symmetric(
+                    horizontal: MediaQuery.of(context).size.width * 0.2),
+                child: _buildIsOfflineModeToggle(context),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 32),
+                child: _buildEditButton(context),
+              ),
+            ],
+          ),
         );
       },
     );

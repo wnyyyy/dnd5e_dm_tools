@@ -1,3 +1,4 @@
+import 'package:dnd5e_dm_tools/core/util/helper.dart';
 import 'package:dnd5e_dm_tools/features/characters/bloc/character_bloc.dart';
 import 'package:dnd5e_dm_tools/features/characters/bloc/character_events.dart';
 import 'package:dnd5e_dm_tools/features/characters/presentation/status_tab/widgets/action_menu/action_menu.dart';
@@ -25,6 +26,33 @@ class StatusTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (character['asi'] == null) {
+      character['asi'] = {
+        'dexterity': 10,
+        'constitution': 10,
+        'wisdom': 10,
+        'intelligence': 10,
+        'charisma': 10,
+        'strength': 10,
+      };
+    }
+    if (character['ac'] == null) {
+      character['ac'] = 0;
+    }
+    if (character['initiative'] == null) {
+      character['initiative'] = getModifier(character['asi']?['dexterity']);
+    }
+    if (character['speed'] == null) {
+      character['speed'] = 30;
+    }
+    if (character['hp_max'] == null) {
+      character['hp_max'] = 1;
+      character['hp_curr'] = 1;
+    }
+    if (character['hd_max'] == null) {
+      character['hd_max'] = 1;
+      character['hd_curr'] = 1;
+    }
     final isCaster = context.read<SettingsCubit>().state.isCaster;
     final Map<String, dynamic> spells;
     if (isCaster) {
