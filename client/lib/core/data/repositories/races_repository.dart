@@ -22,4 +22,17 @@ class RacesRepository {
         path: path, cacheBoxName: cacheRacesName);
     return data;
   }
+
+  Future<void> save(
+    String slug,
+    Map<String, dynamic> entry,
+    bool offline,
+  ) async {
+    await databaseProvider.setData(
+      path: '$path$slug',
+      data: entry,
+      offline: offline,
+      cacheBoxName: cacheRacesName,
+    );
+  }
 }

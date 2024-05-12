@@ -37,9 +37,8 @@ class CharacterUpdate extends CharacterEvent {
 
 class PersistCharacter extends CharacterEvent {
   final bool offline;
-  final bool online;
-  const PersistCharacter({required this.offline, this.online = false});
+  const PersistCharacter({required this.offline});
 
   @override
-  List<Object> get props => [offline, online];
+  List<Object> get props => [offline];
 }

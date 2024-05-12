@@ -1,8 +1,4 @@
-import 'package:dnd5e_dm_tools/core/config/app_colors.dart';
 import 'package:dnd5e_dm_tools/core/util/enum.dart';
-import 'package:dnd5e_dm_tools/core/widgets/trait_description2.dart';
-import 'package:dnd5e_dm_tools/features/rules/rules_cubit.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 class ActionItem extends StatelessWidget {

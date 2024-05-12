@@ -34,7 +34,6 @@ class RulesCubit extends Cubit<RulesState> {
       final feats = featsRepository.getAll();
       final spellLists = spellsRepository.getSpellLists();
       final items = itemsRepository.getAll();
-      final magicItems = itemsRepository.getAllMagicItems();
       results = await Future.wait([
         conditions,
         races,
@@ -43,7 +42,6 @@ class RulesCubit extends Cubit<RulesState> {
         feats,
         spellLists,
         items,
-        magicItems,
       ]);
     } catch (e) {
       emit(RulesStateError(e.toString()));
@@ -58,7 +56,6 @@ class RulesCubit extends Cubit<RulesState> {
           feats: results[4],
           spellLists: results[5],
           items: results[6],
-          magicItems: results[7],
         ),
       );
     } catch (e) {
@@ -132,13 +129,6 @@ class RulesCubit extends Cubit<RulesState> {
   Map<String, dynamic> getAllItems() {
     if (state is RulesStateLoaded) {
       return (state as RulesStateLoaded).items;
-    }
-    return {};
-  }
-
-  Map<String, dynamic> getAllMagicItems() {
-    if (state is RulesStateLoaded) {
-      return (state as RulesStateLoaded).magicItems;
     }
     return {};
   }

@@ -19,21 +19,22 @@ class ItemsRepository {
     return data;
   }
 
-  Future<dynamic> getMagicItem(String slug) async {
-    final data = await databaseProvider.getDocument(
-        path: '$magicItemsPath$slug', cacheBoxName: cacheMagicItems);
-    return data;
-  }
-
   Future<Map<String, Map<String, dynamic>>> getAll() async {
     final data = await databaseProvider.getCollection(
         path: path, cacheBoxName: cacheItemsName);
     return data;
   }
 
-  Future<Map<String, Map<String, dynamic>>> getAllMagicItems() async {
-    final data = await databaseProvider.getCollection(
-        path: magicItemsPath, cacheBoxName: cacheMagicItems);
-    return data;
+  Future<void> save(
+    String slug,
+    Map<String, dynamic> entry,
+    bool offline,
+  ) async {
+    await databaseProvider.setData(
+      path: '$path$slug',
+      data: entry,
+      offline: offline,
+      cacheBoxName: cacheItemsName,
+    );
   }
 }

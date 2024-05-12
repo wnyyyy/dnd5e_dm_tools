@@ -1,5 +1,4 @@
 import 'package:dnd5e_dm_tools/core/util/helper.dart';
-import 'package:dnd5e_dm_tools/core/widgets/trait_description.dart';
 import 'package:flutter/material.dart';
 
 class ClassDescription extends StatefulWidget {

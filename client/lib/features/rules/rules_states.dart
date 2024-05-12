@@ -34,7 +34,6 @@ class RulesStateLoaded extends RulesState {
   final Map<String, dynamic> spells;
   final Map<String, dynamic> spellLists;
   final Map<String, dynamic> items;
-  final Map<String, dynamic> magicItems;
 
   const RulesStateLoaded({
     required this.conditions,
@@ -44,7 +43,6 @@ class RulesStateLoaded extends RulesState {
     required this.spells,
     required this.spellLists,
     required this.items,
-    required this.magicItems,
   });
 
   RulesStateLoaded copyWith({
@@ -65,7 +63,6 @@ class RulesStateLoaded extends RulesState {
       spells: spells ?? this.spells,
       spellLists: spellLists ?? this.spellLists,
       items: items ?? this.items,
-      magicItems: magicItems ?? this.magicItems,
     );
   }
 
@@ -78,6 +75,5 @@ class RulesStateLoaded extends RulesState {
         spells,
         spellLists,
         items,
-        magicItems,
       ];
 }

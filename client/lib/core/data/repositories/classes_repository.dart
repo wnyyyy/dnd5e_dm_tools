@@ -17,16 +17,22 @@ class ClassesRepository {
     return data;
   }
 
-  Future<void> updateClass(String slug, Map<String, dynamic> classs) async {
-    await databaseProvider.setData(
-      path: '$path$slug',
-      data: classs,
-    );
-  }
-
   Future<Map<String, Map<String, dynamic>>> getAll() async {
     final data = await databaseProvider.getCollection(
         path: path, cacheBoxName: cacheClassesName);
     return data;
+  }
+
+  Future<void> save(
+    String slug,
+    Map<String, dynamic> entry,
+    bool offline,
+  ) async {
+    await databaseProvider.setData(
+      path: '$path$slug',
+      data: entry,
+      offline: offline,
+      cacheBoxName: cacheClassesName,
+    );
   }
 }

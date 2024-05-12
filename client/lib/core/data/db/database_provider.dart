@@ -7,15 +7,15 @@ class DatabaseProvider {
   Future<void> setData({
     required String path,
     required Map<String, dynamic> data,
-    String? cacheBoxName,
+    required bool offline,
+    required String cacheBoxName,
   }) async {
-    if (cacheBoxName != null) {
-      final cacheBox = Hive.box<Map>(cacheBoxName);
-      await cacheBox.put(path, data);
-    } else {
+    if (!offline) {
       final reference = _db.doc(path);
       await reference.set(data);
     }
+    final cacheBox = Hive.box<Map>(cacheBoxName);
+    await cacheBox.put(path, data);
   }
 
   Future<Map<String, dynamic>?> getDocument({
@@ -45,31 +45,6 @@ class DatabaseProvider {
       return snapshot.data();
     }
     return null;
-  }
-
-  Future<void> deleteData({
-    required String path,
-    String? cacheBoxName,
-  }) async {
-    final reference = _db.doc(path);
-    await reference.delete();
-    if (cacheBoxName != null) {
-      final cacheBox = Hive.box<Map>(cacheBoxName);
-      await cacheBox.delete(path);
-    }
-  }
-
-  Future<void> updateData({
-    required String path,
-    required Map<String, dynamic> data,
-    String? cacheBoxName,
-  }) async {
-    final reference = _db.doc(path);
-    await reference.update(data);
-    if (cacheBoxName != null) {
-      final cacheBox = Hive.box<Map>(cacheBoxName);
-      await cacheBox.put(path, data);
-    }
   }
 
   Future<Map<String, Map<String, dynamic>>> getCollection({

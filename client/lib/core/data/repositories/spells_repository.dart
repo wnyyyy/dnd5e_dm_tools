@@ -30,4 +30,17 @@ class SpellsRepository {
         path: spellListsPath, cacheBoxName: cacheSpellListsName);
     return data;
   }
+
+  Future<void> save(
+    String slug,
+    Map<String, dynamic> entry,
+    bool offline,
+  ) async {
+    await databaseProvider.setData(
+      path: '$path$slug',
+      data: entry,
+      offline: offline,
+      cacheBoxName: cacheSpellsName,
+    );
+  }
 }

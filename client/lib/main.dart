@@ -9,6 +9,7 @@ import 'package:dnd5e_dm_tools/core/data/repositories/races_repository.dart';
 import 'package:dnd5e_dm_tools/core/data/repositories/conditions_repository.dart';
 import 'package:dnd5e_dm_tools/core/data/repositories/spells_repository.dart';
 import 'package:dnd5e_dm_tools/core/util/const.dart';
+import 'package:dnd5e_dm_tools/features/database_editor/cubit/database_editor_cubit.dart';
 import 'package:dnd5e_dm_tools/features/main_screen/cubit/main_screen_cubit.dart';
 import 'package:dnd5e_dm_tools/features/characters/bloc/character_bloc.dart';
 import 'package:dnd5e_dm_tools/features/main_screen/presentation/screens/main_screen.dart';
@@ -100,35 +101,44 @@ class Dnd5eDmTools extends StatelessWidget {
         return MultiBlocProvider(
           providers: [
             BlocProvider(
-                create: (_) => SettingsCubit(
-                      racesRepository: context.read<RacesRepository>(),
-                      featsRepository: context.read<FeatsRepository>(),
-                      classesRepository: context.read<ClassesRepository>(),
-                      spellsRepository: context.read<SpellsRepository>(),
-                      conditionsRepository:
-                          context.read<ConditionsRepository>(),
-                      itemsRepository: context.read<ItemsRepository>(),
-                      charactersRepository:
-                          context.read<CharactersRepository>(),
-                    )),
+              create: (_) => SettingsCubit(
+                racesRepository: context.read<RacesRepository>(),
+                featsRepository: context.read<FeatsRepository>(),
+                classesRepository: context.read<ClassesRepository>(),
+                spellsRepository: context.read<SpellsRepository>(),
+                conditionsRepository: context.read<ConditionsRepository>(),
+                itemsRepository: context.read<ItemsRepository>(),
+                charactersRepository: context.read<CharactersRepository>(),
+              ),
+            ),
             BlocProvider(create: (_) => ScreenSplitterCubit()),
             BlocProvider(create: (_) => MainScreenCubit()),
             BlocProvider(
-                create: (_) => CharacterBloc(
-                      charactersRepository:
-                          context.read<CharactersRepository>(),
-                    )),
+              create: (_) => CharacterBloc(
+                charactersRepository: context.read<CharactersRepository>(),
+              ),
+            ),
             BlocProvider(create: (_) => ScreenSplitterCubit()),
             BlocProvider(
-                create: (_) => RulesCubit(
-                      conditionsRepository:
-                          context.read<ConditionsRepository>(),
-                      racesRepository: context.read<RacesRepository>(),
-                      featsRepository: context.read<FeatsRepository>(),
-                      classesRepository: context.read<ClassesRepository>(),
-                      spellsRepository: context.read<SpellsRepository>(),
-                      itemsRepository: context.read<ItemsRepository>(),
-                    )),
+              create: (_) => RulesCubit(
+                conditionsRepository: context.read<ConditionsRepository>(),
+                racesRepository: context.read<RacesRepository>(),
+                featsRepository: context.read<FeatsRepository>(),
+                classesRepository: context.read<ClassesRepository>(),
+                spellsRepository: context.read<SpellsRepository>(),
+                itemsRepository: context.read<ItemsRepository>(),
+              ),
+            ),
+            BlocProvider(
+              create: (_) => DatabaseEditorCubit(
+                racesRepository: context.read<RacesRepository>(),
+                featsRepository: context.read<FeatsRepository>(),
+                classesRepository: context.read<ClassesRepository>(),
+                spellsRepository: context.read<SpellsRepository>(),
+                itemsRepository: context.read<ItemsRepository>(),
+                charactersRepository: context.read<CharactersRepository>(),
+              ),
+            ),
           ],
           child: const MainScreen(),
         );

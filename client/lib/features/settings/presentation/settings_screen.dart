@@ -70,9 +70,9 @@ class SettingsScreen extends StatelessWidget {
             if (state.offlineMode)
               ElevatedButton(
                 onPressed: () {
-                  BlocProvider.of<CharacterBloc>(context).add(PersistCharacter(
-                    offline: context.read<SettingsCubit>().state.offlineMode,
-                    online: true,
+                  BlocProvider.of<CharacterBloc>(context)
+                      .add(const PersistCharacter(
+                    offline: false,
                   ));
                 },
                 child: const Text('Persist'),
