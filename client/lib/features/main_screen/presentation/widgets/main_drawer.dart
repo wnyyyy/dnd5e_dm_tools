@@ -1,6 +1,7 @@
 import 'package:dnd5e_dm_tools/features/main_screen/cubit/main_screen_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:fluttericon/font_awesome5_icons.dart';
 
 class MainDrawer extends StatelessWidget {
   const MainDrawer({super.key});
@@ -21,6 +22,14 @@ class MainDrawer extends StatelessWidget {
                     color: Theme.of(context).colorScheme.onPrimary,
                   ),
             ),
+          ),
+          ListTile(
+            leading: const Icon(FontAwesome5.book),
+            title: const Text('Campaign'),
+            onTap: () {
+              BlocProvider.of<MainScreenCubit>(context).showCampaign();
+              Navigator.pop(context);
+            },
           ),
           ListTile(
             leading: const Icon(Icons.person),

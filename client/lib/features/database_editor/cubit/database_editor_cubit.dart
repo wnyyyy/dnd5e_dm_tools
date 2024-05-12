@@ -4,7 +4,7 @@ import 'package:dnd5e_dm_tools/core/data/repositories/feats_repository.dart';
 import 'package:dnd5e_dm_tools/core/data/repositories/items_repository.dart';
 import 'package:dnd5e_dm_tools/core/data/repositories/races_repository.dart';
 import 'package:dnd5e_dm_tools/core/data/repositories/spells_repository.dart';
-import 'package:dnd5e_dm_tools/features/database_editor/cubit/database_editor_state.dart';
+import 'package:dnd5e_dm_tools/features/database_editor/cubit/database_editor_states.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class DatabaseEditorCubit extends Cubit<DatabaseEditorState> {

@@ -1,5 +1,6 @@
 import 'package:dnd5e_dm_tools/core/config/app_themes.dart';
 import 'package:dnd5e_dm_tools/core/widgets/error_handler.dart';
+import 'package:dnd5e_dm_tools/features/campaign/presentation/screens/campaign_screen.dart';
 import 'package:dnd5e_dm_tools/features/characters/presentation/character_screen.dart';
 import 'package:dnd5e_dm_tools/features/database_editor/database_editor.dart';
 import 'package:dnd5e_dm_tools/features/header/header.dart';
@@ -111,8 +112,13 @@ class MainScreen extends StatelessWidget {
       );
     }
     if (state is MainScreenStateDatabase) {
-      return Center(
+      return const Center(
         child: DatabaseEditorScreen(),
+      );
+    }
+    if (state is MainScreenStateCampaign) {
+      return const Center(
+        child: CampaignScreen(),
       );
     }
     return Container();

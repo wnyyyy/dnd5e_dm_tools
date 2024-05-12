@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dnd5e_dm_tools/core/data/db/database_provider.dart';
+import 'package:dnd5e_dm_tools/core/data/db/realtime_database_provider.dart';
+import 'package:dnd5e_dm_tools/features/campaign/data/repository/campaign_repository.dart';
 import 'package:dnd5e_dm_tools/core/data/repositories/characters_repository.dart';
 import 'package:dnd5e_dm_tools/core/data/repositories/classes_repository.dart';
 import 'package:dnd5e_dm_tools/core/data/repositories/feats_repository.dart';
@@ -9,6 +11,7 @@ import 'package:dnd5e_dm_tools/core/data/repositories/races_repository.dart';
 import 'package:dnd5e_dm_tools/core/data/repositories/conditions_repository.dart';
 import 'package:dnd5e_dm_tools/core/data/repositories/spells_repository.dart';
 import 'package:dnd5e_dm_tools/core/util/const.dart';
+import 'package:dnd5e_dm_tools/features/campaign/cubit/campaign_cubit.dart';
 import 'package:dnd5e_dm_tools/features/database_editor/cubit/database_editor_cubit.dart';
 import 'package:dnd5e_dm_tools/features/main_screen/cubit/main_screen_cubit.dart';
 import 'package:dnd5e_dm_tools/features/characters/bloc/character_bloc.dart';
@@ -83,6 +86,8 @@ Future<Uint8List?> loadAsset(String path) async {
 
 class Dnd5eDmTools extends StatelessWidget {
   final DatabaseProvider databaseProvider = DatabaseProvider();
+  final RealtimeDatabaseProvider realtimeDatabaseProvider =
+      RealtimeDatabaseProvider();
 
   Dnd5eDmTools({super.key});
   @override
@@ -96,6 +101,7 @@ class Dnd5eDmTools extends StatelessWidget {
         Provider(create: (_) => SpellsRepository(databaseProvider)),
         Provider(create: (_) => ConditionsRepository(databaseProvider)),
         Provider(create: (_) => ItemsRepository(databaseProvider)),
+        Provider(create: (_) => CampaignRepository(realtimeDatabaseProvider)),
       ],
       builder: (context, child) {
         return MultiBlocProvider(
@@ -137,6 +143,11 @@ class Dnd5eDmTools extends StatelessWidget {
                 spellsRepository: context.read<SpellsRepository>(),
                 itemsRepository: context.read<ItemsRepository>(),
                 charactersRepository: context.read<CharactersRepository>(),
+              ),
+            ),
+            BlocProvider(
+              create: (_) => CampaignCubit(
+                campaignRepository: context.read<CampaignRepository>(),
               ),
             ),
           ],

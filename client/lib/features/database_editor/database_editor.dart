@@ -1,5 +1,5 @@
 import 'package:dnd5e_dm_tools/features/database_editor/cubit/database_editor_cubit.dart';
-import 'package:dnd5e_dm_tools/features/database_editor/cubit/database_editor_state.dart';
+import 'package:dnd5e_dm_tools/features/database_editor/cubit/database_editor_states.dart';
 import 'package:dnd5e_dm_tools/features/settings/bloc/settings_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';

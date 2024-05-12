@@ -21,3 +21,8 @@ class MainScreenStateDatabase extends MainScreenState {
   @override
   List<Object?> get props => [];
 }
+
+class MainScreenStateCampaign extends MainScreenState {
+  @override
+  List<Object?> get props => [];
+}
