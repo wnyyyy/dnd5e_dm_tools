@@ -10,9 +10,15 @@ class CampaignRepository {
 
   CampaignRepository(this.databaseProvider);
 
-  Future<void> createCampaign(
-      String campaignId, Map<String, dynamic> campaignData) async {
-    await databaseProvider.writeData('campaigns/$campaignId', campaignData);
+  Stream<List<Location>> getLocationsStream() {
+    return databaseProvider.onValueStream('locations').map((event) {
+      final locationsMap = event.snapshot.value as Map<dynamic, dynamic>?;
+      return locationsMap?.entries.map((e) {
+            return Location.fromJson(
+                Map<String, dynamic>.from(e.value as Map), e.key);
+          }).toList() ??
+          [];
+    });
   }
 
   Future<List<Location>> getLocations() async {
@@ -22,11 +28,20 @@ class CampaignRepository {
     }
     final locations = <Location>[];
     if (data.value != null) {
-      (data.value as Map).forEach((key, value) {
-        locations.add(Location.fromJson(value));
+      Map<String, dynamic> locationsMap =
+          Map<String, dynamic>.from(data.value as Map);
+      locationsMap.forEach((key, value) {
+        locations.add(
+          Location.fromJson(Map<String, dynamic>.from(value), key),
+        );
       });
     }
     return locations;
+  }
+
+  Future<void> updateLocation(int id, String name, String content) async {
+    DatabaseReference ref = FirebaseDatabase.instance.ref('locations/$id');
+    await ref.update({'name': name, 'content': content});
   }
 
   Future<List<Character>> getCharacters() async {
@@ -36,8 +51,12 @@ class CampaignRepository {
     }
     final characters = <Character>[];
     if (data.value != null) {
-      (data.value as Map).forEach((key, value) {
-        characters.add(Character.fromJson(value));
+      Map<String, dynamic> charactersMap =
+          Map<String, dynamic>.from(data.value as Map);
+      charactersMap.forEach((key, value) {
+        characters.add(
+          Character.fromJson(Map<String, dynamic>.from(value), key),
+        );
       });
     }
     return characters;
@@ -50,27 +69,12 @@ class CampaignRepository {
     }
     final entries = <BulletPoint>[];
     if (data.value != null) {
-      (data.value as Map).forEach((key, value) {
-        entries.add(BulletPoint.fromJson(value));
+      Map<String, dynamic> entriesMap =
+          Map<String, dynamic>.from(data.value as Map);
+      entriesMap.forEach((key, value) {
+        entries.add(BulletPoint.fromJson(Map<String, dynamic>.from(value)));
       });
     }
     return Adventure(entries: entries);
-  }
-
-  Future<void> updateCampaign(
-      String campaignId, Map<String, dynamic> campaignData) async {
-    await databaseProvider.updateData('campaigns/$campaignId', campaignData);
-  }
-
-  Future<void> deleteCampaign(String campaignId) async {
-    await databaseProvider.deleteData('campaigns/$campaignId');
-  }
-
-  Stream<DatabaseEvent> watchCampaign(String campaignId) {
-    return databaseProvider.onValueStream('campaigns/$campaignId');
-  }
-
-  Stream<DatabaseEvent> watchAllCampaigns() {
-    return databaseProvider.onValueStream('campaigns/');
   }
 }

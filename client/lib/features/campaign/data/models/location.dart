@@ -35,15 +35,15 @@ class Location extends Equatable {
   @override
   List<Object?> get props => [entries, name, imageUrl, isHidden, isImageHidden];
 
-  factory Location.fromJson(Map<String, dynamic> json) {
+  factory Location.fromJson(Map<String, dynamic> json, name) {
     return Location(
       entries: (json['entries'] as List)
-          .map((e) => BulletPoint.fromJson(e))
+          .map((e) => BulletPoint.fromJson(Map<String, dynamic>.from(e)))
           .toList(),
-      name: json['name'],
-      imageUrl: json['imageUrl'],
-      isHidden: json['isHidden'],
-      isImageHidden: json['isImageHidden'],
+      name: name,
+      imageUrl: json['url'],
+      isHidden: json['isHidden'] ?? false,
+      isImageHidden: json['isImageHidden'] ?? false,
     );
   }
 

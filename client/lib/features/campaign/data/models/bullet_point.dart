@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 
 class BulletPoint extends Equatable {
-  final String id;
+  final int id;
   final String content;
 
   const BulletPoint({
@@ -10,7 +10,7 @@ class BulletPoint extends Equatable {
   });
 
   BulletPoint copyWith({
-    String? id,
+    int? id,
     String? content,
   }) {
     return BulletPoint(
@@ -24,8 +24,8 @@ class BulletPoint extends Equatable {
 
   factory BulletPoint.fromJson(Map<String, dynamic> json) {
     return BulletPoint(
-      id: json['id'],
-      content: json['content'],
+      id: json['id'] as int,
+      content: json['content'] as String,
     );
   }
 
