@@ -84,7 +84,7 @@ class CampaignCubit extends Cubit<CampaignState> {
 
   Future<void> updateEntry({
     required String name,
-    required int entryId,
+    required String entryId,
     required String content,
     required CampaignTab type,
   }) async {
@@ -98,6 +98,28 @@ class CampaignCubit extends Cubit<CampaignState> {
           break;
         case CampaignTab.adventure:
           await campaignRepository.updateAdventureEntry(entryId, content);
+          break;
+      }
+    } catch (e) {
+      emit(CampaignError(message: e.toString()));
+    }
+  }
+
+  Future<void> addEntry({
+    required String name,
+    required String content,
+    required CampaignTab type,
+  }) async {
+    try {
+      switch (type) {
+        case CampaignTab.locations:
+          await campaignRepository.addLocationEntry(name, content);
+          break;
+        case CampaignTab.characters:
+          await campaignRepository.addCharacterEntry(name, content);
+          break;
+        case CampaignTab.adventure:
+          await campaignRepository.addAdventureEntry(content);
           break;
       }
     } catch (e) {

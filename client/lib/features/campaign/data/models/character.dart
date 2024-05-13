@@ -41,7 +41,7 @@ class Character extends Equatable {
       for (var i = 0; i < json['entries'].length; i++) {
         if (json['entries'][i] is String) {
           bulletPoints.add(
-            BulletPoint(id: i, content: json['entries'][i] as String),
+            BulletPoint(id: i.toString(), content: json['entries'][i] as String),
           );
         }
       }
@@ -50,7 +50,7 @@ class Character extends Equatable {
       for (final entry in json['entries'].entries) {
         if (entry.value is String) {
           bulletPoints.add(
-            BulletPoint(id: int.parse(entry.key), content: entry.value as String),
+            BulletPoint(id: entry.key, content: entry.value as String),
           );
         }
       }

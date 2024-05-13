@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 
 class BulletPoint extends Equatable {
-  final int id;
+  final String id;
   final String content;
 
   const BulletPoint({
@@ -10,7 +10,7 @@ class BulletPoint extends Equatable {
   });
 
   BulletPoint copyWith({
-    int? id,
+    String? id,
     String? content,
   }) {
     return BulletPoint(

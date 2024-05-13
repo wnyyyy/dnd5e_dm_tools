@@ -25,7 +25,7 @@ class Adventure extends Equatable {
       for (var i = 0; i < json.length; i++) {
         if (json[i] is String) {
           bulletPoints.add(
-            BulletPoint(id: i, content: json[i] as String),
+            BulletPoint(id: i.toString(), content: json[i] as String),
           );
         }
       }
@@ -34,8 +34,7 @@ class Adventure extends Equatable {
       for (var entry in json.entries) {
         if (entry.value is String) {
           bulletPoints.add(
-            BulletPoint(
-                id: int.parse(entry.key), content: entry.value as String),
+            BulletPoint(id: entry.key, content: entry.value as String),
           );
         }
       }

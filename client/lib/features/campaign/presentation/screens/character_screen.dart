@@ -1,4 +1,3 @@
-import 'dart:math';
 import 'package:dnd5e_dm_tools/features/campaign/cubit/campaign_states.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -124,7 +123,7 @@ class CharacterDetailsScreenState extends State<CharacterDetailsScreen> {
     );
   }
 
-  void _showEntryDialog({int? entryId, String initialText = ''}) {
+  void _showEntryDialog({String? entryId, String initialText = ''}) {
     TextEditingController dialogController =
         TextEditingController(text: initialText);
     showDialog(
@@ -144,23 +143,30 @@ class CharacterDetailsScreenState extends State<CharacterDetailsScreen> {
           TextButton(
             onPressed: () {
               var content = dialogController.text.trim();
-              context.read<CampaignCubit>().updateEntry(
-                    name: widget.character.name,
-                    entryId: entryId ?? _getNewId(),
-                    content: content,
-                    type: CampaignTab.characters,
-                  );
-              Navigator.pop(context);
+              if (entryId == null) {
+                if (content.isNotEmpty) {
+                  context.read<CampaignCubit>().addEntry(
+                        name: widget.character.name,
+                        content: content,
+                        type: CampaignTab.characters,
+                      );
+                  Navigator.pop(context);
+                }
+              } else {
+                context.read<CampaignCubit>().updateEntry(
+                      name: widget.character.name,
+                      entryId: entryId,
+                      content: content,
+                      type: CampaignTab.characters,
+                    );
+                Navigator.pop(context);
+              }
             },
             child: const Text('Save'),
           ),
         ],
       ),
     );
-  }
-
-  int _getNewId() {
-    return updatedCharacter.entries.map((e) => e.id).reduce(max) + 1;
   }
 
   Widget _getImageWidget(BuildContext context) {

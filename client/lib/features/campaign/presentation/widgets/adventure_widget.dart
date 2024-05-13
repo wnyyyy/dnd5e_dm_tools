@@ -111,7 +111,7 @@ class AdventureWidgetState extends State<AdventureWidget> {
     );
   }
 
-  void _showEntryDialog({int? entryId, String initialText = ''}) {
+  void _showEntryDialog({String? entryId, String initialText = ''}) {
     TextEditingController dialogController =
         TextEditingController(text: initialText);
     showDialog(
@@ -131,25 +131,30 @@ class AdventureWidgetState extends State<AdventureWidget> {
           TextButton(
             onPressed: () {
               var content = dialogController.text.trim();
-              context.read<CampaignCubit>().updateEntry(
-                    name: 'Adventure',
-                    entryId: entryId ?? _getNewId(),
-                    content: content,
-                    type: CampaignTab.adventure,
-                  );
-              Navigator.pop(context);
+              if (entryId == null) {
+                if (content.isNotEmpty) {
+                  context.read<CampaignCubit>().addEntry(
+                        name: 'Adventure',
+                        content: content,
+                        type: CampaignTab.adventure,
+                      );
+                  Navigator.pop(context);
+                }
+              } else {
+                context.read<CampaignCubit>().updateEntry(
+                      name: 'Adventure',
+                      entryId: entryId,
+                      content: content,
+                      type: CampaignTab.adventure,
+                    );
+                Navigator.pop(context);
+              }
+
             },
             child: const Text('Save'),
           ),
         ],
       ),
     );
-  }
-
-  int _getNewId() {
-    if (updatedAdventure.entries.isEmpty) {
-      return 1;
-    }
-    return updatedAdventure.entries.map((e) => e.id).reduce(max) + 1;
   }
 }

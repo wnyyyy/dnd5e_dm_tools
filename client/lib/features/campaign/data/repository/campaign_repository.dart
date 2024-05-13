@@ -21,7 +21,7 @@ class CampaignRepository {
   }
 
   Future<void> updateLocation(
-      String locationName, int entryId, String content) async {
+      String locationName, String entryId, String content) async {
     DatabaseReference ref = FirebaseDatabase.instance
         .ref('locations/$locationName/entries/$entryId');
     if (content.isEmpty) {
@@ -29,6 +29,12 @@ class CampaignRepository {
     } else {
       await ref.set(content);
     }
+  }
+
+  Future<void> addLocationEntry(String locationName, String content) async {
+    DatabaseReference ref =
+        FirebaseDatabase.instance.ref('locations/$locationName/entries').push();
+    await ref.set(content);
   }
 
   Stream<List<Character>> getCharactersStream() {
@@ -45,7 +51,7 @@ class CampaignRepository {
   }
 
   Future<void> updateCharacter(
-      String characterName, int entryId, String content) async {
+      String characterName, String entryId, String content) async {
     DatabaseReference ref = FirebaseDatabase.instance
         .ref('characters/$characterName/entries/$entryId');
     if (content.isEmpty) {
@@ -53,6 +59,13 @@ class CampaignRepository {
     } else {
       await ref.set(content);
     }
+  }
+
+  Future<void> addCharacterEntry(String characterName, String content) async {
+    DatabaseReference ref = FirebaseDatabase.instance
+        .ref('characters/$characterName/entries')
+        .push();
+    await ref.set(content);
   }
 
   Stream<Adventure> getAdventureStream() {
@@ -66,12 +79,17 @@ class CampaignRepository {
     );
   }
 
-  Future<void> updateAdventureEntry(int entryId, String content) async {
+  Future<void> updateAdventureEntry(String entryId, String content) async {
     DatabaseReference ref = FirebaseDatabase.instance.ref('adventure/$entryId');
     if (content.isEmpty) {
       await ref.remove();
     } else {
       await ref.set(content);
     }
+  }
+
+  Future<void> addAdventureEntry(String content) async {
+    DatabaseReference ref = FirebaseDatabase.instance.ref('adventure').push();
+    await ref.set(content);
   }
 }

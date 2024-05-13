@@ -123,7 +123,7 @@ class LocationDetailsScreenState extends State<LocationDetailsScreen> {
     );
   }
 
-  void _showEntryDialog({int? entryId, String initialText = ''}) {
+  void _showEntryDialog({String? entryId, String initialText = ''}) {
     TextEditingController dialogController =
         TextEditingController(text: initialText);
     showDialog(
@@ -143,23 +143,30 @@ class LocationDetailsScreenState extends State<LocationDetailsScreen> {
           TextButton(
             onPressed: () {
               var content = dialogController.text.trim();
-              context.read<CampaignCubit>().updateEntry(
-                    name: widget.location.name,
-                    entryId: entryId ?? _getNewId(),
-                    content: content,
-                    type: CampaignTab.locations,
-                  );
-              Navigator.pop(context);
+              if (entryId == null) {
+                if (content.isNotEmpty) {
+                  context.read<CampaignCubit>().addEntry(
+                        name: widget.location.name,
+                        content: content,
+                        type: CampaignTab.locations,
+                      );
+                  Navigator.pop(context);
+                }
+              } else {
+                context.read<CampaignCubit>().updateEntry(
+                      name: widget.location.name,
+                      entryId: entryId,
+                      content: content,
+                      type: CampaignTab.locations,
+                    );
+                Navigator.pop(context);
+              }
             },
             child: const Text('Save'),
           ),
         ],
       ),
     );
-  }
-
-  int _getNewId() {
-    return updatedLocation.entries.map((e) => e.id).reduce(max) + 1;
   }
 
   Widget _getImageWidget(BuildContext context) {
