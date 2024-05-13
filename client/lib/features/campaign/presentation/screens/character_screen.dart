@@ -4,21 +4,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:photo_view/photo_view.dart';
-import 'package:dnd5e_dm_tools/features/campaign/data/models/location.dart';
+import 'package:dnd5e_dm_tools/features/campaign/data/models/character.dart';
 import 'package:dnd5e_dm_tools/features/campaign/cubit/campaign_cubit.dart';
 
-class LocationDetailsScreen extends StatefulWidget {
-  final Location location;
+class CharacterDetailsScreen extends StatefulWidget {
+  final Character character;
 
-  const LocationDetailsScreen({super.key, required this.location});
+  const CharacterDetailsScreen({super.key, required this.character});
 
   @override
-  LocationDetailsScreenState createState() => LocationDetailsScreenState();
+  CharacterDetailsScreenState createState() => CharacterDetailsScreenState();
 }
 
-class LocationDetailsScreenState extends State<LocationDetailsScreen> {
+class CharacterDetailsScreenState extends State<CharacterDetailsScreen> {
   var editMode = false;
-  late Location updatedLocation;
+  late Character updatedCharacter;
 
   void _toggleEditMode() {
     setState(() {
@@ -29,20 +29,20 @@ class LocationDetailsScreenState extends State<LocationDetailsScreen> {
   @override
   void initState() {
     super.initState();
-    updatedLocation = widget.location;
+    updatedCharacter = widget.character;
   }
 
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<CampaignCubit, CampaignState>(
       builder: (context, state) {
-        updatedLocation = (state as CampaignLoaded).locations.firstWhere(
-              (loc) => loc.name == widget.location.name,
-              orElse: () => widget.location,
+        updatedCharacter = (state as CampaignLoaded).characters.firstWhere(
+              (char) => char.name == widget.character.name,
+              orElse: () => widget.character,
             );
         return Scaffold(
           appBar: AppBar(
-            title: Text(updatedLocation.name),
+            title: Text(updatedCharacter.name),
           ),
           body: Column(
             children: [
@@ -54,8 +54,9 @@ class LocationDetailsScreenState extends State<LocationDetailsScreen> {
                     children: [
                       _getImageWidget(context),
                       const SizedBox(height: 16),
-                      ...List.generate(updatedLocation.entries.length, (index) {
-                        final entry = updatedLocation.entries[index];
+                      ...List.generate(updatedCharacter.entries.length,
+                          (index) {
+                        final entry = updatedCharacter.entries[index];
                         return Card(
                           elevation: 2,
                           margin: const EdgeInsets.symmetric(vertical: 8),
@@ -144,10 +145,10 @@ class LocationDetailsScreenState extends State<LocationDetailsScreen> {
             onPressed: () {
               var content = dialogController.text.trim();
               context.read<CampaignCubit>().updateEntry(
-                    name: widget.location.name,
+                    name: widget.character.name,
                     entryId: entryId ?? _getNewId(),
                     content: content,
-                    type: CampaignTab.locations,
+                    type: CampaignTab.characters,
                   );
               Navigator.pop(context);
             },
@@ -159,18 +160,18 @@ class LocationDetailsScreenState extends State<LocationDetailsScreen> {
   }
 
   int _getNewId() {
-    return updatedLocation.entries.map((e) => e.id).reduce(max) + 1;
+    return updatedCharacter.entries.map((e) => e.id).reduce(max) + 1;
   }
 
   Widget _getImageWidget(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
 
-    if (updatedLocation.imageUrl.isEmpty || updatedLocation.isImageHidden) {
+    if (updatedCharacter.imageUrl.isEmpty || updatedCharacter.isImageHidden) {
       return SizedBox(
         height: screenHeight * 0.3,
         child: Center(
           child: Image.asset(
-            'assets/img/unknown_loc.jpg',
+            'assets/img/unknown.jpg',
             fit: BoxFit.cover,
             errorBuilder: (context, error, stackTrace) =>
                 const Icon(Icons.error),
@@ -184,7 +185,7 @@ class LocationDetailsScreenState extends State<LocationDetailsScreen> {
         child: PhotoView(
           backgroundDecoration:
               BoxDecoration(color: Theme.of(context).canvasColor),
-          imageProvider: NetworkImage(updatedLocation.imageUrl),
+          imageProvider: NetworkImage(updatedCharacter.imageUrl),
         ),
       ),
     );

@@ -21,18 +21,4 @@ class BulletPoint extends Equatable {
 
   @override
   List<Object?> get props => [id, content];
-
-  factory BulletPoint.fromJson(Map<String, dynamic> json) {
-    return BulletPoint(
-      id: json['id'] as int,
-      content: json['content'] as String,
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'content': content,
-    };
-  }
 }

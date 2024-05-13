@@ -19,17 +19,29 @@ class Adventure extends Equatable {
   @override
   List<Object?> get props => [entries];
 
-  factory Adventure.fromJson(Map<String, dynamic> json) {
+  factory Adventure.fromJson(dynamic json) {
+    final bulletPoints = <BulletPoint>[];
+    if (json is List) {
+      for (var i = 0; i < json.length; i++) {
+        if (json[i] is String) {
+          bulletPoints.add(
+            BulletPoint(id: i, content: json[i] as String),
+          );
+        }
+      }
+    }
+    if (json is Map) {
+      for (var entry in json.entries) {
+        if (entry.value is String) {
+          bulletPoints.add(
+            BulletPoint(
+                id: int.parse(entry.key), content: entry.value as String),
+          );
+        }
+      }
+    }
     return Adventure(
-      entries: (json['entries'] as List)
-          .map((e) => BulletPoint.fromJson(e))
-          .toList(),
+      entries: bulletPoints,
     );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'entries': entries.map((e) => e.toJson()).toList(),
-    };
   }
 }

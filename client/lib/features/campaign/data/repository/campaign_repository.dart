@@ -1,6 +1,5 @@
 import 'package:dnd5e_dm_tools/core/data/db/realtime_database_provider.dart';
 import 'package:dnd5e_dm_tools/features/campaign/data/models/adventure.dart';
-import 'package:dnd5e_dm_tools/features/campaign/data/models/bullet_point.dart';
 import 'package:dnd5e_dm_tools/features/campaign/data/models/character.dart';
 import 'package:dnd5e_dm_tools/features/campaign/data/models/location.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -13,68 +12,66 @@ class CampaignRepository {
   Stream<List<Location>> getLocationsStream() {
     return databaseProvider.onValueStream('locations').map((event) {
       final locationsMap = event.snapshot.value as Map<dynamic, dynamic>?;
-      return locationsMap?.entries.map((e) {
+      return locationsMap?.keys.map((key) {
             return Location.fromJson(
-                Map<String, dynamic>.from(e.value as Map), e.key);
+                Map<String, dynamic>.from(locationsMap[key] as Map), key);
           }).toList() ??
           [];
     });
   }
 
-  Future<List<Location>> getLocations() async {
-    final data = await databaseProvider.readData('locations/');
-    if (data.value == null) {
-      return [];
+  Future<void> updateLocation(
+      String locationName, int entryId, String content) async {
+    DatabaseReference ref = FirebaseDatabase.instance
+        .ref('locations/$locationName/entries/$entryId');
+    if (content.isEmpty) {
+      await ref.remove();
+    } else {
+      await ref.set(content);
     }
-    final locations = <Location>[];
-    if (data.value != null) {
-      Map<String, dynamic> locationsMap =
-          Map<String, dynamic>.from(data.value as Map);
-      locationsMap.forEach((key, value) {
-        locations.add(
-          Location.fromJson(Map<String, dynamic>.from(value), key),
+  }
+
+  Stream<List<Character>> getCharactersStream() {
+    return databaseProvider.onValueStream('characters').map(
+      (event) {
+        final charactersMap = event.snapshot.value as Map<dynamic, dynamic>?;
+        return charactersMap?.keys.map((key) {
+              return Character.fromJson(
+                  Map<String, dynamic>.from(charactersMap[key] as Map), key);
+            }).toList() ??
+            [];
+      },
+    );
+  }
+
+  Future<void> updateCharacter(
+      String characterName, int entryId, String content) async {
+    DatabaseReference ref = FirebaseDatabase.instance
+        .ref('characters/$characterName/entries/$entryId');
+    if (content.isEmpty) {
+      await ref.remove();
+    } else {
+      await ref.set(content);
+    }
+  }
+
+  Stream<Adventure> getAdventureStream() {
+    return databaseProvider.onValueStream('adventure').map(
+      (event) {
+        final snapshot = event.snapshot.value;
+        return Adventure.fromJson(
+          snapshot ?? [],
         );
-      });
-    }
-    return locations;
+      },
+    );
   }
 
-  Future<void> updateLocation(int id, String name, String content) async {
-    DatabaseReference ref = FirebaseDatabase.instance.ref('locations/$id');
-    await ref.update({'name': name, 'content': content});
-  }
-
-  Future<List<Character>> getCharacters() async {
-    final data = await databaseProvider.readData('characters/');
-    if (data.value == null) {
-      return [];
+  Future<void> updateAdventureEntry(int entryId, String content) async {
+    DatabaseReference ref = FirebaseDatabase.instance.ref('adventure/$entryId');
+    if (content.isEmpty) {
+      await ref.remove();
+    } else {
+      await ref.set(content);
     }
-    final characters = <Character>[];
-    if (data.value != null) {
-      Map<String, dynamic> charactersMap =
-          Map<String, dynamic>.from(data.value as Map);
-      charactersMap.forEach((key, value) {
-        characters.add(
-          Character.fromJson(Map<String, dynamic>.from(value), key),
-        );
-      });
-    }
-    return characters;
-  }
-
-  Future<Adventure> getAdventure() async {
-    final data = await databaseProvider.readData('adventure/');
-    if (data.value == null) {
-      return const Adventure(entries: []);
-    }
-    final entries = <BulletPoint>[];
-    if (data.value != null) {
-      Map<String, dynamic> entriesMap =
-          Map<String, dynamic>.from(data.value as Map);
-      entriesMap.forEach((key, value) {
-        entries.add(BulletPoint.fromJson(Map<String, dynamic>.from(value)));
-      });
-    }
-    return Adventure(entries: entries);
   }
 }

@@ -10,6 +10,8 @@ enum CampaignTab { locations, characters, adventure }
 class CampaignCubit extends Cubit<CampaignState> {
   final CampaignRepository campaignRepository;
   StreamSubscription? _locationsSubscription;
+  StreamSubscription? _charactersSubscription;
+  StreamSubscription? _adventureSubscription;
 
   CampaignCubit({
     required this.campaignRepository,
@@ -18,25 +20,65 @@ class CampaignCubit extends Cubit<CampaignState> {
   @override
   Future<void> close() {
     _locationsSubscription?.cancel();
+    _charactersSubscription?.cancel();
+    _adventureSubscription?.cancel();
     return super.close();
   }
 
-  void loadCampaign() {
-    if (state is CampaignLoading) {
-      return;
-    }
+  void retry() {
+    emit(CampaignInitial());
+    loadCampaign();
+  }
 
+  void loadCampaign() {
     emit(CampaignLoading());
     _locationsSubscription?.cancel();
+    _charactersSubscription?.cancel();
+    _adventureSubscription?.cancel();
+
     _locationsSubscription =
         campaignRepository.getLocationsStream().listen((locations) {
-      emit(CampaignLoaded(
-        locations: locations,
-        characters: const [],
-        adventure: const Adventure(entries: []),
-      ));
+      if (state is CampaignLoaded) {
+        emit((state as CampaignLoaded).copyWith(locations: locations));
+      } else if (state is CampaignLoading) {
+        emit(CampaignLoaded(
+          locations: locations,
+          characters: const [],
+          adventure: const Adventure(entries: []),
+        ));
+      }
     }, onError: (error) {
-      emit(CampaignError());
+      emit(CampaignError(message: error.toString()));
+    });
+
+    _charactersSubscription =
+        campaignRepository.getCharactersStream().listen((characters) {
+      if (state is CampaignLoaded) {
+        emit((state as CampaignLoaded).copyWith(characters: characters));
+      } else if (state is CampaignLoading) {
+        emit(CampaignLoaded(
+          locations: const [],
+          characters: characters,
+          adventure: const Adventure(entries: []),
+        ));
+      }
+    }, onError: (error) {
+      emit(CampaignError(message: error.toString()));
+    });
+
+    _adventureSubscription =
+        campaignRepository.getAdventureStream().listen((adventure) {
+      if (state is CampaignLoaded) {
+        emit((state as CampaignLoaded).copyWith(adventure: adventure));
+      } else if (state is CampaignLoading) {
+        emit(CampaignLoaded(
+          locations: const [],
+          characters: const [],
+          adventure: adventure,
+        ));
+      }
+    }, onError: (error) {
+      emit(CampaignError(message: error.toString()));
     });
   }
 
@@ -49,18 +91,17 @@ class CampaignCubit extends Cubit<CampaignState> {
     try {
       switch (type) {
         case CampaignTab.locations:
-          await campaignRepository.updateLocation(entryId, name, content);
+          await campaignRepository.updateLocation(name, entryId, content);
           break;
         case CampaignTab.characters:
-          //await campaignRepository.updateCharacter(entryId, name, content);
+          await campaignRepository.updateCharacter(name, entryId, content);
           break;
         case CampaignTab.adventure:
-          //await campaignRepository.updateAdventureEntry(entryId, name, content);
+          await campaignRepository.updateAdventureEntry(entryId, content);
           break;
       }
-      // Optionally, reload or handle state change locally
     } catch (e) {
-      // Handle exceptions, maybe emit error state
+      emit(CampaignError(message: e.toString()));
     }
   }
 }

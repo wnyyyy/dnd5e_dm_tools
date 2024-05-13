@@ -11,8 +11,11 @@ class CampaignInitial extends CampaignState {
 }
 
 class CampaignError extends CampaignState {
+  final String message;
+
+  CampaignError({required this.message});
   @override
-  List<Object?> get props => [];
+  List<Object?> get props => [message];
 }
 
 class CampaignLoading extends CampaignState {
@@ -32,4 +35,16 @@ class CampaignLoaded extends CampaignState {
   });
   @override
   List<Object?> get props => [locations, characters, adventure];
+
+  CampaignLoaded copyWith({
+    List<Location>? locations,
+    List<Character>? characters,
+    Adventure? adventure,
+  }) {
+    return CampaignLoaded(
+      locations: locations ?? this.locations,
+      characters: characters ?? this.characters,
+      adventure: adventure ?? this.adventure,
+    );
+  }
 }

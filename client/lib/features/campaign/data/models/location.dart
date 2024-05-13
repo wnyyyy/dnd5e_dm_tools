@@ -35,25 +35,33 @@ class Location extends Equatable {
   @override
   List<Object?> get props => [entries, name, imageUrl, isHidden, isImageHidden];
 
-  factory Location.fromJson(Map<String, dynamic> json, name) {
+  factory Location.fromJson(Map<String, dynamic> json, String name) {
+    final bulletPoints = <BulletPoint>[];
+    if (json['entries'] is List) {
+      for (var i = 0; i < json['entries'].length; i++) {
+        if (json['entries'][i] is String) {
+          bulletPoints.add(
+            BulletPoint(id: i, content: json['entries'][i] as String),
+          );
+        }
+      }
+    }
+    if (json['entries'] is Map) {
+      for (final entry in json['entries'].entries) {
+        if (entry.value is String) {
+          bulletPoints.add(
+            BulletPoint(
+                id: int.parse(entry.key), content: entry.value as String),
+          );
+        }
+      }
+    }
     return Location(
-      entries: (json['entries'] as List)
-          .map((e) => BulletPoint.fromJson(Map<String, dynamic>.from(e)))
-          .toList(),
+      entries: bulletPoints,
       name: name,
-      imageUrl: json['url'],
-      isHidden: json['isHidden'] ?? false,
-      isImageHidden: json['isImageHidden'] ?? false,
+      imageUrl: json['url'] as String? ?? '',
+      isHidden: json['isHidden'] as bool? ?? false,
+      isImageHidden: json['isImageHidden'] as bool? ?? false,
     );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'entries': entries.map((e) => e.toJson()).toList(),
-      'name': name,
-      'imageUrl': imageUrl,
-      'isHidden': isHidden,
-      'isImageHidden': isImageHidden,
-    };
   }
 }

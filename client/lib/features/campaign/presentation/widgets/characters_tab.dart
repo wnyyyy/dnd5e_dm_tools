@@ -1,7 +1,9 @@
-import 'package:dnd5e_dm_tools/features/campaign/cubit/campaign_cubit.dart';
-import 'package:dnd5e_dm_tools/features/campaign/cubit/campaign_states.dart';
+import 'package:dnd5e_dm_tools/features/campaign/data/models/character.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:dnd5e_dm_tools/features/campaign/cubit/campaign_cubit.dart';
+import 'package:dnd5e_dm_tools/features/campaign/cubit/campaign_states.dart';
+import 'package:dnd5e_dm_tools/features/campaign/presentation/screens/character_screen.dart';
 
 class CharactersTab extends StatelessWidget {
   const CharactersTab({super.key});
@@ -12,39 +14,57 @@ class CharactersTab extends StatelessWidget {
       builder: (context, state) {
         if (state is CampaignLoading) {
           return const Center(child: CircularProgressIndicator());
-        } else if (state is CampaignInitial) {
-          context.read<CampaignCubit>().loadCampaign();
-          return Container();
         } else if (state is CampaignLoaded) {
-          return Wrap(
-            spacing: 8.0,
-            runSpacing: 4.0,
-            children: List<Widget>.generate(
-              state.characters.length,
-              (index) {
-                var character = state.characters[index];
-                return ChoiceChip(
-                  label: Text(character.name),
-                  selected: false,
-                  onSelected: (_) {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => BlocProvider.value(
-                          value: BlocProvider.of<CampaignCubit>(context),
-                          child: Container(),
+          List<Character> sortedCharacters =
+              List<Character>.from(state.characters);
+          sortedCharacters.sort((a, b) => a.name.compareTo(b.name));
+
+          return Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Wrap(
+              spacing: 8.0,
+              runSpacing: 4.0,
+              children: sortedCharacters
+                  .map((character) => Visibility(
+                        visible: !character.isHidden,
+                        child: ChoiceChip(
+                          label: Text(character.name),
+                          selected: false,
+                          onSelected: (_) {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => BlocProvider.value(
+                                  value:
+                                      BlocProvider.of<CampaignCubit>(context),
+                                  child: CharacterDetailsScreen(
+                                      character: character),
+                                ),
+                              ),
+                            );
+                          },
                         ),
-                      ),
-                    );
-                  },
-                );
-              },
+                      ))
+                  .toList(),
             ),
           );
         } else if (state is CampaignError) {
-          return const Center(child: Text('Failed to load characters'));
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text('Failed to load characters\n${state.message}'),
+                TextButton(
+                  onPressed: () {
+                    context.read<CampaignCubit>().loadCampaign();
+                  },
+                  child: const Text('Retry'),
+                ),
+              ],
+            ),
+          );
         } else {
-          return const Center(child: Text('No character data'));
+          return const Center(child: Text('No characters data'));
         }
       },
     );
