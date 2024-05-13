@@ -23,6 +23,18 @@ class ClassesRepository {
     return data;
   }
 
+  Future<void> sync(
+    String slug,
+    Map<String, dynamic> entry,
+  ) async {
+    await databaseProvider.setData(
+      path: '$path$slug',
+      data: entry,
+      offline: false,
+      cacheBoxName: cacheClassesName,
+    );
+  }
+
   Future<void> save(
     String slug,
     Map<String, dynamic> entry,

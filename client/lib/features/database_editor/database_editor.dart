@@ -52,11 +52,6 @@ class DatabaseEditorScreenState extends State<DatabaseEditorScreen> {
             const SizedBox(height: 20),
             _buildContent(),
             const SizedBox(height: 20),
-            ElevatedButton(
-                onPressed: () {
-                  _saveDocument();
-                },
-                child: const Text('Save')),
           ],
         ),
       ),
@@ -72,88 +67,57 @@ class DatabaseEditorScreenState extends State<DatabaseEditorScreen> {
       'Item',
       'Character'
     ];
-    return List<Widget>.generate(
-      categories.length,
-      (int index) {
-        return ChoiceChip(
-          label: Text(categories[index]),
-          selected: _selectedIndex == index,
-          onSelected: (bool selected) {
-            setState(() {
-              _selectedIndex = index;
-              _searchController.clear();
-            });
-            _fetchData();
-          },
-        );
-      },
-    );
-  }
-
-  void _saveDocument() {
-    Map<String, dynamic> updatedEntries = {};
-    _controllers.forEach((key, controllerList) {
-      if (controllerList.length == 1) {
-        updatedEntries[key] = controllerList.first.text;
-      } else {
-        updatedEntries[key] =
-            controllerList.map((controller) => controller.text).toList();
-      }
-    });
-    _slugController.text = _searchController.text.trim();
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: const Text('Save entry'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text('Entry slug'),
-            const SizedBox(height: 20),
-            TextField(
-              controller: _slugController,
-              decoration: const InputDecoration(
-                hintText: 'Slug',
-                border: OutlineInputBorder(),
-              ),
-            ),
-          ],
-        ),
-        actionsAlignment: MainAxisAlignment.spaceBetween,
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              if (_slugController.text.trim().isEmpty) return;
-              final String type = [
-                'feats',
-                'races',
-                'spells',
-                'classes',
-                'items',
-                'characters'
-              ][_selectedIndex];
-              context.read<DatabaseEditorCubit>().save(
-                    _slugController.text,
-                    updatedEntries,
-                    type,
-                  );
-              Navigator.of(context).pop();
+    List<Widget> chips = [];
+    chips.addAll(
+      List<Widget>.generate(
+        categories.length,
+        (int index) {
+          return ChoiceChip(
+            label: Text(categories[index]),
+            selected: _selectedIndex == index,
+            onSelected: (bool selected) {
+              setState(() {
+                _selectedIndex = index;
+                _searchController.clear();
+              });
+              _fetchData();
             },
-            child: const Text('Save'),
-          ),
-        ],
+          );
+        },
       ),
     );
+    final state = context.read<DatabaseEditorCubit>().state;
+    if (state is! DatabaseEditorLoaded) {
+      maySync = false;
+    }
+    final String type = [
+      'feats',
+      'races',
+      'spells',
+      'classes',
+      'items',
+      'characters'
+    ][_selectedIndex];
+    chips.add(
+      ActionChip(
+        label: const Text('Sync'),
+        onPressed: maySync
+            ? () {
+                final slug = (state as DatabaseEditorLoaded).slug;
+                final entry = state.entry;
+                context.read<DatabaseEditorCubit>().sync(entry, slug, type);
+              }
+            : null,
+      ),
+    );
+    return chips;
   }
 
   Widget _buildContent() {
     return BlocBuilder<DatabaseEditorCubit, DatabaseEditorState>(
       builder: (context, state) {
         if (state is DatabaseEditorLoading) {
+          maySync = false;
           return const CircularProgressIndicator();
         }
         if (state is DatabaseEditorLoaded) return _buildInputs(state.entry);
@@ -164,20 +128,22 @@ class DatabaseEditorScreenState extends State<DatabaseEditorScreen> {
 
   Widget _buildInputs(Map<String, dynamic> entries) {
     List<Widget> fields = [];
+    maySync = true;
     entries.forEach((key, value) {
-      fields.add(Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
-        child: Text('$key:',
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-      ));
+      fields.add(
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
+          child: Text('$key:',
+              style:
+                  const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+        ),
+      );
 
-      // Check if the value is a list
       if (value is List) {
         _buildListFields(fields, key, value);
       } else if (value is Map) {
         _buildMapFields(fields, key, Map<String, dynamic>.from(value));
       } else {
-        // Handle simple types (strings, numbers)
         _buildTextField(fields, key, value.toString());
       }
     });

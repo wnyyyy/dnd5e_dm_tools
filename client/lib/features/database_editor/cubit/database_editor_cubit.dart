@@ -51,14 +51,43 @@ class DatabaseEditorCubit extends Cubit<DatabaseEditorState> {
           emit(DatabaseEditorError());
           return;
       }
-      emit(DatabaseEditorLoaded(entry: entry));
+      emit(DatabaseEditorLoaded(entry: entry, slug: slug));
     } catch (e) {
       emit(DatabaseEditorError());
     }
   }
 
+  Future<void> sync(
+      Map<String, dynamic> entry, String type, String slug) async {
+    switch (type) {
+      case 'spells':
+        await spellsRepository.sync(slug, entry);
+        break;
+      case 'feats':
+        await featsRepository.sync(slug, entry);
+        break;
+      case 'classes':
+        await classesRepository.sync(slug, entry);
+        break;
+      case 'races':
+        await racesRepository.sync(slug, entry);
+        break;
+      case 'items':
+        await itemsRepository.sync(slug, entry);
+        break;
+      case 'characters':
+        return;
+      default:
+        return;
+    }
+    return;
+  }
+
   Future<void> save(
-      String slug, Map<String, dynamic> entry, String type) async {
+    String slug,
+    Map<String, dynamic> entry,
+    String type,
+  ) async {
     emit(DatabaseEditorLoading());
     try {
       switch (type) {
@@ -84,7 +113,7 @@ class DatabaseEditorCubit extends Cubit<DatabaseEditorState> {
           emit(DatabaseEditorError());
           return;
       }
-      emit(DatabaseEditorLoaded(entry: entry));
+      emit(DatabaseEditorLoaded(entry: entry, slug: slug));
     } catch (e) {
       emit(DatabaseEditorError());
     }

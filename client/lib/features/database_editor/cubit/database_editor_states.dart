@@ -19,8 +19,9 @@ class DatabaseEditorLoading extends DatabaseEditorState {
 
 class DatabaseEditorLoaded extends DatabaseEditorState {
   final Map<String, dynamic> entry;
+  final String slug;
 
-  DatabaseEditorLoaded({required this.entry});
+  DatabaseEditorLoaded({required this.entry, required this.slug});
   @override
-  List<Object?> get props => [entry];
+  List<Object?> get props => [entry, slug];
 }
