@@ -45,37 +45,42 @@ class AdventureWidgetState extends State<AdventureWidget> {
                     const SizedBox(height: 16),
                     ...List.generate(updatedAdventure.entries.length, (index) {
                       final entry = updatedAdventure.entries[index];
-                      return Card(
-                        elevation: 2,
-                        margin: const EdgeInsets.symmetric(vertical: 8),
-                        child: ListTile(
-                          tileColor:
-                              Theme.of(context).colorScheme.secondaryContainer,
-                          title: Text(
-                            entry.content,
-                            textAlign: TextAlign.justify,
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyMedium!
-                                .copyWith(
-                                  fontFamily:
-                                      GoogleFonts.montserrat().fontFamily,
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .onSecondaryContainer,
-                                ),
-                          ),
-                          trailing: editMode
-                              ? IconButton(
-                                  icon: const Icon(Icons.edit),
-                                  onPressed: () => _showEntryDialog(
-                                    entryId: entry.id,
-                                    initialText: entry.content,
+                      if (entry.id != '0') {
+                        return Card(
+                          elevation: 2,
+                          margin: const EdgeInsets.symmetric(vertical: 8),
+                          child: ListTile(
+                            tileColor: Theme.of(context)
+                                .colorScheme
+                                .secondaryContainer,
+                            title: Text(
+                              entry.content,
+                              textAlign: TextAlign.justify,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyMedium!
+                                  .copyWith(
+                                    fontFamily:
+                                        GoogleFonts.montserrat().fontFamily,
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSecondaryContainer,
                                   ),
-                                )
-                              : null,
-                        ),
-                      );
+                            ),
+                            trailing: editMode
+                                ? IconButton(
+                                    icon: const Icon(Icons.edit),
+                                    onPressed: () => _showEntryDialog(
+                                      entryId: entry.id,
+                                      initialText: entry.content,
+                                    ),
+                                  )
+                                : null,
+                          ),
+                        );
+                      } else {
+                        return const SizedBox.shrink();
+                      }
                     }),
                   ],
                 ),
@@ -148,7 +153,6 @@ class AdventureWidgetState extends State<AdventureWidget> {
                     );
                 Navigator.pop(context);
               }
-
             },
             child: const Text('Save'),
           ),

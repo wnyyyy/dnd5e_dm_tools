@@ -71,9 +71,9 @@ class CampaignRepository {
   Stream<Adventure> getAdventureStream() {
     return databaseProvider.onValueStream('adventure').map(
       (event) {
-        final snapshot = event.snapshot.value;
+        final snapshot = event.snapshot.value ?? [];
         return Adventure.fromJson(
-          snapshot ?? [],
+          snapshot,
         );
       },
     );

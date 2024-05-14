@@ -51,8 +51,10 @@ class CharacterPortrait extends StatelessWidget {
       builder: (context) {
         return AlertDialog(
           title: Text(data?['name'] ?? "Error"),
-          content: TraitDescription2(
-            inputText: data?['traits'] ?? "Could not load race",
+          content: SingleChildScrollView(
+            child: TraitDescription2(
+              inputText: data?['traits'] ?? "Could not load race",
+            ),
           ),
           actions: [
             TextButton(

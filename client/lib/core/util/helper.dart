@@ -162,6 +162,17 @@ Map<String, dynamic> getArchetypeFeatures(String desc,
   return features;
 }
 
+Map<String, dynamic> getBackpackItem(
+    Map<String, dynamic> character, String item) {
+  final backpack = character['backpack'] ?? {};
+  final backpackItems = backpack['items'] ?? {};
+  final backpackItem = backpackItems.entries
+          .firstWhere((element) => element.key == item)
+          ?.value ??
+      {'isEquipped': false, 'quantity': 0};
+  return backpackItem;
+}
+
 bool isEquipable(Map<String, dynamic> item) {
   return item['armor_class'] != null || item['damage'] != null;
 }

@@ -1,4 +1,5 @@
 import 'package:dnd5e_dm_tools/core/util/enum.dart';
+import 'package:dnd5e_dm_tools/core/util/helper.dart';
 import 'package:flutter/material.dart';
 
 class ActionItem extends StatelessWidget {
@@ -13,13 +14,14 @@ class ActionItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bool canUse;
+    bool canUse = true;
     final ActionMenuMode type = ActionMenuMode.values.firstWhere(
         (e) => e.name == action['type'],
         orElse: () => ActionMenuMode.all);
     final requiresResource = (action['requires_resource'] ?? false) as bool;
     final usedCount = action['used_count'] ?? 0;
     final remaining = (action['resource_count'] ?? 1) - usedCount;
+    final mustEquip = action['must_equip'] ?? false;
     switch (type) {
       case ActionMenuMode.abilities:
         if (requiresResource) {
@@ -27,13 +29,15 @@ class ActionItem extends StatelessWidget {
         }
         break;
       case ActionMenuMode.items:
-        canUse = character['actions']['bonus'] > 0;
+        final backpackItem = getBackpackItem(character, action['item']);
+        canUse = mustEquip ? backpackItem['isEquipped'] ?? false : true;
+        canUse = canUse && (backpackItem['quantity'] ?? 0) > 0;
         break;
       default:
         canUse = true;
     }
 
-    Widget buildSubtitle() {
+    Widget buildSubtitle(context) {
       switch (type) {
         case ActionMenuMode.abilities:
           if (!(action['requires_resource'] ?? true)) {
@@ -43,7 +47,15 @@ class ActionItem extends StatelessWidget {
           return Text('$remaining available $use',
               style: Theme.of(context).textTheme.bodyMedium);
         case ActionMenuMode.items:
-          return Container();
+          if ((action['must_equip'] ?? false) && !canUse) {
+            return Text('Must be equipped',
+                style: Theme.of(context).textTheme.bodyMedium);
+          }
+          final backpackItem = getBackpackItem(character, action['item']);
+          final inBackpack = backpackItem['quantity'] ?? 0;
+          final String use = inBackpack == 1 ? 'use' : 'uses';
+          return Text('$inBackpack available $use',
+              style: Theme.of(context).textTheme.bodyMedium);
         default:
           return Container();
       }
@@ -54,7 +66,7 @@ class ActionItem extends StatelessWidget {
       child: ListTile(
         title: Text(action['title'],
             style: Theme.of(context).textTheme.titleMedium),
-        subtitle: buildSubtitle(),
+        subtitle: buildSubtitle(context),
       ),
     );
   }

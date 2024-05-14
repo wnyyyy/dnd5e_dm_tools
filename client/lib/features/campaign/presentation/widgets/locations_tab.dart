@@ -15,7 +15,6 @@ class LocationsTab extends StatelessWidget {
         if (state is CampaignLoading) {
           return const Center(child: CircularProgressIndicator());
         } else if (state is CampaignLoaded) {
-          // Sort the locations alphabetically by name
           List<Location> sortedLocations = List<Location>.from(state.locations);
           sortedLocations.sort((a, b) => a.name.compareTo(b.name));
 
