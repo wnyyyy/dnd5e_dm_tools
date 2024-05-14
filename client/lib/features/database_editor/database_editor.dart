@@ -1,5 +1,6 @@
 import 'package:dnd5e_dm_tools/features/database_editor/cubit/database_editor_cubit.dart';
 import 'package:dnd5e_dm_tools/features/database_editor/cubit/database_editor_states.dart';
+import 'package:dnd5e_dm_tools/features/rules/rules_cubit.dart';
 import 'package:dnd5e_dm_tools/features/settings/bloc/settings_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -13,10 +14,10 @@ class DatabaseEditorScreen extends StatefulWidget {
 
 class DatabaseEditorScreenState extends State<DatabaseEditorScreen> {
   int _selectedIndex = 5;
-  bool maySync = false;
   final TextEditingController _searchController = TextEditingController();
   final Map<String, List<TextEditingController>> _controllers = {};
   final TextEditingController _slugController = TextEditingController();
+  var maySync = false;
 
   @override
   Widget build(BuildContext context) {
@@ -86,10 +87,6 @@ class DatabaseEditorScreenState extends State<DatabaseEditorScreen> {
         },
       ),
     );
-    final state = context.read<DatabaseEditorCubit>().state;
-    if (state is! DatabaseEditorLoaded) {
-      maySync = false;
-    }
     final String type = [
       'feats',
       'races',
@@ -99,16 +96,18 @@ class DatabaseEditorScreenState extends State<DatabaseEditorScreen> {
       'characters'
     ][_selectedIndex];
     chips.add(
-      ActionChip(
-        label: const Text('Sync'),
-        onPressed: maySync
-            ? () {
-                final slug = (state as DatabaseEditorLoaded).slug;
-                final entry = state.entry;
-                context.read<DatabaseEditorCubit>().sync(entry, slug, type);
-              }
-            : null,
-      ),
+      ActionChip.elevated(
+          label: const Text('Sync'),
+          onPressed: () {
+            final slug = (context.read<DatabaseEditorCubit>().state
+                    as DatabaseEditorLoaded)
+                .slug;
+            final entry = (context.read<DatabaseEditorCubit>().state
+                    as DatabaseEditorLoaded)
+                .entry;
+            context.read<DatabaseEditorCubit>().sync(entry, type, slug);
+            context.read<RulesCubit>().loadRules();
+          }),
     );
     return chips;
   }
@@ -117,7 +116,6 @@ class DatabaseEditorScreenState extends State<DatabaseEditorScreen> {
     return BlocBuilder<DatabaseEditorCubit, DatabaseEditorState>(
       builder: (context, state) {
         if (state is DatabaseEditorLoading) {
-          maySync = false;
           return const CircularProgressIndicator();
         }
         if (state is DatabaseEditorLoaded) return _buildInputs(state.entry);
@@ -128,7 +126,6 @@ class DatabaseEditorScreenState extends State<DatabaseEditorScreen> {
 
   Widget _buildInputs(Map<String, dynamic> entries) {
     List<Widget> fields = [];
-    maySync = true;
     entries.forEach((key, value) {
       fields.add(
         Padding(

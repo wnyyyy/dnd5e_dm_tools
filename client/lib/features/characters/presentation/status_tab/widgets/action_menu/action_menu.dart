@@ -31,8 +31,17 @@ class _ActionMenuState extends State<ActionMenu> {
   @override
   void initState() {
     super.initState();
-    _actions = Map<String, Map<String, dynamic>>.from(
-        widget.character['actions'] ?? {});
+    final dynamic actions = widget.character['actions'];
+    if (actions is Map) {
+      _actions = actions.map<String, Map<String, dynamic>>((key, value) {
+        if (key is String && value is Map<String, dynamic>) {
+          return MapEntry(key, value);
+        }
+        throw Exception('Invalid key or value type in actions map');
+      });
+    } else {
+      _actions = <String, Map<String, dynamic>>{};
+    }
   }
 
   @override

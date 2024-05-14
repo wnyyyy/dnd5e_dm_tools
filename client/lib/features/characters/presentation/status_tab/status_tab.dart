@@ -158,6 +158,7 @@ class StatusTab extends StatelessWidget {
                                       .read<SettingsCubit>()
                                       .state
                                       .offlineMode,
+                                  persistData: true,
                                 )),
                         character: character),
                   ],

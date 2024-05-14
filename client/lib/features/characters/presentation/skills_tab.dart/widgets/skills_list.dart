@@ -120,6 +120,7 @@ class _SkillListState extends State<SkillList> {
                             slug: widget.slug,
                             offline:
                                 context.read<SettingsCubit>().state.offlineMode,
+                            persistData: true,
                           ));
                       Navigator.of(context).pop();
                     },
@@ -146,6 +147,7 @@ class _SkillListState extends State<SkillList> {
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 12),
             child: GestureDetector(
+              onLongPress: () => editSkill(),
               onTap: editMode ? editSkill : null,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,

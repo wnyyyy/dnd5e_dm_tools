@@ -105,6 +105,7 @@ class SkillsTab extends StatelessWidget {
                           slug: slug,
                           offline:
                               context.read<SettingsCubit>().state.offlineMode,
+                          persistData: true,
                         ));
                     Navigator.of(context).pop();
                   }
@@ -126,45 +127,49 @@ class SkillsTab extends StatelessWidget {
           onTap: editMode
               ? () => editAttribute('Strength', asi['strength'])
               : null,
+          onLongPress: () => editAttribute('Strength', asi['strength']),
         ),
         AttributeCard(
-          attributeName: 'Dexterity',
-          attributeValue: asi['dexterity'],
-          color: Theme.of(context).dexterityColor,
-          onTap: editMode
-              ? () => editAttribute('Dexterity', asi['dexterity'])
-              : null,
-        ),
+            attributeName: 'Dexterity',
+            attributeValue: asi['dexterity'],
+            color: Theme.of(context).dexterityColor,
+            onTap: editMode
+                ? () => editAttribute('Dexterity', asi['dexterity'])
+                : null,
+            onLongPress: () => editAttribute('Dexterity', asi['dexterity'])),
         AttributeCard(
-          attributeName: 'Constitution',
-          attributeValue: asi['constitution'],
-          color: Theme.of(context).constitutionColor,
-          onTap: editMode
-              ? () => editAttribute('Constitution', asi['constitution'])
-              : null,
-        ),
+            attributeName: 'Constitution',
+            attributeValue: asi['constitution'],
+            color: Theme.of(context).constitutionColor,
+            onTap: editMode
+                ? () => editAttribute('Constitution', asi['constitution'])
+                : null,
+            onLongPress: () =>
+                editAttribute('Constitution', asi['constitution'])),
         AttributeCard(
-          attributeName: 'Intelligence',
-          attributeValue: asi['intelligence'],
-          color: Theme.of(context).intelligenceColor,
-          onTap: editMode
-              ? () => editAttribute('Intelligence', asi['intelligence'])
-              : null,
-        ),
+            attributeName: 'Intelligence',
+            attributeValue: asi['intelligence'],
+            color: Theme.of(context).intelligenceColor,
+            onTap: editMode
+                ? () => editAttribute('Intelligence', asi['intelligence'])
+                : null,
+            onLongPress: () =>
+                editAttribute('Intelligence', asi['intelligence'])),
         AttributeCard(
           attributeName: 'Wisdom',
           attributeValue: asi['wisdom'],
           color: Theme.of(context).wisdomColor,
           onTap: editMode ? () => editAttribute('Wisdom', asi['wisdom']) : null,
+          onLongPress: () => editAttribute('Wisdom', asi['wisdom']),
         ),
         AttributeCard(
-          attributeName: 'Charisma',
-          attributeValue: asi['charisma'],
-          color: Theme.of(context).charismaColor,
-          onTap: editMode
-              ? () => editAttribute('Charisma', asi['charisma'])
-              : null,
-        ),
+            attributeName: 'Charisma',
+            attributeValue: asi['charisma'],
+            color: Theme.of(context).charismaColor,
+            onTap: editMode
+                ? () => editAttribute('Charisma', asi['charisma'])
+                : null,
+            onLongPress: () => editAttribute('Charisma', asi['charisma'])),
       ],
     );
   }
@@ -205,60 +210,60 @@ class SkillsTab extends StatelessWidget {
     );
   }
 
+  void _showEditPassivePerception(BuildContext context) {
+    final TextEditingController controller = TextEditingController(
+        text: character['passive_perception']?.toString() ?? '');
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Edit Passive Perception'),
+          content: TextField(
+            keyboardType: TextInputType.number,
+            decoration: const InputDecoration(
+              labelText: 'Enter new value',
+            ),
+            controller: controller,
+          ),
+          actionsAlignment: MainAxisAlignment.spaceBetween,
+          actions: <Widget>[
+            TextButton(
+              child: const Icon(Icons.close),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Icon(Icons.check),
+              onPressed: () {
+                final newValue = int.tryParse(controller.text);
+                if (newValue != null &&
+                    newValue != character['passive_perception'] &&
+                    newValue >= 0) {
+                  character['passive_perception'] = newValue;
+                  context.read<CharacterBloc>().add(CharacterUpdate(
+                        character: character,
+                        slug: slug,
+                        offline:
+                            context.read<SettingsCubit>().state.offlineMode,
+                        persistData: true,
+                      ));
+                  Navigator.of(context).pop();
+                }
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Widget _buildPassivePerception(BuildContext context) {
     final editMode = Provider.of<SettingsCubit>(context).state.isEditMode;
     return Card.outlined(
       child: GestureDetector(
-        onTap: editMode
-            ? () {
-                final TextEditingController controller = TextEditingController(
-                    text: character['passive_perception']?.toString() ?? '');
-                showDialog(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return AlertDialog(
-                      title: const Text('Edit Passive Perception'),
-                      content: TextField(
-                        keyboardType: TextInputType.number,
-                        decoration: const InputDecoration(
-                          labelText: 'Enter new value',
-                        ),
-                        controller: controller,
-                      ),
-                      actionsAlignment: MainAxisAlignment.spaceBetween,
-                      actions: <Widget>[
-                        TextButton(
-                          child: const Icon(Icons.close),
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                          },
-                        ),
-                        TextButton(
-                          child: const Icon(Icons.check),
-                          onPressed: () {
-                            final newValue = int.tryParse(controller.text);
-                            if (newValue != null &&
-                                newValue != character['passive_perception'] &&
-                                newValue >= 0) {
-                              character['passive_perception'] = newValue;
-                              context.read<CharacterBloc>().add(CharacterUpdate(
-                                    character: character,
-                                    slug: slug,
-                                    offline: context
-                                        .read<SettingsCubit>()
-                                        .state
-                                        .offlineMode,
-                                  ));
-                              Navigator.of(context).pop();
-                            }
-                          },
-                        ),
-                      ],
-                    );
-                  },
-                );
-              }
-            : null,
+        onLongPress: () => _showEditPassivePerception(context),
+        onTap: editMode ? () => _showEditPassivePerception(context) : null,
         child: Column(
           children: [
             Padding(

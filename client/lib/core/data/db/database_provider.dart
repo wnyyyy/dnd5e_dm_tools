@@ -15,7 +15,11 @@ class DatabaseProvider {
       await reference.set(data);
     }
     final cacheBox = Hive.box<Map>(cacheBoxName);
+    print('Setting data for $path');
     await cacheBox.put(path, data);
+    final test = cacheBox.get(path);
+    print('Data set for $path: $test');
+    print('total items in cache: ${cacheBox.length}');
   }
 
   Future<Map<String, dynamic>?> getDocument({

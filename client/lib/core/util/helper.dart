@@ -1,4 +1,3 @@
-
 import 'package:dnd5e_dm_tools/core/util/enum.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttericon/font_awesome5_icons.dart';
@@ -34,9 +33,12 @@ String getOrdinal(int number) {
   }
 }
 
-Map<String, dynamic> getClassFeatures(
-    String desc, List<Map<String, dynamic>> table,
-    {int level = 20}) {
+int fromOrdinal(String ordinal) {
+  return int.tryParse(ordinal.replaceAll(RegExp(r'[a-zA-Z]'), '')) ?? 0;
+}
+
+Map<String, dynamic> getClassFeatures(String desc,
+    {int level = 20, List<Map<String, dynamic>> table = const []}) {
   var features = <String, dynamic>{};
   List<String> lines = desc.split('\n');
   lines = lines
@@ -87,6 +89,74 @@ Map<String, dynamic> getClassFeatures(
     }
     features[currentFeatureKey]['description'] =
         currentFeatureDescription.join('\n');
+  }
+
+  if (table.isNotEmpty) {
+    var filteredFeatures = <String, dynamic>{};
+    for (var feature in features.keys) {
+      for (var entry in table) {
+        final levelEntry = fromOrdinal(entry['Level']);
+        if ((entry['Features'] ?? '')
+                .toString()
+                .toLowerCase()
+                .contains(feature.toLowerCase()) &&
+            levelEntry <= level) {
+          filteredFeatures[feature] = features[feature];
+        }
+      }
+    }
+    return filteredFeatures;
+  }
+
+  return features;
+}
+
+Map<String, dynamic> getArchetypeFeatures(String desc,
+    {int level = 20, List<Map<String, dynamic>> table = const []}) {
+  var features = <String, dynamic>{};
+  List<String> lines = desc.split('\n');
+  lines = lines
+      .map((line) => line.trim())
+      .where((line) => line.isNotEmpty)
+      .toList();
+
+  String currentFeatureKey = '';
+  List<String> currentFeatureDescription = [];
+
+  for (var line in lines) {
+    if (line.startsWith('##### ')) {
+      if (currentFeatureKey.isNotEmpty) {
+        features[currentFeatureKey]['description'] =
+            currentFeatureDescription.join('\n');
+      }
+      currentFeatureKey = line.substring(6).trim();
+      currentFeatureDescription = [];
+      features[currentFeatureKey] = {};
+    } else {
+      currentFeatureDescription.add(line.trim());
+    }
+  }
+
+  if (currentFeatureKey.isNotEmpty) {
+    features[currentFeatureKey]['description'] =
+        currentFeatureDescription.join('\n');
+  }
+
+  if (table.isNotEmpty) {
+    var filteredFeatures = <String, dynamic>{};
+    for (var feature in features.keys) {
+      for (var entry in table) {
+        final levelEntry = fromOrdinal(entry['Level']);
+        if ((entry['Features'] ?? '')
+                .toString()
+                .toLowerCase()
+                .contains(feature.toLowerCase()) &&
+            levelEntry <= level) {
+          filteredFeatures[feature] = features[feature];
+        }
+      }
+    }
+    return filteredFeatures;
   }
 
   return features;

@@ -160,7 +160,13 @@ class HitpointsState extends State<Hitpoints> {
                 width: 45,
                 child: Divider(thickness: 2),
               ),
-              Text('$maxHp', style: Theme.of(context).textTheme.displaySmall),
+              GestureDetector(
+                onLongPress: () => _editHpModal(context),
+                child: Text(
+                  '$maxHp',
+                  style: Theme.of(context).textTheme.displaySmall,
+                ),
+              ),
               if (tempHp > 0)
                 Text('+$tempHp',
                     style: Theme.of(context)

@@ -1,9 +1,15 @@
 import 'package:dnd5e_dm_tools/core/util/helper.dart';
+import 'package:dnd5e_dm_tools/core/widgets/description_text.dart';
+import 'package:dnd5e_dm_tools/features/characters/bloc/character_bloc.dart';
+import 'package:dnd5e_dm_tools/features/characters/bloc/character_events.dart';
+import 'package:dnd5e_dm_tools/features/settings/bloc/settings_cubit.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class ClassDescription extends StatefulWidget {
   final Map<String, dynamic> classs;
   final Map<String, dynamic> character;
+  final String slug;
   final bool editMode;
 
   const ClassDescription({
@@ -11,6 +17,7 @@ class ClassDescription extends StatefulWidget {
     required this.classs,
     required this.character,
     required this.editMode,
+    required this.slug,
   });
 
   @override
@@ -24,7 +31,7 @@ class _ClassDescriptionState extends State<ClassDescription> {
   @override
   void initState() {
     super.initState();
-    selectedArchetypeSlug = widget.character['archetype'];
+    selectedArchetypeSlug = widget.character['subclass'] ?? '';
     initializeArchetypes();
   }
 
@@ -68,7 +75,7 @@ class _ClassDescriptionState extends State<ClassDescription> {
   }
 
   Widget _buildClassTab() {
-    final archetypeChr = widget.character['archetype'] ?? '';
+    final archetypeChr = widget.character['subclass'] ?? '';
     final archetype = widget.classs['archetypes'].firstWhere(
       (element) => element['slug'] == archetypeChr,
       orElse: () => null,
@@ -80,15 +87,15 @@ class _ClassDescriptionState extends State<ClassDescription> {
         child: Column(
           children: [
             Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: const EdgeInsets.only(top: 8.0, right: 8, left: 8),
               child: Text(widget.classs['name'],
                   style: Theme.of(context).textTheme.headlineMedium),
             ),
             if (archetype != null)
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: const EdgeInsets.only(bottom: 8.0),
                 child: Text(
-                  '$archetype',
+                  '(${archetype['name']})',
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
               ),
@@ -263,18 +270,32 @@ class _ClassDescriptionState extends State<ClassDescription> {
       padding: const EdgeInsets.all(8.0),
       child: Column(
         children: [
-          DropdownButton<String>(
-            value: selectedArchetypeSlug,
-            onChanged: (String? newValue) {
-              setState(() {
-                selectedArchetypeSlug = newValue;
-                widget.character['archetype'] = newValue;
-              });
+          DropdownButton<Map<String, dynamic>>(
+            value: archetypes.firstWhere(
+              (element) => element['slug'] == (selectedArchetypeSlug ?? ''),
+              orElse: () => archetypes.first,
+            ),
+            onChanged: (Map<String, dynamic>? newValue) {
+              setState(
+                () {
+                  selectedArchetypeSlug = newValue!['slug'];
+                  widget.character['subclass'] = selectedArchetypeSlug;
+                  context.read<CharacterBloc>().add(
+                        CharacterUpdate(
+                          character: widget.character,
+                          slug: widget.slug,
+                          offline:
+                              context.read<SettingsCubit>().state.offlineMode,
+                          persistData: false,
+                        ),
+                      );
+                },
+              );
             },
-            items: archetypes.map<DropdownMenuItem<String>>(
+            items: archetypes.map<DropdownMenuItem<Map<String, dynamic>>>(
                 (Map<String, dynamic> archetype) {
-              return DropdownMenuItem<String>(
-                value: archetype['slug'],
+              return DropdownMenuItem<Map<String, dynamic>>(
+                value: archetype,
                 child: Text(archetype['name']),
               );
             }).toList(),
@@ -297,32 +318,31 @@ class _ClassDescriptionState extends State<ClassDescription> {
     List<Widget> widgets = [];
     widgets.add(
       Text(
-        archetype['name'],
+        archetype?['name'] ?? '',
         style: Theme.of(context).textTheme.headlineMedium,
       ),
     );
-    widgets.add(
-      Text(
-        archetype['description'],
-        style: Theme.of(context).textTheme.bodyMedium,
-      ),
-    );
-    if (archetype['features'] != null) {
-      for (final feature in archetype['features']) {
-        widgets.add(
-          Text(
-            feature['name'],
-            style: Theme.of(context).textTheme.titleMedium,
+    final archetypeFeatures = getArchetypeFeatures(archetype['desc'] ?? '');
+    for (final feature in archetypeFeatures.entries) {
+      widgets.add(
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            children: [
+              Text(
+                feature.key,
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
+              const SizedBox(height: 8),
+              DescriptionText(
+                  inputText: feature.value['description'] ?? '',
+                  baseStyle: Theme.of(context).textTheme.bodySmall!),
+            ],
           ),
-        );
-        widgets.add(
-          Text(
-            feature['description'],
-            style: Theme.of(context).textTheme.bodyMedium,
-          ),
-        );
-      }
+        ),
+      );
     }
+
     return widgets;
   }
 

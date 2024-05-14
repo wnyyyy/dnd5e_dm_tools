@@ -132,6 +132,7 @@ class _SavingThrowListState extends State<SavingThrowList> {
                           onTap: editMode
                               ? () => editSavingThrow('Strength')
                               : null,
+                          onLongPress: () => editSavingThrow('Strength'),
                         ),
                         const SizedBox(height: 12),
                         SavingThrow(
@@ -143,6 +144,7 @@ class _SavingThrowListState extends State<SavingThrowList> {
                           onTap: editMode
                               ? () => editSavingThrow('Dexterity')
                               : null,
+                          onLongPress: () => editSavingThrow('Dexterity'),
                         ),
                         const SizedBox(height: 12),
                         SavingThrow(
@@ -155,6 +157,7 @@ class _SavingThrowListState extends State<SavingThrowList> {
                           onTap: editMode
                               ? () => editSavingThrow('Constitution')
                               : null,
+                          onLongPress: () => editSavingThrow('Constitution'),
                         ),
                       ],
                     ),
@@ -171,6 +174,7 @@ class _SavingThrowListState extends State<SavingThrowList> {
                           onTap: editMode
                               ? () => editSavingThrow('Intelligence')
                               : null,
+                          onLongPress: () => editSavingThrow('Intelligence'),
                         ),
                         const SizedBox(height: 12),
                         SavingThrow(
@@ -181,6 +185,7 @@ class _SavingThrowListState extends State<SavingThrowList> {
                               charProf.contains('wisdom') ? profBonus : null,
                           onTap:
                               editMode ? () => editSavingThrow('Wisdom') : null,
+                          onLongPress: () => editSavingThrow('Wisdom'),
                         ),
                         const SizedBox(height: 12),
                         SavingThrow(
@@ -192,6 +197,7 @@ class _SavingThrowListState extends State<SavingThrowList> {
                           onTap: editMode
                               ? () => editSavingThrow('Charisma')
                               : null,
+                          onLongPress: () => editSavingThrow('Charisma'),
                         ),
                       ],
                     )

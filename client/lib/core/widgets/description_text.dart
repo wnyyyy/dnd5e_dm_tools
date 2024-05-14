@@ -21,6 +21,7 @@ class DescriptionText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return RichText(
+      textAlign: TextAlign.justify,
       text: TextSpan(
         children: _processText(inputText, context),
       ),

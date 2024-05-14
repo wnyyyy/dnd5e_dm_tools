@@ -8,6 +8,7 @@ class SavingThrow extends StatelessWidget {
   final int? proficiency;
   final Color color;
   final VoidCallback? onTap;
+  final VoidCallback? onLongPress;
 
   const SavingThrow({
     super.key,
@@ -16,6 +17,7 @@ class SavingThrow extends StatelessWidget {
     this.proficiency,
     required this.color,
     this.onTap,
+    this.onLongPress,
   });
 
   @override
@@ -25,6 +27,7 @@ class SavingThrow extends StatelessWidget {
         : getModifier(attributeValue);
     final valueStr = value >= 0 ? '+$value' : value.toString();
     return GestureDetector(
+      onLongPress: onLongPress,
       onTap: onTap,
       child: SizedBox(
         width: 100,

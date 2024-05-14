@@ -7,6 +7,7 @@ class AttributeCard extends StatelessWidget {
   final int attributeValue;
   final Color color;
   final VoidCallback? onTap;
+  final VoidCallback? onLongPress;
 
   const AttributeCard({
     super.key,
@@ -14,6 +15,7 @@ class AttributeCard extends StatelessWidget {
     required this.attributeValue,
     required this.color,
     this.onTap,
+    this.onLongPress,
   });
 
   @override
@@ -24,6 +26,7 @@ class AttributeCard extends StatelessWidget {
     const minWidth = 120.0;
     return GestureDetector(
       onTap: onTap,
+      onLongPress: onLongPress,
       child: Container(
         constraints: const BoxConstraints(
           minWidth: minWidth,

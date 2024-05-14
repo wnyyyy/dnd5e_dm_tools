@@ -63,13 +63,23 @@ class _AddActionDialogState extends State<_AddActionDialog> {
     final classs =
         context.read<RulesCubit>().getClass(widget.character['class'] ?? '');
     final table = parseTable(classs?['table'] ?? {});
-    final characterFeats = getClassFeatures(classs?['desc'] ?? '', table,
-        level: widget.character['level'] ?? 1);
-    for (var feat in characterFeats.entries) {
+    final classFeats = getClassFeatures(classs?['desc'] ?? '',
+        level: widget.character['level'] ?? 1, table: table);
+    for (var feat in classFeats.entries) {
       if (feat.key != 'Ability Score Improvement') {
         feats[feat.key] = feat.value['description'];
       }
     }
+
+    final archetype = classs?['archetypes']?.firstWhere(
+        (archetype) => archetype['slug'] == widget.character['subclass'],
+        orElse: () => null);
+    final archetypeDesc = archetype?['desc'] ?? '';
+    final subclassFeats = getArchetypeFeatures(archetypeDesc);
+    for (var feat in subclassFeats.entries) {
+      feats[feat.key] = feat.value['description'];
+    }
+
     final characterBackpack =
         Map<String, dynamic>.from(widget.character['backpack'] ?? {});
     final characterItems =

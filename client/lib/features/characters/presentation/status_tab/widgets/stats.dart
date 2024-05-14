@@ -89,6 +89,7 @@ class StatsView extends StatelessWidget {
     final speed = int.tryParse(character['speed'].toString()) ?? 30;
     final editMode = context.read<SettingsCubit>().state.isEditMode;
     return GestureDetector(
+      onLongPress: () => editStats(context),
       onTap: () => editMode ? editStats(context) : null,
       child: Card(
         child: Container(

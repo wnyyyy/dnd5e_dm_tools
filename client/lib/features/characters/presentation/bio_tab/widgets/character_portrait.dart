@@ -28,11 +28,15 @@ class CharacterPortrait extends StatelessWidget {
           itemBuilder: (context, index) => ListTile(
             title: Text('Level ${index + 1}'),
             onTap: () {
-              context.read<CharacterBloc>().add(CharacterUpdate(
-                    character: character,
-                    slug: slug,
-                    offline: offline,
-                  ));
+              character['level'] = index + 1;
+              context.read<CharacterBloc>().add(
+                    CharacterUpdate(
+                      character: character,
+                      slug: slug,
+                      offline: offline,
+                      persistData: true,
+                    ),
+                  );
               Navigator.pop(context);
             },
           ),
@@ -95,6 +99,7 @@ class CharacterPortrait extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   GestureDetector(
+                    onLongPress: () => _showEditLevel(context),
                     onTap: () => context.read<SettingsCubit>().state.isEditMode
                         ? _showEditLevel(context)
                         : null,
@@ -126,6 +131,7 @@ class CharacterPortrait extends StatelessWidget {
                         return ClassDescription(
                             classs: classs,
                             character: character,
+                            slug: slug,
                             editMode: false);
                       },
                     ),

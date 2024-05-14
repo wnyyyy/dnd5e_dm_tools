@@ -2,6 +2,7 @@ import 'package:dnd5e_dm_tools/core/util/helper.dart';
 import 'package:dnd5e_dm_tools/core/widgets/description_text.dart';
 import 'package:dnd5e_dm_tools/features/characters/bloc/character_bloc.dart';
 import 'package:dnd5e_dm_tools/features/characters/bloc/character_events.dart';
+import 'package:dnd5e_dm_tools/features/rules/rules_cubit.dart';
 import 'package:dnd5e_dm_tools/features/settings/bloc/settings_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -100,7 +101,8 @@ class SpellbookState extends State<Spellbook> {
     }
     List<MapEntry<String, dynamic>> spells = [];
     for (var spellSlug in spellSlugs) {
-      final spell = widget.spells[spellSlug];
+      var spell = widget.spells[spellSlug];
+      spell ??= context.read<RulesCubit>().getAllSpells()[spellSlug] ?? {};
       if (spell['level_int'] == level) {
         spells.add(MapEntry(spellSlug, spell));
       }
@@ -288,7 +290,8 @@ class SpellbookState extends State<Spellbook> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        final spell = widget.spells[spellSlug];
+        var spell = widget.spells[spellSlug];
+        spell ??= context.read<RulesCubit>().getAllSpells()[spellSlug] ?? {};
         bool isLearned = knownSpells.contains(spellSlug);
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {

@@ -30,9 +30,9 @@ class ItemsRepository {
     Map<String, dynamic> entry,
   ) async {
     await databaseProvider.setData(
-      path: '$path$slug',
+      path: slug,
       data: entry,
-      offline: false,
+      offline: true,
       cacheBoxName: cacheItemsName,
     );
   }
