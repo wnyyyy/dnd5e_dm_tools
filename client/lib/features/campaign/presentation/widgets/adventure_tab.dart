@@ -1,6 +1,6 @@
 import 'package:dnd5e_dm_tools/features/campaign/cubit/campaign_cubit.dart';
 import 'package:dnd5e_dm_tools/features/campaign/cubit/campaign_states.dart';
-import 'package:dnd5e_dm_tools/features/campaign/presentation/widgets/adventure_widget.dart';
+import 'package:dnd5e_dm_tools/features/campaign/presentation/screens/adventure_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 

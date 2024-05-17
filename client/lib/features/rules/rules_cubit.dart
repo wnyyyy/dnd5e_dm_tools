@@ -103,9 +103,12 @@ class RulesCubit extends Cubit<RulesState> {
       Map<String, Map<String, dynamic>> spellList = {};
       final allSpells = (state as RulesStateLoaded).spells;
       final extraSuffix = ['a5e'];
-      final classSpells =
-          (state as RulesStateLoaded).spellLists[classs]['spells'];
-      for (var spell in classSpells) {
+      var classSpellListEntry = getClass(classs)?['spell_list'];
+      classSpellListEntry ??= classs;
+      final classSpellList = (state as RulesStateLoaded)
+              .spellLists[classSpellListEntry]?['spells'] ??
+          [];
+      for (var spell in classSpellList) {
         spellList[spell] = allSpells[spell] ?? {};
         for (var suffix in extraSuffix) {
           final extraSpell = allSpells['$spell-$suffix'];

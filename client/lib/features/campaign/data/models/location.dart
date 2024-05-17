@@ -40,8 +40,13 @@ class Location extends Equatable {
     if (json['entries'] is List) {
       for (var i = 0; i < json['entries'].length; i++) {
         if (json['entries'][i] is String) {
+          final entry = json['entries'][i];
           bulletPoints.add(
-            BulletPoint(id: i.toString(), content: json['entries'][i] as String),
+            BulletPoint(
+              id: i.toString(),
+              content: entry['content'] as String,
+              timestamp: entry['timestamp'] as int,
+            ),
           );
         }
       }
@@ -51,7 +56,10 @@ class Location extends Equatable {
         if (entry.value is String) {
           bulletPoints.add(
             BulletPoint(
-                id: entry.key, content: entry.value as String),
+              id: entry.key,
+              content: entry.value as String,
+              timestamp: entry.value['timestamp'] as int,
+            ),
           );
         }
       }

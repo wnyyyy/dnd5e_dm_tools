@@ -273,7 +273,7 @@ class _ClassDescriptionState extends State<ClassDescription> {
           DropdownButton<Map<String, dynamic>>(
             value: archetypes.firstWhere(
               (element) => element['slug'] == (selectedArchetypeSlug ?? ''),
-              orElse: () => archetypes.first,
+              orElse: () => {},
             ),
             onChanged: (Map<String, dynamic>? newValue) {
               setState(
@@ -300,7 +300,7 @@ class _ClassDescriptionState extends State<ClassDescription> {
               );
             }).toList(),
           ),
-          if (selectedArchetypeSlug != null)
+          if (selectedArchetypeSlug?.isNotEmpty ?? false)
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: Column(
@@ -327,16 +327,19 @@ class _ClassDescriptionState extends State<ClassDescription> {
       widgets.add(
         Padding(
           padding: const EdgeInsets.all(8.0),
-          child: Column(
+          child: ExpansionTile(
+            title: Text(
+              feature.key,
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
             children: [
-              Text(
-                feature.key,
-                style: Theme.of(context).textTheme.titleSmall,
-              ),
-              const SizedBox(height: 8),
-              DescriptionText(
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: DescriptionText(
                   inputText: feature.value['description'] ?? '',
-                  baseStyle: Theme.of(context).textTheme.bodySmall!),
+                  baseStyle: Theme.of(context).textTheme.bodySmall!,
+                ),
+              ),
             ],
           ),
         ),

@@ -33,15 +33,26 @@ class Character extends Equatable {
   }
 
   @override
-  List<Object?> get props => [entries, name, imageUrl, isHidden, isImageHidden];
+  List<Object?> get props => [
+        entries,
+        name,
+        imageUrl,
+        isHidden,
+        isImageHidden,
+      ];
 
   factory Character.fromJson(Map<String, dynamic> json, String name) {
     final bulletPoints = <BulletPoint>[];
     if (json['entries'] is List) {
       for (var i = 0; i < json['entries'].length; i++) {
         if (json['entries'][i] is String) {
+          final entry = json['entries'][i];
           bulletPoints.add(
-            BulletPoint(id: i.toString(), content: json['entries'][i] as String),
+            BulletPoint(
+              id: i.toString(),
+              content: entry['content'] as String,
+              timestamp: entry['timestamp'] as int,
+            ),
           );
         }
       }
@@ -50,7 +61,11 @@ class Character extends Equatable {
       for (final entry in json['entries'].entries) {
         if (entry.value is String) {
           bulletPoints.add(
-            BulletPoint(id: entry.key, content: entry.value as String),
+            BulletPoint(
+              id: entry.key,
+              content: entry.value as String,
+              timestamp: entry.value['timestamp'] as int,
+            ),
           );
         }
       }

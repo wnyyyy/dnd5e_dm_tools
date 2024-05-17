@@ -53,29 +53,86 @@ class AdventureWidgetState extends State<AdventureWidget> {
                             tileColor: Theme.of(context)
                                 .colorScheme
                                 .secondaryContainer,
-                            title: Text(
-                              entry.content,
-                              textAlign: TextAlign.justify,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodyMedium!
-                                  .copyWith(
-                                    fontFamily:
-                                        GoogleFonts.montserrat().fontFamily,
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .onSecondaryContainer,
+                            title: Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    entry.content,
+                                    textAlign: TextAlign.justify,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodyMedium!
+                                        .copyWith(
+                                          fontFamily: GoogleFonts.montserrat()
+                                              .fontFamily,
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onSecondaryContainer,
+                                        ),
                                   ),
-                            ),
-                            trailing: editMode
-                                ? IconButton(
-                                    icon: const Icon(Icons.edit),
-                                    onPressed: () => _showEntryDialog(
-                                      entryId: entry.id,
-                                      initialText: entry.content,
+                                ),
+                                if (editMode)
+                                  SizedBox(
+                                    width: 80,
+                                    height: 40,
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        IconButton(
+                                          icon: const Icon(Icons.edit),
+                                          onPressed: () => _showEntryDialog(
+                                            entryId: entry.id,
+                                            initialText: entry.content,
+                                          ),
+                                        ),
+                                        IconButton(
+                                            onPressed: () {
+                                              showDialog(
+                                                context: context,
+                                                builder: (context) =>
+                                                    AlertDialog(
+                                                  title: const Text(
+                                                      'Delete Entry'),
+                                                  content: const Text(
+                                                      'Are you sure you want to delete this entry?'),
+                                                  actions: [
+                                                    TextButton(
+                                                      onPressed: () =>
+                                                          Navigator.pop(
+                                                              context),
+                                                      child:
+                                                          const Text('Cancel'),
+                                                    ),
+                                                    TextButton(
+                                                      onPressed: () {
+                                                        context
+                                                            .read<
+                                                                CampaignCubit>()
+                                                            .updateEntry(
+                                                              name: 'Adventure',
+                                                              entryId: entry.id,
+                                                              content: '',
+                                                              type: CampaignTab
+                                                                  .adventure,
+                                                            );
+                                                        Navigator.pop(context);
+                                                      },
+                                                      child:
+                                                          const Text('Delete'),
+                                                    ),
+                                                  ],
+                                                ),
+                                              );
+                                            },
+                                            icon: const Icon(Icons.delete))
+                                      ],
                                     ),
                                   )
-                                : null,
+                                else
+                                  Container(),
+                              ],
+                            ),
                           ),
                         );
                       } else {

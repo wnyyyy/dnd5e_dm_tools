@@ -167,7 +167,7 @@ class UploadCustomDb(Resource):
     def post(self):
         with open(CUSTOM_DB_PATH, 'r') as file:
             custom_db = json.load(file)
-            upload_to_firestore('races', custom_db['races'])
+            upload_to_firestore('spells', custom_db['spells'])
 
 @ns.route('/handouts/<filename>')
 class Handouts(Resource):
