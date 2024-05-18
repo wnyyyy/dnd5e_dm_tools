@@ -1,8 +1,5 @@
 import 'package:dnd5e_dm_tools/core/util/helper.dart';
-import 'package:dnd5e_dm_tools/features/characters/bloc/character_bloc.dart';
-import 'package:dnd5e_dm_tools/features/characters/bloc/character_events.dart';
 import 'package:dnd5e_dm_tools/features/rules/rules_cubit.dart';
-import 'package:dnd5e_dm_tools/features/settings/bloc/settings_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:dnd5e_dm_tools/core/util/enum.dart';
 import 'package:dnd5e_dm_tools/features/characters/presentation/status_tab/widgets/action_menu/action_category_row.dart';
@@ -11,9 +8,16 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 class AddActionButton extends StatelessWidget {
   final Map<String, dynamic> character;
   final String slug;
+  final Map<String, dynamic>? action;
+  final String? actionSlug;
+  final Function(Map<String, Map<String, dynamic>>) onActionsChanged;
+
   const AddActionButton({
     required this.character,
     required this.slug,
+    required this.onActionsChanged,
+    this.action,
+    this.actionSlug,
     super.key,
   });
 
@@ -25,9 +29,13 @@ class AddActionButton extends StatelessWidget {
         builder: (BuildContext context) => _AddActionDialog(
           character: character,
           slug: slug,
+          action: action,
+          editActionSlug: actionSlug,
+          onActionsChanged: onActionsChanged,
         ),
       ),
-      child: const Icon(Icons.add),
+      child:
+          actionSlug != null ? const Icon(Icons.edit) : const Icon(Icons.add),
     );
   }
 }
@@ -35,10 +43,16 @@ class AddActionButton extends StatelessWidget {
 class _AddActionDialog extends StatefulWidget {
   final Map<String, dynamic> character;
   final String slug;
+  final Map<String, dynamic>? action;
+  final String? editActionSlug;
+  final Function(Map<String, Map<String, dynamic>>) onActionsChanged;
 
   const _AddActionDialog({
     required this.character,
     required this.slug,
+    this.action,
+    this.editActionSlug,
+    required this.onActionsChanged,
   });
   @override
   _AddActionDialogState createState() => _AddActionDialogState();
@@ -50,12 +64,14 @@ class _AddActionDialogState extends State<_AddActionDialog> {
   ResourceType _resourceType = ResourceType.none;
   bool _requiresResource = false;
   bool _expendable = false;
+  String _ammo = 'none';
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   int _resourceCount = 0;
   String _selectedDropdown = 'none';
   final feats = {};
   final items = {};
+  late String? oldTitle;
 
   @override
   void initState() {
@@ -91,6 +107,35 @@ class _AddActionDialogState extends State<_AddActionDialog> {
           'name': item['name'],
           'desc': item['desc']?.join('\n') ?? '',
         };
+      }
+    }
+
+    if (widget.action != null) {
+      final actionType = ActionMenuMode.values.firstWhere(
+          (e) => e.name == widget.action!['type'],
+          orElse: () => ActionMenuMode.abilities);
+      _selected = actionType;
+      _descriptionController.text = widget.action!['description'] ?? '';
+      _titleController.text = widget.action!['title'] ?? '';
+      switch (actionType) {
+        case ActionMenuMode.abilities:
+          _selectedDropdown = widget.action!['ability'] ?? 'none';
+          _requiresResource = widget.action!['requires_resource'] ?? false;
+          _resourceType = ResourceType.values.firstWhere(
+              (e) => e.name == (widget.action!['resource_type'] ?? 'none'),
+              orElse: () => ResourceType.none);
+          _resourceCount = widget.action!['resource_count'] ?? 0;
+          break;
+        case ActionMenuMode.items:
+          _selectedDropdown = widget.action!['item'] ?? 'none';
+          _requiresResource = widget.action!['must_equip'] ?? false;
+          _expendable = widget.action!['expendable'] ?? false;
+          _ammo = widget.action!['ammo'] ?? 'none';
+          break;
+        case ActionMenuMode.spells:
+          break;
+        default:
+          _selected = ActionMenuMode.abilities;
       }
     }
   }
@@ -189,13 +234,28 @@ class _AddActionDialogState extends State<_AddActionDialog> {
 
   List<DropdownMenuItem<String>> getDropdownOptions() {
     final List<DropdownMenuItem<String>> options;
+    final screenWidth = MediaQuery.of(context).size.width;
     switch (_selected) {
       case ActionMenuMode.abilities:
         options = [
-          const DropdownMenuItem(value: 'none', child: Text('None')),
+          const DropdownMenuItem(
+            value: 'none',
+            child: Text('None', overflow: TextOverflow.fade),
+          ),
         ];
         for (var feat in feats.entries) {
-          options.add(DropdownMenuItem(value: feat.key, child: Text(feat.key)));
+          options.add(
+            DropdownMenuItem(
+              value: feat.key,
+              child: SizedBox(
+                  width: screenWidth * 0.4,
+                  child: Text(
+                    feat.key,
+                    overflow: TextOverflow.fade,
+                    style: Theme.of(context).textTheme.bodySmall,
+                  )),
+            ),
+          );
         }
         break;
       case ActionMenuMode.items:
@@ -203,8 +263,18 @@ class _AddActionDialogState extends State<_AddActionDialog> {
           const DropdownMenuItem(value: 'none', child: Text('None')),
         ];
         for (var item in items.entries) {
-          options.add(DropdownMenuItem(
-              value: item.key, child: Text(item.value['name'])));
+          options.add(
+            DropdownMenuItem(
+              value: item.key,
+              child: SizedBox(
+                  width: screenWidth * 0.4,
+                  child: Text(
+                    item.value['name'],
+                    overflow: TextOverflow.fade,
+                    style: Theme.of(context).textTheme.bodySmall,
+                  )),
+            ),
+          );
         }
         break;
       case ActionMenuMode.spells:
@@ -258,6 +328,39 @@ class _AddActionDialogState extends State<_AddActionDialog> {
                   }
                 },
               ),
+            ),
+          ],
+        ),
+        Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            Text('Requires Ammo',
+                style: Theme.of(context).textTheme.bodyMedium),
+            DropdownButton<String>(
+              value: _ammo,
+              onChanged: (String? newValue) {
+                setState(() {
+                  _ammo = newValue ?? 'none';
+                });
+              },
+              items: [
+                DropdownMenuItem(
+                  value: 'none',
+                  child: Text(
+                    'None',
+                    style: Theme.of(context).textTheme.titleSmall,
+                  ),
+                ),
+                for (var item in items.entries)
+                  DropdownMenuItem(
+                    value: item.key,
+                    child: Text(
+                      item.value['name'],
+                      overflow: TextOverflow.fade,
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  ),
+              ],
             ),
           ],
         ),
@@ -364,15 +467,29 @@ class _AddActionDialogState extends State<_AddActionDialog> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        TextButton(
+        IconButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Icon(Icons.close),
+          icon: const Icon(Icons.close),
         ),
-        TextButton(
+        if (widget.editActionSlug != null)
+          IconButton(
+            onPressed: () {
+              widget.character['actions']?.remove(widget.editActionSlug);
+              final updatedActions = Map<String, Map<String, dynamic>>.from(
+                  widget.character['actions']
+                          ?.cast<String, Map<String, dynamic>>() ??
+                      {});
+              widget.onActionsChanged(updatedActions);
+              Navigator.of(context).pop();
+            },
+            icon: const Icon(Icons.delete),
+          ),
+        IconButton(
           onPressed: () {
             final actionType = _selected;
-            final Map action;
-            final String actionSlug;
+            final Map<String, dynamic> action;
+            String actionSlug;
+
             switch (actionType) {
               case ActionMenuMode.abilities:
                 final ability = _selectedDropdown;
@@ -398,6 +515,7 @@ class _AddActionDialogState extends State<_AddActionDialog> {
                 final title = _titleController.text;
                 final requiresResource = _requiresResource;
                 final expendable = _expendable;
+                final ammo = _ammo;
                 action = {
                   'type': actionType.name,
                   'item': item,
@@ -405,6 +523,7 @@ class _AddActionDialogState extends State<_AddActionDialog> {
                   'title': title,
                   'must_equip': requiresResource,
                   'expendable': expendable,
+                  'ammo': ammo,
                 };
                 actionSlug = title.trim().replaceAll(' ', '_').toLowerCase();
                 break;
@@ -416,19 +535,24 @@ class _AddActionDialogState extends State<_AddActionDialog> {
                 action = {};
                 actionSlug = '';
             }
+
+            if (widget.editActionSlug != null) {
+              actionSlug = widget.editActionSlug!;
+            }
+
             widget.character['actions'] ??= {};
             if (actionSlug.isNotEmpty) {
               widget.character['actions'][actionSlug] = action;
-              context.read<CharacterBloc>().add(CharacterUpdate(
-                    character: widget.character,
-                    slug: widget.slug,
-                    offline: context.read<SettingsCubit>().state.offlineMode,
-                    persistData: true,
-                  ));
+              final updatedActions = Map<String, Map<String, dynamic>>.from(
+                  widget.character['actions']
+                          ?.cast<String, Map<String, dynamic>>() ??
+                      {});
+              widget.onActionsChanged(updatedActions);
             }
+
             Navigator.of(context).pop();
           },
-          child: const Icon(Icons.check),
+          icon: const Icon(Icons.check),
         ),
       ],
     );

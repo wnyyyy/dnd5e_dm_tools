@@ -33,6 +33,76 @@ class ItemListState extends State<ItemList> {
     });
   }
 
+  void _editItem(String key, Map item) {
+    final TextEditingController titleController =
+        TextEditingController(text: item[widget.displayKey]);
+    final TextEditingController descriptionController =
+        TextEditingController(text: item['description']);
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Edit ${widget.tableName}'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                TextFormField(
+                  controller: titleController,
+                  decoration: const InputDecoration(
+                    labelText: 'Title',
+                  ),
+                ),
+                TextFormField(
+                  controller: descriptionController,
+                  decoration: const InputDecoration(
+                    labelText: 'Description',
+                  ),
+                  minLines: 3,
+                  maxLines: 5,
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Icon(Icons.close),
+            ),
+            TextButton(
+              onPressed: () {
+                if (titleController.text.isNotEmpty) {
+                  var newItem = {
+                    widget.displayKey: titleController.text,
+                    'description': descriptionController.text,
+                  };
+                  setState(() {
+                    widget.items?[key] = newItem;
+                    widget.onItemsChanged(widget.items ?? {});
+                  });
+                  Navigator.of(context).pop();
+                }
+              },
+              child: const Icon(Icons.save),
+            ),
+            TextButton(
+              onPressed: () {
+                setState(() {
+                  widget.items?.remove(key);
+                  widget.onItemsChanged(widget.items ?? {});
+                });
+                Navigator.of(context).pop();
+              },
+              child: const Icon(Icons.delete),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return DecoratedBox(
@@ -99,11 +169,9 @@ class ItemListState extends State<ItemList> {
                   ),
                   trailing: _isEditMode
                       ? IconButton(
-                          icon: const Icon(Icons.delete),
-                          onPressed: () => setState(() {
-                            widget.items?.remove(key);
-                            widget.onItemsChanged(widget.items ?? {});
-                          }),
+                          icon: const Icon(Icons.edit),
+                          onPressed: () =>
+                              _editItem(key, widget.items?[key] ?? {}),
                         )
                       : null,
                 );

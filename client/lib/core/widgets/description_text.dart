@@ -20,10 +20,14 @@ class DescriptionText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var preProcess = inputText.replaceAll('**_', '**');
+    preProcess = preProcess.replaceAll('_**', '**');
+    preProcess = preProcess.replaceAll('_', '**');
+
     return RichText(
-      textAlign: TextAlign.justify,
+      textAlign: TextAlign.left,
       text: TextSpan(
-        children: _processText(inputText, context),
+        children: _postProcess(_processText(preProcess, context)),
       ),
     );
   }
@@ -50,6 +54,27 @@ class DescriptionText extends StatelessWidget {
       'intelligence': Theme.of(context).intelligenceColor,
       'cha': Theme.of(context).charismaColor,
       'charisma': Theme.of(context).charismaColor,
+    };
+
+    final skillAttributes = {
+      'acrobatics': 'dex',
+      'animal handling': 'wis',
+      'arcana': 'int',
+      'athletics': 'str',
+      'deception': 'cha',
+      'history': 'int',
+      'insight': 'wis',
+      'intimidation': 'cha',
+      'investigation': 'int',
+      'medicine': 'wis',
+      'nature': 'int',
+      'perception': 'wis',
+      'performance': 'cha',
+      'persuasion': 'cha',
+      'religion': 'int',
+      'sleight of hand': 'dex',
+      'stealth': 'dex',
+      'survival': 'wis',
     };
 
     final damageTypeColors = {
@@ -82,7 +107,9 @@ class DescriptionText extends StatelessWidget {
           spans.add(TextSpan(
             text: fullMatch,
             style: baseStyle.copyWith(
-                color: Colors.blueAccent, fontWeight: FontWeight.bold),
+              color: Colors.blueAccent,
+              fontWeight: FontWeight.bold,
+            ),
           ));
         } else if (match[3] != null) {
           // Handling words like 'successful', 'failure', etc.
@@ -108,51 +135,92 @@ class DescriptionText extends StatelessWidget {
             ),
           ));
         }
-        spans.add(const TextSpan(text: ' '));
         return '';
       },
       onNonMatch: (String text) {
-        final words = text.split(' ');
-        for (var word in words) {
-          final lowerWord = word.toLowerCase();
-          if (attributeColors.containsKey(lowerWord)) {
+        final parts = text.split('**');
+        for (var i = 0; i < parts.length; i++) {
+          if (i % 2 == 1) {
             spans.add(TextSpan(
-              text: '$word ',
-              style: baseStyle.copyWith(color: attributeColors[lowerWord]),
-            ));
-          } else if (conditions.containsKey(lowerWord)) {
-            spans.add(TextSpan(
-              text: '$word ',
+              text: parts[i],
               style: baseStyle.copyWith(fontWeight: FontWeight.bold),
-              recognizer: TapGestureRecognizer()
-                ..onTap = () {
-                  showDialog(
-                    context: context,
-                    builder: (context) {
-                      final condition = conditions[lowerWord];
-                      return AlertDialog(
-                        title: Text(condition['name']),
-                        content: TraitDescription2(
-                          inputText: condition['desc'],
-                          separator: '*',
-                          boldify: false,
-                        ),
-                        actions: <Widget>[
-                          TextButton(
-                            child: const Icon(Icons.done),
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                            },
-                          ),
-                        ],
-                      );
-                    },
-                  );
-                },
             ));
           } else {
-            if (word.isNotEmpty) {
-              spans.add(TextSpan(text: '$word ', style: baseStyle));
+            final lines = parts[i].split('\n');
+            for (var j = 0; j < lines.length; j++) {
+              final words = lines[j]
+                  .split(RegExp(r'(\s+|(?=\p{P})|(?<=\p{P}))', unicode: true));
+              for (var k = 0; k < words.length; k++) {
+                if (words[k].isEmpty) continue;
+                final lowerWord = words[k].toLowerCase();
+
+                // Handle multi-word skills
+                bool matchedSkill = false;
+                for (var skill in skillAttributes.keys) {
+                  final skillWords = skill.split(' ');
+                  if (k + skillWords.length <= words.length) {
+                    final combinedWords = words
+                        .sublist(k, k + skillWords.length)
+                        .join(' ')
+                        .toLowerCase();
+                    if (combinedWords == skill) {
+                      spans.add(TextSpan(
+                        text: words.sublist(k, k + skillWords.length).join(' '),
+                        style: baseStyle.copyWith(
+                            color: attributeColors[skillAttributes[skill]]),
+                      ));
+                      k += skillWords.length - 1;
+                      matchedSkill = true;
+                      break;
+                    }
+                  }
+                }
+                if (matchedSkill) continue;
+
+                // Handle single-word skills, attributes, and conditions
+                if (attributeColors.containsKey(lowerWord)) {
+                  spans.add(TextSpan(
+                    text: words[k],
+                    style:
+                        baseStyle.copyWith(color: attributeColors[lowerWord]),
+                  ));
+                } else if (conditions.containsKey(lowerWord)) {
+                  spans.add(TextSpan(
+                    text: words[k],
+                    style: baseStyle.copyWith(fontWeight: FontWeight.bold),
+                    recognizer: TapGestureRecognizer()
+                      ..onTap = () {
+                        showDialog(
+                          context: context,
+                          builder: (context) {
+                            final condition = conditions[lowerWord];
+                            return AlertDialog(
+                              title: Text(condition['name']),
+                              content: TraitDescription2(
+                                inputText: condition['desc'],
+                                separator: '*',
+                                boldify: false,
+                              ),
+                              actions: <Widget>[
+                                TextButton(
+                                  child: const Icon(Icons.done),
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      },
+                  ));
+                } else {
+                  spans.add(TextSpan(text: words[k], style: baseStyle));
+                }
+              }
+              if (j < lines.length - 1) {
+                spans.add(const TextSpan(text: '\n'));
+              }
             }
           }
         }
@@ -161,5 +229,50 @@ class DescriptionText extends StatelessWidget {
     );
 
     return spans;
+  }
+
+  List<TextSpan> _postProcess(List<TextSpan> spans) {
+    List<TextSpan> processedSpans = [];
+    for (int i = 0; i < spans.length; i++) {
+      processedSpans.add(spans[i]);
+      if (i < spans.length - 1 && _needsSpace(spans[i], spans[i + 1])) {
+        processedSpans.add(const TextSpan(text: ' '));
+      }
+    }
+    return _removeDuplicateSpaces(processedSpans);
+  }
+
+  bool _needsSpace(TextSpan currentSpan, TextSpan nextSpan) {
+    if (currentSpan.text == null || nextSpan.text == null) return false;
+    final currentText = currentSpan.text!;
+    final nextText = nextSpan.text!;
+    final noSpaceBefore = RegExp(r"[.,;!?'\’]");
+    return !noSpaceBefore.hasMatch(nextText) && !currentText.endsWith('\n');
+  }
+
+  List<TextSpan> _removeDuplicateSpaces(List<TextSpan> spans) {
+    List<TextSpan> processedSpans = [];
+    for (int i = 0; i < spans.length; i++) {
+      if (i > 0 &&
+          spans[i].text == ' ' &&
+          processedSpans.isNotEmpty &&
+          processedSpans.last.text == ' ') {
+        continue; // Skip duplicate spaces
+      }
+      // Check for space between apostrophe and 's'
+      if (i > 0 &&
+          spans[i].text == ' ' &&
+          processedSpans.isNotEmpty &&
+          processedSpans.last.text != null &&
+          spans.length > i + 1 &&
+          spans[i + 1].text != null &&
+          (processedSpans.last.text!.endsWith("'") ||
+              processedSpans.last.text!.endsWith("’")) &&
+          spans[i + 1].text!.startsWith('s')) {
+        continue; // Skip space between apostrophe and 's'
+      }
+      processedSpans.add(spans[i]);
+    }
+    return processedSpans;
   }
 }

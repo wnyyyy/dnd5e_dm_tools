@@ -25,6 +25,7 @@ class SkillList extends StatefulWidget {
 
 class _SkillListState extends State<SkillList> {
   late List<String> skillProf;
+  late List<String> expertiseSkills;
 
   @override
   void initState() {
@@ -34,6 +35,13 @@ class _SkillListState extends State<SkillList> {
       skillProf = List<String>.from(profSkills);
     } else {
       skillProf = [];
+    }
+
+    var expSkills = widget.character['expertise_skills'];
+    if (expSkills != null && expSkills is List) {
+      expertiseSkills = List<String>.from(expSkills);
+    } else {
+      expertiseSkills = [];
     }
   }
 
@@ -70,35 +78,67 @@ class _SkillListState extends State<SkillList> {
           return StatefulBuilder(
             builder: (BuildContext context, StateSetter setDialogState) {
               return AlertDialog(
-                title: const Text('Edit Skill Proficiencies'),
+                title: const Text('Edit Skill Proficiencies and Expertise'),
                 content: GridView.count(
                   crossAxisCount: 2,
                   shrinkWrap: true,
                   children: skills.map((skill) {
                     final skillSlug =
                         skill.toLowerCase().trim().replaceAll(' ', '_');
-                    return Row(
+                    return Column(
                       children: <Widget>[
-                        Expanded(
-                          child: Text(skill),
-                        ),
-                        Checkbox(
-                          value: skillProf.contains(skillSlug),
-                          onChanged: (bool? value) {
-                            if (value != null) {
-                              setDialogState(() {
-                                if (value) {
-                                  if (!skillProf.contains(skillSlug)) {
-                                    skillProf.add(skillSlug);
-                                  }
-                                } else {
-                                  skillProf.removeWhere(
-                                      (element) => element == skillSlug);
+                        Row(
+                          children: <Widget>[
+                            Expanded(
+                              child: Text(skill),
+                            ),
+                            Checkbox(
+                              value: skillProf.contains(skillSlug),
+                              onChanged: (bool? value) {
+                                if (value != null) {
+                                  setDialogState(() {
+                                    if (value) {
+                                      if (!skillProf.contains(skillSlug)) {
+                                        skillProf.add(skillSlug);
+                                      }
+                                    } else {
+                                      skillProf.removeWhere(
+                                          (element) => element == skillSlug);
+                                      expertiseSkills.removeWhere(
+                                          (element) => element == skillSlug);
+                                    }
+                                  });
                                 }
-                              });
-                            }
-                          },
+                              },
+                            ),
+                          ],
                         ),
+                        if (skillProf.contains(skillSlug))
+                          Row(
+                            children: <Widget>[
+                              const Expanded(
+                                child: Text('Expertise'),
+                              ),
+                              Checkbox(
+                                value: expertiseSkills.contains(skillSlug),
+                                onChanged: (bool? value) {
+                                  if (value != null) {
+                                    setDialogState(() {
+                                      if (value) {
+                                        if (!expertiseSkills
+                                            .contains(skillSlug)) {
+                                          expertiseSkills.add(skillSlug);
+                                        }
+                                      } else {
+                                        expertiseSkills.removeWhere(
+                                            (element) => element == skillSlug);
+                                      }
+                                    });
+                                  }
+                                },
+                              ),
+                            ],
+                          ),
                       ],
                     );
                   }).toList(),
@@ -115,6 +155,7 @@ class _SkillListState extends State<SkillList> {
                     child: const Icon(Icons.check),
                     onPressed: () {
                       widget.character['prof_skills'] = skillProf;
+                      widget.character['expertise_skills'] = expertiseSkills;
                       context.read<CharacterBloc>().add(CharacterUpdate(
                             character: widget.character,
                             slug: widget.slug,
@@ -174,6 +215,7 @@ class _SkillListState extends State<SkillList> {
                               proficiency: skillProf.contains('athletics')
                                   ? profBonus
                                   : null,
+                              expertise: expertiseSkills.contains('athletics'),
                               color: Theme.of(context).strengthColor,
                               character: widget.character,
                             ),
@@ -200,6 +242,7 @@ class _SkillListState extends State<SkillList> {
                               proficiency: skillProf.contains('acrobatics')
                                   ? profBonus
                                   : null,
+                              expertise: expertiseSkills.contains('acrobatics'),
                               color: Theme.of(context).dexterityColor,
                               character: widget.character,
                             ),
@@ -209,6 +252,8 @@ class _SkillListState extends State<SkillList> {
                               proficiency: skillProf.contains('sleight_of_hand')
                                   ? profBonus
                                   : null,
+                              expertise:
+                                  expertiseSkills.contains('sleight_of_hand'),
                               color: Theme.of(context).dexterityColor,
                               character: widget.character,
                             ),
@@ -218,6 +263,7 @@ class _SkillListState extends State<SkillList> {
                               proficiency: skillProf.contains('stealth')
                                   ? profBonus
                                   : null,
+                              expertise: expertiseSkills.contains('stealth'),
                               color: Theme.of(context).dexterityColor,
                               character: widget.character,
                             ),
@@ -245,6 +291,7 @@ class _SkillListState extends State<SkillList> {
                               proficiency: skillProf.contains('arcana')
                                   ? profBonus
                                   : null,
+                              expertise: expertiseSkills.contains('arcana'),
                               color: Theme.of(context).intelligenceColor,
                               character: widget.character,
                             ),
@@ -254,6 +301,7 @@ class _SkillListState extends State<SkillList> {
                               proficiency: skillProf.contains('history')
                                   ? profBonus
                                   : null,
+                              expertise: expertiseSkills.contains('history'),
                               color: Theme.of(context).intelligenceColor,
                               character: widget.character,
                             ),
@@ -263,6 +311,8 @@ class _SkillListState extends State<SkillList> {
                               proficiency: skillProf.contains('investigation')
                                   ? profBonus
                                   : null,
+                              expertise:
+                                  expertiseSkills.contains('investigation'),
                               color: Theme.of(context).intelligenceColor,
                               character: widget.character,
                             ),
@@ -272,6 +322,7 @@ class _SkillListState extends State<SkillList> {
                               proficiency: skillProf.contains('nature')
                                   ? profBonus
                                   : null,
+                              expertise: expertiseSkills.contains('nature'),
                               color: Theme.of(context).intelligenceColor,
                               character: widget.character,
                             ),
@@ -281,6 +332,7 @@ class _SkillListState extends State<SkillList> {
                               proficiency: skillProf.contains('religion')
                                   ? profBonus
                                   : null,
+                              expertise: expertiseSkills.contains('religion'),
                               color: Theme.of(context).intelligenceColor,
                               character: widget.character,
                             ),
@@ -311,6 +363,8 @@ class _SkillListState extends State<SkillList> {
                               proficiency: skillProf.contains('animal_handling')
                                   ? profBonus
                                   : null,
+                              expertise:
+                                  expertiseSkills.contains('animal_handling'),
                               color: Theme.of(context).wisdomColor,
                               character: widget.character,
                             ),
@@ -320,6 +374,7 @@ class _SkillListState extends State<SkillList> {
                               proficiency: skillProf.contains('insight')
                                   ? profBonus
                                   : null,
+                              expertise: expertiseSkills.contains('insight'),
                               color: Theme.of(context).wisdomColor,
                               character: widget.character,
                             ),
@@ -329,6 +384,7 @@ class _SkillListState extends State<SkillList> {
                               proficiency: skillProf.contains('medicine')
                                   ? profBonus
                                   : null,
+                              expertise: expertiseSkills.contains('medicine'),
                               color: Theme.of(context).wisdomColor,
                               character: widget.character,
                             ),
@@ -338,6 +394,7 @@ class _SkillListState extends State<SkillList> {
                               proficiency: skillProf.contains('perception')
                                   ? profBonus
                                   : null,
+                              expertise: expertiseSkills.contains('perception'),
                               color: Theme.of(context).wisdomColor,
                               character: widget.character,
                             ),
@@ -347,6 +404,7 @@ class _SkillListState extends State<SkillList> {
                               proficiency: skillProf.contains('survival')
                                   ? profBonus
                                   : null,
+                              expertise: expertiseSkills.contains('survival'),
                               color: Theme.of(context).wisdomColor,
                               character: widget.character,
                             ),
@@ -373,6 +431,7 @@ class _SkillListState extends State<SkillList> {
                               proficiency: skillProf.contains('deception')
                                   ? profBonus
                                   : null,
+                              expertise: expertiseSkills.contains('deception'),
                               color: Theme.of(context).charismaColor,
                               character: widget.character,
                             ),
@@ -382,6 +441,8 @@ class _SkillListState extends State<SkillList> {
                               proficiency: skillProf.contains('intimidation')
                                   ? profBonus
                                   : null,
+                              expertise:
+                                  expertiseSkills.contains('intimidation'),
                               color: Theme.of(context).charismaColor,
                               character: widget.character,
                             ),
@@ -391,6 +452,8 @@ class _SkillListState extends State<SkillList> {
                               proficiency: skillProf.contains('performance')
                                   ? profBonus
                                   : null,
+                              expertise:
+                                  expertiseSkills.contains('performance'),
                               color: Theme.of(context).charismaColor,
                               character: widget.character,
                             ),
@@ -400,6 +463,7 @@ class _SkillListState extends State<SkillList> {
                               proficiency: skillProf.contains('persuasion')
                                   ? profBonus
                                   : null,
+                              expertise: expertiseSkills.contains('persuasion'),
                               color: Theme.of(context).charismaColor,
                               character: widget.character,
                             ),

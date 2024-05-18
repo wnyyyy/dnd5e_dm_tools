@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dnd5e_dm_tools/core/util/helper.dart';
 import 'package:dnd5e_dm_tools/core/widgets/description_text.dart';
 import 'package:dnd5e_dm_tools/features/characters/bloc/character_bloc.dart';
@@ -265,52 +266,58 @@ class _ClassDescriptionState extends State<ClassDescription> {
     );
   }
 
-  Widget _buildArchetypeTab() {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(8.0),
-      child: Column(
-        children: [
-          DropdownButton<Map<String, dynamic>>(
-            value: archetypes.firstWhere(
-              (element) => element['slug'] == (selectedArchetypeSlug ?? ''),
-              orElse: () => {},
-            ),
-            onChanged: (Map<String, dynamic>? newValue) {
-              setState(
-                () {
-                  selectedArchetypeSlug = newValue!['slug'];
-                  widget.character['subclass'] = selectedArchetypeSlug;
-                  context.read<CharacterBloc>().add(
-                        CharacterUpdate(
-                          character: widget.character,
-                          slug: widget.slug,
-                          offline:
-                              context.read<SettingsCubit>().state.offlineMode,
-                          persistData: false,
-                        ),
-                      );
-                },
-              );
-            },
-            items: archetypes.map<DropdownMenuItem<Map<String, dynamic>>>(
+Widget _buildArchetypeTab() {
+  final Map<String, dynamic> noneOption = {'slug': '', 'name': 'None'};
+
+  return SingleChildScrollView(
+    padding: const EdgeInsets.all(8.0),
+    child: Column(
+      children: [
+        DropdownButton<Map<String, dynamic>>(
+          value: selectedArchetypeSlug == null || selectedArchetypeSlug!.isEmpty
+                  ? noneOption 
+                  : archetypes.firstWhere(
+                      (element) => element['slug'] == selectedArchetypeSlug!,
+                      orElse: () => noneOption), 
+          onChanged: (Map<String, dynamic>? newValue) {
+            setState(
+              () {
+                selectedArchetypeSlug = newValue!['slug'];
+                widget.character['subclass'] = selectedArchetypeSlug;
+                context.read<CharacterBloc>().add(
+                  CharacterUpdate(
+                    character: widget.character,
+                    slug: widget.slug,
+                    offline: context.read<SettingsCubit>().state.offlineMode,
+                    persistData: false,
+                  ),
+                );
+              },
+            );
+          },
+          items: [noneOption]
+              .followedBy(archetypes)
+              .map<DropdownMenuItem<Map<String, dynamic>>>(
                 (Map<String, dynamic> archetype) {
-              return DropdownMenuItem<Map<String, dynamic>>(
-                value: archetype,
-                child: Text(archetype['name']),
-              );
-            }).toList(),
-          ),
-          if (selectedArchetypeSlug?.isNotEmpty ?? false)
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                children: _buildArchetypeDetails(selectedArchetypeSlug!),
-              ),
+                  return DropdownMenuItem<Map<String, dynamic>>(
+                    value: archetype,
+                    child: Text(archetype['name']),
+                  );
+                },
+              ).toList(),
+        ),
+        if (selectedArchetypeSlug?.isNotEmpty ?? false)
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              children: _buildArchetypeDetails(selectedArchetypeSlug!),
             ),
-        ],
-      ),
-    );
-  }
+          ),
+      ],
+    ),
+  );
+}
+
 
   List<Widget> _buildArchetypeDetails(String archetypeSlug) {
     final archetype = widget.classs['archetypes']

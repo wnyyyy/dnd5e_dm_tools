@@ -1,15 +1,24 @@
 import 'package:dnd5e_dm_tools/core/util/enum.dart';
 import 'package:dnd5e_dm_tools/core/util/helper.dart';
+import 'package:dnd5e_dm_tools/features/characters/presentation/status_tab/widgets/action_menu/add_action.dart';
 import 'package:flutter/material.dart';
 
 class ActionItem extends StatelessWidget {
   final Map<String, dynamic> action;
+  final String actionSlug;
   final Map<String, dynamic> character;
+  final String characterSlug;
+  final bool isEditMode;
+  final Function(Map<String, Map<String, dynamic>>) onActionsChanged;
 
   const ActionItem({
     super.key,
     required this.action,
+    required this.actionSlug,
     required this.character,
+    required this.characterSlug,
+    required this.isEditMode,
+    required this.onActionsChanged,
   });
 
   @override
@@ -67,6 +76,15 @@ class ActionItem extends StatelessWidget {
         title: Text(action['title'],
             style: Theme.of(context).textTheme.titleMedium),
         subtitle: buildSubtitle(context),
+        trailing: isEditMode
+            ? AddActionButton(
+                character: character,
+                slug: characterSlug,
+                action: action,
+                actionSlug: actionSlug,
+                onActionsChanged: onActionsChanged,
+              )
+            : null,
       ),
     );
   }

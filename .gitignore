@@ -4,3 +4,5 @@ db_timestamp.txt
 base_db.json
 firebase_key.json
 venv
+scrapper.py
+custom_db2.json

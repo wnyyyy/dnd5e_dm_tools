@@ -6,6 +6,7 @@ class Skill extends StatelessWidget {
   final String skillName;
   final String attributeName;
   final int? proficiency;
+  final bool expertise;
   final Color color;
   final Map<String, dynamic> character;
 
@@ -14,6 +15,7 @@ class Skill extends StatelessWidget {
     required this.skillName,
     required this.attributeName,
     this.proficiency,
+    this.expertise = false,
     required this.color,
     required this.character,
   });
@@ -21,10 +23,14 @@ class Skill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final attrValue = character['asi'][attributeName.toLowerCase()];
-    final value = proficiency != null
+    var value = proficiency != null
         ? getModifier(attrValue) + proficiency!
         : getModifier(attrValue);
+    if (expertise) {
+      value += proficiency ?? 0;
+    }
     final valueStr = value >= 0 ? '+$value' : value.toString();
+
     return Padding(
       padding: const EdgeInsets.all(2.0),
       child: Row(
@@ -34,6 +40,16 @@ class Skill extends StatelessWidget {
               padding: const EdgeInsets.only(right: 2),
               child: Icon(
                 Icons.star_outline,
+                color: color,
+                size: 16,
+              ),
+            ),
+          ],
+          if (expertise) ...[
+            Padding(
+              padding: const EdgeInsets.only(right: 2),
+              child: Icon(
+                Icons.star,
                 color: color,
                 size: 16,
               ),
