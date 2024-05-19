@@ -246,8 +246,13 @@ class DescriptionText extends StatelessWidget {
     if (currentSpan.text == null || nextSpan.text == null) return false;
     final currentText = currentSpan.text!;
     final nextText = nextSpan.text!;
-    final noSpaceBefore = RegExp(r"[.,;!?'\’]");
-    return !noSpaceBefore.hasMatch(nextText) && !currentText.endsWith('\n');
+    final noSpaceBefore = RegExp(r"[.,;:!?'\’]");
+    final noSpaceAfterCloseParen = RegExp(r"^\)");
+    final noSpaceBeforeOpenParen = RegExp(r"\($");
+    return !noSpaceBefore.hasMatch(nextText) &&
+        !currentText.endsWith('\n') &&
+        !noSpaceAfterCloseParen.hasMatch(nextText) &&
+        !noSpaceBeforeOpenParen.hasMatch(currentText);
   }
 
   List<TextSpan> _removeDuplicateSpaces(List<TextSpan> spans) {
@@ -257,9 +262,8 @@ class DescriptionText extends StatelessWidget {
           spans[i].text == ' ' &&
           processedSpans.isNotEmpty &&
           processedSpans.last.text == ' ') {
-        continue; // Skip duplicate spaces
+        continue;
       }
-      // Check for space between apostrophe and 's'
       if (i > 0 &&
           spans[i].text == ' ' &&
           processedSpans.isNotEmpty &&
@@ -269,7 +273,7 @@ class DescriptionText extends StatelessWidget {
           (processedSpans.last.text!.endsWith("'") ||
               processedSpans.last.text!.endsWith("’")) &&
           spans[i + 1].text!.startsWith('s')) {
-        continue; // Skip space between apostrophe and 's'
+        continue;
       }
       processedSpans.add(spans[i]);
     }

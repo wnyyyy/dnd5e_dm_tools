@@ -182,7 +182,6 @@ class SpellbookState extends State<Spellbook> {
         onLongPress: () => _editSpellSlots(context, expendedSlots, slots),
         child: ExpansionTile(
           title: const Text('Spell Slots'),
-          initiallyExpanded: true,
           children: texts,
         ),
       ),

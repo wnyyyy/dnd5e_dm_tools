@@ -307,6 +307,26 @@ class _BackpackWidgetState extends State<BackpackWidget> {
                         child: ItemWidget(
                           item: item,
                           quantity: backpackItem.value['quantity'],
+                          onQuantityChange: (quantity) {
+                            if (quantity == 0) {
+                              widget.character['backpack']['items']
+                                  .remove(backpackItem.key);
+                            } else {
+                              widget.character['backpack']['items']
+                                  [backpackItem.key]['quantity'] = quantity;
+                            }
+                            context.read<CharacterBloc>().add(
+                                  CharacterUpdate(
+                                    character: widget.character,
+                                    slug: widget.slug,
+                                    persistData: true,
+                                    offline: context
+                                        .read<SettingsCubit>()
+                                        .state
+                                        .offlineMode,
+                                  ),
+                                );
+                          },
                           isEquipped: backpackItem.value['isEquipped'],
                           onEquip: (itemKey, isEquipped) {
                             widget.character['backpack']['items'][itemKey]

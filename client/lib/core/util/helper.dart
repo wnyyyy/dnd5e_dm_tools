@@ -9,6 +9,25 @@ int getModifier(int value) {
   return (value - 10) ~/ 2;
 }
 
+String getAttributeFromPrefix(String prefix) {
+  switch (prefix.toLowerCase()) {
+    case 'str':
+      return 'strength';
+    case 'dex':
+      return 'dexterity';
+    case 'con':
+      return 'constitution';
+    case 'int':
+      return 'intelligence';
+    case 'wis':
+      return 'wisdom';
+    case 'cha':
+      return 'charisma';
+    default:
+      return '';
+  }
+}
+
 int getProfBonus(int level) {
   return ((level - 1) ~/ 4) + 2;
 }

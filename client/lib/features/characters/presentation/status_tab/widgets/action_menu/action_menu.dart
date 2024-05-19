@@ -114,13 +114,22 @@ class _ActionMenuState extends State<ActionMenu> {
                 ),
               ...filteredActions.keys.map(
                 (key) {
-                  return ActionItem(
-                    action: filteredActions[key]!,
-                    actionSlug: key,
-                    character: widget.character,
-                    characterSlug: widget.slug,
-                    isEditMode: _isEditMode,
-                    onActionsChanged: onActionsChanged,
+                  return Container(
+                    decoration: BoxDecoration(
+                      border: Border(
+                        bottom: BorderSide(
+                          color: Theme.of(context).colorScheme.outline,
+                        ),
+                      ),
+                    ),
+                    child: ActionItem(
+                      action: filteredActions[key]!,
+                      actionSlug: key,
+                      character: widget.character,
+                      characterSlug: widget.slug,
+                      isEditMode: _isEditMode,
+                      onActionsChanged: onActionsChanged,
+                    ),
                   );
                 },
               ),
@@ -140,6 +149,7 @@ class _ActionMenuState extends State<ActionMenu> {
             character: widget.character,
             slug: widget.slug,
             offline: context.read<SettingsCubit>().state.offlineMode,
+            persistData: true,
           ),
         );
   }
