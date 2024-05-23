@@ -1,5 +1,5 @@
 import 'package:dnd5e_dm_tools/core/config/app_colors.dart';
-import 'package:dnd5e_dm_tools/core/widgets/trait_description2.dart';
+import 'package:dnd5e_dm_tools/core/widgets/trait_description.dart';
 import 'package:dnd5e_dm_tools/features/rules/rules_cubit.dart';
 import 'package:dnd5e_dm_tools/features/rules/rules_states.dart';
 import 'package:flutter/gestures.dart';
@@ -196,7 +196,7 @@ class DescriptionText extends StatelessWidget {
                             final condition = conditions[lowerWord];
                             return AlertDialog(
                               title: Text(condition['name']),
-                              content: TraitDescription2(
+                              content: TraitDescription(
                                 inputText: condition['desc'],
                                 separator: '*',
                                 boldify: false,

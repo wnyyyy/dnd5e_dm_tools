@@ -130,6 +130,27 @@ Map<String, dynamic> getClassFeatures(String desc,
   return features;
 }
 
+Map<String, dynamic> getRacialFeatures(String desc) {
+  var features = <String, dynamic>{};
+  var rawFeatures = desc.split('***');
+
+  for (var i = 1; i < rawFeatures.length; i += 2) {
+    var name = rawFeatures[i].trim();
+    var description =
+        (i + 1 < rawFeatures.length) ? rawFeatures[i + 1].trim() : '';
+
+    if (name.endsWith('.')) {
+      name = name.substring(0, name.length - 1);
+    }
+
+    if (name.isNotEmpty && description.isNotEmpty) {
+      features[name] = description;
+    }
+  }
+
+  return features;
+}
+
 Map<String, dynamic> getArchetypeFeatures(String desc,
     {int level = 20, List<Map<String, dynamic>> table = const []}) {
   var features = <String, dynamic>{};

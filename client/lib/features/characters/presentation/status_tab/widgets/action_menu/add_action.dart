@@ -68,9 +68,13 @@ class _AddActionDialogState extends State<_AddActionDialog> {
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   int _resourceCount = 0;
-  String _selectedDropdown = 'none';
-  final feats = {};
+  String _selectedEntry = 'none';
+  final charFeats = {};
+  final classFeats = {};
+  final archetypeFeats = {};
+  final raceFeats = {};
   final items = {};
+  final spells = {};
   late String? oldTitle;
 
   @override
@@ -83,17 +87,27 @@ class _AddActionDialogState extends State<_AddActionDialog> {
         level: widget.character['level'] ?? 1, table: table);
     for (var feat in classFeats.entries) {
       if (feat.key != 'Ability Score Improvement') {
-        feats[feat.key] = feat.value['description'];
+        classFeats[feat.key] = feat.value['description'];
       }
     }
-
     final archetype = classs?['archetypes']?.firstWhere(
         (archetype) => archetype['slug'] == widget.character['subclass'],
         orElse: () => null);
     final archetypeDesc = archetype?['desc'] ?? '';
     final subclassFeats = getArchetypeFeatures(archetypeDesc);
     for (var feat in subclassFeats.entries) {
-      feats[feat.key] = feat.value['description'];
+      archetypeFeats[feat.key] = feat.value['description'];
+    }
+    final charFeats = widget.character['feats'] ?? [];
+    for (var feat in charFeats.entries) {
+      charFeats[feat.key] = feat.value['name'];
+    }
+
+    for (var spellSlug in widget.character['knownSpells'] ?? []) {
+      final spell = context.read<RulesCubit>().getSpell(spellSlug);
+      if (spell != null) {
+        spells[spellSlug] = spell;
+      }
     }
 
     final characterBackpack =
@@ -103,10 +117,7 @@ class _AddActionDialogState extends State<_AddActionDialog> {
     for (final charItem in characterItems.entries) {
       final item = context.read<RulesCubit>().getItem(charItem.key);
       if (item != null) {
-        items[charItem.key] = {
-          'name': item['name'],
-          'desc': item['desc']?.join('\n') ?? '',
-        };
+        items[charItem.key] = item;
       }
     }
 
@@ -119,7 +130,7 @@ class _AddActionDialogState extends State<_AddActionDialog> {
       _titleController.text = widget.action!['title'] ?? '';
       switch (actionType) {
         case ActionMenuMode.abilities:
-          _selectedDropdown = widget.action!['ability'] ?? 'none';
+          _selectedEntry = widget.action!['ability'] ?? 'none';
           _requiresResource = widget.action!['requires_resource'] ?? false;
           _resourceType = ResourceType.values.firstWhere(
               (e) => e.name == (widget.action!['resource_type'] ?? 'none'),
@@ -127,12 +138,13 @@ class _AddActionDialogState extends State<_AddActionDialog> {
           _resourceCount = widget.action!['resource_count'] ?? 0;
           break;
         case ActionMenuMode.items:
-          _selectedDropdown = widget.action!['item'] ?? 'none';
+          _selectedEntry = widget.action!['item'] ?? 'none';
           _requiresResource = widget.action!['must_equip'] ?? false;
           _expendable = widget.action!['expendable'] ?? false;
           _ammo = widget.action!['ammo'] ?? 'none';
           break;
         case ActionMenuMode.spells:
+          _selectedEntry = widget.action!['spell'] ?? 'none';
           break;
         default:
           _selected = ActionMenuMode.abilities;
@@ -154,12 +166,12 @@ class _AddActionDialogState extends State<_AddActionDialog> {
               showAll: false,
               onSelected: (ActionMenuMode selected) {
                 setState(() {
-                  _selectedDropdown = 'none';
+                  _selectedEntry = 'none';
                   _selected = selected;
                 });
               },
             ),
-            _buildDropdown(),
+            _buildSectionedList(),
             if (_selected == ActionMenuMode.items) _buildAddItem(),
             if (_selected == ActionMenuMode.abilities) _buildAddAbility(),
             _buildCommonFields(),
@@ -191,99 +203,88 @@ class _AddActionDialogState extends State<_AddActionDialog> {
     );
   }
 
-  Widget _buildDropdown() {
-    var dropdownOptions = getDropdownOptions();
-    final String label;
+  Widget _buildSectionedList() {
+    final List<Widget> options = [];
     switch (_selected) {
       case ActionMenuMode.abilities:
-        label = 'Select Ability';
+        if (archetypeFeats.isNotEmpty) {
+          options.addAll(_buildSection('Equippable', archetypeFeats));
+        }
         break;
       case ActionMenuMode.items:
-        label = 'Select Item';
+        final equipableItems = Map.fromEntries(
+            items.entries.where((entry) => isEquipable(entry.value)).toList());
+        if (equipableItems.isNotEmpty) {
+          options.addAll(_buildSection('Equippable', equipableItems));
+        }
+        final misc = Map.fromEntries(
+            items.entries.where((entry) => !isEquipable(entry.value)).toList());
+        if (misc.isNotEmpty) {
+          options.addAll(_buildSection('Misc', misc));
+        }
         break;
       case ActionMenuMode.spells:
-        label = 'Select Spell';
         break;
       default:
-        label = 'Select Option';
+        break;
     }
 
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: DropdownButtonFormField<String>(
-        decoration: InputDecoration(
-          labelText: label,
-          border: const OutlineInputBorder(),
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.outline,
         ),
-        value: _selectedDropdown,
-        onChanged: (String? newValue) {
-          setState(() {
-            _selectedDropdown = newValue ?? 'none';
-            if (_selected == ActionMenuMode.abilities) {
-              updateDescription(newValue ?? '', feats[newValue] ?? '');
-            } else if (_selected == ActionMenuMode.items) {
-              updateDescription(
-                  items[newValue]!['name'] ?? '', items[newValue]!['desc']);
-            }
-          });
-        },
-        items: dropdownOptions,
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 2),
+      height: 200,
+      width: double.infinity,
+      child: Scrollbar(
+        thumbVisibility: true,
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: options,
+          ),
+        ),
       ),
     );
   }
 
-  List<DropdownMenuItem<String>> getDropdownOptions() {
-    final List<DropdownMenuItem<String>> options;
-    final screenWidth = MediaQuery.of(context).size.width;
-    switch (_selected) {
-      case ActionMenuMode.abilities:
-        options = [
-          const DropdownMenuItem(
-            value: 'none',
-            child: Text('None', overflow: TextOverflow.fade),
-          ),
-        ];
-        for (var feat in feats.entries) {
-          options.add(
-            DropdownMenuItem(
-              value: feat.key,
-              child: SizedBox(
-                  width: screenWidth * 0.4,
-                  child: Text(
-                    feat.key,
-                    overflow: TextOverflow.fade,
-                    style: Theme.of(context).textTheme.bodySmall,
-                  )),
-            ),
-          );
-        }
-        break;
-      case ActionMenuMode.items:
-        options = [
-          const DropdownMenuItem(value: 'none', child: Text('None')),
-        ];
-        for (var item in items.entries) {
-          options.add(
-            DropdownMenuItem(
-              value: item.key,
-              child: SizedBox(
-                  width: screenWidth * 0.4,
-                  child: Text(
-                    item.value['name'],
-                    overflow: TextOverflow.fade,
-                    style: Theme.of(context).textTheme.bodySmall,
-                  )),
-            ),
-          );
-        }
-        break;
-      case ActionMenuMode.spells:
-        options = [const DropdownMenuItem(value: 'none', child: Text('None'))];
-        break;
-      default:
-        options = [];
-    }
-    return options;
+  List<Widget> _buildSection(String label, Map<dynamic, dynamic> items) {
+    return [
+      Text(label.toUpperCase(), style: Theme.of(context).textTheme.titleSmall),
+      SizedBox(width: label.length * 10, child: const Divider()),
+      Wrap(
+        direction: Axis.horizontal,
+        spacing: 4,
+        runSpacing: 0,
+        children: [
+          for (var entry in items.entries)
+            ChoiceChip(
+              labelPadding: const EdgeInsets.all(0),
+              showCheckmark: false,
+              label: Text(
+                entry.value is String
+                    ? entry.value
+                    : entry.value['name'] ?? entry.key,
+                style: Theme.of(context).textTheme.labelSmall,
+              ),
+              selected: _selectedEntry == entry.key,
+              onSelected: (selected) {
+                setState(() {
+                  if (selected) {
+                    _selectedEntry = entry.key;
+                  } else {
+                    _selectedEntry = 'none';
+                  }
+                });
+              },
+            )
+        ],
+      ),
+      const SizedBox(height: 12),
+    ];
   }
 
   Widget _buildAddItem() {
@@ -492,7 +493,7 @@ class _AddActionDialogState extends State<_AddActionDialog> {
 
             switch (actionType) {
               case ActionMenuMode.abilities:
-                final ability = _selectedDropdown;
+                final ability = _selectedEntry;
                 final description = _descriptionController.text;
                 final title = _titleController.text;
                 final requiresResource = _requiresResource;
@@ -510,7 +511,7 @@ class _AddActionDialogState extends State<_AddActionDialog> {
                 actionSlug = title.trim().replaceAll(' ', '_').toLowerCase();
                 break;
               case ActionMenuMode.items:
-                final item = _selectedDropdown;
+                final item = _selectedEntry;
                 final description = _descriptionController.text;
                 final title = _titleController.text;
                 final requiresResource = _requiresResource;

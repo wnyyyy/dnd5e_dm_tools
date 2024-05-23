@@ -1,6 +1,5 @@
 import 'package:dnd5e_dm_tools/core/config/app_colors.dart';
 import 'package:dnd5e_dm_tools/core/util/helper.dart';
-import 'package:dnd5e_dm_tools/core/widgets/description_text.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttericon/font_awesome5_icons.dart';
 import 'item_details_dialog.dart';

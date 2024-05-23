@@ -1,7 +1,7 @@
 import 'package:dnd5e_dm_tools/core/config/app_colors.dart';
-import 'package:flutter/material.dart';
-import 'package:dnd5e_dm_tools/core/widgets/description_text.dart';
 import 'package:dnd5e_dm_tools/core/util/helper.dart';
+import 'package:dnd5e_dm_tools/core/widgets/description_text.dart';
+import 'package:flutter/material.dart';
 import 'package:fluttericon/font_awesome5_icons.dart';
 
 class ItemDetailsDialogContent extends StatelessWidget {
@@ -39,39 +39,37 @@ class ItemDetailsDialogContent extends StatelessWidget {
     final isArmor = item['armor_class'] != null;
 
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
       children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            RichText(
-              text: TextSpan(
-                children: [
-                  WidgetSpan(
-                    alignment: PlaceholderAlignment.middle,
-                    child: equipmentTypeToIcon(getEquipmentTypeFromItem(item)),
-                  ),
-                  TextSpan(
-                    text: '  ${item['name']}',
-                    style: Theme.of(context).textTheme.headlineSmall,
-                  ),
-                  if (baseQuantity > 1)
-                    TextSpan(
-                      text: ' (x$baseQuantity)',
-                      style: Theme.of(context).textTheme.headlineSmall,
-                    ),
-                ],
+        RichText(
+          text: TextSpan(
+            children: [
+              WidgetSpan(
+                alignment: PlaceholderAlignment.middle,
+                child: equipmentTypeToIcon(getEquipmentTypeFromItem(item)),
               ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              rarity ?? 'Common',
-              style: Theme.of(context)
-                  .textTheme
-                  .labelSmall!
-                  .copyWith(color: rarityToColor(rarity)),
-            ),
-          ],
+              TextSpan(
+                text: '  ${item['name']}',
+                style: Theme.of(context).textTheme.headlineSmall,
+              ),
+              if (baseQuantity > 1)
+                TextSpan(
+                  text: ' (x$baseQuantity)',
+                  style: Theme.of(context).textTheme.headlineSmall,
+                ),
+            ],
+          ),
         ),
+        const SizedBox(height: 16),
+        Text(
+          rarity ?? 'Common',
+          style: Theme.of(context)
+              .textTheme
+              .labelSmall!
+              .copyWith(color: rarityToColor(rarity)),
+        ),
+        const SizedBox(height: 8),
         SingleChildScrollView(
           child: ListBody(
             children: [

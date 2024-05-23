@@ -98,6 +98,13 @@ class RulesCubit extends Cubit<RulesState> {
     return {};
   }
 
+  Map<String, dynamic>? getSpell(String slug) {
+    if (state is RulesStateLoaded) {
+      return (state as RulesStateLoaded).spells[slug];
+    }
+    return null;
+  }
+
   Map<String, dynamic> getSpellsByClass(String classs) {
     if (state is RulesStateLoaded) {
       Map<String, Map<String, dynamic>> spellList = {};

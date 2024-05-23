@@ -1,11 +1,10 @@
 import 'package:dnd5e_dm_tools/core/util/enum.dart';
 import 'package:dnd5e_dm_tools/core/util/helper.dart';
 import 'package:dnd5e_dm_tools/core/widgets/description_text.dart';
-import 'package:dnd5e_dm_tools/features/characters/presentation/equip_tab/widgets/item.dart';
-import 'package:dnd5e_dm_tools/features/characters/presentation/equip_tab/widgets/item_details_dialog.dart';
 import 'package:dnd5e_dm_tools/features/characters/presentation/equip_tab/widgets/item_details_dialog_content.dart';
 import 'package:dnd5e_dm_tools/features/characters/presentation/status_tab/widgets/action_menu/add_action.dart';
 import 'package:dnd5e_dm_tools/features/rules/rules_cubit.dart';
+import 'package:dnd5e_dm_tools/features/rules/rules_states.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -62,135 +61,6 @@ class ActionItem extends StatelessWidget {
         canUse = true;
     }
 
-    String? getAttack() {
-      final description = action['description'];
-      if (description == null) {
-        return null;
-      }
-
-      final lastAtkIndex = description.lastIndexOf('Attack:');
-      if (lastAtkIndex == -1) {
-        return null;
-      }
-
-      final atkSubstring = description.substring(lastAtkIndex);
-      final preffixStr = atkSubstring.split('\n')[0].split('Attack:')[1].trim();
-
-      try {
-        if (preffixStr.isNotEmpty) {
-          final atkType = preffixStr.toLowerCase();
-          final atk = getAttributeFromPrefix(atkType);
-          final mod = getModifier(character['asi'][atk.toLowerCase()]);
-          final prof = getProfBonus(character['level']);
-          final total = mod + prof;
-          final sign = total >= 0 ? '+' : '';
-          return '$sign$total to hit';
-        }
-      } catch (e) {
-        return null;
-      }
-
-      return null;
-    }
-
-    String? getArea() {
-      final description = action['description'];
-      if (description == null) {
-        return null;
-      }
-
-      final lastDcIndex = description.lastIndexOf('Area:');
-      if (lastDcIndex == -1) {
-        return null;
-      }
-
-      final dcSubstring = description.substring(lastDcIndex);
-      final preffixStr = dcSubstring.split('\n')[0].split('Area:')[1].trim();
-
-      try {
-        if (preffixStr.isNotEmpty) {
-          return '$preffixStr';
-        }
-      } catch (e) {
-        return null;
-      }
-
-      return null;
-    }
-
-    String? getSaveDC() {
-      final description = action['description'];
-      if (description == null) {
-        return null;
-      }
-
-      final lastDcIndex = description.lastIndexOf('DC:');
-      if (lastDcIndex == -1) {
-        return null;
-      }
-
-      final dcSubstring = description.substring(lastDcIndex);
-      final preffixStr = dcSubstring.split('\n')[0].split('DC:')[1].trim();
-
-      try {
-        if (preffixStr.isNotEmpty) {
-          final attribPreff = preffixStr.split('+')[1].trim();
-          final attribute = getAttributeFromPrefix(attribPreff);
-          final mod = getModifier(character['asi'][attribute]);
-          final prof = getProfBonus(character['level']);
-          final total = mod + prof + 8;
-          return '$total';
-        }
-      } catch (e) {
-        return null;
-      }
-
-      return null;
-    }
-
-    String? getDamage() {
-      final description = action['description'];
-      if (description == null) {
-        return null;
-      }
-
-      final lastDmgIndex = description.lastIndexOf('Damage:');
-      if (lastDmgIndex == -1) {
-        return null;
-      }
-
-      final dmgSubstring = description.substring(lastDmgIndex);
-      final preffixStr = dmgSubstring.split('\n')[0].split('Damage:')[1].trim();
-
-      try {
-        if (preffixStr.isNotEmpty) {
-          final diceParts = preffixStr.split('d');
-          final diceCount = diceParts[0].trim();
-          final remaining = diceParts[1].split('+');
-          final diceType = remaining[0].trim();
-          final hasDamage = remaining.length > 1;
-
-          if (hasDamage) {
-            final damageTypePreffix = remaining[1].trim().toLowerCase();
-            final damageType = getAttributeFromPrefix(damageTypePreffix);
-            final mod = getModifier(character['asi'][damageType.toLowerCase()]);
-            final sign = mod >= 0
-                ? '+'
-                : mod == 0
-                    ? ''
-                    : '-';
-            return '${diceCount}d$diceType $sign ${mod.abs()}';
-          }
-
-          return '${diceCount}d$diceType';
-        }
-      } catch (e) {
-        return null;
-      }
-
-      return null;
-    }
-
     Widget buildSubtitle(context) {
       List<Widget> children = [];
       switch (type) {
@@ -201,42 +71,6 @@ class ActionItem extends StatelessWidget {
               Text('$remaining $use',
                   style: Theme.of(context).textTheme.labelMedium),
             );
-          }
-          String? damage = getDamage();
-          String? attack = getAttack();
-          String? saveDc = getSaveDC();
-          String? area = getArea();
-          if (attack != null) {
-            children.add(Text('Attack: $attack',
-                style: Theme.of(context).textTheme.labelMedium));
-          }
-          if (damage != null) {
-            children.add(Text('Damage: $damage',
-                style: Theme.of(context).textTheme.labelMedium));
-          }
-          if (saveDc != null) {
-            children.add(Text('Save DC: $saveDc',
-                style: Theme.of(context).textTheme.labelMedium));
-          }
-          if (area != null) {
-            children.add(Text('Area: $area',
-                style: Theme.of(context).textTheme.labelMedium));
-          }
-
-        case ActionMenuMode.items:
-          if ((action['must_equip'] ?? false) && !canUse) {
-            return Text('Must be equipped',
-                style: Theme.of(context).textTheme.labelMedium);
-          }
-          String? damage = getDamage();
-          String? attack = getAttack();
-          if (attack != null) {
-            children.add(Text('Attack: $attack',
-                style: Theme.of(context).textTheme.labelMedium));
-          }
-          if (damage != null) {
-            children.add(Text('Damage: $damage',
-                style: Theme.of(context).textTheme.labelMedium));
           }
           if (action['expendable'] ?? false) {
             final backpackItem = getBackpackItem(character, action['item']);
@@ -263,24 +97,51 @@ class ActionItem extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.all(8.0),
-      child: GestureDetector(
-        onTap: () => _onTap(context),
-        child: ListTile(
-          title: Text(action['title'],
-              style: Theme.of(context).textTheme.titleMedium),
-          subtitle: buildSubtitle(context),
-          trailing: isEditMode
-              ? AddActionButton(
-                  character: character,
-                  slug: characterSlug,
-                  action: action,
-                  actionSlug: actionSlug,
-                  onActionsChanged: onActionsChanged,
-                )
-              : usable
-                  ? _buildUse(context)
-                  : null,
-        ),
+      child: ExpansionTile(
+        title: Text(action['title'],
+            style: Theme.of(context).textTheme.titleMedium),
+        subtitle: buildSubtitle(context),
+        trailing: isEditMode
+            ? AddActionButton(
+                character: character,
+                slug: characterSlug,
+                action: action,
+                actionSlug: actionSlug,
+                onActionsChanged: onActionsChanged,
+              )
+            : usable
+                ? _buildUse(context)
+                : null,
+        children: <Widget>[
+          DescriptionText(
+              inputText: action['description'],
+              baseStyle: Theme.of(context).textTheme.bodySmall!),
+          if (action['item'] != null)
+            BlocBuilder<RulesCubit, RulesState>(
+              builder: (context, state) {
+                final item =
+                    context.read<RulesCubit>().getItem(action['item'] ?? '');
+                if (item != null) {
+                  final backpackItem =
+                      getBackpackItem(character, action['item']);
+                  return Column(
+                    children: [
+                      const Divider(),
+                      ItemDetailsDialogContent(
+                        item: item,
+                        quantity: backpackItem['quantity'],
+                      )
+                    ],
+                  );
+                } else {
+                  return Container();
+                }
+              },
+            ),
+          const SizedBox(
+            height: 16,
+          ),
+        ],
       ),
     );
   }
@@ -298,52 +159,28 @@ class ActionItem extends StatelessWidget {
     );
   }
 
-  void _onTap(BuildContext context) {
+  void _showDeleteConfirmationDialog(BuildContext context) {
     showDialog(
       context: context,
       builder: (context) {
-        final item = context.read<RulesCubit>().getItem(action['item'] ?? '');
-        final Map<String, dynamic>? backpackItem;
-        if (item != null) {
-          backpackItem = getBackpackItem(character, action['item']);
-        } else {
-          backpackItem = null;
-        }
         return AlertDialog(
-          title: Text(action['title']),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              DescriptionText(
-                  inputText: action['description'],
-                  baseStyle: Theme.of(context).textTheme.bodySmall!),
-              if (item != null)
-                Column(
-                  children: [
-                    const Divider(),
-                    ItemDetailsDialogContent(
-                      item: item,
-                      quantity: backpackItem != null
-                          ? backpackItem['quantity']
-                          : null,
-                    )
-                  ],
-                )
-            ],
-          ),
-          actionsAlignment: MainAxisAlignment.spaceBetween,
+          title: const Text('Confirm Deletion'),
+          content: const Text('Are you sure you want to delete this action?'),
           actions: <Widget>[
-            IconButton(
-                onPressed: () => {
-                      character['actions'].remove(actionSlug),
-                      onActionsChanged(character['actions']),
-                    },
-                icon: const Icon(Icons.delete)),
-            IconButton(
-              icon: const Icon(Icons.done),
+            TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
               },
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                character['actions'].remove(actionSlug);
+                onActionsChanged(character['actions']);
+                Navigator.of(context).pop();
+                Navigator.of(context).pop();
+              },
+              child: const Text('Delete'),
             ),
           ],
         );

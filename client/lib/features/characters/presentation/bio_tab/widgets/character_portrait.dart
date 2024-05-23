@@ -1,4 +1,5 @@
-import 'package:dnd5e_dm_tools/core/widgets/trait_description2.dart';
+import 'package:dnd5e_dm_tools/core/util/helper.dart';
+import 'package:dnd5e_dm_tools/core/widgets/description_text.dart';
 import 'package:dnd5e_dm_tools/features/characters/bloc/character_bloc.dart';
 import 'package:dnd5e_dm_tools/features/characters/bloc/character_events.dart';
 import 'package:dnd5e_dm_tools/features/characters/presentation/bio_tab/widgets/class_description.dart';
@@ -49,11 +50,32 @@ class CharacterPortrait extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) {
+        if (data == null) return Container();
+        final racialTraits = getRacialFeatures(data['traits']);
         return AlertDialog(
-          title: Text(data?['name'] ?? "Error"),
+          title: Text(data['name'] ?? "Error"),
           content: SingleChildScrollView(
-            child: TraitDescription2(
-              inputText: data?['traits'] ?? "Could not load race",
+            child: Column(
+              children: [
+                for (final trait in racialTraits.entries)
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        trait.key,
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        child: DescriptionText(
+                            inputText: trait.value,
+                            baseStyle: Theme.of(context).textTheme.bodySmall!),
+                      ),
+                      const Divider(),
+                      const SizedBox(height: 8)
+                    ],
+                  )
+              ],
             ),
           ),
           actions: [

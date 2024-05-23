@@ -248,7 +248,13 @@ class StatusTab extends StatelessWidget {
             const SizedBox(
               height: 16,
             ),
-            ActionMenu(character: character, slug: slug)
+            ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: 500),
+              child: ActionMenu(
+                character: character,
+                slug: slug,
+              ),
+            )
           ],
         ),
       ),

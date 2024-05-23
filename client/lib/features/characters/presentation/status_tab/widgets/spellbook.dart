@@ -1,9 +1,6 @@
 import 'package:dnd5e_dm_tools/core/util/helper.dart';
-import 'package:dnd5e_dm_tools/core/widgets/description_text.dart';
-import 'package:dnd5e_dm_tools/features/characters/bloc/character_bloc.dart';
-import 'package:dnd5e_dm_tools/features/characters/bloc/character_events.dart';
+import 'package:dnd5e_dm_tools/features/characters/presentation/status_tab/widgets/spell_info.dart';
 import 'package:dnd5e_dm_tools/features/rules/rules_cubit.dart';
-import 'package:dnd5e_dm_tools/features/settings/bloc/settings_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:recase/recase.dart';
@@ -266,15 +263,7 @@ class SpellbookState extends State<Spellbook> {
                       total[entry.key]! - entry.value;
                 }
                 widget.character['expendedSpellSlots'] = expendedNew;
-                context.read<CharacterBloc>().add(
-                      CharacterUpdate(
-                        character: widget.character,
-                        slug: widget.slug,
-                        persistData: true,
-                        offline:
-                            context.read<SettingsCubit>().state.offlineMode,
-                      ),
-                    );
+                widget.updateCharacter?.call();
                 Navigator.of(context).pop();
               },
               child: const Icon(Icons.done),
@@ -289,226 +278,12 @@ class SpellbookState extends State<Spellbook> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        var spell = widget.spells[spellSlug];
-        spell ??= context.read<RulesCubit>().getAllSpells()[spellSlug] ?? {};
-        bool isLearned = knownSpells.contains(spellSlug);
-        return StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            return AlertDialog(
-              title: Text(spell['name']),
-              content: SingleChildScrollView(
-                child: Column(
-                  children: <Widget>[
-                    Row(
-                      children: <Widget>[
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(spell['level'],
-                                style: Theme.of(context).textTheme.bodySmall!),
-                            Text(spell['school'],
-                                style: Theme.of(context).textTheme.bodySmall!),
-                          ],
-                        ),
-                        const Spacer(),
-                        Text(
-                          spell['document__title'],
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(
-                      height: 24,
-                      child: Divider(),
-                    ),
-                    DescriptionText(
-                      inputText: spell['desc'],
-                      baseStyle: Theme.of(context).textTheme.bodyMedium!,
-                    ),
-                    const SizedBox(
-                      height: 24,
-                      child: Divider(),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 4),
-                      child: Row(
-                        children: [
-                          if (spell['concentration'] != null &&
-                              spell['concentration'] == 'yes')
-                            Text(
-                              'Concentration',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodySmall!
-                                  .copyWith(fontWeight: FontWeight.bold),
-                            ),
-                          if (spell['ritual'] != null &&
-                              spell['ritual'] == 'yes')
-                            Padding(
-                              padding: const EdgeInsets.only(left: 16.0),
-                              child: Text(
-                                'Ritual',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodySmall!
-                                    .copyWith(fontWeight: FontWeight.bold),
-                              ),
-                            ),
-                        ],
-                      ),
-                    ),
-                    SizedBox(
-                      width: double.infinity,
-                      child: Wrap(
-                        direction: Axis.horizontal,
-                        spacing: 16,
-                        children: [
-                          if (spell['range'] != null &&
-                              spell['range'].isNotEmpty)
-                            Flex(
-                              mainAxisSize: MainAxisSize.min,
-                              direction: Axis.horizontal,
-                              children: [
-                                Text(
-                                  'Range: ',
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodySmall!
-                                      .copyWith(fontWeight: FontWeight.bold),
-                                ),
-                                Text(spell['range']),
-                              ],
-                            ),
-                          if (spell['components'] != null &&
-                              spell['components'].isNotEmpty)
-                            Flex(
-                              mainAxisSize: MainAxisSize.min,
-                              direction: Axis.horizontal,
-                              children: [
-                                Text(
-                                  'Components: ',
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodySmall!
-                                      .copyWith(fontWeight: FontWeight.bold),
-                                ),
-                                Text(spell['components']),
-                              ],
-                            ),
-                          if (spell['duration'] != null &&
-                              spell['duration'].isNotEmpty)
-                            Flex(
-                              mainAxisSize: MainAxisSize.min,
-                              direction: Axis.horizontal,
-                              children: [
-                                Text(
-                                  'Duration: ',
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodySmall!
-                                      .copyWith(fontWeight: FontWeight.bold),
-                                ),
-                                Text(spell['duration']),
-                              ],
-                            ),
-                          if (spell['casting_time'] != null &&
-                              spell['casting_time'].isNotEmpty)
-                            Flex(
-                              mainAxisSize: MainAxisSize.min,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              direction: Axis.horizontal,
-                              children: [
-                                Padding(
-                                  padding: const EdgeInsets.only(top: 3),
-                                  child: Text(
-                                    'Casting Time: ',
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .bodySmall!
-                                        .copyWith(fontWeight: FontWeight.bold),
-                                  ),
-                                ),
-                                Flexible(child: Text(spell['casting_time'])),
-                              ],
-                            ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              actions: <Widget>[
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: <Widget>[
-                            Text(isLearned ? 'Learned' : 'Unlearned'),
-                            Padding(
-                              padding: const EdgeInsets.only(left: 12.0),
-                              child: Switch(
-                                value: isLearned,
-                                onChanged: (value) {
-                                  setState(
-                                    () {
-                                      isLearned = value;
-                                    },
-                                  );
-                                  if (value) {
-                                    knownSpells.add(spellSlug);
-                                    preparedSpells.putIfAbsent(
-                                        spellSlug, () => true);
-                                  } else {
-                                    knownSpells.remove(spellSlug);
-                                  }
-                                  if (widget.updateCharacter != null) {
-                                    widget.character['knownSpells'] =
-                                        knownSpells;
-                                    widget.character['preparedSpells'] =
-                                        preparedSpells;
-                                    widget.updateCharacter!();
-                                  }
-                                },
-                              ),
-                            ),
-                          ],
-                        ),
-                        if (isLearned)
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: <Widget>[
-                              const Text('Prepared'),
-                              Checkbox(
-                                value: preparedSpells[spellSlug] ?? false,
-                                onChanged: (value) {
-                                  setState(() {
-                                    preparedSpells[spellSlug] = value!;
-                                  });
-                                  if (widget.updateCharacter != null) {
-                                    widget.character['preparedSpells'] =
-                                        preparedSpells;
-                                    widget.updateCharacter!();
-                                  }
-                                },
-                              ),
-                            ],
-                          ),
-                      ],
-                    ),
-                    TextButton(
-                      onPressed: () => widget.onDone?.call(),
-                      child: const Icon(Icons.done),
-                    ),
-                  ],
-                ),
-              ],
-            );
-          },
+        return SpellInfoDialog(
+          spellSlug: spellSlug,
+          spells: widget.spells,
+          knownSpells: knownSpells,
+          preparedSpells: preparedSpells,
+          updateCharacter: widget.updateCharacter!,
         );
       },
     );
