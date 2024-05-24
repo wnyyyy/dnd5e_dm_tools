@@ -33,6 +33,7 @@ class AddActionButton extends StatelessWidget {
           editActionSlug: actionSlug,
           onActionsChanged: onActionsChanged,
         ),
+        barrierDismissible: false,
       ),
       child:
           actionSlug != null ? const Icon(Icons.edit) : const Icon(Icons.add),
@@ -59,35 +60,49 @@ class _AddActionDialog extends StatefulWidget {
 }
 
 class _AddActionDialogState extends State<_AddActionDialog> {
-  TextEditingController textEditingController = TextEditingController();
+  final TextEditingController textEditingController = TextEditingController();
+  final TextEditingController _titleController = TextEditingController();
+  final TextEditingController _descriptionController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
+  final TextEditingController _healController = TextEditingController();
+  final TextEditingController _damageController = TextEditingController();
+  final TextEditingController _attackController = TextEditingController();
+  final TextEditingController _saveDcController = TextEditingController();
+  final TextEditingController _areaController = TextEditingController();
+  final TextEditingController _rangeController = TextEditingController();
+  final TextEditingController _conditionsController = TextEditingController();
+  final TextEditingController _durationController = TextEditingController();
+  final TextEditingController _castTimeController = TextEditingController();
+  final TextEditingController _typeController = TextEditingController();
+
   ActionMenuMode _selected = ActionMenuMode.abilities;
   ResourceType _resourceType = ResourceType.none;
   bool _requiresResource = false;
   bool _expendable = false;
   String _ammo = 'none';
-  final TextEditingController _titleController = TextEditingController();
-  final TextEditingController _descriptionController = TextEditingController();
   int _resourceCount = 0;
   String _selectedEntry = 'none';
-  final charFeats = {};
-  final classFeats = {};
-  final archetypeFeats = {};
-  final raceFeats = {};
-  final items = {};
-  final spells = {};
-  late String? oldTitle;
+  final Map<String, dynamic> charFeats = {};
+  final Map<String, dynamic> classFeats = {};
+  final Map<String, dynamic> archetypeFeats = {};
+  final Map<String, dynamic> raceFeats = {};
+  final Map<String, dynamic> items = {};
+  final Map<String, dynamic> spells = {};
+  String _selectedSaveAttribute = 'None';
+  bool _halfOnSuccess = false;
 
   @override
   void initState() {
     super.initState();
     final classs =
         context.read<RulesCubit>().getClass(widget.character['class'] ?? '');
+    final race = context.read<RulesCubit>().getRace(widget.character['race']);
     final table = parseTable(classs?['table'] ?? {});
     final classFeats = getClassFeatures(classs?['desc'] ?? '',
         level: widget.character['level'] ?? 1, table: table);
     for (var feat in classFeats.entries) {
       if (feat.key != 'Ability Score Improvement') {
-        classFeats[feat.key] = feat.value['description'];
+        this.classFeats[feat.key] = feat.value['description'];
       }
     }
     final archetype = classs?['archetypes']?.firstWhere(
@@ -98,9 +113,9 @@ class _AddActionDialogState extends State<_AddActionDialog> {
     for (var feat in subclassFeats.entries) {
       archetypeFeats[feat.key] = feat.value['description'];
     }
-    final charFeats = widget.character['feats'] ?? [];
-    for (var feat in charFeats.entries) {
-      charFeats[feat.key] = feat.value['name'];
+    final racialFeats = getRacialFeatures(race?['traits'] ?? {});
+    for (var feat in racialFeats.entries) {
+      raceFeats[feat.key] = feat.value;
     }
 
     for (var spellSlug in widget.character['knownSpells'] ?? []) {
@@ -154,29 +169,43 @@ class _AddActionDialogState extends State<_AddActionDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return Dialog(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Text('Add Action', style: Theme.of(context).textTheme.titleMedium),
-            const SizedBox(height: 20),
-            ActionCategoryRow(
-              showAll: false,
-              onSelected: (ActionMenuMode selected) {
-                setState(() {
-                  _selectedEntry = 'none';
-                  _selected = selected;
-                });
-              },
-            ),
-            _buildSectionedList(),
-            if (_selected == ActionMenuMode.items) _buildAddItem(),
-            if (_selected == ActionMenuMode.abilities) _buildAddAbility(),
-            _buildCommonFields(),
-            _buildActionButtons(context),
-          ],
+    return WillPopScope(
+      onWillPop: () async => false,
+      child: Dialog(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Text('Add Action',
+                  style: Theme.of(context).textTheme.titleMedium),
+              const SizedBox(height: 20),
+              ActionCategoryRow(
+                showAll: false,
+                onSelected: (ActionMenuMode selected) {
+                  setState(() {
+                    _selectedEntry = 'none';
+                    _selected = selected;
+                  });
+                },
+              ),
+              _buildSectionedList(),
+              const SizedBox(height: 12),
+              if (_selected == ActionMenuMode.items) _buildAddItem(),
+              if (_selected == ActionMenuMode.abilities) _buildAddAbility(),
+              const SizedBox(
+                height: 24,
+                child: Divider(),
+              ),
+              _buildCommonFields(),
+              _buildExpansionTileFields(),
+              const SizedBox(
+                height: 24,
+                child: Divider(),
+              ),
+              _buildActionButtons(context),
+            ],
+          ),
         ),
       ),
     );
@@ -208,7 +237,13 @@ class _AddActionDialogState extends State<_AddActionDialog> {
     switch (_selected) {
       case ActionMenuMode.abilities:
         if (archetypeFeats.isNotEmpty) {
-          options.addAll(_buildSection('Equippable', archetypeFeats));
+          options.addAll(_buildSection('Archetype', archetypeFeats));
+        }
+        if (classFeats.isNotEmpty) {
+          options.addAll(_buildSection('Class feats', classFeats));
+        }
+        if (raceFeats.isNotEmpty) {
+          options.addAll(_buildSection('Racial feats', raceFeats));
         }
         break;
       case ActionMenuMode.items:
@@ -224,6 +259,20 @@ class _AddActionDialogState extends State<_AddActionDialog> {
         }
         break;
       case ActionMenuMode.spells:
+        final cantrips = Map.fromEntries(spells.entries
+            .where((entry) => entry.value['level_int'] == 0)
+            .toList());
+        if (cantrips.isNotEmpty) {
+          options.addAll(_buildSection('Cantrips', cantrips));
+        }
+        for (var i = 1; i < 10; i++) {
+          final spellsByLevel = Map.fromEntries(spells.entries
+              .where((entry) => entry.value['level_int'] == i)
+              .toList());
+          if (spellsByLevel.isNotEmpty) {
+            options.addAll(_buildSection('Level $i', spellsByLevel));
+          }
+        }
         break;
       default:
         break;
@@ -240,8 +289,10 @@ class _AddActionDialogState extends State<_AddActionDialog> {
       height: 200,
       width: double.infinity,
       child: Scrollbar(
+        controller: _scrollController,
         thumbVisibility: true,
         child: SingleChildScrollView(
+          controller: _scrollController,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: options,
@@ -266,7 +317,7 @@ class _AddActionDialogState extends State<_AddActionDialog> {
               showCheckmark: false,
               label: Text(
                 entry.value is String
-                    ? entry.value
+                    ? entry.key
                     : entry.value['name'] ?? entry.key,
                 style: Theme.of(context).textTheme.labelSmall,
               ),
@@ -275,8 +326,18 @@ class _AddActionDialogState extends State<_AddActionDialog> {
                 setState(() {
                   if (selected) {
                     _selectedEntry = entry.key;
+                    _titleController.text = entry.value is String
+                        ? entry.key
+                        : entry.value['name'] ?? entry.key;
+                    _descriptionController.text = entry.value is String
+                        ? entry.value
+                        : entry.value['description'] ??
+                            entry.value['desc'] ??
+                            '';
                   } else {
                     _selectedEntry = 'none';
+                    _titleController.clear();
+                    _descriptionController.clear();
                   }
                 });
               },
@@ -347,10 +408,8 @@ class _AddActionDialogState extends State<_AddActionDialog> {
               items: [
                 DropdownMenuItem(
                   value: 'none',
-                  child: Text(
-                    'None',
-                    style: Theme.of(context).textTheme.titleSmall,
-                  ),
+                  child: Text('None',
+                      style: Theme.of(context).textTheme.titleSmall),
                 ),
                 for (var item in items.entries)
                   DropdownMenuItem(
@@ -400,8 +459,7 @@ class _AddActionDialogState extends State<_AddActionDialog> {
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
                     border: Border.all(
-                      color: Theme.of(context).colorScheme.outline,
-                    ),
+                        color: Theme.of(context).colorScheme.outline),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Column(
@@ -410,23 +468,25 @@ class _AddActionDialogState extends State<_AddActionDialog> {
                           style: Theme.of(context).textTheme.bodySmall,
                           textAlign: TextAlign.center),
                       IconButton(
-                          onPressed: () {
-                            setState(() {
-                              _resourceCount++;
-                            });
-                          },
-                          icon: const Icon(Icons.add)),
+                        onPressed: () {
+                          setState(() {
+                            _resourceCount++;
+                          });
+                        },
+                        icon: const Icon(Icons.add),
+                      ),
                       Text(_resourceCount.toString(),
                           style: Theme.of(context).textTheme.titleLarge),
                       IconButton(
-                          onPressed: () {
-                            setState(() {
-                              if (_resourceCount > 0) {
-                                _resourceCount--;
-                              }
-                            });
-                          },
-                          icon: const Icon(Icons.remove)),
+                        onPressed: () {
+                          setState(() {
+                            if (_resourceCount > 0) {
+                              _resourceCount--;
+                            }
+                          });
+                        },
+                        icon: const Icon(Icons.remove),
+                      ),
                     ],
                   ),
                 ),
@@ -459,9 +519,181 @@ class _AddActionDialogState extends State<_AddActionDialog> {
     );
   }
 
-  void updateDescription(String title, String description) {
-    _titleController.text = title;
-    _descriptionController.text = description;
+  Widget _buildExpansionTileFields() {
+    return ExpansionTile(
+      title: Text('Additional Fields',
+          style: Theme.of(context).textTheme.titleSmall),
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: TextFormField(
+                controller: _healController,
+                decoration: const InputDecoration(
+                  labelText: 'Heal',
+                  labelStyle: TextStyle(fontSize: 12),
+                ),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: TextFormField(
+                controller: _damageController,
+                decoration: const InputDecoration(
+                  labelText: 'Damage',
+                  labelStyle: TextStyle(fontSize: 12),
+                ),
+              ),
+            ),
+          ],
+        ),
+        Row(
+          children: [
+            Expanded(
+              child: TextFormField(
+                controller: _attackController,
+                decoration: const InputDecoration(
+                  labelText: 'Attack',
+                  labelStyle: TextStyle(fontSize: 12),
+                ),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: TextFormField(
+                controller: _typeController,
+                decoration: const InputDecoration(
+                  labelText: 'Type',
+                  labelStyle: TextStyle(fontSize: 12),
+                ),
+              ),
+            ),
+          ],
+        ),
+        Row(
+          children: [
+            Expanded(
+              child: DropdownButtonFormField<String>(
+                value: _selectedSaveAttribute,
+                onChanged: (String? newValue) {
+                  setState(() {
+                    _selectedSaveAttribute = newValue!;
+                  });
+                },
+                items: [
+                  'None',
+                  'Strength',
+                  'Dexterity',
+                  'Constitution',
+                  'Intelligence',
+                  'Wisdom',
+                  'Charisma'
+                ]
+                    .map((attribute) => DropdownMenuItem(
+                          value: attribute,
+                          child: Text(attribute,
+                              style: const TextStyle(fontSize: 12)),
+                        ))
+                    .toList(),
+                decoration: const InputDecoration(
+                  labelText: 'Save',
+                  labelStyle: TextStyle(fontSize: 12),
+                ),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.only(top: 16),
+                child: Column(
+                  children: [
+                    Text('Half on Success',
+                        style: Theme.of(context).textTheme.bodySmall),
+                    Checkbox(
+                      value: _halfOnSuccess,
+                      onChanged: (bool? newValue) {
+                        setState(() {
+                          _halfOnSuccess = newValue!;
+                        });
+                      },
+                    )
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+        Row(
+          children: [
+            Expanded(
+              child: TextFormField(
+                controller: _saveDcController,
+                decoration: const InputDecoration(
+                  labelText: 'Save DC',
+                  labelStyle: TextStyle(fontSize: 12),
+                ),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: TextFormField(
+                controller: _rangeController,
+                decoration: const InputDecoration(
+                  labelText: 'Range',
+                  labelStyle: TextStyle(fontSize: 12),
+                ),
+              ),
+            ),
+          ],
+        ),
+        Row(
+          children: [
+            Expanded(
+              child: TextFormField(
+                controller: _castTimeController,
+                decoration: const InputDecoration(
+                  labelText: 'Cast Time',
+                  labelStyle: TextStyle(fontSize: 12),
+                ),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: TextFormField(
+                controller: _areaController,
+                decoration: const InputDecoration(
+                  labelText: 'Area',
+                  labelStyle: TextStyle(fontSize: 12),
+                ),
+              ),
+            ),
+          ],
+        ),
+        Row(
+          children: [
+            Expanded(
+              child: TextFormField(
+                controller: _conditionsController,
+                decoration: const InputDecoration(
+                  labelText: 'Condition',
+                  labelStyle: TextStyle(fontSize: 12),
+                ),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: TextFormField(
+                controller: _durationController,
+                decoration: const InputDecoration(
+                  labelText: 'Duration',
+                  labelStyle: TextStyle(fontSize: 12),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
   }
 
   Widget _buildActionButtons(BuildContext context) {
@@ -475,66 +707,57 @@ class _AddActionDialogState extends State<_AddActionDialog> {
         if (widget.editActionSlug != null)
           IconButton(
             onPressed: () {
-              widget.character['actions']?.remove(widget.editActionSlug);
-              final updatedActions = Map<String, Map<String, dynamic>>.from(
-                  widget.character['actions']
-                          ?.cast<String, Map<String, dynamic>>() ??
-                      {});
-              widget.onActionsChanged(updatedActions);
               Navigator.of(context).pop();
+              _showDeleteConfirmationDialog(context);
             },
             icon: const Icon(Icons.delete),
           ),
         IconButton(
           onPressed: () {
             final actionType = _selected;
-            final Map<String, dynamic> action;
-            String actionSlug;
+            final Map<String, dynamic> action = {};
+            final fields = {
+              'heal': _healController.text,
+              'damage': _damageController.text,
+              'attack': _attackController.text,
+              'save_dc': _saveDcController.text,
+              'save': _selectedSaveAttribute,
+              'half_on_success': _halfOnSuccess,
+              'area': _areaController.text,
+              'range': _rangeController.text,
+              'conditions': _conditionsController.text,
+              'duration': _durationController.text,
+              'cast_time': _castTimeController.text,
+              'type': _typeController.text,
+            };
+            action['fields'] = fields;
+            final description = _descriptionController.text;
+            final title = _titleController.text;
+            action['description'] = description;
+            action['title'] = title;
+            String actionSlug = title.trim().replaceAll(' ', '_').toLowerCase();
 
             switch (actionType) {
               case ActionMenuMode.abilities:
                 final ability = _selectedEntry;
-                final description = _descriptionController.text;
-                final title = _titleController.text;
                 final requiresResource = _requiresResource;
                 final resourceType = _resourceType;
                 final resourceCount = _resourceCount;
-                action = {
-                  'type': actionType.name,
-                  'ability': ability.toLowerCase() != 'none' ? ability : null,
-                  'description': description,
-                  'title': title,
-                  'requires_resource': requiresResource,
-                  'resource_type': resourceType.name,
-                  'resource_count': resourceCount,
-                };
-                actionSlug = title.trim().replaceAll(' ', '_').toLowerCase();
+                action['ability'] = ability;
+                action['requires_resource'] = requiresResource;
+                action['resource_type'] = resourceType.name;
+                action['resource_count'] = resourceCount;
                 break;
               case ActionMenuMode.items:
                 final item = _selectedEntry;
-                final description = _descriptionController.text;
-                final title = _titleController.text;
                 final requiresResource = _requiresResource;
                 final expendable = _expendable;
                 final ammo = _ammo;
-                action = {
-                  'type': actionType.name,
-                  'item': item,
-                  'description': description,
-                  'title': title,
-                  'must_equip': requiresResource,
-                  'expendable': expendable,
-                  'ammo': ammo,
-                };
-                actionSlug = title.trim().replaceAll(' ', '_').toLowerCase();
                 break;
               case ActionMenuMode.spells:
-                action = {};
-                actionSlug = '';
                 break;
               default:
-                action = {};
-                actionSlug = '';
+                break;
             }
 
             if (widget.editActionSlug != null) {
@@ -559,10 +782,53 @@ class _AddActionDialogState extends State<_AddActionDialog> {
     );
   }
 
+  void _showDeleteConfirmationDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Confirm Deletion'),
+          content: const Text('Are you sure you want to delete this action?'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                widget.character['actions']?.remove(widget.editActionSlug);
+                final updatedActions = Map<String, Map<String, dynamic>>.from(
+                    widget.character['actions']
+                            ?.cast<String, Map<String, dynamic>>() ??
+                        {});
+                widget.onActionsChanged(updatedActions);
+                Navigator.of(context).pop();
+              },
+              child: const Text('Delete'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   void dispose() {
     _titleController.dispose();
     _descriptionController.dispose();
+    _scrollController.dispose();
+    _healController.dispose();
+    _damageController.dispose();
+    _attackController.dispose();
+    _saveDcController.dispose();
+    _areaController.dispose();
+    _rangeController.dispose();
+    _conditionsController.dispose();
+    _durationController.dispose();
+    _castTimeController.dispose();
+    _typeController.dispose();
     super.dispose();
   }
 }

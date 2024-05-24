@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:fluttericon/font_awesome5_icons.dart';
 import 'package:fluttericon/octicons_icons.dart';
 import 'package:fluttericon/rpg_awesome_icons.dart';
+import 'package:petitparser/petitparser.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:math' as math;
 
 int getModifier(int value) {
   return (value - 10) ~/ 2;
@@ -507,4 +509,77 @@ dynamic _parseValue(String value) {
   if (int.tryParse(value) != null) return int.parse(value);
   if (double.tryParse(value) != null) return double.parse(value);
   return value;
+}
+
+String parseFormula(
+    String description, Map<String, int> attributes, int prof, int level) {
+  Map<String, int> values = {
+    'prof': prof,
+    'level': level,
+  };
+
+  for (var entry in attributes.entries) {
+    final prefix = entry.key.substring(0, 3).toLowerCase();
+    final modifier = getModifier(entry.value);
+    values[prefix] = modifier;
+  }
+  RegExp regExp = RegExp(r'\b(?:str|dex|con|int|wis|cha|prof|level)\b');
+
+  String processed = description.replaceAllMapped(regExp, (match) {
+    return values[match.group(0)]!.toString();
+  });
+
+  processed = processed.replaceAll('+-', '-');
+  processed = _processFormula(processed);
+  return processed;
+}
+
+String _processFormula(String formula) {
+  final arithmeticRegex = RegExp(r'(?<!\d)d|(?<![d])(\d+[\+\-\*/]\d+)');
+
+  String previousFormula;
+  do {
+    previousFormula = formula;
+    formula = formula.replaceAllMapped(
+      arithmeticRegex,
+      (match) {
+        if (match.group(0)!.contains('d')) {
+          return match.group(0)!;
+        } else {
+          return _evaluateExpression(match.group(0)!).toString();
+        }
+      },
+    );
+  } while (formula != previousFormula);
+
+  return formula;
+}
+
+num _evaluateExpression(String expression) {
+  final parser = buildParser();
+  final result = parser.parse(expression);
+
+  if (result is Success) {
+    return result.value;
+  } else {
+    throw ArgumentError('Invalid expression: $expression');
+  }
+}
+
+Parser<num> buildParser() {
+  final builder = ExpressionBuilder<num>();
+
+  builder.group().primitive(
+      (char('(') & ref0(buildParser) & char(')')).map((values) => values[1]));
+  builder.group().primitive(digit().plus().flatten().trim().map(num.parse));
+
+  builder.group()
+    ..left(char('*').trim(), (a, op, b) => a * b)
+    ..left(char('/').trim(), (a, op, b) => a / b);
+
+  builder.group()
+    ..left(char('+').trim(), (a, op, b) => a + b)
+    ..left(char('-').trim(), (a, op, b) => a - b);
+
+  return builder.build().end();
 }

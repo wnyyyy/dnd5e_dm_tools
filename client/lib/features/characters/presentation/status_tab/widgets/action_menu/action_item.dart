@@ -7,8 +7,11 @@ import 'package:dnd5e_dm_tools/features/rules/rules_cubit.dart';
 import 'package:dnd5e_dm_tools/features/rules/rules_states.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:recase/recase.dart';
 
-class ActionItem extends StatelessWidget {
+class ActionItem extends StatefulWidget {
   final Map<String, dynamic> action;
   final String actionSlug;
   final Map<String, dynamic> character;
@@ -29,16 +32,24 @@ class ActionItem extends StatelessWidget {
   });
 
   @override
+  ActionItemState createState() => ActionItemState();
+}
+
+class ActionItemState extends State<ActionItem> {
+  bool isExpanded = false;
+
+  @override
   Widget build(BuildContext context) {
     bool canUse = true;
     bool usable = false;
     final ActionMenuMode type = ActionMenuMode.values.firstWhere(
-        (e) => e.name == action['type'],
+        (e) => e.name == widget.action['type'],
         orElse: () => ActionMenuMode.all);
-    final requiresResource = (action['requires_resource'] ?? false) as bool;
-    final usedCount = action['used_count'] ?? 0;
-    final remaining = (action['resource_count'] ?? 1) - usedCount;
-    final mustEquip = action['must_equip'] ?? false;
+    final requiresResource =
+        (widget.action['requires_resource'] ?? false) as bool;
+    final usedCount = widget.action['used_count'] ?? 0;
+    final remaining = (widget.action['resource_count'] ?? 1) - usedCount;
+    final mustEquip = widget.action['must_equip'] ?? false;
     switch (type) {
       case ActionMenuMode.abilities:
         if (requiresResource) {
@@ -47,13 +58,14 @@ class ActionItem extends StatelessWidget {
         }
         break;
       case ActionMenuMode.items:
-        final backpackItem = getBackpackItem(character, action['item']);
+        final backpackItem =
+            getBackpackItem(widget.character, widget.action['item']);
         canUse = mustEquip ? backpackItem['isEquipped'] ?? false : true;
         canUse = canUse && (backpackItem['quantity'] ?? 0) > 0;
-        if (action['expendable'] ?? false) {
+        if (widget.action['expendable'] ?? false) {
           usable = true;
         }
-        if (action['ammo']?.toString().isNotEmpty ?? false) {
+        if (widget.action['ammo']?.toString().isNotEmpty ?? false) {
           usable = true;
         }
         break;
@@ -65,125 +77,340 @@ class ActionItem extends StatelessWidget {
       List<Widget> children = [];
       switch (type) {
         case ActionMenuMode.abilities:
-          if (action['requires_resource']) {
+          if (widget.action['requires_resource']) {
             final String use = remaining == 1 ? 'use' : 'uses';
             children.add(
               Text('$remaining $use',
                   style: Theme.of(context).textTheme.labelMedium),
             );
           }
-          if (action['expendable'] ?? false) {
-            final backpackItem = getBackpackItem(character, action['item']);
-            final inBackpack = backpackItem['quantity'] ?? 0;
-            final String use = inBackpack == 1 ? 'use' : 'uses';
-            children.add(Text('$inBackpack available $use',
-                style: Theme.of(context).textTheme.labelMedium));
-          }
         default:
-          return Container();
+          break;
       }
-      return Wrap(
-        children: children
-            .map((e) => Card.outlined(
-                  child: Padding(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    child: e,
-                  ),
-                ))
-            .toList(),
+
+      final actionFields = _buildFields(context);
+      children.addAll(actionFields);
+
+      return StaggeredGrid.count(
+        crossAxisCount: 4,
+        children: List.generate(children.length, (index) {
+          return StaggeredGridTile.fit(
+            crossAxisCellCount: 1,
+            child: Card.outlined(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                child: children[index],
+              ),
+            ),
+          );
+        }),
       );
     }
 
+    final screenWidth = MediaQuery.of(context).size.width;
     return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: ExpansionTile(
-        title: Text(action['title'],
-            style: Theme.of(context).textTheme.titleMedium),
-        subtitle: buildSubtitle(context),
-        trailing: isEditMode
-            ? AddActionButton(
-                character: character,
-                slug: characterSlug,
-                action: action,
-                actionSlug: actionSlug,
-                onActionsChanged: onActionsChanged,
-              )
-            : usable
-                ? _buildUse(context)
-                : null,
-        children: <Widget>[
-          DescriptionText(
-              inputText: action['description'],
-              baseStyle: Theme.of(context).textTheme.bodySmall!),
-          if (action['item'] != null)
-            BlocBuilder<RulesCubit, RulesState>(
-              builder: (context, state) {
-                final item =
-                    context.read<RulesCubit>().getItem(action['item'] ?? '');
-                if (item != null) {
-                  final backpackItem =
-                      getBackpackItem(character, action['item']);
-                  return Column(
-                    children: [
-                      const Divider(),
-                      ItemDetailsDialogContent(
-                        item: item,
-                        quantity: backpackItem['quantity'],
-                      )
-                    ],
-                  );
-                } else {
-                  return Container();
-                }
-              },
+      padding: const EdgeInsets.only(bottom: 12),
+      child: GestureDetector(
+        onTap: () {
+          setState(() {
+            isExpanded = !isExpanded;
+          });
+        },
+        behavior: HitTestBehavior.opaque,
+        child: Column(
+          children: [
+            SizedBox(
+              height: 60,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Align(
+                    alignment: Alignment.topLeft,
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 12, left: 24),
+                      child: Text(
+                        widget.action['title'],
+                        style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                              fontFamily: GoogleFonts.poppins().fontFamily,
+                            ),
+                      ),
+                    ),
+                  ),
+                  Align(
+                    alignment: Alignment.topRight,
+                    child: Padding(
+                      padding: const EdgeInsets.only(right: 18),
+                      child: _buildUse(context, usable),
+                    ),
+                  ),
+                ],
+              ),
             ),
-          const SizedBox(
-            height: 16,
-          ),
-        ],
+            SizedBox(width: screenWidth * 0.8, child: const Divider()),
+            Padding(
+              padding: const EdgeInsets.only(left: 6, right: 6, bottom: 0),
+              child: buildSubtitle(context),
+            ),
+            AnimatedCrossFade(
+              firstChild: Container(),
+              secondChild: Column(
+                children: [
+                  SizedBox(width: screenWidth * 0.8, child: const Divider()),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Column(
+                      children: [
+                        DescriptionText(
+                            inputText: widget.action['description'],
+                            baseStyle: Theme.of(context).textTheme.bodySmall!),
+                        if (widget.action['item'] != null)
+                          BlocBuilder<RulesCubit, RulesState>(
+                            builder: (context, state) {
+                              final item = context
+                                  .read<RulesCubit>()
+                                  .getItem(widget.action['item'] ?? '');
+                              if (item != null) {
+                                final backpackItem = getBackpackItem(
+                                    widget.character, widget.action['item']);
+                                return Column(
+                                  children: [
+                                    const Divider(),
+                                    ItemDetailsDialogContent(
+                                      item: item,
+                                      quantity: backpackItem['quantity'],
+                                    )
+                                  ],
+                                );
+                              } else {
+                                return Container();
+                              }
+                            },
+                          ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 4,
+                  ),
+                ],
+              ),
+              crossFadeState: isExpanded
+                  ? CrossFadeState.showSecond
+                  : CrossFadeState.showFirst,
+              duration: const Duration(milliseconds: 150),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildUse(BuildContext context) {
-    return ActionChip(
-      label: const Text('Use'),
-      onPressed: () {
-        if (onUse != null) {
-          var character = this.character;
-          final ammo = action['ammo'];
-          final backpackItem = getBackpackItem(character, action['item']);
+  List<Widget> _buildFields(BuildContext context) {
+    final children = <Widget>[];
+    final actionFields = widget.action['fields'];
+    final level = widget.character['level'] ?? 1;
+    final prof = getProfBonus(level);
+    final asi = Map<String, int>.from(
+      widget.character['asi'] ??
+          {
+            'strength': 10,
+            'dexterity': 10,
+            'constitution': 10,
+            'intelligence': 10,
+            'wisdom': 10,
+            'charisma': 10
+          },
+    );
+    final boldTheme = Theme.of(context).textTheme.labelLarge!.copyWith(
+          fontWeight: FontWeight.bold,
+        );
+
+    if (actionFields['heal']?.toString().isNotEmpty ?? false) {
+      final heal = parseFormula(actionFields['heal'], asi, prof, level);
+      children.add(
+          _buildVerticalField('Heal', heal, context, valueTheme: boldTheme));
+    }
+
+    if (actionFields['damage']?.toString().isNotEmpty ?? false) {
+      final damage = parseFormula(actionFields['damage'], asi, prof, level);
+      if (actionFields['type']?.toString().isNotEmpty ?? false) {
+        final type = actionFields['type'].toString().sentenceCase;
+        final typeWidget = DescriptionText(
+            inputText: type,
+            baseStyle: Theme.of(context).textTheme.labelSmall!);
+        children.add(
+          _buildVerticalField(
+            'Damage',
+            damage,
+            extra: typeWidget,
+            valueTheme: boldTheme,
+            context,
+          ),
+        );
+      } else {
+        children.add(_buildVerticalField('Damage', damage, context,
+            valueTheme: boldTheme));
+      }
+    }
+
+    if (actionFields['attack']?.toString().isNotEmpty ?? false) {
+      final attack = parseFormula(actionFields['attack'], asi, prof, level);
+      final attackStr = (int.tryParse(attack) ?? 0) > 0 ? '+$attack' : attack;
+      children.add(
+        _buildVerticalField(
+          'Attack',
+          attackStr,
+          context,
+          valueTheme: boldTheme,
+        ),
+      );
+    }
+
+    if (actionFields['save']?.toString().isNotEmpty ?? false) {
+      final save = actionFields['save'].toString().sentenceCase;
+      if (actionFields['save_dc']?.toString().isNotEmpty ?? false) {
+        final saveDc = parseFormula(actionFields['save_dc'], asi, prof, level);
+        final saveWidget = DescriptionText(
+          inputText: save,
+          baseStyle: Theme.of(context).textTheme.labelMedium!,
+        );
+        final saveRow = Row(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              'Save: ',
+              softWrap: true,
+              style: Theme.of(context).textTheme.labelSmall,
+            ),
+            Text(
+              saveDc,
+              softWrap: true,
+              style: boldTheme,
+            )
+          ],
+        );
+
+        if (actionFields['half_on_success']?.toString().isNotEmpty ?? false) {
+          children.add(
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                saveRow,
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 2),
+                  child: saveWidget,
+                ),
+                Text(
+                  'Half on Success',
+                  style: Theme.of(context).textTheme.labelSmall,
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          );
+        } else {
+          children.add(
+            Column(
+              children: [
+                saveRow,
+                Padding(
+                  padding: const EdgeInsets.only(top: 2),
+                  child: saveWidget,
+                ),
+              ],
+            ),
+          );
         }
-      },
+      }
+    }
+
+    if (actionFields['area']?.toString().isNotEmpty ?? false) {
+      final area = actionFields['area'].toString().sentenceCase;
+      children.add(_buildVerticalField('Area', area, context));
+    }
+
+    if (actionFields['range']?.toString().isNotEmpty ?? false) {
+      final range = actionFields['range'].toString().sentenceCase;
+      children.add(_buildVerticalField('Range', range, context));
+    }
+
+    if (actionFields['duration']?.toString().isNotEmpty ?? false) {
+      final duration = actionFields['duration'].toString().sentenceCase;
+      children.add(_buildVerticalField('Duration', duration, context));
+    }
+
+    if (actionFields['conditions']?.toString().isNotEmpty ?? false) {
+      final conditions = actionFields['conditions'].toString().titleCase;
+      children.add(Column(
+        children: [
+          Text(
+            'Condition',
+            style: Theme.of(context).textTheme.labelSmall,
+            softWrap: true,
+          ),
+          DescriptionText(
+              inputText: conditions,
+              baseStyle: Theme.of(context).textTheme.labelLarge!),
+        ],
+      ));
+    }
+
+    if (actionFields['cast_time']?.toString().isNotEmpty ?? false) {
+      final castTime = actionFields['cast_time'].toString().titleCase;
+      children.add(_buildVerticalField('Cast Time', castTime, context));
+    }
+
+    return children;
+  }
+
+  Widget _buildVerticalField(String field, String value, BuildContext context,
+      {Widget? extra, TextStyle? valueTheme}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Text(
+          field,
+          style: Theme.of(context).textTheme.labelSmall,
+        ),
+        Text(
+          value,
+          textAlign: TextAlign.center,
+          style: valueTheme ?? Theme.of(context).textTheme.labelSmall,
+        ),
+        if (extra != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 2),
+            child: extra,
+          ),
+      ],
     );
   }
 
-  void _showDeleteConfirmationDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Confirm Deletion'),
-          content: const Text('Are you sure you want to delete this action?'),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                character['actions'].remove(actionSlug);
-                onActionsChanged(character['actions']);
-                Navigator.of(context).pop();
-                Navigator.of(context).pop();
-              },
-              child: const Text('Delete'),
-            ),
-          ],
-        );
+  Widget _buildUse(BuildContext context, bool usable) {
+    final editMode = widget.isEditMode;
+    if (editMode) {
+      return AddActionButton(
+        character: widget.character,
+        slug: widget.characterSlug,
+        action: widget.action,
+        actionSlug: widget.actionSlug,
+        onActionsChanged: widget.onActionsChanged,
+      );
+    }
+    if (!usable) {
+      return const SizedBox();
+    }
+    return ActionChip(
+      label: const Text('Use'),
+      onPressed: () {
+        if (widget.onUse != null) {
+          var character = widget.character;
+          final ammo = widget.action['ammo'];
+          final backpackItem =
+              getBackpackItem(character, widget.action['item']);
+        }
       },
     );
   }
