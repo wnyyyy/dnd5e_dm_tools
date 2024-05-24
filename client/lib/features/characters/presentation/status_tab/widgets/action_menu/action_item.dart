@@ -18,7 +18,7 @@ class ActionItem extends StatefulWidget {
   final String characterSlug;
   final bool isEditMode;
   final Function(Map<String, Map<String, dynamic>>) onActionsChanged;
-  final Function(Map<String, dynamic>)? onUse;
+  final Function? onUse;
 
   const ActionItem({
     super.key,
@@ -125,22 +125,22 @@ class ActionItemState extends State<ActionItem> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Align(
-                    alignment: Alignment.topLeft,
+                    alignment: Alignment.centerLeft,
                     child: Padding(
                       padding: const EdgeInsets.only(top: 12, left: 24),
                       child: Text(
                         widget.action['title'],
                         style: Theme.of(context).textTheme.titleLarge!.copyWith(
-                              fontFamily: GoogleFonts.poppins().fontFamily,
+                              fontFamily: GoogleFonts.montserrat().fontFamily,
                             ),
                       ),
                     ),
                   ),
                   Align(
-                    alignment: Alignment.topRight,
+                    alignment: Alignment.bottomRight,
                     child: Padding(
                       padding: const EdgeInsets.only(right: 18),
-                      child: _buildUse(context, usable),
+                      child: _buildUse(context, usable, remaining),
                     ),
                   ),
                 ],
@@ -388,7 +388,7 @@ class ActionItemState extends State<ActionItem> {
     );
   }
 
-  Widget _buildUse(BuildContext context, bool usable) {
+  Widget _buildUse(BuildContext context, bool usable, int remaining) {
     final editMode = widget.isEditMode;
     if (editMode) {
       return AddActionButton(
@@ -401,6 +401,19 @@ class ActionItemState extends State<ActionItem> {
     }
     if (!usable) {
       return const SizedBox();
+    }
+    if (remaining == 0) {
+      return ActionChip(
+        label: const Text('Recharge'),
+        onPressed: () {
+          if (widget.onUse != null) {
+            var character = widget.character;
+            final ammo = widget.action['ammo'];
+            final backpackItem =
+                getBackpackItem(character, widget.action['item']);
+          }
+        },
+      );
     }
     return ActionChip(
       label: const Text('Use'),

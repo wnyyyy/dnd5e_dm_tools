@@ -232,7 +232,7 @@ class HitDice extends StatelessWidget {
                     );
                   } else {
                     character['hd_curr'] = maxHitDie;
-                    character['expendedSpellSlots'] = {};
+                    character['expended_spell_slots'] = {};
                     context.read<CharacterBloc>().add(CharacterUpdate(
                           character: character,
                           slug: slug,

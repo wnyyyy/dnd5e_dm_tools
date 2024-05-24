@@ -138,7 +138,7 @@ class SpellbookState extends State<Spellbook> {
     Map<int, int> slots =
         getSpellSlotsForLevel(widget.table, widget.character['level'] ?? 1);
     final expendedSlots =
-        Map<String, int>.from(widget.character['expendedSpellSlots'] ?? {});
+        Map<String, int>.from(widget.character['expended_spell_slots'] ?? {});
 
     List<Padding> texts = [];
     for (var entry in slots.entries) {
@@ -262,7 +262,7 @@ class SpellbookState extends State<Spellbook> {
                   expendedNew[entry.key.toString()] =
                       total[entry.key]! - entry.value;
                 }
-                widget.character['expendedSpellSlots'] = expendedNew;
+                widget.character['expended_spell_slots'] = expendedNew;
                 widget.updateCharacter?.call();
                 Navigator.of(context).pop();
               },

@@ -1,9 +1,11 @@
 import 'package:dnd5e_dm_tools/core/util/enum.dart';
+import 'package:dnd5e_dm_tools/core/util/helper.dart';
 import 'package:dnd5e_dm_tools/features/characters/bloc/character_bloc.dart';
 import 'package:dnd5e_dm_tools/features/characters/bloc/character_events.dart';
 import 'package:dnd5e_dm_tools/features/characters/presentation/status_tab/widgets/action_menu/action_category_row.dart';
 import 'package:dnd5e_dm_tools/features/characters/presentation/status_tab/widgets/action_menu/action_item.dart';
 import 'package:dnd5e_dm_tools/features/characters/presentation/status_tab/widgets/action_menu/add_action.dart';
+import 'package:dnd5e_dm_tools/features/rules/rules_cubit.dart';
 import 'package:dnd5e_dm_tools/features/settings/bloc/settings_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -129,6 +131,7 @@ class _ActionMenuState extends State<ActionMenu> {
                       characterSlug: widget.slug,
                       isEditMode: _isEditMode,
                       onActionsChanged: onActionsChanged,
+                      onUse: onUseAction,
                     ),
                   );
                 },
@@ -138,6 +141,74 @@ class _ActionMenuState extends State<ActionMenu> {
         ),
       ],
     );
+  }
+
+  void onUseAction({
+    required Map<String, dynamic> action,
+    required String slug,
+    required ActionMenuMode type,
+    bool recharge = false,
+  }) {
+    switch (type) {
+      case ActionMenuMode.abilities:
+        var usedCount = action['used_count'] ?? 0;
+        if (recharge) {
+          usedCount = 0;
+        } else {
+          usedCount++;
+        }
+        action['used_count'] = usedCount;
+        widget.character['actions'][slug] = action;
+        break;
+      case ActionMenuMode.items:
+        if (recharge) {
+          break;
+        }
+        if (action['expendable']) {
+          final itemSlug = action['item'] ?? '';
+          final backpackItem = getBackpackItem(widget.character, itemSlug);
+          if (backpackItem['quantity'] > 0) {
+            backpackItem['quantity']--;
+            widget.character['backpack'][itemSlug] = backpackItem;
+          }
+        }
+        if (action['ammo'] != null) {
+          final ammoSlug = action['ammo'] ?? '';
+          final ammoItem = getBackpackItem(widget.character, ammoSlug);
+          if (ammoItem['quantity'] > 0) {
+            ammoItem['quantity']--;
+            widget.character['backpack'][ammoSlug] = ammoItem;
+          }
+        }
+        break;
+      case ActionMenuMode.spells:
+        if (recharge) {
+          break;
+        }
+        final actionSpell = action['spell'] ?? '';
+        final spell = context.read<RulesCubit>().getSpell(actionSpell);
+        if (spell != null) {
+          final level = spell['level_int'] ?? 0;
+          if (level > 0) {
+            final expendedSlotsMap =
+                widget.character['expended_spell_slots'] ?? {};
+            final expendedSlots = expendedSlotsMap[level.toString()] ?? 0;
+            expendedSlotsMap[level.toString()] = expendedSlots + 1;
+            widget.character['expended_spell_slots'] = expendedSlotsMap;
+          }
+        }
+        break;
+      default:
+        break;
+    }
+    context.read<CharacterBloc>().add(
+          CharacterUpdate(
+            character: widget.character,
+            slug: widget.slug,
+            offline: context.read<SettingsCubit>().state.offlineMode,
+            persistData: true,
+          ),
+        );
   }
 
   void onActionsChanged(Map<String, dynamic> actions) {
