@@ -1,16 +1,35 @@
 import 'package:dnd5e_dm_tools/core/util/helper.dart';
+import 'package:dnd5e_dm_tools/features/characters/presentation/skills_tab.dart/skills_tab.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:dnd5e_dm_tools/core/widgets/error_handler.dart';
 import 'package:dnd5e_dm_tools/features/characters/bloc/character_bloc.dart';
 import 'package:dnd5e_dm_tools/features/characters/bloc/character_events.dart';
 import 'package:dnd5e_dm_tools/features/characters/bloc/character_states.dart';
 import 'package:dnd5e_dm_tools/features/characters/presentation/bio_tab/bio_tab.dart';
 import 'package:dnd5e_dm_tools/features/characters/presentation/equip_tab/equip_tab.dart';
-import 'package:dnd5e_dm_tools/features/characters/presentation/skills_tab.dart/skills_tab.dart';
 import 'package:dnd5e_dm_tools/features/characters/presentation/status_tab/status_tab.dart';
 import 'package:dnd5e_dm_tools/features/rules/rules_cubit.dart';
 import 'package:dnd5e_dm_tools/features/settings/bloc/settings_cubit.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+
+class NoScrollPhysics extends ScrollPhysics {
+  const NoScrollPhysics({super.parent});
+
+  @override
+  NoScrollPhysics applyTo(ScrollPhysics? ancestor) {
+    return NoScrollPhysics(parent: buildParent(ancestor));
+  }
+
+  @override
+  double applyPhysicsToUserOffset(ScrollMetrics position, double offset) {
+    return 0.0;
+  }
+
+  @override
+  bool shouldAcceptUserOffset(ScrollMetrics position) {
+    return false;
+  }
+}
 
 class CharacterScreen extends StatelessWidget {
   const CharacterScreen({super.key});
@@ -25,6 +44,7 @@ class CharacterScreen extends StatelessWidget {
           context
               .read<CharacterBloc>()
               .add(CharacterLoad(slug, offline: offline));
+          return Container();
         }
         if (state is CharacterStateLoading) {
           return const Center(child: CircularProgressIndicator());
@@ -60,6 +80,7 @@ class CharacterScreen extends StatelessWidget {
                   ),
                   Expanded(
                     child: TabBarView(
+                      physics: const NoScrollPhysics(),
                       children: [
                         BioTab(
                           character: state.character,

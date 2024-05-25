@@ -1,3 +1,4 @@
+import 'package:dnd5e_dm_tools/core/config/app_colors.dart';
 import 'package:dnd5e_dm_tools/core/util/enum.dart';
 import 'package:dnd5e_dm_tools/core/util/helper.dart';
 import 'package:dnd5e_dm_tools/core/widgets/description_text.dart';
@@ -11,6 +12,13 @@ import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:recase/recase.dart';
 
+typedef OnUseActionCallback = void Function({
+  required Map<String, dynamic> action,
+  required String slug,
+  required ActionMenuMode type,
+  bool recharge,
+});
+
 class ActionItem extends StatefulWidget {
   final Map<String, dynamic> action;
   final String actionSlug;
@@ -18,7 +26,7 @@ class ActionItem extends StatefulWidget {
   final String characterSlug;
   final bool isEditMode;
   final Function(Map<String, Map<String, dynamic>>) onActionsChanged;
-  final Function? onUse;
+  final OnUseActionCallback? onUse;
 
   const ActionItem({
     super.key,
@@ -28,7 +36,7 @@ class ActionItem extends StatefulWidget {
     required this.characterSlug,
     required this.isEditMode,
     required this.onActionsChanged,
-    this.onUse,
+    required this.onUse,
   });
 
   @override
@@ -50,6 +58,10 @@ class ActionItemState extends State<ActionItem> {
     final usedCount = widget.action['used_count'] ?? 0;
     final remaining = (widget.action['resource_count'] ?? 1) - usedCount;
     final mustEquip = widget.action['must_equip'] ?? false;
+    final resourceTypeStr = widget.action['resource_type'] ?? '';
+    final resourceType = ResourceType.values.firstWhere(
+        (e) => e.name == resourceTypeStr,
+        orElse: () => ResourceType.none);
     switch (type) {
       case ActionMenuMode.abilities:
         if (requiresResource) {
@@ -78,11 +90,70 @@ class ActionItemState extends State<ActionItem> {
       switch (type) {
         case ActionMenuMode.abilities:
           if (widget.action['requires_resource']) {
-            final String use = remaining == 1 ? 'use' : 'uses';
+            final color = remaining > 0
+                ? Theme.of(context).colorScheme.secondary
+                : Theme.of(context).colorScheme.error;
             children.add(
-              Text('$remaining $use',
-                  style: Theme.of(context).textTheme.labelMedium),
+              Column(
+                children: [
+                  Text(
+                    '$remaining/${widget.action['resource_count']}',
+                    style: Theme.of(context).textTheme.labelLarge!.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: color,
+                        ),
+                  ),
+                  const SizedBox(
+                    height: 8,
+                    child: Divider(),
+                  ),
+                  if (remaining > 0)
+                    Text(
+                      'Available\nUses',
+                      style: Theme.of(context).textTheme.labelSmall,
+                      textAlign: TextAlign.center,
+                    )
+                  else
+                    Text(
+                      'No Uses\nAvailable',
+                      style: Theme.of(context).textTheme.labelSmall!.copyWith(
+                            color: Theme.of(context).colorScheme.error,
+                          ),
+                      softWrap: false,
+                      textAlign: TextAlign.center,
+                    ),
+                ],
+              ),
             );
+            if (resourceType == ResourceType.shortRest ||
+                resourceType == ResourceType.longRest) {
+              children.add(
+                Column(
+                  children: [
+                    Text(
+                      'Recharge',
+                      style: Theme.of(context).textTheme.labelSmall,
+                      textAlign: TextAlign.center,
+                      softWrap: false,
+                    ),
+                    const SizedBox(height: 2),
+                    if (resourceType == ResourceType.shortRest)
+                      Text(
+                        'Short Rest',
+                        style: Theme.of(context).textTheme.labelMedium,
+                        textAlign: TextAlign.center,
+                        softWrap: true,
+                      )
+                    else
+                      Text(
+                        'Long Rest',
+                        style: Theme.of(context).textTheme.labelMedium,
+                        textAlign: TextAlign.center,
+                      ),
+                  ],
+                ),
+              );
+            }
           }
         default:
           break;
@@ -90,6 +161,20 @@ class ActionItemState extends State<ActionItem> {
 
       final actionFields = _buildFields(context);
       children.addAll(actionFields);
+
+      if (children.length < 4) {
+        return Wrap(
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: List.generate(children.length, (index) {
+            return Card.outlined(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                child: children[index],
+              ),
+            );
+          }),
+        );
+      }
 
       return StaggeredGrid.count(
         crossAxisCount: 4,
@@ -402,27 +487,33 @@ class ActionItemState extends State<ActionItem> {
     if (!usable) {
       return const SizedBox();
     }
-    if (remaining == 0) {
+    if (remaining == 0 && widget.action['requires_resource'] == true) {
       return ActionChip(
         label: const Text('Recharge'),
         onPressed: () {
           if (widget.onUse != null) {
-            var character = widget.character;
-            final ammo = widget.action['ammo'];
-            final backpackItem =
-                getBackpackItem(character, widget.action['item']);
+            widget.onUse!(
+              action: widget.action,
+              slug: widget.actionSlug,
+              type: ActionMenuMode.abilities,
+              recharge: true,
+            );
           }
         },
       );
     }
+    final type = ActionMenuMode.values.firstWhere(
+        (e) => e.name == widget.action['type'],
+        orElse: () => ActionMenuMode.all);
     return ActionChip(
       label: const Text('Use'),
       onPressed: () {
         if (widget.onUse != null) {
-          var character = widget.character;
-          final ammo = widget.action['ammo'];
-          final backpackItem =
-              getBackpackItem(character, widget.action['item']);
+          widget.onUse!(
+            action: widget.action,
+            slug: widget.actionSlug,
+            type: type,
+          );
         }
       },
     );

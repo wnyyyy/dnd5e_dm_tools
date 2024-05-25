@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:dnd5e_dm_tools/core/util/enum.dart';
 import 'package:dnd5e_dm_tools/features/characters/presentation/status_tab/widgets/action_menu/action_category_row.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:fluttericon/mfg_labs_icons.dart';
 
 class AddActionButton extends StatelessWidget {
   final Map<String, dynamic> character;
@@ -74,6 +75,7 @@ class _AddActionDialogState extends State<_AddActionDialog> {
   final TextEditingController _durationController = TextEditingController();
   final TextEditingController _castTimeController = TextEditingController();
   final TextEditingController _typeController = TextEditingController();
+  final TextEditingController _formulaController = TextEditingController();
 
   ActionMenuMode _selected = ActionMenuMode.abilities;
   ResourceType _resourceType = ResourceType.none;
@@ -90,6 +92,7 @@ class _AddActionDialogState extends State<_AddActionDialog> {
   final Map<String, dynamic> spells = {};
   String _selectedSaveAttribute = 'None';
   bool _halfOnSuccess = false;
+  bool _isAdditionalFieldsExpanded = false;
 
   @override
   void initState() {
@@ -143,6 +146,20 @@ class _AddActionDialogState extends State<_AddActionDialog> {
       _selected = actionType;
       _descriptionController.text = widget.action!['description'] ?? '';
       _titleController.text = widget.action!['title'] ?? '';
+      _healController.text = widget.action!['fields']['heal'] ?? '';
+      _damageController.text = widget.action!['fields']['damage'] ?? '';
+      _attackController.text = widget.action!['fields']['attack'] ?? '';
+      _saveDcController.text = widget.action!['fields']['save_dc'] ?? '';
+      _areaController.text = widget.action!['fields']['area'] ?? '';
+      _rangeController.text = widget.action!['fields']['range'] ?? '';
+      _conditionsController.text = widget.action!['fields']['conditions'] ?? '';
+      _durationController.text = widget.action!['fields']['duration'] ?? '';
+      _castTimeController.text = widget.action!['fields']['cast_time'] ?? '';
+      _typeController.text = widget.action!['fields']['type'] ?? '';
+      _selectedSaveAttribute = widget.action!['fields']['save'] ?? 'None';
+      _halfOnSuccess = widget.action!['fields']['half_on_success'] ?? false;
+      _isAdditionalFieldsExpanded = true;
+
       switch (actionType) {
         case ActionMenuMode.abilities:
           _selectedEntry = widget.action!['ability'] ?? 'none';
@@ -169,8 +186,7 @@ class _AddActionDialogState extends State<_AddActionDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async => false,
+    return PopScope(
       child: Dialog(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(20),
@@ -450,8 +466,7 @@ class _AddActionDialogState extends State<_AddActionDialog> {
         ),
         if (_requiresResource)
           Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -470,22 +485,36 @@ class _AddActionDialogState extends State<_AddActionDialog> {
                       IconButton(
                         onPressed: () {
                           setState(() {
+                            if (_formulaController.text.isNotEmpty) {
+                              _formulaController.clear();
+                            }
                             _resourceCount++;
                           });
                         },
                         icon: const Icon(Icons.add),
                       ),
-                      Text(_resourceCount.toString(),
-                          style: Theme.of(context).textTheme.titleLarge),
+                      Text(
+                        _formulaController.text.isEmpty
+                            ? _resourceCount.toString()
+                            : 'x',
+                        style: Theme.of(context).textTheme.titleLarge,
+                      ),
                       IconButton(
                         onPressed: () {
                           setState(() {
+                            if (_formulaController.text.isNotEmpty) {
+                              _formulaController.clear();
+                            }
                             if (_resourceCount > 0) {
                               _resourceCount--;
                             }
                           });
                         },
                         icon: const Icon(Icons.remove),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.edit),
+                        onPressed: () => _showFormulaDialog(context),
                       ),
                     ],
                   ),
@@ -519,10 +548,46 @@ class _AddActionDialogState extends State<_AddActionDialog> {
     );
   }
 
+  void _showFormulaDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Enter Formula'),
+          content: TextField(
+            controller: _formulaController,
+            decoration: const InputDecoration(),
+          ),
+          actionsAlignment: MainAxisAlignment.spaceBetween,
+          actions: <Widget>[
+            IconButton(
+                onPressed: () {
+                  _formulaController.clear();
+                  Navigator.of(context).pop();
+                },
+                icon: const Icon(Icons.close)),
+            IconButton(
+              onPressed: () {
+                setState(() {
+                  if (_formulaController.text.isNotEmpty) {
+                    _resourceCount = 0;
+                  }
+                });
+                Navigator.of(context).pop();
+              },
+              icon: const Icon(Icons.check),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Widget _buildExpansionTileFields() {
     return ExpansionTile(
       title: Text('Additional Fields',
           style: Theme.of(context).textTheme.titleSmall),
+      initiallyExpanded: _isAdditionalFieldsExpanded,
       children: [
         Row(
           children: [
@@ -735,6 +800,7 @@ class _AddActionDialogState extends State<_AddActionDialog> {
             final title = _titleController.text;
             action['description'] = description;
             action['title'] = title;
+            action['type'] = actionType.name;
             String actionSlug = title.trim().replaceAll(' ', '_').toLowerCase();
 
             switch (actionType) {
@@ -743,10 +809,14 @@ class _AddActionDialogState extends State<_AddActionDialog> {
                 final requiresResource = _requiresResource;
                 final resourceType = _resourceType;
                 final resourceCount = _resourceCount;
+                if (_formulaController.text.isNotEmpty) {
+                  action['resource_formula'] = _formulaController.text;
+                } else {
+                  action['resource_count'] = resourceCount;
+                }
                 action['ability'] = ability;
                 action['requires_resource'] = requiresResource;
                 action['resource_type'] = resourceType.name;
-                action['resource_count'] = resourceCount;
                 break;
               case ActionMenuMode.items:
                 final item = _selectedEntry;
@@ -829,6 +899,7 @@ class _AddActionDialogState extends State<_AddActionDialog> {
     _durationController.dispose();
     _castTimeController.dispose();
     _typeController.dispose();
+    _formulaController.dispose();
     super.dispose();
   }
 }

@@ -1,4 +1,3 @@
-import 'package:dnd5e_dm_tools/core/util/helper.dart';
 import 'package:dnd5e_dm_tools/features/characters/presentation/equip_tab/widgets/item_details_dialog_content.dart';
 import 'package:flutter/material.dart';
 

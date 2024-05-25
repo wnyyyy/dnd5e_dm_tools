@@ -96,11 +96,11 @@ class HitDice extends StatelessWidget {
       showDialog(
         context: context,
         builder: (BuildContext context) {
-          return AlertDialog(
-            title: const Text('Rest'),
-            content: StatefulBuilder(
-              builder: (context, setState) {
-                return Column(
+          return StatefulBuilder(
+            builder: (context, setState) {
+              return AlertDialog(
+                title: const Text('Rest'),
+                content: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
                     Row(
@@ -108,141 +108,143 @@ class HitDice extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: <Widget>[
                         ChoiceChip(
-                            label: const Text('Short'),
-                            selected: isShort,
-                            onSelected: (selected) {
+                          label: const Text('Short'),
+                          selected: isShort,
+                          onSelected: (selected) {
+                            if (!isShort) {
                               setState(() {
-                                isShort = selected;
+                                isShort = true;
                               });
-                            }),
+                            }
+                          },
+                        ),
                         const SizedBox(width: 24),
                         ChoiceChip(
-                            label: const Text('Long'),
-                            selected: !isShort,
-                            onSelected: (selected) {
+                          label: const Text('Long'),
+                          selected: !isShort,
+                          onSelected: (selected) {
+                            if (isShort) {
                               setState(() {
-                                isShort = !selected;
+                                isShort = false;
                               });
-                            }),
+                            }
+                          },
+                        ),
                       ],
                     ),
-                  ],
-                );
-              },
-            ),
-            actionsAlignment: MainAxisAlignment.spaceBetween,
-            actions: [
-              TextButton(
-                child: const Icon(Icons.close),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              ),
-              TextButton(
-                child: const Icon(Icons.check),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  if (isShort) {
-                    showDialog(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return AlertDialog(
-                          title: const Text('Rest'),
-                          content: StatefulBuilder(
-                            builder: (context, setState) {
-                              return Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: <Widget>[
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Padding(
-                                        padding:
-                                            const EdgeInsets.only(right: 6),
-                                        child: IconButton(
-                                            onPressed: () {
-                                              if (currHitDieInput > 0) {
-                                                setState(() {
-                                                  currHitDieInput--;
-                                                });
-                                              }
-                                            },
-                                            iconSize: 32,
-                                            icon: const Icon(
-                                                Icons.remove_circle_outline)),
-                                      ),
-                                      Text('$currHitDieInput',
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .displaySmall),
-                                      Padding(
-                                        padding:
-                                            const EdgeInsets.only(left: 6.0),
-                                        child: IconButton(
-                                            iconSize: 32,
-                                            onPressed: () {
-                                              if (currHitDieInput <
-                                                  currHitDie) {
-                                                setState(() {
-                                                  currHitDieInput++;
-                                                });
-                                              }
-                                            },
-                                            icon: const Icon(
-                                                Icons.add_circle_outline)),
-                                      ),
-                                    ],
+                    if (isShort)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 16),
+                        child: Column(
+                          children: <Widget>[
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.only(right: 6),
+                                  child: IconButton(
+                                    onPressed: () {
+                                      if (currHitDieInput > 0) {
+                                        setState(() {
+                                          currHitDieInput--;
+                                        });
+                                      }
+                                    },
+                                    iconSize: 32,
+                                    icon:
+                                        const Icon(Icons.remove_circle_outline),
                                   ),
-                                ],
-                              );
-                            },
-                          ),
-                          actionsAlignment: MainAxisAlignment.spaceBetween,
-                          actions: <Widget>[
-                            TextButton(
-                              child: const Icon(Icons.close),
-                              onPressed: () {
-                                Navigator.of(context).pop();
-                              },
-                            ),
-                            TextButton(
-                              child: const Icon(Icons.check),
-                              onPressed: () {
-                                if (currHitDieInput > 0) {
-                                  character['hd_curr'] =
-                                      currHitDie - currHitDieInput;
-                                  context
-                                      .read<CharacterBloc>()
-                                      .add(CharacterUpdate(
-                                        character: character,
-                                        slug: slug,
-                                        offline: context
-                                            .read<SettingsCubit>()
-                                            .state
-                                            .offlineMode,
-                                      ));
-                                }
-                                Navigator.of(context).pop();
-                              },
+                                ),
+                                Text('$currHitDieInput',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .displaySmall),
+                                Padding(
+                                  padding: const EdgeInsets.only(left: 6.0),
+                                  child: IconButton(
+                                    iconSize: 32,
+                                    onPressed: () {
+                                      if (currHitDieInput < currHitDie) {
+                                        setState(() {
+                                          currHitDieInput++;
+                                        });
+                                      }
+                                    },
+                                    icon: const Icon(Icons.add_circle_outline),
+                                  ),
+                                ),
+                              ],
                             ),
                           ],
-                        );
-                      },
-                    );
-                  } else {
-                    character['hd_curr'] = maxHitDie;
-                    character['expended_spell_slots'] = {};
-                    context.read<CharacterBloc>().add(CharacterUpdate(
-                          character: character,
-                          slug: slug,
-                          offline:
-                              context.read<SettingsCubit>().state.offlineMode,
-                        ));
-                  }
-                },
-              ),
-            ],
+                        ),
+                      ),
+                  ],
+                ),
+                actionsAlignment: MainAxisAlignment.spaceBetween,
+                actions: [
+                  TextButton(
+                    child: const Icon(Icons.close),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                  TextButton(
+                    child: const Icon(Icons.check),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      final characterActions = character['actions'] ?? [];
+                      if (isShort) {
+                        if (currHitDieInput > 0) {
+                          character['hd_curr'] = currHitDie - currHitDieInput;
+                          if (character['class'] == 'warlock') {
+                            character['expended_spell_slots'] = {};
+                          }
+                          for (var action in characterActions) {
+                            if (action['requires_resource'] ?? false) {
+                              if (action['resource_type']?.toString() ==
+                                  'shortRest') {
+                                action['used_count'] = 0;
+                              }
+                            }
+                          }
+                          context.read<CharacterBloc>().add(CharacterUpdate(
+                                character: character,
+                                slug: slug,
+                                offline: context
+                                    .read<SettingsCubit>()
+                                    .state
+                                    .offlineMode,
+                              ));
+                        }
+                      } else {
+                        character['hd_curr'] = maxHitDie;
+                        character['expended_spell_slots'] = {};
+                        for (var action in characterActions) {
+                          if (action['requires_resource'] ?? false) {
+                            if (action['resource_type']?.toString() ==
+                                    'longRest' ||
+                                action['resource_type']?.toString() ==
+                                    'shortRest') {
+                              action['used_count'] = 0;
+                            }
+                          }
+                        }
+                        context.read<CharacterBloc>().add(
+                              CharacterUpdate(
+                                character: character,
+                                slug: slug,
+                                offline: context
+                                    .read<SettingsCubit>()
+                                    .state
+                                    .offlineMode,
+                              ),
+                            );
+                      }
+                    },
+                  ),
+                ],
+              );
+            },
           );
         },
       );

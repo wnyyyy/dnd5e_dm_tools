@@ -70,6 +70,7 @@ class MainScreen extends StatelessWidget {
       builder: (context, rulesState) {
         if (rulesState is RulesStateInitial) {
           context.read<RulesCubit>().loadRules();
+          return Container();
         }
         if (rulesState is RulesStateError) {
           return ErrorHandler(error: rulesState.message);

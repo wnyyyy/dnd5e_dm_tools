@@ -5,7 +5,6 @@ import 'package:fluttericon/octicons_icons.dart';
 import 'package:fluttericon/rpg_awesome_icons.dart';
 import 'package:petitparser/petitparser.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:math' as math;
 
 int getModifier(int value) {
   return (value - 10) ~/ 2;
@@ -569,9 +568,9 @@ num _evaluateExpression(String expression) {
 Parser<num> buildParser() {
   final builder = ExpressionBuilder<num>();
 
-  builder.group().primitive(
+  builder.primitive(
       (char('(') & ref0(buildParser) & char(')')).map((values) => values[1]));
-  builder.group().primitive(digit().plus().flatten().trim().map(num.parse));
+  builder.primitive(digit().plus().flatten().trim().map(num.parse));
 
   builder.group()
     ..left(char('*').trim(), (a, op, b) => a * b)

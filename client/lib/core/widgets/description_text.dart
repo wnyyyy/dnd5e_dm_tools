@@ -94,7 +94,7 @@ class DescriptionText extends StatelessWidget {
     };
 
     final regex = RegExp(
-      r'(\d+\s?(ft|feet|hp|hitpoints))|\b(successful|success|failure|fail|fails|succeed)\b|(\d+d\d+)( \w+)?',
+      r'(\d+\s?(ft|feet|foot|radius|hour|minute|minutes|hours))|\b(successful|success|failure|fail|fails|succeed)\b|(\d+d\d+)( \w+)?',
       caseSensitive: false,
     );
 
@@ -103,11 +103,10 @@ class DescriptionText extends StatelessWidget {
       onMatch: (Match match) {
         final fullMatch = match[0]!;
         if (match[1] != null) {
-          // Handling units such as feet and hitpoints
+          // Handling units such as feet, foot, radius, hour, and minute
           spans.add(TextSpan(
             text: fullMatch,
             style: baseStyle.copyWith(
-              color: Colors.blueAccent,
               fontWeight: FontWeight.bold,
             ),
           ));
@@ -177,12 +176,18 @@ class DescriptionText extends StatelessWidget {
                 }
                 if (matchedSkill) continue;
 
-                // Handle single-word skills, attributes, and conditions
+                // Handle single-word skills, attributes, conditions, and damage types
                 if (attributeColors.containsKey(lowerWord)) {
                   spans.add(TextSpan(
                     text: words[k],
                     style:
                         baseStyle.copyWith(color: attributeColors[lowerWord]),
+                  ));
+                } else if (damageTypeColors.containsKey(lowerWord)) {
+                  spans.add(TextSpan(
+                    text: words[k],
+                    style:
+                        baseStyle.copyWith(color: damageTypeColors[lowerWord]),
                   ));
                 } else if (conditions.containsKey(lowerWord)) {
                   spans.add(TextSpan(
@@ -239,7 +244,9 @@ class DescriptionText extends StatelessWidget {
         processedSpans.add(const TextSpan(text: ' '));
       }
     }
-    return _removeDuplicateSpaces(processedSpans);
+    var processedText = _removeDuplicateSpaces(processedSpans);
+    processedText = _processCompoundWords(processedText);
+    return processedText;
   }
 
   bool _needsSpace(TextSpan currentSpan, TextSpan nextSpan) {
@@ -275,8 +282,64 @@ class DescriptionText extends StatelessWidget {
           spans[i + 1].text!.startsWith('s')) {
         continue;
       }
+      // Remove spaces around hyphens in the middle of words
+      if (i > 0 &&
+          spans[i].text == ' ' &&
+          spans[i - 1].text != null &&
+          spans[i + 1].text != null) {
+        final previousText = spans[i - 1].text!;
+        final nextText = spans[i + 1].text!;
+        if (previousText.endsWith('-') || nextText.startsWith('-')) {
+          continue;
+        }
+      }
       processedSpans.add(spans[i]);
     }
+    return processedSpans;
+  }
+
+  List<TextSpan> _processCompoundWords(List<TextSpan> spans) {
+    List<TextSpan> processedSpans = [];
+    final compoundRegex = RegExp(
+        r'\b\w+-(\w*(feet|foot|ft|hour|minute|minutes|hours)\b(?:-\w+)?)',
+        caseSensitive: false);
+
+    // Concatenate all texts from the spans
+    String concatenatedText = spans.map((span) => span.text).join();
+
+    // Find all matches in the concatenated text
+    final matches = compoundRegex.allMatches(concatenatedText);
+
+    // If there are no matches, return the original spans
+    if (matches.isEmpty) {
+      return spans;
+    }
+
+    int lastEnd = 0;
+    for (final match in matches) {
+      // Add the text before the match
+      if (match.start > lastEnd) {
+        processedSpans.add(TextSpan(
+          text: concatenatedText.substring(lastEnd, match.start),
+          style: spans[0].style, // Use the style of the first span as default
+        ));
+      }
+      // Add the matched text with bold style
+      processedSpans.add(TextSpan(
+        text: match.group(0),
+        style: spans[0].style?.copyWith(fontWeight: FontWeight.bold),
+      ));
+      lastEnd = match.end;
+    }
+
+    // Add the remaining text after the last match
+    if (lastEnd < concatenatedText.length) {
+      processedSpans.add(TextSpan(
+        text: concatenatedText.substring(lastEnd),
+        style: spans[0].style,
+      ));
+    }
+
     return processedSpans;
   }
 }
