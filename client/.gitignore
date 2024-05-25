@@ -48,3 +48,6 @@ pubspec.lock
 firebase.json
 client/android/app/google-services.json
 firebase_options.dart
+
+node_modules/
+package-lock.json

@@ -10,12 +10,14 @@ class DescriptionText extends StatelessWidget {
   final String inputText;
   final TextStyle baseStyle;
   final bool addTabSpace;
+  final TextAlign textAlign;
 
   const DescriptionText({
     super.key,
     required this.inputText,
     required this.baseStyle,
     this.addTabSpace = false,
+    this.textAlign = TextAlign.left,
   });
 
   @override
@@ -25,7 +27,7 @@ class DescriptionText extends StatelessWidget {
     preProcess = preProcess.replaceAll('_', '**');
 
     return RichText(
-      textAlign: TextAlign.left,
+      textAlign: textAlign,
       text: TextSpan(
         children: _postProcess(_processText(preProcess, context)),
       ),

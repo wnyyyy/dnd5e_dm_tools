@@ -1,4 +1,3 @@
-import 'package:dnd5e_dm_tools/core/config/app_colors.dart';
 import 'package:dnd5e_dm_tools/core/util/enum.dart';
 import 'package:dnd5e_dm_tools/core/util/helper.dart';
 import 'package:dnd5e_dm_tools/core/widgets/description_text.dart';
@@ -51,12 +50,48 @@ class ActionItemState extends State<ActionItem> {
     bool canUse = true;
     bool usable = false;
     final ActionMenuMode type = ActionMenuMode.values.firstWhere(
-        (e) => e.name == widget.action['type'],
-        orElse: () => ActionMenuMode.all);
+      (e) => e.name == widget.action['type'],
+      orElse: () => ActionMenuMode.all,
+    );
     final requiresResource =
         (widget.action['requires_resource'] ?? false) as bool;
-    final usedCount = widget.action['used_count'] ?? 0;
-    final remaining = (widget.action['resource_count'] ?? 1) - usedCount;
+    final usedCount =
+        int.tryParse(widget.action['used_count']?.toString() ?? '0') ??
+            0;
+    int resourceCount = 0;
+    final resourceFormula = widget.action['resource_formula'];
+    if (resourceFormula != null) {
+      final asi = Map<String, int>.from(
+        widget.character['asi'] ??
+            {
+              'strength': 10,
+              'dexterity': 10,
+              'constitution': 10,
+              'intelligence': 10,
+              'wisdom': 10,
+              'charisma': 10,
+            },
+      );
+      final level = widget.character['level'] ?? 1;
+      final prof = getProfBonus(level);
+      try {
+        final parsedValue =
+            int.parse(parseFormula(resourceFormula, asi, prof, level));
+        resourceCount = parsedValue;
+      } catch (e) {
+        resourceCount = 1;
+      }
+    } else {
+      final resourceCountValue = widget.action['resource_count'];
+      if (resourceCountValue is int) {
+        resourceCount = resourceCountValue;
+      } else if (resourceCountValue is String) {
+        resourceCount = int.tryParse(resourceCountValue) ?? 1;
+      } else {
+        resourceCount = 1;
+      }
+    }
+    final remaining = resourceCount - usedCount; // Use parsed integer value
     final mustEquip = widget.action['must_equip'] ?? false;
     final resourceTypeStr = widget.action['resource_type'] ?? '';
     final resourceType = ResourceType.values.firstWhere(
@@ -95,9 +130,10 @@ class ActionItemState extends State<ActionItem> {
                 : Theme.of(context).colorScheme.error;
             children.add(
               Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    '$remaining/${widget.action['resource_count']}',
+                    '$remaining/$resourceCount',
                     style: Theme.of(context).textTheme.labelLarge!.copyWith(
                           fontWeight: FontWeight.bold,
                           color: color,
@@ -105,6 +141,7 @@ class ActionItemState extends State<ActionItem> {
                   ),
                   const SizedBox(
                     height: 8,
+                    width: 32,
                     child: Divider(),
                   ),
                   if (remaining > 0)
@@ -129,6 +166,7 @@ class ActionItemState extends State<ActionItem> {
                 resourceType == ResourceType.longRest) {
               children.add(
                 Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
                       'Recharge',
@@ -303,7 +341,7 @@ class ActionItemState extends State<ActionItem> {
             'constitution': 10,
             'intelligence': 10,
             'wisdom': 10,
-            'charisma': 10
+            'charisma': 10,
           },
     );
     final boldTheme = Theme.of(context).textTheme.labelLarge!.copyWith(
@@ -351,7 +389,8 @@ class ActionItemState extends State<ActionItem> {
       );
     }
 
-    if (actionFields['save']?.toString().isNotEmpty ?? false) {
+    if ((actionFields['save']?.toString().isNotEmpty ?? false) &&
+        (actionFields['save'].toString().toLowerCase() != 'none')) {
       final save = actionFields['save'].toString().sentenceCase;
       if (actionFields['save_dc']?.toString().isNotEmpty ?? false) {
         final saveDc = parseFormula(actionFields['save_dc'], asi, prof, level);
@@ -427,7 +466,17 @@ class ActionItemState extends State<ActionItem> {
     }
 
     if (actionFields['conditions']?.toString().isNotEmpty ?? false) {
-      final conditions = actionFields['conditions'].toString().titleCase;
+      final conditionsField = actionFields['conditions'].toString();
+      final wordCount = conditionsField.split(' ').length;
+      final String conditions;
+      final TextStyle baseStyle;
+      if (wordCount > 3) {
+        conditions = conditionsField.sentenceCase;
+        baseStyle = Theme.of(context).textTheme.labelMedium!;
+      } else {
+        conditions = conditionsField.titleCase;
+        baseStyle = Theme.of(context).textTheme.labelLarge!;
+      }
       children.add(Column(
         children: [
           Text(
@@ -436,8 +485,9 @@ class ActionItemState extends State<ActionItem> {
             softWrap: true,
           ),
           DescriptionText(
+              textAlign: TextAlign.center,
               inputText: conditions,
-              baseStyle: Theme.of(context).textTheme.labelLarge!),
+              baseStyle: baseStyle),
         ],
       ));
     }

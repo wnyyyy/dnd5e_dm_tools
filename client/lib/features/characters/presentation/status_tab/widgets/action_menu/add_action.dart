@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:dnd5e_dm_tools/core/util/enum.dart';
 import 'package:dnd5e_dm_tools/features/characters/presentation/status_tab/widgets/action_menu/action_category_row.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:fluttericon/mfg_labs_icons.dart';
 
 class AddActionButton extends StatelessWidget {
   final Map<String, dynamic> character;
@@ -93,6 +92,7 @@ class _AddActionDialogState extends State<_AddActionDialog> {
   String _selectedSaveAttribute = 'None';
   bool _halfOnSuccess = false;
   bool _isAdditionalFieldsExpanded = false;
+  bool _isFormulaValid = true;
 
   @override
   void initState() {
@@ -350,10 +350,26 @@ class _AddActionDialogState extends State<_AddActionDialog> {
                         : entry.value['description'] ??
                             entry.value['desc'] ??
                             '';
+
+                    if (_selected == ActionMenuMode.spells &&
+                        entry.value is Map<String, dynamic>) {
+                      final spell = entry.value;
+                      _rangeController.text = spell['range'] ?? '';
+                      _durationController.text = spell['duration'] ?? '';
+                      final proficiency =
+                          widget.character['proficiency_bonus'] ?? 2;
+                      final attributeValue =
+                          widget.character[spell['casting_attribute']] ?? 0;
+                      _saveDcController.text =
+                          (8 + proficiency + attributeValue).toString();
+                    }
                   } else {
                     _selectedEntry = 'none';
                     _titleController.clear();
                     _descriptionController.clear();
+                    _rangeController.clear();
+                    _durationController.clear();
+                    _saveDcController.clear();
                   }
                 });
               },
@@ -554,26 +570,65 @@ class _AddActionDialogState extends State<_AddActionDialog> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Enter Formula'),
-          content: TextField(
-            controller: _formulaController,
-            decoration: const InputDecoration(),
+          content: StatefulBuilder(
+            builder: (context, setState) {
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    controller: _formulaController,
+                    decoration: InputDecoration(
+                      errorText: _isFormulaValid ? null : 'Invalid formula',
+                    ),
+                    onChanged: (value) {
+                      setState(() {
+                        var valid = true;
+                        try {
+                          final asi = Map<String, int>.from(
+                            widget.character['asi'] ??
+                                {
+                                  'strength': 10,
+                                  'dexterity': 10,
+                                  'constitution': 10,
+                                  'intelligence': 10,
+                                  'wisdom': 10,
+                                  'charisma': 10
+                                },
+                          );
+                          final t = parseFormula(value, asi, 0, 0);
+                          final _ = int.parse(t);
+                        } catch (e) {
+                          valid = false;
+                        }
+                        _isFormulaValid = valid;
+                      });
+                    },
+                  ),
+                ],
+              );
+            },
           ),
           actionsAlignment: MainAxisAlignment.spaceBetween,
           actions: <Widget>[
             IconButton(
                 onPressed: () {
                   _formulaController.clear();
+                  setState(() {
+                    _isFormulaValid = true;
+                  });
                   Navigator.of(context).pop();
                 },
                 icon: const Icon(Icons.close)),
             IconButton(
               onPressed: () {
-                setState(() {
-                  if (_formulaController.text.isNotEmpty) {
-                    _resourceCount = 0;
-                  }
-                });
-                Navigator.of(context).pop();
+                if (_isFormulaValid) {
+                  setState(() {
+                    if (_formulaController.text.isNotEmpty) {
+                      _resourceCount = 0;
+                    }
+                  });
+                  Navigator.of(context).pop();
+                }
               },
               icon: const Icon(Icons.check),
             ),
@@ -643,6 +698,23 @@ class _AddActionDialogState extends State<_AddActionDialog> {
                 onChanged: (String? newValue) {
                   setState(() {
                     _selectedSaveAttribute = newValue!;
+                    if (_saveDcController.text.isEmpty) {
+                      final classSlug = widget.character['class'];
+                      final classs =
+                          context.read<RulesCubit>().getClass(classSlug);
+                      final castingAttribute =
+                          classs?['spellcasting_ability'] ?? '   ';
+                      final prefix = castingAttribute.length > 0
+                          ? castingAttribute
+                              .toString()
+                              .toLowerCase()
+                              .substring(0, 3)
+                          : '';
+                      _saveDcController.text = "8+prof+$prefix";
+                    }
+                    if (_selectedSaveAttribute == 'None') {
+                      _saveDcController.clear();
+                    }
                   });
                 },
                 items: [
@@ -823,6 +895,10 @@ class _AddActionDialogState extends State<_AddActionDialog> {
                 final requiresResource = _requiresResource;
                 final expendable = _expendable;
                 final ammo = _ammo;
+                action['item'] = item;
+                action['must_equip'] = requiresResource;
+                action['expendable'] = expendable;
+                action['ammo'] = ammo;
                 break;
               case ActionMenuMode.spells:
                 break;
