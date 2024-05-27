@@ -7,6 +7,7 @@ import 'package:dnd5e_dm_tools/features/header/header.dart';
 import 'package:dnd5e_dm_tools/features/main_screen/cubit/main_screen_cubit.dart';
 import 'package:dnd5e_dm_tools/features/main_screen/cubit/main_screen_states.dart';
 import 'package:dnd5e_dm_tools/features/main_screen/presentation/widgets/main_drawer.dart';
+import 'package:dnd5e_dm_tools/features/onboarding/onboarding_screen.dart';
 import 'package:dnd5e_dm_tools/features/rules/rules_cubit.dart';
 import 'package:dnd5e_dm_tools/features/rules/rules_states.dart';
 import 'package:dnd5e_dm_tools/features/screen_splitter/presentation/screen_splitter.dart';
@@ -40,25 +41,34 @@ class MainScreen extends StatelessWidget {
         if (state is SettingsLoaded) {
           final appTheme =
               AppThemes.buildThemeData(state.themeColor, state.isDarkMode);
-          return MaterialApp(
-            theme: appTheme,
-            home: Scaffold(
-              drawer: const MainDrawer(),
-              appBar: const Header(),
-              body: PopScope(
-                child: Builder(
-                  builder: (context) {
-                    if (state.name.isEmpty) {
-                      return Center(
-                        child: SettingsScreen(),
-                      );
-                    }
-                    return _loadMainScreen(context, state);
-                  },
+          if (state.isOnboardingComplete) {
+            return MaterialApp(
+              theme: appTheme,
+              home: Scaffold(
+                drawer: const MainDrawer(),
+                appBar: const Header(),
+                body: PopScope(
+                  child: Builder(
+                    builder: (context) {
+                      if (state.name.isEmpty) {
+                        return Center(
+                          child: SettingsScreen(),
+                        );
+                      }
+                      return _loadMainScreen(context, state);
+                    },
+                  ),
                 ),
               ),
-            ),
-          );
+            );
+          } else {
+            return MaterialApp(
+              theme: appTheme,
+              home: const Scaffold(
+                body: OnboardingScreen(),
+              ),
+            );
+          }
         }
         return Container();
       },

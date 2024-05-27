@@ -1,4 +1,6 @@
-import 'dart:io';
+import 'dart:io' show Directory, File;
+import 'package:dnd5e_dm_tools/features/onboarding/bloc/onboarding_cubit.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dnd5e_dm_tools/core/data/db/database_provider.dart';
 import 'package:dnd5e_dm_tools/core/data/db/realtime_database_provider.dart';
@@ -30,10 +32,24 @@ import 'package:provider/provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  final appDocumentDir = await getApplicationDocumentsDirectory();
-  final hiveDir = Directory('${appDocumentDir.path}/$hiveFolder');
+  print("Initializing...");
+
+  final Directory? hiveDir;
+  if (kIsWeb) {
+    await Hive.initFlutter();
+    hiveDir = null;
+  } else {
+    final appDocumentDir = await getApplicationDocumentsDirectory();
+    print(appDocumentDir.path);
+    hiveDir = Directory('${appDocumentDir.path}/$hiveFolder');
+    await Hive.initFlutter(hiveDir.path);
+  }
+
+  final hiveDirPath = hiveDir?.path ?? 'web';
+
   await checkHiveFiles(hiveDir);
-  await Hive.initFlutter(hiveDir.path);
+
+  print('Hive initialized at $hiveDirPath');
 
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
@@ -41,10 +57,12 @@ void main() async {
   FirebaseFirestore.instance.settings = const Settings(
     persistenceEnabled: true,
   );
+  print('Firebase initialized');
+
   runApp(Dnd5eDmTools());
 }
 
-Future<void> checkHiveFiles(Directory hiveDir) async {
+Future<void> checkHiveFiles(Directory? hiveDir) async {
   final fileList = [
     '$cacheClassesName.hive',
     '$cacheConditionsName.hive',
@@ -55,15 +73,25 @@ Future<void> checkHiveFiles(Directory hiveDir) async {
     '$cacheItemsName.hive',
     '$cacheMagicItems.hive',
   ];
-  await hiveDir.create(recursive: true);
+
+  if (hiveDir != null) {
+    await hiveDir.create(recursive: true);
+  }
 
   for (var fileName in fileList) {
-    final hiveFile = File('${hiveDir.path}/$fileName');
-    if (!await hiveFile.exists()) {
+    final String hiveFilePath =
+        hiveDir != null ? '${hiveDir.path}/$fileName' : 'web/$fileName';
+    final hiveFile = File(hiveFilePath);
+    final exists = hiveDir != null
+        ? await hiveFile.exists()
+        : await assetExists('assets/precache/$fileName');
+    if (!exists) {
       final assetPath = 'assets/precache/$fileName';
       final data = await loadAsset(assetPath);
       if (data != null) {
-        await hiveFile.writeAsBytes(data);
+        if (hiveDir != null) {
+          await hiveFile.writeAsBytes(data);
+        }
         print('$fileName does not exist, copying from assets...');
       } else {
         print('$fileName does not exist and no asset found');
@@ -71,6 +99,15 @@ Future<void> checkHiveFiles(Directory hiveDir) async {
     } else {
       print('$fileName exists');
     }
+  }
+}
+
+Future<bool> assetExists(String path) async {
+  try {
+    await rootBundle.load(path);
+    return true;
+  } catch (e) {
+    return false;
   }
 }
 
@@ -148,6 +185,11 @@ class Dnd5eDmTools extends StatelessWidget {
             BlocProvider(
               create: (_) => CampaignCubit(
                 campaignRepository: context.read<CampaignRepository>(),
+              ),
+            ),
+            BlocProvider(
+              create: (_) => OnboardingCubit(
+                charactersRepository: context.read<CharactersRepository>(),
               ),
             ),
           ],

@@ -82,6 +82,8 @@ class SettingsCubit extends Cubit<SettingsState> {
       final themeColor = ThemeColor.values.firstWhere(
           (e) => e.name == themeColorName,
           orElse: () => ThemeColor.chestnutBrown);
+      final isOnboardingComplete =
+          await readConfig('onboarding_complete') ?? 'false';
 
       await spellsRepository.init();
       await featsRepository.init();
@@ -100,6 +102,7 @@ class SettingsCubit extends Cubit<SettingsState> {
         themeColor: themeColor,
         isDarkMode: isDarkMode == 'true',
         offlineMode: offlineMode == 'true',
+        isOnboardingComplete: isOnboardingComplete == 'true',
       ));
     } catch (error) {
       emit(SettingsError('Failed to load settings'));

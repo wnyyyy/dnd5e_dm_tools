@@ -39,17 +39,17 @@ class CharacterScreen extends StatelessWidget {
     final offline = context.read<SettingsCubit>().state.offlineMode;
     return BlocBuilder<CharacterBloc, CharacterState>(
       builder: (context, state) {
-        if (state is CharacterStateInitial) {
+        if (state is CharacterInitial) {
           final slug = context.read<SettingsCubit>().state.name;
           context
               .read<CharacterBloc>()
               .add(CharacterLoad(slug, offline: offline));
           return Container();
         }
-        if (state is CharacterStateLoading) {
+        if (state is CharacterLoading) {
           return const Center(child: CircularProgressIndicator());
         }
-        if (state is CharacterStateError) {
+        if (state is CharacterError) {
           return ErrorHandler(
               error: state.error,
               onRetry: () {
@@ -59,7 +59,7 @@ class CharacterScreen extends StatelessWidget {
                     .add(CharacterLoad(slug, offline: offline));
               });
         }
-        if (state is CharacterStateLoaded) {
+        if (state is CharacterLoaded) {
           final classs =
               context.read<RulesCubit>().getClass(state.character['class']);
           if (classs == null) {

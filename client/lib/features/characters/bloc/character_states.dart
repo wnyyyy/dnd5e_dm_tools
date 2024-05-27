@@ -7,15 +7,15 @@ abstract class CharacterState extends Equatable {
   List<Object> get props => [];
 }
 
-class CharacterStateInitial extends CharacterState {
+class CharacterInitial extends CharacterState {
   @override
   List<Object> get props => [];
 }
 
-class CharacterStateLoading extends CharacterState {
+class CharacterLoading extends CharacterState {
   final String slug;
 
-  const CharacterStateLoading({
+  const CharacterLoading({
     required this.slug,
   });
 
@@ -23,10 +23,10 @@ class CharacterStateLoading extends CharacterState {
   List<Object> get props => [slug];
 }
 
-class CharacterStateError extends CharacterState {
+class CharacterError extends CharacterState {
   final String slug;
   final String error;
-  const CharacterStateError({
+  const CharacterError({
     required this.error,
     required this.slug,
   });
@@ -35,19 +35,19 @@ class CharacterStateError extends CharacterState {
   List<Object> get props => [error, slug];
 }
 
-class CharacterStateLoaded extends CharacterState {
+class CharacterLoaded extends CharacterState {
   final Map<String, dynamic> character;
   final String slug;
-  const CharacterStateLoaded({
+  const CharacterLoaded({
     required this.character,
     required this.slug,
   });
 
-  CharacterStateLoaded copyWith(
+  CharacterLoaded copyWith(
       {Map<String, dynamic>? character,
       String? slug,
       Map<String, dynamic>? spells}) {
-    return CharacterStateLoaded(
+    return CharacterLoaded(
       character: character ?? this.character,
       slug: slug ?? this.slug,
     );

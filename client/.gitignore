@@ -51,3 +51,4 @@ firebase_options.dart
 
 node_modules/
 package-lock.json
+.vercel

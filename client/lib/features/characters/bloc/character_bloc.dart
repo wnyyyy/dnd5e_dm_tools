@@ -9,7 +9,7 @@ class CharacterBloc extends Bloc<CharacterEvent, CharacterState> {
 
   CharacterBloc({
     required this.charactersRepository,
-  }) : super(CharacterStateInitial()) {
+  }) : super(CharacterInitial()) {
     on<CharacterLoad>(_onCharacterLoad);
     on<CharacterUpdate>(_onCharacterUpdate);
     on<PersistCharacter>(_onPersistCharacter);
@@ -18,20 +18,20 @@ class CharacterBloc extends Bloc<CharacterEvent, CharacterState> {
   Future<void> _onCharacterLoad(
       CharacterLoad event, Emitter<CharacterState> emit) async {
     print("Loading name: ${event.characterName}");
-    emit(CharacterStateLoading(slug: event.characterName));
+    emit(CharacterLoading(slug: event.characterName));
     try {
       final slug = event.characterName;
       Map<String, dynamic> character =
           await charactersRepository.get(slug, event.offline);
       emit(
-        CharacterStateLoaded(
+        CharacterLoaded(
           character: character,
           slug: slug,
         ),
       );
     } catch (error) {
       emit(
-        CharacterStateError(
+        CharacterError(
             error: "Failed to load characters", slug: event.characterName),
       );
     }
@@ -40,11 +40,11 @@ class CharacterBloc extends Bloc<CharacterEvent, CharacterState> {
   Future<void> _onCharacterUpdate(
       CharacterUpdate event, Emitter<CharacterState> emit) async {
     try {
-      if (state is! CharacterStateLoaded) {
+      if (state is! CharacterLoaded) {
         return;
       }
       var character = Map.from(event.character).cast<String, dynamic>();
-      var newState = (state as CharacterStateLoaded).copyWith(
+      var newState = (state as CharacterLoaded).copyWith(
         character: character,
       );
 
@@ -58,18 +58,17 @@ class CharacterBloc extends Bloc<CharacterEvent, CharacterState> {
       }
     } catch (error) {
       emit(
-        CharacterStateError(
-            error: "Failed to load characters", slug: event.slug),
+        CharacterError(error: "Failed to load characters", slug: event.slug),
       );
     }
   }
 
   Future<void> _onPersistCharacter(
       PersistCharacter event, Emitter<CharacterState> emit) async {
-    if (this.state is! CharacterStateLoaded) {
+    if (this.state is! CharacterLoaded) {
       return;
     }
-    final state = this.state as CharacterStateLoaded;
+    final state = this.state as CharacterLoaded;
     try {
       await charactersRepository.updateCharacter(
         state.slug,
@@ -78,8 +77,7 @@ class CharacterBloc extends Bloc<CharacterEvent, CharacterState> {
       );
     } catch (error) {
       emit(
-        CharacterStateError(
-            error: "Failed to persist character", slug: state.slug),
+        CharacterError(error: "Failed to persist character", slug: state.slug),
       );
     }
   }

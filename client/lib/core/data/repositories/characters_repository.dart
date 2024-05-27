@@ -23,6 +23,11 @@ class CharactersRepository {
     return data;
   }
 
+  Future<Map<String, Map<String, dynamic>>> getAll() async {
+    final data = await databaseProvider.getCollection(path: path);
+    return data;
+  }
+
   Future<void> updateCharacter(
     String slug,
     Map<String, dynamic> character,
