@@ -121,7 +121,7 @@ class _AddActionDialogState extends State<_AddActionDialog> {
       raceFeats[feat.key] = feat.value;
     }
 
-    for (var spellSlug in widget.character['knownSpells'] ?? []) {
+    for (var spellSlug in widget.character['known_spells'] ?? []) {
       final spell = context.read<RulesCubit>().getSpell(spellSlug);
       if (spell != null) {
         spells[spellSlug] = spell;

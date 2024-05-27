@@ -132,7 +132,7 @@ class SettingsScreen extends StatelessWidget {
               ElevatedButton(
                 onPressed: () {
                   BlocProvider.of<SettingsCubit>(context)
-                      .changeName(_nameController.text);
+                      .changeName(name: _nameController.text);
                   BlocProvider.of<CharacterBloc>(context).add(CharacterLoad(
                     _nameController.text,
                     offline: context.read<SettingsCubit>().state.offlineMode,

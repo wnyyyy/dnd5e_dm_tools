@@ -29,10 +29,15 @@ class SettingsCubit extends Cubit<SettingsState> {
     required this.charactersRepository,
   }) : super(SettingsInitial());
 
-  void changeName(String name) async {
+  void changeName({required String name, bool? caster}) async {
     if (name.isEmpty) return;
     if (state is! SettingsLoaded) return;
     await saveConfig('char_name', name);
+    if (caster != null) {
+      await saveConfig('is_caster', caster.toString());
+      emit((state as SettingsLoaded).copyWith(name: name, isCaster: caster));
+      return;
+    }
     emit((state as SettingsLoaded).copyWith(name: name));
   }
 

@@ -137,13 +137,18 @@ class _ActionMenuState extends State<ActionMenu> {
                             ),
                           ...filteredActions.keys.map(
                             (key) {
+                              final isLastItem =
+                                  key == filteredActions.keys.last;
                               return Container(
                                 decoration: BoxDecoration(
                                   border: Border(
-                                    bottom: BorderSide(
-                                      color:
-                                          Theme.of(context).colorScheme.outline,
-                                    ),
+                                    bottom: isLastItem
+                                        ? BorderSide.none
+                                        : BorderSide(
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .outline,
+                                          ),
                                   ),
                                 ),
                                 child: ActionItem(

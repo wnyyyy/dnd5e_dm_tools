@@ -1,6 +1,9 @@
+import 'dart:math';
+
 import 'package:dnd5e_dm_tools/features/onboarding/bloc/onboarding_cubit.dart';
 import 'package:dnd5e_dm_tools/features/onboarding/bloc/onboarding_state.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:dnd5e_dm_tools/features/settings/bloc/settings_cubit.dart';
 import 'package:dnd5e_dm_tools/features/settings/bloc/settings_states.dart';
@@ -19,10 +22,20 @@ class OnboardingScreenState extends State<OnboardingScreen> {
   late PageController pageController;
   int currentPage = 999;
 
+  late Future<void> preloadImages;
+
   @override
   void initState() {
     super.initState();
     pageController = PageController(initialPage: currentPage);
+    preloadImages = _preloadCharacterImages();
+  }
+
+  Future<void> _preloadCharacterImages() async {
+    final characters = context.read<OnboardingCubit>().state.characters;
+    for (var character in characters.values) {
+      await precacheImage(NetworkImage(character['image_url']), context);
+    }
   }
 
   @override
@@ -137,7 +150,7 @@ class OnboardingScreenState extends State<OnboardingScreen> {
             },
             itemBuilder: (context, index) {
               final characterPaged =
-                  characters.values.elementAt(currentPage % characters.length);
+                  characters.values.elementAt(index % characters.length);
               return Image.network(
                 characterPaged['image_url'],
                 fit: BoxFit.cover,
@@ -196,17 +209,28 @@ class OnboardingScreenState extends State<OnboardingScreen> {
             ),
           ],
         ),
-        _buildAdvanceButton(context, selectedCharacter),
+        _buildAdvanceButton(context, selectedCharacter, character),
       ],
     );
   }
 
-  Widget _buildAdvanceButton(BuildContext context, String selectedCharacter) {
+  Widget _buildAdvanceButton(
+    BuildContext context,
+    String selectedCharacter,
+    Map<String, dynamic> character,
+  ) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12.0),
       child: ElevatedButton(
         onPressed: () {
-          context.read<SettingsCubit>().changeName(selectedCharacter);
+          var caster = false;
+          if (character['known_spells'] != null &&
+              character['known_spells'].isNotEmpty) {
+            caster = true;
+          }
+          context
+              .read<SettingsCubit>()
+              .changeName(name: selectedCharacter, caster: caster);
         },
         child: const Text('Start', style: TextStyle(fontSize: 18)),
       ),
@@ -227,6 +251,20 @@ class OnboardingScreenState extends State<OnboardingScreen> {
     if (color is String) {
       color = hexToColor(color);
     }
+    final extraScrollSpeed = MediaQuery.of(context).size.height * 0.6;
+    pageController.addListener(() {
+      ScrollDirection scrollDirection =
+          pageController.position.userScrollDirection;
+      if (scrollDirection != ScrollDirection.idle) {
+        double scrollEnd = pageController.offset +
+            (scrollDirection == ScrollDirection.reverse
+                ? extraScrollSpeed
+                : -extraScrollSpeed);
+        scrollEnd = min(pageController.position.maxScrollExtent,
+            max(pageController.position.minScrollExtent, scrollEnd));
+        pageController.jumpTo(scrollEnd);
+      }
+    });
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
@@ -245,7 +283,7 @@ class OnboardingScreenState extends State<OnboardingScreen> {
             },
             itemBuilder: (context, index) {
               final characterPaged =
-                  characters.values.elementAt(currentPage % characters.length);
+                  characters.values.elementAt(index % characters.length);
               return Image.network(
                 fit: BoxFit.cover,
                 characterPaged['image_url'],
@@ -254,58 +292,53 @@ class OnboardingScreenState extends State<OnboardingScreen> {
           ),
         ),
         Expanded(
-          child: Stack(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  IconButton(
-                    iconSize: 36,
-                    onPressed: () {
-                      final targetPage = pageController.page!.toInt() - 1;
-                      pageController.animateToPage(
-                        targetPage,
-                        duration: const Duration(milliseconds: 300),
-                        curve: Curves.easeInOut,
-                      );
-                    },
-                    icon: Icon(Elusive.up_open, color: color),
-                  ),
-                  Container(
-                    width: double.infinity,
-                    padding: longName
-                        ? const EdgeInsets.symmetric(vertical: 6)
-                        : const EdgeInsets.symmetric(vertical: 0),
-                    child: Text(
-                      character['name'],
-                      textAlign: TextAlign.center,
-                      style: baseTheme!.copyWith(
-                        fontFamily: GoogleFonts.patuaOne().fontFamily,
-                        color: color,
-                      ),
-                    ),
-                  ),
-                  IconButton(
-                    iconSize: 36,
-                    onPressed: () {
-                      final targetPage = pageController.page!.toInt() + 1;
-                      pageController.animateToPage(
-                        targetPage,
-                        duration: const Duration(milliseconds: 300),
-                        curve: Curves.easeInOut,
-                      );
-                    },
-                    icon: Icon(Elusive.down_open, color: color),
-                  ),
-                ],
+              IconButton(
+                iconSize: 36,
+                onPressed: () {
+                  final targetPage = pageController.page!.toInt() - 1;
+                  pageController.animateToPage(
+                    targetPage,
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeInOut,
+                  );
+                },
+                icon: Icon(Elusive.up_open, color: color),
               ),
-              Positioned(
-                bottom: 10,
-                left: 60,
-                right: 60,
-                child: _buildAdvanceButton(context, selectedCharacter),
+              Container(
+                width: double.infinity,
+                padding: longName
+                    ? const EdgeInsets.symmetric(vertical: 6)
+                    : const EdgeInsets.symmetric(vertical: 0),
+                child: Text(
+                  character['name'],
+                  textAlign: TextAlign.center,
+                  style: baseTheme!.copyWith(
+                    fontFamily: GoogleFonts.patuaOne().fontFamily,
+                    color: color,
+                  ),
+                ),
               ),
+              IconButton(
+                iconSize: 36,
+                onPressed: () {
+                  final targetPage = pageController.page!.toInt() + 1;
+                  pageController.animateToPage(
+                    targetPage,
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeInOut,
+                  );
+                },
+                icon: Icon(Elusive.down_open, color: color),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(top: 16),
+                child:
+                    _buildAdvanceButton(context, selectedCharacter, character),
+              )
             ],
           ),
         ),

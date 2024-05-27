@@ -36,12 +36,12 @@ class SpellbookState extends State<Spellbook> {
   @override
   void initState() {
     super.initState();
-    if (widget.character.containsKey('knownSpells')) {
-      knownSpells = List<String>.from(widget.character['knownSpells']);
+    if (widget.character.containsKey('known_spells')) {
+      knownSpells = List<String>.from(widget.character['known_spells']);
     }
-    if (widget.character.containsKey('preparedSpells')) {
+    if (widget.character.containsKey('prepared_spells')) {
       preparedSpells =
-          Map<String, bool>.from(widget.character['preparedSpells']);
+          Map<String, bool>.from(widget.character['prepared_spells']);
     }
   }
 
@@ -92,7 +92,7 @@ class SpellbookState extends State<Spellbook> {
   }
 
   Widget _buildSpellList(int level) {
-    List<dynamic> spellSlugs = widget.character['knownSpells'] ?? [];
+    List<dynamic> spellSlugs = widget.character['known_spells'] ?? [];
     if (spellSlugs.isEmpty) {
       return Container();
     }
