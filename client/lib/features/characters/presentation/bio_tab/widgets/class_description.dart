@@ -5,6 +5,7 @@ import 'package:dnd5e_dm_tools/features/characters/bloc/character_events.dart';
 import 'package:dnd5e_dm_tools/features/settings/bloc/settings_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 
 class ClassDescription extends StatefulWidget {
   final Map<String, dynamic> classs;
@@ -80,7 +81,6 @@ class _ClassDescriptionState extends State<ClassDescription> {
       (element) => element['slug'] == archetypeChr,
       orElse: () => null,
     );
-    final screenWidth = MediaQuery.of(context).size.width;
     return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -99,147 +99,32 @@ class _ClassDescriptionState extends State<ClassDescription> {
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
               ),
-            Wrap(children: [
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(12.0),
-                  child: Column(
-                    children: [
-                      Text(
-                        'Hit Dice',
-                        style: Theme.of(context).textTheme.titleSmall,
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        widget.classs['hit_dice'],
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              ConstrainedBox(
-                constraints: BoxConstraints(maxWidth: screenWidth / 2.2),
-                child: Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Column(
-                      children: [
-                        Text(
-                          'Saving Throws',
-                          style: Theme.of(context).textTheme.titleSmall,
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          widget.classs['prof_saving_throws'],
-                          style: Theme.of(context).textTheme.titleSmall,
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              ConstrainedBox(
-                constraints: BoxConstraints(maxWidth: screenWidth / 2.2),
-                child: Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Column(
-                      children: [
-                        Text(
-                          'Armor\nProficiencies',
-                          style: Theme.of(context).textTheme.titleSmall,
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          widget.classs['prof_armor'],
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              if (widget.classs['spellcasting_ability'] != null &&
-                  widget.classs['spellcasting_ability'].isNotEmpty)
-                ConstrainedBox(
-                  constraints: BoxConstraints(maxWidth: screenWidth / 2.2),
+            StaggeredGrid.count(
+              crossAxisCount:
+                  Orientation.landscape == MediaQuery.of(context).orientation
+                      ? 4
+                      : 2,
+              crossAxisSpacing: 8,
+              mainAxisSpacing: 8,
+              children: [
+                _buildGridCard('Hit Dice', widget.classs['hit_dice'], context),
+                _buildGridCard('Saving Throws',
+                    widget.classs['prof_saving_throws'], context),
+                _buildGridCard('Armor\nProficiencies',
+                    widget.classs['prof_armor'], context),
+                if (widget.classs['spellcasting_ability'] != null &&
+                    widget.classs['spellcasting_ability'].isNotEmpty)
+                  _buildGridCard('Spellcasting\nAbility',
+                      widget.classs['spellcasting_ability'], context),
+                _buildGridCard('Weapon\nProficiencies',
+                    widget.classs['prof_weapons'], context),
+                _buildGridCard('Tools\nProficiencies',
+                    widget.classs['prof_tools'] ?? 'None', context),
+                StaggeredGridTile.fit(
+                  crossAxisCellCount: 2,
                   child: Card(
                     child: Padding(
                       padding: const EdgeInsets.all(12.0),
-                      child: Column(
-                        children: [
-                          Text(
-                            'Spellcasting\nAbility',
-                            style: Theme.of(context).textTheme.titleSmall,
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            widget.classs['spellcasting_ability'],
-                            style: Theme.of(context).textTheme.titleSmall,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ConstrainedBox(
-                constraints: BoxConstraints(maxWidth: screenWidth / 2.5),
-                child: Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Column(
-                      children: [
-                        Text(
-                          'Weapon\nProficiencies',
-                          style: Theme.of(context).textTheme.titleSmall,
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          widget.classs['prof_weapons'],
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              ConstrainedBox(
-                constraints: BoxConstraints(maxWidth: screenWidth / 2.5),
-                child: Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Column(
-                      children: [
-                        Text(
-                          'Tools\nProficiencies',
-                          style: Theme.of(context).textTheme.titleSmall,
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          widget.classs['prof_tools'] ?? 'None',
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              ConstrainedBox(
-                constraints: BoxConstraints(minWidth: screenWidth / 1.5),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                  child: Card(
-                    child: Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(8.0),
                       child: Column(
                         children: [
                           Text(
@@ -257,66 +142,93 @@ class _ClassDescriptionState extends State<ClassDescription> {
                     ),
                   ),
                 ),
-              ),
-            ])
+              ],
+            ),
           ],
         ),
       ),
     );
   }
 
-Widget _buildArchetypeTab() {
-  final Map<String, dynamic> noneOption = {'slug': '', 'name': 'None'};
+  Widget _buildGridCard(String title, String content, BuildContext context) {
+    return StaggeredGridTile.fit(
+      crossAxisCellCount: 1,
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Column(
+            children: [
+              Text(
+                title,
+                style: Theme.of(context).textTheme.titleSmall,
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                content,
+                style: Theme.of(context).textTheme.bodySmall,
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 
-  return SingleChildScrollView(
-    padding: const EdgeInsets.all(8.0),
-    child: Column(
-      children: [
-        DropdownButton<Map<String, dynamic>>(
-          value: selectedArchetypeSlug == null || selectedArchetypeSlug!.isEmpty
-                  ? noneOption 
-                  : archetypes.firstWhere(
-                      (element) => element['slug'] == selectedArchetypeSlug!,
-                      orElse: () => noneOption), 
-          onChanged: (Map<String, dynamic>? newValue) {
-            setState(
-              () {
-                selectedArchetypeSlug = newValue!['slug'];
-                widget.character['subclass'] = selectedArchetypeSlug;
-                context.read<CharacterBloc>().add(
-                  CharacterUpdate(
-                    character: widget.character,
-                    slug: widget.slug,
-                    offline: context.read<SettingsCubit>().state.offlineMode,
-                    persistData: false,
-                  ),
+  Widget _buildArchetypeTab() {
+    final Map<String, dynamic> noneOption = {'slug': '', 'name': 'None'};
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        children: [
+          DropdownButton<Map<String, dynamic>>(
+            value:
+                selectedArchetypeSlug == null || selectedArchetypeSlug!.isEmpty
+                    ? noneOption
+                    : archetypes.firstWhere(
+                        (element) => element['slug'] == selectedArchetypeSlug!,
+                        orElse: () => noneOption),
+            onChanged: (Map<String, dynamic>? newValue) {
+              setState(
+                () {
+                  selectedArchetypeSlug = newValue!['slug'];
+                  widget.character['subclass'] = selectedArchetypeSlug;
+                  context.read<CharacterBloc>().add(
+                        CharacterUpdate(
+                          character: widget.character,
+                          slug: widget.slug,
+                          offline:
+                              context.read<SettingsCubit>().state.offlineMode,
+                          persistData: false,
+                        ),
+                      );
+                },
+              );
+            },
+            items: [noneOption]
+                .followedBy(archetypes)
+                .map<DropdownMenuItem<Map<String, dynamic>>>(
+              (Map<String, dynamic> archetype) {
+                return DropdownMenuItem<Map<String, dynamic>>(
+                  value: archetype,
+                  child: Text(archetype['name']),
                 );
               },
-            );
-          },
-          items: [noneOption]
-              .followedBy(archetypes)
-              .map<DropdownMenuItem<Map<String, dynamic>>>(
-                (Map<String, dynamic> archetype) {
-                  return DropdownMenuItem<Map<String, dynamic>>(
-                    value: archetype,
-                    child: Text(archetype['name']),
-                  );
-                },
-              ).toList(),
-        ),
-        if (selectedArchetypeSlug?.isNotEmpty ?? false)
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Column(
-              children: _buildArchetypeDetails(selectedArchetypeSlug!),
-            ),
+            ).toList(),
           ),
-      ],
-    ),
-  );
-}
-
+          if (selectedArchetypeSlug?.isNotEmpty ?? false)
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                children: _buildArchetypeDetails(selectedArchetypeSlug!),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
 
   List<Widget> _buildArchetypeDetails(String archetypeSlug) {
     final archetype = widget.classs['archetypes']

@@ -79,185 +79,400 @@ class StatusTab extends StatelessWidget {
     if (classs == null) {
       return Container();
     }
-    return SingleChildScrollView(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            Flex(
-              direction: Axis.horizontal,
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (constraints.maxWidth > 600) {
+          return SingleChildScrollView(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Flex(
-                  direction: Axis.vertical,
-                  children: [
-                    Hitpoints(
-                      character: character,
-                      slug: slug,
-                    ),
-                    HitDice(
-                      character: character,
-                      classs: classs,
-                      slug: slug,
-                    )
-                  ],
-                ),
-                Flex(
-                  direction: Axis.vertical,
-                  children: [
-                    if (isCaster)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 8),
-                        child: Column(
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Flex(
+                          direction: Axis.horizontal,
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            IconButton.outlined(
-                              padding: const EdgeInsets.all(12),
-                              iconSize: 36,
-                              icon: const Icon(Octicons.book),
-                              onPressed: () {
-                                showDialog(
-                                    context: context,
-                                    builder: (context) {
-                                      return AlertDialog(
-                                        title: const Text('Spellbook'),
-                                        content: Spellbook(
-                                            character: character,
-                                            spells: spells,
-                                            slug: slug,
-                                            table: table,
-                                            updateCharacter: () => context
-                                                .read<CharacterBloc>()
-                                                .add(
-                                                  CharacterUpdate(
-                                                    character: character,
-                                                    slug: slug,
-                                                    offline: context
-                                                        .read<SettingsCubit>()
-                                                        .state
-                                                        .offlineMode,
+                            Flex(
+                              direction: Axis.vertical,
+                              children: [
+                                Hitpoints(
+                                  character: character,
+                                  slug: slug,
+                                ),
+                                HitDice(
+                                  character: character,
+                                  classs: classs,
+                                  slug: slug,
+                                )
+                              ],
+                            ),
+                            Flex(
+                              direction: Axis.vertical,
+                              children: [
+                                if (isCaster)
+                                  Padding(
+                                    padding: const EdgeInsets.only(bottom: 8),
+                                    child: Column(
+                                      children: [
+                                        IconButton.outlined(
+                                          padding: const EdgeInsets.all(12),
+                                          iconSize: 36,
+                                          icon: const Icon(Octicons.book),
+                                          onPressed: () {
+                                            showDialog(
+                                                context: context,
+                                                builder: (context) {
+                                                  return AlertDialog(
+                                                    title:
+                                                        const Text('Spellbook'),
+                                                    content: Spellbook(
+                                                        character: character,
+                                                        spells: spells,
+                                                        slug: slug,
+                                                        table: table,
+                                                        updateCharacter: () =>
+                                                            context
+                                                                .read<
+                                                                    CharacterBloc>()
+                                                                .add(
+                                                                  CharacterUpdate(
+                                                                    character:
+                                                                        character,
+                                                                    slug: slug,
+                                                                    offline: context
+                                                                        .read<
+                                                                            SettingsCubit>()
+                                                                        .state
+                                                                        .offlineMode,
+                                                                  ),
+                                                                ),
+                                                        onDone: () {
+                                                          context
+                                                              .read<
+                                                                  CharacterBloc>()
+                                                              .add(
+                                                                  PersistCharacter(
+                                                                offline: context
+                                                                    .read<
+                                                                        SettingsCubit>()
+                                                                    .state
+                                                                    .offlineMode,
+                                                              ));
+                                                          Navigator.of(context)
+                                                              .pop();
+                                                        }),
+                                                    actions: [
+                                                      TextButton(
+                                                        onPressed: () {
+                                                          Navigator.of(context)
+                                                              .pop();
+                                                        },
+                                                        child: const Icon(
+                                                            Icons.done),
+                                                      ),
+                                                    ],
+                                                  );
+                                                });
+                                          },
+                                        ),
+                                        Card.filled(
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(8),
+                                            child: Row(
+                                              children: [
+                                                Padding(
+                                                  padding:
+                                                      const EdgeInsets.only(
+                                                    top: 8.0,
+                                                    left: 8,
+                                                    bottom: 4,
+                                                  ),
+                                                  child: Column(
+                                                    children: [
+                                                      Text(
+                                                        '+$spellAttackBonus',
+                                                        style: Theme.of(context)
+                                                            .textTheme
+                                                            .titleMedium,
+                                                      ),
+                                                      Text(
+                                                        'Spell\nAttack\nBonus',
+                                                        style: Theme.of(context)
+                                                            .textTheme
+                                                            .labelSmall,
+                                                        textAlign:
+                                                            TextAlign.center,
+                                                      ),
+                                                    ],
                                                   ),
                                                 ),
-                                            onDone: () {
-                                              context
-                                                  .read<CharacterBloc>()
-                                                  .add(PersistCharacter(
-                                                    offline: context
-                                                        .read<SettingsCubit>()
-                                                        .state
-                                                        .offlineMode,
-                                                  ));
-                                              Navigator.of(context).pop();
-                                            }),
-                                        actions: [
-                                          TextButton(
-                                            onPressed: () {
-                                              Navigator.of(context).pop();
-                                            },
-                                            child: const Icon(Icons.done),
+                                                const Padding(
+                                                  padding: EdgeInsets.symmetric(
+                                                      horizontal: 12),
+                                                  child: SizedBox(
+                                                    height: 45,
+                                                    child: VerticalDivider(),
+                                                  ),
+                                                ),
+                                                Padding(
+                                                  padding:
+                                                      const EdgeInsets.only(
+                                                    top: 8.0,
+                                                    right: 8,
+                                                    bottom: 4,
+                                                  ),
+                                                  child: Column(
+                                                    children: [
+                                                      Text(
+                                                        '$spellSaveDC',
+                                                        style: Theme.of(context)
+                                                            .textTheme
+                                                            .titleMedium,
+                                                        textAlign:
+                                                            TextAlign.center,
+                                                      ),
+                                                      Text(
+                                                        'Spell\nSave\nDC',
+                                                        style: Theme.of(context)
+                                                            .textTheme
+                                                            .labelSmall,
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
                                           ),
-                                        ],
-                                      );
-                                    });
-                              },
-                            ),
-                            Card.filled(
-                              child: Padding(
-                                padding: const EdgeInsets.all(8),
-                                child: Row(
-                                  children: [
-                                    Padding(
-                                      padding: const EdgeInsets.only(
-                                        top: 8.0,
-                                        left: 8,
-                                        bottom: 4,
-                                      ),
-                                      child: Column(
-                                        children: [
-                                          Text(
-                                            '+$spellAttackBonus',
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .titleMedium,
-                                          ),
-                                          Text(
-                                            'Spell\nAttack\nBonus',
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .labelSmall,
-                                            textAlign: TextAlign.center,
-                                          ),
-                                        ],
-                                      ),
+                                        ),
+                                      ],
                                     ),
-                                    const Padding(
-                                      padding:
-                                          EdgeInsets.symmetric(horizontal: 12),
-                                      child: SizedBox(
-                                        height: 45,
-                                        child: VerticalDivider(),
-                                      ),
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.only(
-                                        top: 8.0,
-                                        right: 8,
-                                        bottom: 4,
-                                      ),
-                                      child: Column(
-                                        children: [
-                                          Text(
-                                            '$spellSaveDC',
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .titleMedium,
-                                            textAlign: TextAlign.center,
-                                          ),
-                                          Text(
-                                            'Spell\nSave\nDC',
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .labelSmall,
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
+                                  ),
+                                StatsView(
+                                    onSave: () =>
+                                        context.read<CharacterBloc>().add(
+                                              CharacterUpdate(
+                                                character: character,
+                                                slug: slug,
+                                                offline: context
+                                                    .read<SettingsCubit>()
+                                                    .state
+                                                    .offlineMode,
+                                                persistData: true,
+                                              ),
+                                            ),
+                                    character: character),
+                              ],
                             ),
                           ],
                         ),
-                      ),
-                    StatsView(
-                        onSave: () => context.read<CharacterBloc>().add(
-                              CharacterUpdate(
-                                character: character,
-                                slug: slug,
-                                offline: context
-                                    .read<SettingsCubit>()
-                                    .state
-                                    .offlineMode,
-                                persistData: true,
-                              ),
-                            ),
-                        character: character),
-                  ],
+                      ],
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: ActionMenu(
+                      character: character,
+                      slug: slug,
+                      height: MediaQuery.of(context).size.height - 110,
+                    ),
+                  ),
                 ),
               ],
             ),
-            const SizedBox(
-              height: 16,
-            ),
-            ConstrainedBox(
-              constraints: const BoxConstraints(minHeight: 500),
-              child: ActionMenu(
-                character: character,
-                slug: slug,
+          );
+        } else {
+          return SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                children: [
+                  Flex(
+                    direction: Axis.horizontal,
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Flex(
+                        direction: Axis.vertical,
+                        children: [
+                          Hitpoints(
+                            character: character,
+                            slug: slug,
+                          ),
+                          HitDice(
+                            character: character,
+                            classs: classs,
+                            slug: slug,
+                          )
+                        ],
+                      ),
+                      Flex(
+                        direction: Axis.vertical,
+                        children: [
+                          if (isCaster)
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 8),
+                              child: Column(
+                                children: [
+                                  IconButton.outlined(
+                                    padding: const EdgeInsets.all(12),
+                                    iconSize: 36,
+                                    icon: const Icon(Octicons.book),
+                                    onPressed: () {
+                                      showDialog(
+                                          context: context,
+                                          builder: (context) {
+                                            return AlertDialog(
+                                              title: const Text('Spellbook'),
+                                              content: Spellbook(
+                                                  character: character,
+                                                  spells: spells,
+                                                  slug: slug,
+                                                  table: table,
+                                                  updateCharacter: () => context
+                                                      .read<CharacterBloc>()
+                                                      .add(
+                                                        CharacterUpdate(
+                                                          character: character,
+                                                          slug: slug,
+                                                          offline: context
+                                                              .read<
+                                                                  SettingsCubit>()
+                                                              .state
+                                                              .offlineMode,
+                                                        ),
+                                                      ),
+                                                  onDone: () {
+                                                    context
+                                                        .read<CharacterBloc>()
+                                                        .add(PersistCharacter(
+                                                          offline: context
+                                                              .read<
+                                                                  SettingsCubit>()
+                                                              .state
+                                                              .offlineMode,
+                                                        ));
+                                                    Navigator.of(context).pop();
+                                                  }),
+                                              actions: [
+                                                TextButton(
+                                                  onPressed: () {
+                                                    Navigator.of(context).pop();
+                                                  },
+                                                  child: const Icon(Icons.done),
+                                                ),
+                                              ],
+                                            );
+                                          });
+                                    },
+                                  ),
+                                  Card.filled(
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(8),
+                                      child: Row(
+                                        children: [
+                                          Padding(
+                                            padding: const EdgeInsets.only(
+                                              top: 8.0,
+                                              left: 8,
+                                              bottom: 4,
+                                            ),
+                                            child: Column(
+                                              children: [
+                                                Text(
+                                                  '+$spellAttackBonus',
+                                                  style: Theme.of(context)
+                                                      .textTheme
+                                                      .titleMedium,
+                                                ),
+                                                Text(
+                                                  'Spell\nAttack\nBonus',
+                                                  style: Theme.of(context)
+                                                      .textTheme
+                                                      .labelSmall,
+                                                  textAlign: TextAlign.center,
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          const Padding(
+                                            padding: EdgeInsets.symmetric(
+                                                horizontal: 12),
+                                            child: SizedBox(
+                                              height: 45,
+                                              child: VerticalDivider(),
+                                            ),
+                                          ),
+                                          Padding(
+                                            padding: const EdgeInsets.only(
+                                              top: 8.0,
+                                              right: 8,
+                                              bottom: 4,
+                                            ),
+                                            child: Column(
+                                              children: [
+                                                Text(
+                                                  '$spellSaveDC',
+                                                  style: Theme.of(context)
+                                                      .textTheme
+                                                      .titleMedium,
+                                                  textAlign: TextAlign.center,
+                                                ),
+                                                Text(
+                                                  'Spell\nSave\nDC',
+                                                  style: Theme.of(context)
+                                                      .textTheme
+                                                      .labelSmall,
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          StatsView(
+                              onSave: () => context.read<CharacterBloc>().add(
+                                    CharacterUpdate(
+                                      character: character,
+                                      slug: slug,
+                                      offline: context
+                                          .read<SettingsCubit>()
+                                          .state
+                                          .offlineMode,
+                                      persistData: true,
+                                    ),
+                                  ),
+                              character: character),
+                        ],
+                      ),
+                    ],
+                  ),
+                  const SizedBox(
+                    height: 16,
+                  ),
+                  ConstrainedBox(
+                    constraints: const BoxConstraints(minHeight: 500),
+                    child: ActionMenu(
+                      character: character,
+                      slug: slug,
+                    ),
+                  )
+                ],
               ),
-            )
-          ],
-        ),
-      ),
+            ),
+          );
+        }
+      },
     );
   }
 }

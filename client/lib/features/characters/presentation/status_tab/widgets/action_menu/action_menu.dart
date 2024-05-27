@@ -13,11 +13,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 class ActionMenu extends StatefulWidget {
   final Map<String, dynamic> character;
   final String slug;
+  final double? height;
 
   const ActionMenu({
     super.key,
     required this.character,
     required this.slug,
+    this.height,
   });
 
   @override
@@ -108,33 +110,42 @@ class _ActionMenuState extends State<ActionMenu> {
                   ),
                 ),
               ),
-              if (filteredActions.isEmpty)
-                Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Text('No actions.',
-                      style: Theme.of(context).textTheme.bodyLarge),
-                ),
-              ...filteredActions.keys.map(
-                (key) {
-                  return Container(
-                    decoration: BoxDecoration(
-                      border: Border(
-                        bottom: BorderSide(
-                          color: Theme.of(context).colorScheme.outline,
+              SizedBox(
+                height: widget.height,
+                child: Scrollbar(
+                  child: SingleChildScrollView(
+                    child: Column(children: [
+                      if (filteredActions.isEmpty)
+                        Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Text('No actions.',
+                              style: Theme.of(context).textTheme.bodyLarge),
                         ),
+                      ...filteredActions.keys.map(
+                        (key) {
+                          return Container(
+                            decoration: BoxDecoration(
+                              border: Border(
+                                bottom: BorderSide(
+                                  color: Theme.of(context).colorScheme.outline,
+                                ),
+                              ),
+                            ),
+                            child: ActionItem(
+                              action: filteredActions[key]!,
+                              actionSlug: key,
+                              character: widget.character,
+                              characterSlug: widget.slug,
+                              isEditMode: _isEditMode,
+                              onActionsChanged: onActionsChanged,
+                              onUse: onUseAction,
+                            ),
+                          );
+                        },
                       ),
-                    ),
-                    child: ActionItem(
-                      action: filteredActions[key]!,
-                      actionSlug: key,
-                      character: widget.character,
-                      characterSlug: widget.slug,
-                      isEditMode: _isEditMode,
-                      onActionsChanged: onActionsChanged,
-                      onUse: onUseAction,
-                    ),
-                  );
-                },
+                    ]),
+                  ),
+                ),
               ),
             ],
           ),

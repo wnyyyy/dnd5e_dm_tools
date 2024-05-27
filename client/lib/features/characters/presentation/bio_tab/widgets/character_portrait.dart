@@ -108,67 +108,72 @@ class CharacterPortrait extends StatelessWidget {
             ),
           ),
         ),
-        Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Text(
-                    textAlign: TextAlign.center,
-                    name,
-                    style: Theme.of(context).textTheme.displaySmall!.copyWith(
-                          fontFamily: GoogleFonts.patuaOne().fontFamily,
-                        ),
-                  ),
-                  const SizedBox(height: 8),
-                  GestureDetector(
-                    onLongPress: () => _showEditLevel(context),
-                    onTap: () => context.read<SettingsCubit>().state.isEditMode
-                        ? _showEditLevel(context)
-                        : null,
-                    child: Text(
-                      'Level ${character['level']}',
-                      style: Theme.of(context).textTheme.titleMedium,
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                flex: 1,
+                child: Column(
+                  children: [
+                    Text(
+                      name,
+                      style: Theme.of(context).textTheme.displaySmall!.copyWith(
+                            fontFamily: GoogleFonts.patuaOne().fontFamily,
+                          ),
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 8),
+                    GestureDetector(
+                      onLongPress: () => _showEditLevel(context),
+                      onTap: () =>
+                          context.read<SettingsCubit>().state.isEditMode
+                              ? _showEditLevel(context)
+                              : null,
+                      child: Text(
+                        'Level ${character['level']}',
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  GestureDetector(
-                    onTap: () => _showRaceModal(context, race),
-                    child: Text(
-                      '${race?['name'] ?? 'Race not found'}',
-                      style: Theme.of(context).textTheme.headlineMedium,
+              Expanded(
+                flex: 1,
+                child: Column(
+                  children: [
+                    GestureDetector(
+                      onTap: () => _showRaceModal(context, race),
+                      child: Text(
+                        '${race?['name'] ?? 'Race not found'}',
+                        style: Theme.of(context).textTheme.headlineSmall,
+                        softWrap: false,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                  GestureDetector(
-                    onTap: () => showDialog(
-                      context: context,
-                      builder: (context) {
-                        if (classs == null) return Container();
-                        return ClassDescription(
-                            classs: classs,
-                            character: character,
-                            slug: slug,
-                            editMode: false);
-                      },
+                    const SizedBox(height: 8),
+                    GestureDetector(
+                      onTap: () => showDialog(
+                        context: context,
+                        builder: (context) {
+                          if (classs == null) return Container();
+                          return ClassDescription(
+                              classs: classs,
+                              character: character,
+                              slug: slug,
+                              editMode: false);
+                        },
+                      ),
+                      child: Text(
+                        '${classs?['name'] ?? 'Class not found'}',
+                        style: Theme.of(context).textTheme.headlineSmall,
+                      ),
                     ),
-                    child: Text(
-                      '${classs?['name'] ?? 'Class not found'}',
-                      style: Theme.of(context).textTheme.headlineMedium,
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            )
-          ],
-        )
+            ],
+          ),
+        ),
       ],
     );
   }

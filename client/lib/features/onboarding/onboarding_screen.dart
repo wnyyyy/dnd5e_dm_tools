@@ -8,8 +8,28 @@ import 'package:dnd5e_dm_tools/core/widgets/error_handler.dart';
 import 'package:fluttericon/elusive_icons.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class OnboardingScreen extends StatelessWidget {
+class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
+
+  @override
+  OnboardingScreenState createState() => OnboardingScreenState();
+}
+
+class OnboardingScreenState extends State<OnboardingScreen> {
+  late PageController pageController;
+  int currentPage = 999;
+
+  @override
+  void initState() {
+    super.initState();
+    pageController = PageController(initialPage: currentPage);
+  }
+
+  @override
+  void dispose() {
+    pageController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -65,18 +85,14 @@ class OnboardingScreen extends StatelessWidget {
     Map<String, dynamic> characters,
     String selectedCharacter,
   ) {
-    final PageController pageController = PageController(initialPage: 999);
-
     return OrientationBuilder(
       builder: (context, orientation) {
-        return Scaffold(
-          body: Center(
-            child: orientation == Orientation.portrait
-                ? _buildPortraitContent(
-                    context, characters, selectedCharacter, pageController)
-                : _buildLandscapeContent(
-                    context, characters, selectedCharacter, pageController),
-          ),
+        return Center(
+          child: orientation == Orientation.portrait
+              ? _buildPortraitContent(
+                  context, characters, selectedCharacter, pageController)
+              : _buildLandscapeContent(
+                  context, characters, selectedCharacter, pageController),
         );
       },
     );
@@ -105,7 +121,7 @@ class OnboardingScreen extends StatelessWidget {
       color = hexToColor(color);
     }
     return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         SizedBox(
           height: screenHeight * 0.8,
@@ -115,10 +131,13 @@ class OnboardingScreen extends StatelessWidget {
               final currentIndex = index % characters.length;
               final slug = characters.keys.elementAt(currentIndex);
               context.read<OnboardingCubit>().selectCharacter(slug);
+              setState(() {
+                currentPage = index;
+              });
             },
             itemBuilder: (context, index) {
               final characterPaged =
-                  characters.values.elementAt(index % characters.length);
+                  characters.values.elementAt(currentPage % characters.length);
               return Image.network(
                 characterPaged['image_url'],
                 fit: BoxFit.cover,
@@ -126,7 +145,6 @@ class OnboardingScreen extends StatelessWidget {
             },
           ),
         ),
-        SizedBox(height: screenHeight * 0.03),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -149,7 +167,7 @@ class OnboardingScreen extends StatelessWidget {
             Expanded(
               child: Padding(
                 padding: longName
-                    ? const EdgeInsets.only(top: 8)
+                    ? const EdgeInsets.only(top: 12)
                     : const EdgeInsets.only(top: 0),
                 child: Text(
                   character['name'],
@@ -178,7 +196,20 @@ class OnboardingScreen extends StatelessWidget {
             ),
           ],
         ),
+        _buildAdvanceButton(context, selectedCharacter),
       ],
+    );
+  }
+
+  Widget _buildAdvanceButton(BuildContext context, String selectedCharacter) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12.0),
+      child: ElevatedButton(
+        onPressed: () {
+          context.read<SettingsCubit>().changeName(selectedCharacter);
+        },
+        child: const Text('Start', style: TextStyle(fontSize: 18)),
+      ),
     );
   }
 
@@ -208,57 +239,72 @@ class OnboardingScreen extends StatelessWidget {
               final currentIndex = index % characters.length;
               final slug = characters.keys.elementAt(currentIndex);
               context.read<OnboardingCubit>().selectCharacter(slug);
+              setState(() {
+                currentPage = index;
+              });
             },
             itemBuilder: (context, index) {
               final characterPaged =
-                  characters.values.elementAt(index % characters.length);
+                  characters.values.elementAt(currentPage % characters.length);
               return Image.network(
+                fit: BoxFit.cover,
                 characterPaged['image_url'],
               );
             },
           ),
         ),
         Expanded(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
+          child: Stack(
             children: [
-              IconButton(
-                iconSize: 36,
-                onPressed: () {
-                  final targetPage = pageController.page!.toInt() - 1;
-                  pageController.animateToPage(
-                    targetPage,
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.easeInOut,
-                  );
-                },
-                icon: Icon(Elusive.up_open, color: color),
-              ),
-              Padding(
-                padding: longName
-                    ? const EdgeInsets.symmetric(vertical: 6)
-                    : const EdgeInsets.symmetric(vertical: 0),
-                child: Text(
-                  character['name'],
-                  textAlign: TextAlign.center,
-                  style: baseTheme!.copyWith(
-                    fontFamily: GoogleFonts.patuaOne().fontFamily,
-                    color: color,
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  IconButton(
+                    iconSize: 36,
+                    onPressed: () {
+                      final targetPage = pageController.page!.toInt() - 1;
+                      pageController.animateToPage(
+                        targetPage,
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeInOut,
+                      );
+                    },
+                    icon: Icon(Elusive.up_open, color: color),
                   ),
-                ),
+                  Container(
+                    width: double.infinity,
+                    padding: longName
+                        ? const EdgeInsets.symmetric(vertical: 6)
+                        : const EdgeInsets.symmetric(vertical: 0),
+                    child: Text(
+                      character['name'],
+                      textAlign: TextAlign.center,
+                      style: baseTheme!.copyWith(
+                        fontFamily: GoogleFonts.patuaOne().fontFamily,
+                        color: color,
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    iconSize: 36,
+                    onPressed: () {
+                      final targetPage = pageController.page!.toInt() + 1;
+                      pageController.animateToPage(
+                        targetPage,
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeInOut,
+                      );
+                    },
+                    icon: Icon(Elusive.down_open, color: color),
+                  ),
+                ],
               ),
-              IconButton(
-                iconSize: 36,
-                onPressed: () {
-                  final targetPage = pageController.page!.toInt() + 1;
-                  pageController.animateToPage(
-                    targetPage,
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.easeInOut,
-                  );
-                },
-                icon: Icon(Elusive.down_open, color: color),
+              Positioned(
+                bottom: 10,
+                left: 60,
+                right: 60,
+                child: _buildAdvanceButton(context, selectedCharacter),
               ),
             ],
           ),

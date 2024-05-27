@@ -106,10 +106,7 @@ class MainScreen extends StatelessWidget {
   Widget _buildMainContent(MainScreenState state) {
     if (state is MainScreenStateCharacter) {
       return const Center(
-        child: ScreenSplitter(
-          upperChild: CharacterScreen(),
-          lowerChild: Placeholder(),
-        ),
+        child: CharacterScreen(),
       );
     }
     if (state is MainScreenStateParty) {

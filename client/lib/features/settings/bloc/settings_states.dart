@@ -52,7 +52,6 @@ class SettingsLoaded extends SettingsState {
     bool? isDarkMode,
     ThemeColor? themeColor,
     bool? offlineMode,
-    bool? isOnboardingComplete,
   }) {
     return SettingsLoaded(
       name: name ?? this.name,
@@ -62,7 +61,8 @@ class SettingsLoaded extends SettingsState {
       isDarkMode: isDarkMode ?? this.isDarkMode,
       themeColor: themeColor ?? this.themeColor,
       offlineMode: offlineMode ?? this.offlineMode,
-      isOnboardingComplete: isOnboardingComplete ?? this.isOnboardingComplete,
+      isOnboardingComplete:
+          name?.trim().isNotEmpty ?? this.name.trim().isNotEmpty,
     );
   }
 }
