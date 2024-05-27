@@ -13,9 +13,22 @@ class OnboardingCubit extends Cubit<OnboardingState> {
     emit(OnboardingLoading());
     try {
       final characters = await charactersRepository.getAll();
-      emit(OnboardingLoaded(characters: characters));
+      if (characters.isEmpty) {
+        emit(OnboardingError("No characters found"));
+        return;
+      }
+      final firstCharacter = characters.keys.first;
+      emit(OnboardingLoaded(
+        characters: characters,
+        selectedCharacter: firstCharacter,
+      ));
     } catch (error) {
       emit(OnboardingError("Failed to load characters"));
     }
+  }
+
+  void selectCharacter(String characterSlug) {
+    final currentState = state as OnboardingLoaded;
+    emit(currentState.copyWith(selectedCharacter: characterSlug));
   }
 }
