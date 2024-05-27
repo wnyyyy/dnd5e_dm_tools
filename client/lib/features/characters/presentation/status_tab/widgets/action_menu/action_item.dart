@@ -56,8 +56,7 @@ class ActionItemState extends State<ActionItem> {
     final requiresResource =
         (widget.action['requires_resource'] ?? false) as bool;
     final usedCount =
-        int.tryParse(widget.action['used_count']?.toString() ?? '0') ??
-            0;
+        int.tryParse(widget.action['used_count']?.toString() ?? '0') ?? 0;
     int resourceCount = 0;
     final resourceFormula = widget.action['resource_formula'];
     if (resourceFormula != null) {

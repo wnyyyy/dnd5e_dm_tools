@@ -47,110 +47,127 @@ class _ActionMenuState extends State<ActionMenu> {
   @override
   Widget build(BuildContext context) {
     final filteredActions = _getFilteredItems(actions);
-    return Column(
-      children: [
-        ActionCategoryRow(
-          onSelected: (mode) {
-            setState(() {
-              _mode = mode;
-            });
-          },
+    return Container(
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: BorderSide(
+            color: Theme.of(context).colorScheme.outline,
+          ),
         ),
-        DecoratedBox(
-          decoration: BoxDecoration(
-            border: Border.all(
-              color: Theme.of(context).colorScheme.outline,
+      ),
+      child: Column(
+        children: [
+          ActionCategoryRow(
+            onSelected: (mode) {
+              setState(() {
+                _mode = mode;
+              });
+            },
+          ),
+          DecoratedBox(
+            decoration: BoxDecoration(
+              border: Border(
+                right: BorderSide(
+                  color: Theme.of(context).colorScheme.outline,
+                ),
+                left: BorderSide(
+                  color: Theme.of(context).colorScheme.outline,
+                ),
+              ),
+            ),
+            child: Column(
+              children: [
+                SizedBox(
+                  width: double.infinity,
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.secondaryContainer,
+                      border: Border.all(
+                        color: Theme.of(context).colorScheme.outline,
+                      ),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.only(
+                          left: 16, bottom: 8, top: 8, right: 4),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Actions',
+                            style: Theme.of(context)
+                                .textTheme
+                                .headlineMedium!
+                                .copyWith(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSecondaryContainer,
+                                ),
+                          ),
+                          Row(
+                            children: [
+                              IconButton(
+                                onPressed: _enableEditMode,
+                                icon: Icon(
+                                    _isEditMode ? Icons.check : Icons.edit),
+                              ),
+                              if (_isEditMode)
+                                AddActionButton(
+                                  character: widget.character,
+                                  slug: widget.slug,
+                                  onActionsChanged: onActionsChanged,
+                                ),
+                            ],
+                          )
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  height: widget.height,
+                  child: Scrollbar(
+                    child: SingleChildScrollView(
+                      child: Column(
+                        children: [
+                          if (filteredActions.isEmpty)
+                            Padding(
+                              padding: const EdgeInsets.all(16),
+                              child: Text('No actions.',
+                                  style: Theme.of(context).textTheme.bodyLarge),
+                            ),
+                          ...filteredActions.keys.map(
+                            (key) {
+                              return Container(
+                                decoration: BoxDecoration(
+                                  border: Border(
+                                    bottom: BorderSide(
+                                      color:
+                                          Theme.of(context).colorScheme.outline,
+                                    ),
+                                  ),
+                                ),
+                                child: ActionItem(
+                                  action: filteredActions[key]!,
+                                  actionSlug: key,
+                                  character: widget.character,
+                                  characterSlug: widget.slug,
+                                  isEditMode: _isEditMode,
+                                  onActionsChanged: onActionsChanged,
+                                  onUse: onUseAction,
+                                ),
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
-          child: Column(
-            children: [
-              SizedBox(
-                width: double.infinity,
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.secondaryContainer,
-                    border: Border.all(
-                      color: Theme.of(context).colorScheme.outline,
-                    ),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.only(
-                        left: 16, bottom: 8, top: 8, right: 4),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'Actions',
-                          style: Theme.of(context)
-                              .textTheme
-                              .headlineMedium!
-                              .copyWith(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onSecondaryContainer,
-                              ),
-                        ),
-                        Row(
-                          children: [
-                            IconButton(
-                              onPressed: _enableEditMode,
-                              icon:
-                                  Icon(_isEditMode ? Icons.check : Icons.edit),
-                            ),
-                            if (_isEditMode)
-                              AddActionButton(
-                                character: widget.character,
-                                slug: widget.slug,
-                                onActionsChanged: onActionsChanged,
-                              ),
-                          ],
-                        )
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              SizedBox(
-                height: widget.height,
-                child: Scrollbar(
-                  child: SingleChildScrollView(
-                    child: Column(children: [
-                      if (filteredActions.isEmpty)
-                        Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Text('No actions.',
-                              style: Theme.of(context).textTheme.bodyLarge),
-                        ),
-                      ...filteredActions.keys.map(
-                        (key) {
-                          return Container(
-                            decoration: BoxDecoration(
-                              border: Border(
-                                bottom: BorderSide(
-                                  color: Theme.of(context).colorScheme.outline,
-                                ),
-                              ),
-                            ),
-                            child: ActionItem(
-                              action: filteredActions[key]!,
-                              actionSlug: key,
-                              character: widget.character,
-                              characterSlug: widget.slug,
-                              isEditMode: _isEditMode,
-                              onActionsChanged: onActionsChanged,
-                              onUse: onUseAction,
-                            ),
-                          );
-                        },
-                      ),
-                    ]),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
