@@ -98,26 +98,25 @@ class CharacterPortrait extends StatelessWidget {
     final screenWidth = MediaQuery.of(context).size.width;
     return Column(
       children: [
-        Expanded(
-          child: ClipRRect(
-            child: Container(
-              decoration: BoxDecoration(
-                border: Border.all(
-                    color: Theme.of(context).colorScheme.outline, width: 3),
+        ClipRRect(
+          child: Container(
+            decoration: BoxDecoration(
+              border: Border.all(
+                  color: Theme.of(context).colorScheme.outline, width: 3),
+            ),
+            child: CachedNetworkImage(
+              imageUrl: character['image_url'],
+              placeholder: (context, url) => const Center(
+                child: CircularProgressIndicator(),
               ),
-              child: CachedNetworkImage(
-                imageUrl: character['image_url'],
-                placeholder: (context, url) => const Center(
-                  child: CircularProgressIndicator(),
-                ),
-                errorWidget: (context, url, error) => const Icon(Icons.error),
-              ),
+              errorWidget: (context, url, error) => const Icon(Icons.error),
             ),
           ),
         ),
         Padding(
           padding: const EdgeInsets.all(8.0),
           child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -128,7 +127,6 @@ class CharacterPortrait extends StatelessWidget {
                           fontFamily: GoogleFonts.patuaOne().fontFamily,
                         ),
                   ),
-                  const SizedBox(height: 8),
                   GestureDetector(
                     onLongPress: () => _showEditLevel(context),
                     onTap: () => context.read<SettingsCubit>().state.isEditMode

@@ -68,24 +68,20 @@ class SpellbookState extends State<Spellbook> {
     );
 
     for (var entry in matchingEntries) {
-      if (searchResults.length < 5) {
-        final spell = entry.value;
-        searchResults.add(ListTile(
-          title: Text(spell['name'] ?? ''),
-          subtitle: Row(
-            children: [
-              Text(spell['level'] ?? ''),
-              const Spacer(),
-              Text(spell['school'].toString().sentenceCase),
-            ],
-          ),
-          onTap: () {
-            _showSpellDialog(entry.key);
-          },
-        ));
-      } else {
-        break;
-      }
+      final spell = entry.value;
+      searchResults.add(ListTile(
+        title: Text(spell['name'] ?? ''),
+        subtitle: Row(
+          children: [
+            Text(spell['level'] ?? ''),
+            const Spacer(),
+            Text(spell['school'].toString().sentenceCase),
+          ],
+        ),
+        onTap: () {
+          _showSpellDialog(entry.key);
+        },
+      ));
     }
 
     return searchResults;
@@ -156,15 +152,11 @@ class SpellbookState extends State<Spellbook> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      'Total: ${entry.value}',
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
+                    Text('Total: ${entry.value}',
+                        style: Theme.of(context).textTheme.bodyMedium),
                     if (expendedSlots.containsKey(entry.key.toString()))
-                      Text(
-                        'Used: ${expendedSlots[entry.key.toString()]}',
-                        style: Theme.of(context).textTheme.bodyMedium,
-                      ),
+                      Text('Used: ${expendedSlots[entry.key.toString()]}',
+                          style: Theme.of(context).textTheme.bodyMedium),
                   ],
                 ),
               ],
@@ -222,10 +214,8 @@ class SpellbookState extends State<Spellbook> {
                             icon: const Icon(Icons.remove_circle_outline),
                           ),
                         ),
-                        Text(
-                          '$curr/$max',
-                          style: Theme.of(context).textTheme.displaySmall,
-                        ),
+                        Text('$curr/$max',
+                            style: Theme.of(context).textTheme.displaySmall),
                         Padding(
                           padding: const EdgeInsets.only(left: 6),
                           child: IconButton(
@@ -293,12 +283,15 @@ class SpellbookState extends State<Spellbook> {
   Widget build(BuildContext context) {
     final searchResults = _buildSearchResults();
     final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
     return ConstrainedBox(
       constraints: BoxConstraints(
+        maxWidth: screenWidth * 0.7,
+        maxHeight: screenHeight * 0.7,
         minWidth: screenWidth * 0.5,
+        minHeight: screenHeight * 0.5,
       ),
-      child: Flex(
-        direction: Axis.vertical,
+      child: Column(
         children: [
           Padding(
             padding: const EdgeInsets.all(8.0),
@@ -314,8 +307,7 @@ class SpellbookState extends State<Spellbook> {
                 border: const OutlineInputBorder(),
                 suffixIcon: searchText.isEmpty
                     ? const Icon(Icons.search)
-                    : Flex(
-                        direction: Axis.horizontal,
+                    : Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           IconButton(
@@ -338,46 +330,43 @@ class SpellbookState extends State<Spellbook> {
               ),
             ),
           ),
-          Visibility(
-            visible: searchText.isNotEmpty,
-            child: Expanded(
-              child: Container(
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    color: Theme.of(context).dividerColor,
-                  ),
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
-                child: searchResults.isEmpty
-                    ? const Center(
-                        child: Text('No spells found'),
-                      )
-                    : ListView.separated(
-                        itemCount: searchResults.length,
-                        itemBuilder: (context, index) {
-                          return searchResults[index];
-                        },
-                        separatorBuilder: (context, index) => const Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 16.0),
-                          child: Divider(),
-                        ),
+          Expanded(
+            child: searchText.isNotEmpty
+                ? Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: Theme.of(context).dividerColor,
                       ),
-              ),
-            ),
-          ),
-          Visibility(
-            visible: searchText.isEmpty && knownSpells.isNotEmpty,
-            child: Expanded(
-              child: ListView(
-                children: [
-                  for (int i = 0; i < 10; i++) _buildSpellList(i),
-                ],
-              ),
-            ),
-          ),
-          Visibility(
-            visible: searchText.isEmpty,
-            child: _buildSpellSlotsList(),
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                    child: searchResults.isEmpty
+                        ? const Center(
+                            child: Text('No spells found'),
+                          )
+                        : ListView.separated(
+                            itemCount: searchResults.length,
+                            itemBuilder: (context, index) {
+                              return searchResults[index];
+                            },
+                            separatorBuilder: (context, index) => const Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 16.0),
+                              child: Divider(),
+                            ),
+                          ),
+                  )
+                : Column(
+                    children: [
+                      if (knownSpells.isNotEmpty)
+                        Expanded(
+                          child: ListView(
+                            children: [
+                              for (int i = 0; i < 10; i++) _buildSpellList(i),
+                            ],
+                          ),
+                        ),
+                      _buildSpellSlotsList(),
+                    ],
+                  ),
           ),
         ],
       ),

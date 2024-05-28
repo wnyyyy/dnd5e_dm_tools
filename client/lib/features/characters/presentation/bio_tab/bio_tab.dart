@@ -35,9 +35,12 @@ class BioTab extends StatelessWidget {
   List<Widget> _buildPortraitContent(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     return [
-      CharacterPortrait(
-        character: character,
-        slug: slug,
+      Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: CharacterPortrait(
+          character: character,
+          slug: slug,
+        ),
       ),
       Padding(
         padding:
@@ -67,11 +70,10 @@ class BioTab extends StatelessWidget {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
     return [
-      Padding(
-        padding: EdgeInsets.symmetric(
-            horizontal: screenWidth * 0.01, vertical: screenHeight * 0.02),
-        child: SizedBox(
-          height: screenHeight * 0.8,
+      Expanded(
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+              horizontal: screenWidth * 0.01, vertical: screenHeight * 0.02),
           child: CharacterPortrait(
             character: character,
             slug: slug,

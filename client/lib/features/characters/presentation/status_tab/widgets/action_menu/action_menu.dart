@@ -1,3 +1,4 @@
+import 'package:dnd5e_dm_tools/core/util/const.dart';
 import 'package:dnd5e_dm_tools/core/util/enum.dart';
 import 'package:dnd5e_dm_tools/core/util/helper.dart';
 import 'package:dnd5e_dm_tools/features/characters/bloc/character_bloc.dart';
@@ -57,7 +58,7 @@ class _ActionMenuState extends State<ActionMenu> {
         ),
       ),
       child: Column(
-        crossAxisAlignment: screenWidth > 600
+        crossAxisAlignment: screenWidth > wideScreenBreakpoint
             ? CrossAxisAlignment.start
             : CrossAxisAlignment.center,
         children: [

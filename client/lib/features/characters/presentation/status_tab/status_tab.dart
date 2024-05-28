@@ -1,3 +1,4 @@
+import 'package:dnd5e_dm_tools/core/util/const.dart';
 import 'package:dnd5e_dm_tools/core/util/helper.dart';
 import 'package:dnd5e_dm_tools/features/characters/bloc/character_bloc.dart';
 import 'package:dnd5e_dm_tools/features/characters/bloc/character_events.dart';
@@ -71,7 +72,7 @@ class StatusTab extends StatelessWidget {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        return constraints.maxWidth > 600
+        return constraints.maxWidth > wideScreenBreakpoint
             ? _buildWideLayout(context, classs, isCaster, spells,
                 spellAttackBonus, spellSaveDC)
             : _buildNarrowLayout(context, classs, isCaster, spells,
@@ -157,7 +158,7 @@ class StatusTab extends StatelessWidget {
   ) {
     return SingleChildScrollView(
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(8.0),
         child: Column(
           children: [
             Flex(
