@@ -65,10 +65,13 @@ class BioTab extends StatelessWidget {
 
   List<Widget> _buildLandscapeContent(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
     return [
-      Expanded(
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.01),
+      Padding(
+        padding: EdgeInsets.symmetric(
+            horizontal: screenWidth * 0.01, vertical: screenHeight * 0.02),
+        child: SizedBox(
+          height: screenHeight * 0.8,
           child: CharacterPortrait(
             character: character,
             slug: slug,

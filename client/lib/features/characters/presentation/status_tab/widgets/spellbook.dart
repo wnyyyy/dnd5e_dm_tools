@@ -292,89 +292,95 @@ class SpellbookState extends State<Spellbook> {
   @override
   Widget build(BuildContext context) {
     final searchResults = _buildSearchResults();
-    return Flex(
-      direction: Axis.vertical,
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: TextField(
-            controller: textEditingController,
-            onChanged: (value) {
-              setState(() {
-                searchText = value.toLowerCase();
-              });
-            },
-            decoration: InputDecoration(
-              labelText: 'Search Spells',
-              border: const OutlineInputBorder(),
-              suffixIcon: searchText.isEmpty
-                  ? const Icon(Icons.search)
-                  : Flex(
-                      direction: Axis.horizontal,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        IconButton(
-                          icon: const Icon(Icons.done),
-                          onPressed: () {
-                            FocusScope.of(context).unfocus();
-                          },
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.clear),
-                          onPressed: () {
-                            setState(() {
-                              searchText = '';
-                              textEditingController.clear();
-                            });
-                          },
-                        ),
-                      ],
-                    ),
-            ),
-          ),
-        ),
-        Visibility(
-          visible: searchText.isNotEmpty,
-          child: Expanded(
-            child: Container(
-              decoration: BoxDecoration(
-                border: Border.all(
-                  color: Theme.of(context).dividerColor,
-                ),
-                borderRadius: BorderRadius.circular(8.0),
-              ),
-              child: searchResults.isEmpty
-                  ? const Center(
-                      child: Text('No spells found'),
-                    )
-                  : ListView.separated(
-                      itemCount: searchResults.length,
-                      itemBuilder: (context, index) {
-                        return searchResults[index];
-                      },
-                      separatorBuilder: (context, index) => const Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 16.0),
-                        child: Divider(),
+    final screenWidth = MediaQuery.of(context).size.width;
+    return ConstrainedBox(
+      constraints: BoxConstraints(
+        minWidth: screenWidth * 0.5,
+      ),
+      child: Flex(
+        direction: Axis.vertical,
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextField(
+              controller: textEditingController,
+              onChanged: (value) {
+                setState(() {
+                  searchText = value.toLowerCase();
+                });
+              },
+              decoration: InputDecoration(
+                labelText: 'Search Spells',
+                border: const OutlineInputBorder(),
+                suffixIcon: searchText.isEmpty
+                    ? const Icon(Icons.search)
+                    : Flex(
+                        direction: Axis.horizontal,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.done),
+                            onPressed: () {
+                              FocusScope.of(context).unfocus();
+                            },
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.clear),
+                            onPressed: () {
+                              setState(() {
+                                searchText = '';
+                                textEditingController.clear();
+                              });
+                            },
+                          ),
+                        ],
                       ),
-                    ),
+              ),
             ),
           ),
-        ),
-        Visibility(
-          visible: searchText.isEmpty,
-          child: Expanded(
-            child: ListView(
-              children: [
-                for (int i = 0; i < 10; i++) _buildSpellList(i),
-              ],
+          Visibility(
+            visible: searchText.isNotEmpty,
+            child: Expanded(
+              child: Container(
+                decoration: BoxDecoration(
+                  border: Border.all(
+                    color: Theme.of(context).dividerColor,
+                  ),
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
+                child: searchResults.isEmpty
+                    ? const Center(
+                        child: Text('No spells found'),
+                      )
+                    : ListView.separated(
+                        itemCount: searchResults.length,
+                        itemBuilder: (context, index) {
+                          return searchResults[index];
+                        },
+                        separatorBuilder: (context, index) => const Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 16.0),
+                          child: Divider(),
+                        ),
+                      ),
+              ),
             ),
           ),
-        ),
-        Visibility(
-          visible: searchText.isEmpty,
-          child: _buildSpellSlotsList(),
-        ),
-      ],
+          Visibility(
+            visible: searchText.isEmpty && knownSpells.isNotEmpty,
+            child: Expanded(
+              child: ListView(
+                children: [
+                  for (int i = 0; i < 10; i++) _buildSpellList(i),
+                ],
+              ),
+            ),
+          ),
+          Visibility(
+            visible: searchText.isEmpty,
+            child: _buildSpellSlotsList(),
+          ),
+        ],
+      ),
     );
   }
 

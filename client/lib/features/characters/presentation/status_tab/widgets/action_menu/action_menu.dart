@@ -47,6 +47,7 @@ class _ActionMenuState extends State<ActionMenu> {
   @override
   Widget build(BuildContext context) {
     final filteredActions = _getFilteredItems(actions);
+    final screenWidth = MediaQuery.of(context).size.width;
     return Container(
       decoration: BoxDecoration(
         border: Border(
@@ -56,6 +57,9 @@ class _ActionMenuState extends State<ActionMenu> {
         ),
       ),
       child: Column(
+        crossAxisAlignment: screenWidth > 600
+            ? CrossAxisAlignment.start
+            : CrossAxisAlignment.center,
         children: [
           ActionCategoryRow(
             onSelected: (mode) {

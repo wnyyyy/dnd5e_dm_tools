@@ -9,7 +9,7 @@ class OnboardingCubit extends Cubit<OnboardingState> {
     required this.charactersRepository,
   }) : super(OnboardingInitial());
 
-  void loadCharacters() async {
+  void loadCharacters(int startPos) async {
     emit(OnboardingLoading());
     try {
       final characters = await charactersRepository.getAll();
@@ -17,7 +17,8 @@ class OnboardingCubit extends Cubit<OnboardingState> {
         emit(OnboardingError("No characters found"));
         return;
       }
-      final firstCharacter = characters.keys.first;
+      final index = startPos % characters.length;
+      final firstCharacter = characters.keys.elementAt(index);
       emit(OnboardingLoaded(
         characters: characters,
         selectedCharacter: firstCharacter,

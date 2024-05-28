@@ -10,7 +10,6 @@ import 'package:dnd5e_dm_tools/features/main_screen/presentation/widgets/main_dr
 import 'package:dnd5e_dm_tools/features/onboarding/onboarding_screen.dart';
 import 'package:dnd5e_dm_tools/features/rules/rules_cubit.dart';
 import 'package:dnd5e_dm_tools/features/rules/rules_states.dart';
-import 'package:dnd5e_dm_tools/features/screen_splitter/presentation/screen_splitter.dart';
 import 'package:dnd5e_dm_tools/features/settings/bloc/settings_cubit.dart';
 import 'package:dnd5e_dm_tools/features/settings/bloc/settings_states.dart';
 import 'package:dnd5e_dm_tools/features/settings/presentation/settings_screen.dart';

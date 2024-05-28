@@ -1,7 +1,9 @@
 import 'dart:math';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dnd5e_dm_tools/features/onboarding/bloc/onboarding_cubit.dart';
 import 'package:dnd5e_dm_tools/features/onboarding/bloc/onboarding_state.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -20,7 +22,8 @@ class OnboardingScreen extends StatefulWidget {
 
 class OnboardingScreenState extends State<OnboardingScreen> {
   late PageController pageController;
-  int currentPage = 999;
+  int currentPage = 1000;
+  bool isMouseScrolling = false;
 
   late Future<void> preloadImages;
 
@@ -46,6 +49,35 @@ class OnboardingScreenState extends State<OnboardingScreen> {
 
   @override
   Widget build(BuildContext context) {
+    return Listener(
+      onPointerSignal: (PointerSignalEvent event) {
+        if (event is PointerScrollEvent &&
+            event.kind == PointerDeviceKind.mouse) {
+          setState(() {
+            isMouseScrolling = true;
+          });
+        } else {
+          setState(() {
+            isMouseScrolling = false;
+          });
+        }
+      },
+      child: FutureBuilder<void>(
+        future: preloadImages,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.done) {
+            return _buildOnboardingContent();
+          } else {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+        },
+      ),
+    );
+  }
+
+  Widget _buildOnboardingContent() {
     return BlocBuilder<SettingsCubit, SettingsState>(
       builder: (context, settingsState) {
         if (settingsState is SettingsInitial) {
@@ -66,7 +98,7 @@ class OnboardingScreenState extends State<OnboardingScreen> {
           return BlocBuilder<OnboardingCubit, OnboardingState>(
             builder: (context, state) {
               if (state is OnboardingInitial) {
-                context.read<OnboardingCubit>().loadCharacters();
+                context.read<OnboardingCubit>().loadCharacters(currentPage);
                 return const Center(
                   child: CircularProgressIndicator(),
                 );
@@ -80,7 +112,7 @@ class OnboardingScreenState extends State<OnboardingScreen> {
                 );
               }
               if (state is OnboardingLoaded) {
-                return _buildOnboardingContent(
+                return _buildOnboardingContentDetails(
                     context, state.characters, state.selectedCharacter);
               }
 
@@ -93,7 +125,7 @@ class OnboardingScreenState extends State<OnboardingScreen> {
     );
   }
 
-  Widget _buildOnboardingContent(
+  Widget _buildOnboardingContentDetails(
     BuildContext context,
     Map<String, dynamic> characters,
     String selectedCharacter,
@@ -151,9 +183,13 @@ class OnboardingScreenState extends State<OnboardingScreen> {
             itemBuilder: (context, index) {
               final characterPaged =
                   characters.values.elementAt(index % characters.length);
-              return Image.network(
-                characterPaged['image_url'],
+              return CachedNetworkImage(
+                imageUrl: characterPaged['image_url'],
                 fit: BoxFit.cover,
+                placeholder: (context, url) => const Center(
+                  child: CircularProgressIndicator(),
+                ),
+                errorWidget: (context, url, error) => const Icon(Icons.error),
               );
             },
           ),
@@ -255,7 +291,7 @@ class OnboardingScreenState extends State<OnboardingScreen> {
     pageController.addListener(() {
       ScrollDirection scrollDirection =
           pageController.position.userScrollDirection;
-      if (scrollDirection != ScrollDirection.idle) {
+      if (scrollDirection != ScrollDirection.idle && isMouseScrolling) {
         double scrollEnd = pageController.offset +
             (scrollDirection == ScrollDirection.reverse
                 ? extraScrollSpeed
@@ -284,9 +320,13 @@ class OnboardingScreenState extends State<OnboardingScreen> {
             itemBuilder: (context, index) {
               final characterPaged =
                   characters.values.elementAt(index % characters.length);
-              return Image.network(
+              return CachedNetworkImage(
+                imageUrl: characterPaged['image_url'],
                 fit: BoxFit.cover,
-                characterPaged['image_url'],
+                placeholder: (context, url) => const Center(
+                  child: CircularProgressIndicator(),
+                ),
+                errorWidget: (context, url, error) => const Icon(Icons.error),
               );
             },
           ),

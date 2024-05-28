@@ -29,39 +29,79 @@ class SkillsTab extends StatelessWidget {
         child: Text('Class not found'),
       );
     }
-    return SingleChildScrollView(
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Flex(
-          direction: Axis.vertical,
-          children: [
-            Flex(
-              direction: Axis.horizontal,
-              children: [
-                _buildAttributesList(context),
-                const SizedBox(width: 8),
-                Flex(
-                  direction: Axis.vertical,
-                  children: [
-                    _buildProficiencyBonus(context),
-                    SavingThrowList(
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (constraints.maxWidth > 600) {
+          // Landscape Mode
+          return SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Flex(
+                direction: Axis.horizontal,
+                children: [
+                  _buildAttributesList(context),
+                  const SizedBox(width: 8),
+                  Column(
+                    children: [
+                      _buildProficiencyBonus(context),
+                      SavingThrowList(
+                        character: character,
+                        slug: slug,
+                        classs: classs,
+                      ),
+                      _buildPassivePerception(context),
+                    ],
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: SkillList(
                       character: character,
-                      slug: slug,
                       classs: classs,
+                      slug: slug,
                     ),
-                    _buildPassivePerception(context),
-                  ],
-                ),
-              ],
+                  ),
+                ],
+              ),
             ),
-            SkillList(
-              character: character,
-              classs: classs,
-              slug: slug,
-            )
-          ],
-        ),
-      ),
+          );
+        } else {
+          // Portrait Mode
+          return SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Flex(
+                direction: Axis.vertical,
+                children: [
+                  Flex(
+                    direction: Axis.horizontal,
+                    children: [
+                      _buildAttributesList(context),
+                      const SizedBox(width: 8),
+                      Flex(
+                        direction: Axis.vertical,
+                        children: [
+                          _buildProficiencyBonus(context),
+                          SavingThrowList(
+                            character: character,
+                            slug: slug,
+                            classs: classs,
+                          ),
+                          _buildPassivePerception(context),
+                        ],
+                      ),
+                    ],
+                  ),
+                  SkillList(
+                    character: character,
+                    classs: classs,
+                    slug: slug,
+                  )
+                ],
+              ),
+            ),
+          );
+        }
+      },
     );
   }
 
@@ -130,31 +170,32 @@ class SkillsTab extends StatelessWidget {
           onLongPress: () => editAttribute('Strength', asi['strength']),
         ),
         AttributeCard(
-            attributeName: 'Dexterity',
-            attributeValue: asi['dexterity'],
-            color: Theme.of(context).dexterityColor,
-            onTap: editMode
-                ? () => editAttribute('Dexterity', asi['dexterity'])
-                : null,
-            onLongPress: () => editAttribute('Dexterity', asi['dexterity'])),
+          attributeName: 'Dexterity',
+          attributeValue: asi['dexterity'],
+          color: Theme.of(context).dexterityColor,
+          onTap: editMode
+              ? () => editAttribute('Dexterity', asi['dexterity'])
+              : null,
+          onLongPress: () => editAttribute('Dexterity', asi['dexterity']),
+        ),
         AttributeCard(
-            attributeName: 'Constitution',
-            attributeValue: asi['constitution'],
-            color: Theme.of(context).constitutionColor,
-            onTap: editMode
-                ? () => editAttribute('Constitution', asi['constitution'])
-                : null,
-            onLongPress: () =>
-                editAttribute('Constitution', asi['constitution'])),
+          attributeName: 'Constitution',
+          attributeValue: asi['constitution'],
+          color: Theme.of(context).constitutionColor,
+          onTap: editMode
+              ? () => editAttribute('Constitution', asi['constitution'])
+              : null,
+          onLongPress: () => editAttribute('Constitution', asi['constitution']),
+        ),
         AttributeCard(
-            attributeName: 'Intelligence',
-            attributeValue: asi['intelligence'],
-            color: Theme.of(context).intelligenceColor,
-            onTap: editMode
-                ? () => editAttribute('Intelligence', asi['intelligence'])
-                : null,
-            onLongPress: () =>
-                editAttribute('Intelligence', asi['intelligence'])),
+          attributeName: 'Intelligence',
+          attributeValue: asi['intelligence'],
+          color: Theme.of(context).intelligenceColor,
+          onTap: editMode
+              ? () => editAttribute('Intelligence', asi['intelligence'])
+              : null,
+          onLongPress: () => editAttribute('Intelligence', asi['intelligence']),
+        ),
         AttributeCard(
           attributeName: 'Wisdom',
           attributeValue: asi['wisdom'],
@@ -163,13 +204,14 @@ class SkillsTab extends StatelessWidget {
           onLongPress: () => editAttribute('Wisdom', asi['wisdom']),
         ),
         AttributeCard(
-            attributeName: 'Charisma',
-            attributeValue: asi['charisma'],
-            color: Theme.of(context).charismaColor,
-            onTap: editMode
-                ? () => editAttribute('Charisma', asi['charisma'])
-                : null,
-            onLongPress: () => editAttribute('Charisma', asi['charisma'])),
+          attributeName: 'Charisma',
+          attributeValue: asi['charisma'],
+          color: Theme.of(context).charismaColor,
+          onTap: editMode
+              ? () => editAttribute('Charisma', asi['charisma'])
+              : null,
+          onLongPress: () => editAttribute('Charisma', asi['charisma']),
+        ),
       ],
     );
   }
