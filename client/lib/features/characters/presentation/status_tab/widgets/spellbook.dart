@@ -11,7 +11,6 @@ class Spellbook extends StatefulWidget {
   final Map<String, dynamic> spells;
   final List<Map<String, dynamic>> table;
   final VoidCallback? updateCharacter;
-  final VoidCallback? onDone;
 
   const Spellbook({
     super.key,
@@ -19,7 +18,6 @@ class Spellbook extends StatefulWidget {
     required this.spells,
     required this.slug,
     required this.table,
-    this.onDone,
     this.updateCharacter,
   });
 
@@ -273,7 +271,13 @@ class SpellbookState extends State<Spellbook> {
           spells: widget.spells,
           knownSpells: knownSpells,
           preparedSpells: preparedSpells,
-          updateCharacter: widget.updateCharacter!,
+          updateCharacter: () {
+            setState(() {
+              widget.character['known_spells'] = knownSpells;
+              widget.character['prepared_spells'] = preparedSpells;
+            });
+            widget.updateCharacter?.call();
+          },
         );
       },
     );
@@ -339,20 +343,27 @@ class SpellbookState extends State<Spellbook> {
                       ),
                       borderRadius: BorderRadius.circular(8.0),
                     ),
-                    child: searchResults.isEmpty
-                        ? const Center(
-                            child: Text('No spells found'),
-                          )
-                        : ListView.separated(
-                            itemCount: searchResults.length,
-                            itemBuilder: (context, index) {
-                              return searchResults[index];
-                            },
-                            separatorBuilder: (context, index) => const Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 16.0),
-                              child: Divider(),
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        maxWidth: screenWidth * 0.5,
+                        minWidth: screenWidth * 0.5,
+                      ),
+                      child: searchResults.isEmpty
+                          ? const Center(
+                              child: Text('No spells found'),
+                            )
+                          : ListView.separated(
+                              itemCount: searchResults.length,
+                              itemBuilder: (context, index) {
+                                return searchResults[index];
+                              },
+                              separatorBuilder: (context, index) =>
+                                  const Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 16.0),
+                                child: Divider(),
+                              ),
                             ),
-                          ),
+                    ),
                   )
                 : Column(
                     children: [

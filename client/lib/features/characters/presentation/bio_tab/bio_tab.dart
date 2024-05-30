@@ -18,90 +18,92 @@ class BioTab extends StatelessWidget {
     return OrientationBuilder(
       builder: (context, orientation) {
         return SingleChildScrollView(
-          child: Flex(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            direction: orientation == Orientation.portrait
-                ? Axis.vertical
-                : Axis.horizontal,
-            children: orientation == Orientation.portrait
-                ? _buildPortraitContent(context)
-                : _buildLandscapeContent(context),
-          ),
+          child: orientation == Orientation.portrait
+              ? _buildPortraitContent(context)
+              : _buildLandscapeContent(context),
         );
       },
     );
   }
 
-  List<Widget> _buildPortraitContent(BuildContext context) {
+  Widget _buildPortraitContent(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    return [
-      Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: CharacterPortrait(
-          character: character,
-          slug: slug,
-        ),
-      ),
-      Padding(
-        padding:
-            EdgeInsets.symmetric(vertical: 4, horizontal: screenWidth * 0.08),
-        child: const Divider(),
-      ),
-      Padding(
-        padding:
-            EdgeInsets.symmetric(horizontal: screenWidth * 0.08, vertical: 8),
-        child: ProficiencyList(
-          character: character,
-          slug: slug,
-        ),
-      ),
-      Padding(
-        padding:
-            EdgeInsets.symmetric(horizontal: screenWidth * 0.08, vertical: 8),
-        child: FeatsList(
-          character: character,
-          slug: slug,
-        ),
-      ),
-    ];
-  }
-
-  List<Widget> _buildLandscapeContent(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
-    return [
-      Expanded(
-        child: Padding(
-          padding: EdgeInsets.symmetric(
-              horizontal: screenWidth * 0.01, vertical: screenHeight * 0.02),
+    return Flex(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      direction: Axis.vertical,
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(8.0),
           child: CharacterPortrait(
             character: character,
             slug: slug,
           ),
         ),
-      ),
-      Expanded(
-        child: Column(
-          children: [
-            Padding(
-              padding: EdgeInsets.symmetric(
-                  horizontal: screenWidth * 0.02, vertical: 8),
-              child: ProficiencyList(
-                character: character,
-                slug: slug,
-              ),
-            ),
-            Padding(
-              padding: EdgeInsets.symmetric(
-                  horizontal: screenWidth * 0.02, vertical: 8),
-              child: FeatsList(
-                character: character,
-                slug: slug,
-              ),
-            ),
-          ],
+        Padding(
+          padding:
+              EdgeInsets.symmetric(vertical: 4, horizontal: screenWidth * 0.08),
+          child: const Divider(),
         ),
-      ),
-    ];
+        Padding(
+          padding:
+              EdgeInsets.symmetric(horizontal: screenWidth * 0.08, vertical: 8),
+          child: ProficiencyList(
+            character: character,
+            slug: slug,
+          ),
+        ),
+        Padding(
+          padding:
+              EdgeInsets.symmetric(horizontal: screenWidth * 0.08, vertical: 8),
+          child: FeatsList(
+            character: character,
+            slug: slug,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildLandscapeContent(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+    return Flex(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      direction: Axis.horizontal,
+      children: [
+        Expanded(
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+                horizontal: screenWidth * 0.01, vertical: screenHeight * 0.02),
+            child: CharacterPortrait(
+              character: character,
+              slug: slug,
+            ),
+          ),
+        ),
+        Expanded(
+          child: Column(
+            children: [
+              Padding(
+                padding: EdgeInsets.symmetric(
+                    horizontal: screenWidth * 0.02, vertical: 8),
+                child: ProficiencyList(
+                  character: character,
+                  slug: slug,
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.symmetric(
+                    horizontal: screenWidth * 0.02, vertical: 8),
+                child: FeatsList(
+                  character: character,
+                  slug: slug,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
   }
 }

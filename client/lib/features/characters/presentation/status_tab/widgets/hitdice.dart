@@ -259,8 +259,11 @@ class HitDice extends StatelessWidget {
             padding: const EdgeInsets.all(8.0),
             child: Column(
               children: [
-                Text('Hit Dice  ($hd)',
-                    style: Theme.of(context).textTheme.titleSmall),
+                Text(
+                  'Hit Dice\n($hd)',
+                  style: Theme.of(context).textTheme.titleSmall,
+                  textAlign: TextAlign.center,
+                ),
                 const SizedBox(height: 8),
                 Column(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,

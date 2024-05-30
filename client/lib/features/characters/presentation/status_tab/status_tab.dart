@@ -5,6 +5,7 @@ import 'package:dnd5e_dm_tools/features/characters/bloc/character_events.dart';
 import 'package:dnd5e_dm_tools/features/characters/presentation/status_tab/widgets/action_menu/action_menu.dart';
 import 'package:dnd5e_dm_tools/features/characters/presentation/status_tab/widgets/hitdice.dart';
 import 'package:dnd5e_dm_tools/features/characters/presentation/status_tab/widgets/hp.dart';
+import 'package:dnd5e_dm_tools/features/characters/presentation/status_tab/widgets/inspiration.dart';
 import 'package:dnd5e_dm_tools/features/characters/presentation/status_tab/widgets/spellbook.dart';
 import 'package:dnd5e_dm_tools/features/characters/presentation/status_tab/widgets/stats.dart';
 import 'package:dnd5e_dm_tools/features/rules/rules_cubit.dart';
@@ -104,7 +105,14 @@ class StatusTab extends StatelessWidget {
                   direction: Axis.vertical,
                   children: [
                     Hitpoints(character: character, slug: slug),
-                    HitDice(character: character, classs: classs, slug: slug),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        HitDice(
+                            character: character, classs: classs, slug: slug),
+                        Inspiration(character: character, slug: slug)
+                      ],
+                    ),
                   ],
                 ),
                 const SizedBox(width: 16),
@@ -167,9 +175,19 @@ class StatusTab extends StatelessWidget {
               children: [
                 Flex(
                   direction: Axis.vertical,
+                  mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     Hitpoints(character: character, slug: slug),
-                    HitDice(character: character, classs: classs, slug: slug),
+                    SizedBox(
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          HitDice(
+                              character: character, classs: classs, slug: slug),
+                          Inspiration(character: character, slug: slug),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
                 Flex(
@@ -234,23 +252,13 @@ class StatusTab extends StatelessWidget {
                             CharacterUpdate(
                               character: character,
                               slug: slug,
+                              persistData: true,
                               offline: context
                                   .read<SettingsCubit>()
                                   .state
                                   .offlineMode,
                             ),
                           ),
-                      onDone: () {
-                        context.read<CharacterBloc>().add(
-                              PersistCharacter(
-                                offline: context
-                                    .read<SettingsCubit>()
-                                    .state
-                                    .offlineMode,
-                              ),
-                            );
-                        Navigator.of(context).pop();
-                      },
                     ),
                     actions: [
                       TextButton(

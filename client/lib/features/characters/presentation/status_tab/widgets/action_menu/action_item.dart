@@ -199,33 +199,43 @@ class ActionItemState extends State<ActionItem> {
       final actionFields = _buildFields(context);
       children.addAll(actionFields);
 
-      if (children.length < 4) {
-        return Wrap(
-          crossAxisAlignment: WrapCrossAlignment.center,
-          children: List.generate(children.length, (index) {
-            return Card.outlined(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                child: children[index],
-              ),
+      return LayoutBuilder(
+        builder: (context, constraints) {
+          int crossAxisCount = 4 + ((constraints.maxWidth - 300) / 100).floor();
+          print('Cross Axis Count: $crossAxisCount');
+          print('width: ${constraints.maxWidth}');
+          if (constraints.maxWidth > 900) {
+            return Wrap(
+              crossAxisAlignment: WrapCrossAlignment.start,
+              runAlignment: WrapAlignment.start,
+              children: List.generate(children.length, (index) {
+                return Card.outlined(
+                  child: Padding(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    child: children[index],
+                  ),
+                );
+              }),
             );
-          }),
-        );
-      }
-
-      return StaggeredGrid.count(
-        crossAxisCount: 4,
-        children: List.generate(children.length, (index) {
-          return StaggeredGridTile.fit(
-            crossAxisCellCount: 1,
-            child: Card.outlined(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                child: children[index],
-              ),
-            ),
-          );
-        }),
+          } else {
+            return StaggeredGrid.count(
+              crossAxisCount: crossAxisCount,
+              children: List.generate(children.length, (index) {
+                return StaggeredGridTile.fit(
+                  crossAxisCellCount: 1,
+                  child: Card.outlined(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
+                      child: children[index],
+                    ),
+                  ),
+                );
+              }),
+            );
+          }
+        },
       );
     }
 
@@ -240,6 +250,7 @@ class ActionItemState extends State<ActionItem> {
         },
         behavior: HitTestBehavior.opaque,
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(
               height: 60,

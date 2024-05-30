@@ -42,140 +42,146 @@ class SpellInfoDialogState extends State<SpellInfoDialog> {
     return AlertDialog(
       title: Text(spell['name']),
       content: SingleChildScrollView(
-        child: Column(
-          children: <Widget>[
-            Row(
-              children: <Widget>[
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(
+            maxWidth: 700,
+          ),
+          child: Column(
+            children: <Widget>[
+              Row(
+                children: <Widget>[
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(spell['level'],
+                          style: Theme.of(context).textTheme.bodySmall!),
+                      Text(spell['school'],
+                          style: Theme.of(context).textTheme.bodySmall!),
+                    ],
+                  ),
+                  const Spacer(),
+                  if (spell['document__title'] != null)
+                    Text(spell['document__title'],
+                        style: Theme.of(context).textTheme.bodySmall),
+                ],
+              ),
+              const SizedBox(
+                height: 24,
+                child: Divider(),
+              ),
+              DescriptionText(
+                inputText: spell['desc'],
+                baseStyle: Theme.of(context).textTheme.bodyMedium!,
+              ),
+              const SizedBox(
+                height: 24,
+                child: Divider(),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 4),
+                child: Row(
                   children: [
-                    Text(spell['level'],
-                        style: Theme.of(context).textTheme.bodySmall!),
-                    Text(spell['school'],
-                        style: Theme.of(context).textTheme.bodySmall!),
-                  ],
-                ),
-                const Spacer(),
-                if (spell['document__title'] != null)
-                  Text(spell['document__title'],
-                      style: Theme.of(context).textTheme.bodySmall),
-              ],
-            ),
-            const SizedBox(
-              height: 24,
-              child: Divider(),
-            ),
-            DescriptionText(
-              inputText: spell['desc'],
-              baseStyle: Theme.of(context).textTheme.bodyMedium!,
-            ),
-            const SizedBox(
-              height: 24,
-              child: Divider(),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(bottom: 4),
-              child: Row(
-                children: [
-                  if (spell['concentration'] != null &&
-                      spell['concentration'] == 'yes')
-                    Text(
-                      'Concentration',
-                      style: Theme.of(context)
-                          .textTheme
-                          .bodySmall!
-                          .copyWith(fontWeight: FontWeight.bold),
-                    ),
-                  if (spell['ritual'] != null && spell['ritual'] == 'yes')
-                    Padding(
-                      padding: const EdgeInsets.only(left: 16.0),
-                      child: Text(
-                        'Ritual',
+                    if (spell['concentration'] != null &&
+                        spell['concentration'] == 'yes')
+                      Text(
+                        'Concentration',
                         style: Theme.of(context)
                             .textTheme
                             .bodySmall!
                             .copyWith(fontWeight: FontWeight.bold),
                       ),
-                    ),
-                ],
+                    if (spell['ritual'] != null && spell['ritual'] == 'yes')
+                      Padding(
+                        padding: const EdgeInsets.only(left: 16.0),
+                        child: Text(
+                          'Ritual',
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodySmall!
+                              .copyWith(fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                  ],
+                ),
               ),
-            ),
-            SizedBox(
-              width: double.infinity,
-              child: Wrap(
-                direction: Axis.horizontal,
-                spacing: 16,
-                children: [
-                  if (spell['range'] != null && spell['range'].isNotEmpty)
-                    Flex(
-                      mainAxisSize: MainAxisSize.min,
-                      direction: Axis.horizontal,
-                      children: [
-                        Text(
-                          'Range: ',
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodySmall!
-                              .copyWith(fontWeight: FontWeight.bold),
-                        ),
-                        Text(spell['range']),
-                      ],
-                    ),
-                  if (spell['components'] != null &&
-                      spell['components'].isNotEmpty)
-                    Flex(
-                      mainAxisSize: MainAxisSize.min,
-                      direction: Axis.horizontal,
-                      children: [
-                        Text(
-                          'Components: ',
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodySmall!
-                              .copyWith(fontWeight: FontWeight.bold),
-                        ),
-                        Text(spell['components']),
-                      ],
-                    ),
-                  if (spell['duration'] != null && spell['duration'].isNotEmpty)
-                    Flex(
-                      mainAxisSize: MainAxisSize.min,
-                      direction: Axis.horizontal,
-                      children: [
-                        Text(
-                          'Duration: ',
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodySmall!
-                              .copyWith(fontWeight: FontWeight.bold),
-                        ),
-                        Text(spell['duration']),
-                      ],
-                    ),
-                  if (spell['casting_time'] != null &&
-                      spell['casting_time'].isNotEmpty)
-                    Flex(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      direction: Axis.horizontal,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.only(top: 3),
-                          child: Text(
-                            'Casting Time: ',
+              SizedBox(
+                width: double.infinity,
+                child: Wrap(
+                  direction: Axis.horizontal,
+                  spacing: 16,
+                  children: [
+                    if (spell['range'] != null && spell['range'].isNotEmpty)
+                      Flex(
+                        mainAxisSize: MainAxisSize.min,
+                        direction: Axis.horizontal,
+                        children: [
+                          Text(
+                            'Range: ',
                             style: Theme.of(context)
                                 .textTheme
                                 .bodySmall!
                                 .copyWith(fontWeight: FontWeight.bold),
                           ),
-                        ),
-                        Flexible(child: Text(spell['casting_time'])),
-                      ],
-                    ),
-                ],
+                          Text(spell['range']),
+                        ],
+                      ),
+                    if (spell['components'] != null &&
+                        spell['components'].isNotEmpty)
+                      Flex(
+                        mainAxisSize: MainAxisSize.min,
+                        direction: Axis.horizontal,
+                        children: [
+                          Text(
+                            'Components: ',
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodySmall!
+                                .copyWith(fontWeight: FontWeight.bold),
+                          ),
+                          Text(spell['components']),
+                        ],
+                      ),
+                    if (spell['duration'] != null &&
+                        spell['duration'].isNotEmpty)
+                      Flex(
+                        mainAxisSize: MainAxisSize.min,
+                        direction: Axis.horizontal,
+                        children: [
+                          Text(
+                            'Duration: ',
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodySmall!
+                                .copyWith(fontWeight: FontWeight.bold),
+                          ),
+                          Text(spell['duration']),
+                        ],
+                      ),
+                    if (spell['casting_time'] != null &&
+                        spell['casting_time'].isNotEmpty)
+                      Flex(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        direction: Axis.horizontal,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(top: 3),
+                            child: Text(
+                              'Casting Time: ',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall!
+                                  .copyWith(fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                          Flexible(child: Text(spell['casting_time'])),
+                        ],
+                      ),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
       actions: <Widget>[
