@@ -26,6 +26,7 @@ class BackpackWidget extends StatefulWidget {
 class _BackpackWidgetState extends State<BackpackWidget> {
   String sortCriteria = 'name';
   String filterCriteria = 'all';
+  Map<String, Map<String, dynamic>> items = {};
 
   List<DropdownMenuItem<String>> get dropdownItems {
     return [
@@ -42,133 +43,124 @@ class _BackpackWidgetState extends State<BackpackWidget> {
           showDialog(
             context: context,
             builder: (BuildContext context) {
-              int quantity = 1;
-              Timer? timer;
-
-              return StatefulBuilder(
-                builder: (context, setState) {
-                  return AlertDialog(
-                    title: const Text('Quantity'),
-                    content: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: <Widget>[
-                        GestureDetector(
-                          child: const Icon(Icons.remove_circle_outline),
-                          onTap: () {
-                            if (quantity > 1) {
-                              setState(() => quantity--);
-                            }
-                          },
-                          onLongPressStart: (details) {
-                            timer = Timer.periodic(
-                                const Duration(milliseconds: 25), (t) {
-                              setState(() {
-                                quantity = max(1, quantity - 1);
-                              });
-                            });
-                          },
-                          onLongPressEnd: (details) {
-                            timer?.cancel();
-                          },
-                        ),
-                        SizedBox(
-                          width: 100,
-                          child: TextField(
-                            textAlign: TextAlign.center,
-                            decoration: const InputDecoration(
-                              border: OutlineInputBorder(),
-                            ),
-                            controller:
-                                TextEditingController(text: quantity.toString())
-                                  ..selection = TextSelection.collapsed(
-                                      offset: quantity.toString().length),
-                            keyboardType: TextInputType.number,
-                            onChanged: (value) {
-                              int newQuantity = int.tryParse(value) ?? 1;
-                              setState(() => quantity = max(1, newQuantity));
-                            },
-                          ),
-                        ),
-                        GestureDetector(
-                          child: const Icon(Icons.add_circle_outline),
-                          onTap: () {
-                            setState(() => quantity++);
-                          },
-                          onLongPressStart: (details) {
-                            timer = Timer.periodic(
-                                const Duration(milliseconds: 50), (t) {
-                              setState(() {
-                                quantity++;
-                              });
-                            });
-                          },
-                          onLongPressEnd: (details) {
-                            timer?.cancel();
-                          },
-                        ),
-                      ],
-                    ),
-                    actionsAlignment: MainAxisAlignment.spaceBetween,
-                    actions: <Widget>[
-                      TextButton(
-                        child: const Icon(Icons.close),
-                        onPressed: () {
-                          timer?.cancel();
-                          Navigator.pop(context);
-                        },
-                      ),
-                      TextButton(
-                        child: const Icon(Icons.done),
-                        onPressed: () {
-                          timer?.cancel();
-                          final currQuantity = widget.character['backpack']
-                                      ['items'][itemSlug] !=
-                                  null
-                              ? widget.character['backpack']['items'][itemSlug]
-                                  ['quantity']
-                              : 0;
-                          widget.character['backpack']['items'][itemSlug] = {
-                            'quantity': currQuantity + quantity,
-                            'isEquipped': false,
-                          };
-                          context.read<CharacterBloc>().add(
-                                CharacterUpdate(
-                                  character: widget.character,
-                                  slug: widget.slug,
-                                  persistData: true,
-                                  offline: context
-                                      .read<SettingsCubit>()
-                                      .state
-                                      .offlineMode,
-                                ),
-                              );
-                          Navigator.pop(context);
-                          Navigator.pop(context);
-                        },
-                      ),
-                    ],
-                  );
-                },
-              );
+              return _buildQuantityDialog(context, itemSlug);
             },
           );
         } else {
-          widget.character['backpack']['items'][itemSlug] = {
-            'quantity': 1,
-            'isEquipped': false,
-          };
-          context.read<CharacterBloc>().add(
-                CharacterUpdate(
-                  character: widget.character,
-                  slug: widget.slug,
-                  persistData: true,
-                  offline: context.read<SettingsCubit>().state.offlineMode,
-                ),
-              );
+          _addItemToBackpack(itemSlug, 1, isEquipped: false);
           Navigator.pop(context);
         }
       },
     );
+  }
+
+  StatefulBuilder _buildQuantityDialog(BuildContext context, String itemSlug) {
+    int quantity = 1;
+    Timer? timer;
+
+    return StatefulBuilder(
+      builder: (context, setState) {
+        return AlertDialog(
+          title: const Text('Quantity'),
+          content: _buildQuantitySelector(setState, quantity, timer),
+          actionsAlignment: MainAxisAlignment.spaceBetween,
+          actions: <Widget>[
+            TextButton(
+              child: const Icon(Icons.close),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
+            TextButton(
+              child: const Icon(Icons.done),
+              onPressed: () {
+                _addItemToBackpack(itemSlug, quantity);
+                Navigator.pop(context);
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Row _buildQuantitySelector(StateSetter setState, int quantity, Timer? timer) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: <Widget>[
+        GestureDetector(
+          child: const Icon(Icons.remove_circle_outline),
+          onTap: () {
+            if (quantity > 1) {
+              setState(() => quantity--);
+            }
+          },
+          onLongPressStart: (details) {
+            timer = Timer.periodic(const Duration(milliseconds: 25), (t) {
+              setState(() {
+                quantity = max(1, quantity - 1);
+              });
+            });
+          },
+          onLongPressEnd: (details) {
+            timer?.cancel();
+          },
+        ),
+        SizedBox(
+          width: 100,
+          child: TextField(
+            textAlign: TextAlign.center,
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+            ),
+            controller: TextEditingController(text: quantity.toString())
+              ..selection =
+                  TextSelection.collapsed(offset: quantity.toString().length),
+            keyboardType: TextInputType.number,
+            onChanged: (value) {
+              int newQuantity = int.tryParse(value) ?? 1;
+              setState(() => quantity = max(1, newQuantity));
+            },
+          ),
+        ),
+        GestureDetector(
+          child: const Icon(Icons.add_circle_outline),
+          onTap: () {
+            setState(() => quantity++);
+          },
+          onLongPressStart: (details) {
+            timer = Timer.periodic(const Duration(milliseconds: 50), (t) {
+              setState(() {
+                quantity++;
+              });
+            });
+          },
+          onLongPressEnd: (details) {
+            timer?.cancel();
+          },
+        ),
+      ],
+    );
+  }
+
+  void _addItemToBackpack(String itemSlug, int quantity,
+      {bool isEquipped = false}) {
+    final currQuantity = widget.character['backpack']['items'][itemSlug] != null
+        ? widget.character['backpack']['items'][itemSlug]['quantity']
+        : 0;
+    widget.character['backpack']['items'][itemSlug] = {
+      'quantity': currQuantity + quantity,
+      'isEquipped': isEquipped,
+    };
+    context.read<CharacterBloc>().add(
+          CharacterUpdate(
+            character: widget.character,
+            slug: widget.slug,
+            persistData: true,
+            offline: context.read<SettingsCubit>().state.offlineMode,
+          ),
+        );
   }
 
   bool applyFilter(Map<String, dynamic> item, String filter, bool isEquipped) {
@@ -222,8 +214,9 @@ class _BackpackWidgetState extends State<BackpackWidget> {
     final Map<String, Map> backpackItems = backpack['items'] != null
         ? Map<String, Map>.from(backpack['items'])
         : {};
-    final Map<String, Map<String, dynamic>> items = {};
     final screenWidth = MediaQuery.of(context).size.width;
+
+    items.clear(); // Clear previous items before updating
 
     for (final backpackItem in backpackItems.entries) {
       final item = context.read<RulesCubit>().getItem(backpackItem.key);
@@ -243,163 +236,213 @@ class _BackpackWidgetState extends State<BackpackWidget> {
 
     final sortedItems = sortItems(items, sortCriteria);
 
-    return Column(
-      children: [
-        Wrap(
-          spacing: 8.0,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final bool isWide = constraints.maxWidth > 1200;
+        final double horizontalPadding = isWide ? screenWidth * 0.1 : 16;
+
+        return Column(
           children: [
-            ChoiceChip(
-              label: const Text('All Items'),
-              selected: filterCriteria == 'all',
-              onSelected: (bool selected) {
-                setState(() {
-                  filterCriteria = 'all';
-                });
-              },
-            ),
-            ChoiceChip(
-              label: const Text('Equipped'),
-              selected: filterCriteria == 'equipped',
-              onSelected: (bool selected) {
-                setState(() {
-                  filterCriteria = 'equipped';
-                });
-              },
-            ),
-            ChoiceChip(
-              label: const Text('Can Equip'),
-              selected: filterCriteria == 'equippable',
-              onSelected: (bool selected) {
-                setState(() {
-                  filterCriteria = 'equippable';
-                });
-              },
-            ),
-            DropdownButton<String>(
-              value: sortCriteria,
-              items: dropdownItems,
-              onChanged: (String? value) {
-                setState(() {
-                  sortCriteria = value ?? 'name';
-                });
-              },
+            _buildFilters(horizontalPadding),
+            Expanded(
+              child: Card(
+                margin: EdgeInsets.symmetric(
+                    horizontal: horizontalPadding, vertical: 8),
+                child: isWide
+                    ? _buildWideLayout(sortedItems)
+                    : _buildNarrowLayout(sortedItems),
+              ),
             ),
           ],
-        ),
+        );
+      },
+    );
+  }
+
+  Widget _buildFilters(double horizontalPadding) {
+    return Padding(
+      padding: EdgeInsets.only(
+          right: horizontalPadding, left: horizontalPadding, top: 8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Wrap(
+            spacing: 8.0,
+            children: [
+              ChoiceChip(
+                label: const Text('All Items'),
+                selected: filterCriteria == 'all',
+                onSelected: (bool selected) {
+                  setState(() {
+                    filterCriteria = 'all';
+                  });
+                },
+              ),
+              ChoiceChip(
+                label: const Text('Equipped'),
+                selected: filterCriteria == 'equipped',
+                onSelected: (bool selected) {
+                  setState(() {
+                    filterCriteria = 'equipped';
+                  });
+                },
+              ),
+              ChoiceChip(
+                label: const Text('Can Equip'),
+                selected: filterCriteria == 'equippable',
+                onSelected: (bool selected) {
+                  setState(() {
+                    filterCriteria = 'equippable';
+                  });
+                },
+              ),
+            ],
+          ),
+          DropdownButton<String>(
+            value: sortCriteria,
+            items: dropdownItems,
+            onChanged: (String? value) {
+              setState(() {
+                sortCriteria = value ?? 'name';
+              });
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildWideLayout(Map<String, Map<String, dynamic>> sortedItems) {
+    return Row(
+      children: [
         Expanded(
-          child: Card(
-            margin: EdgeInsets.symmetric(
-                horizontal: screenWidth * 0.1, vertical: 8),
-            child: Column(
-              children: [
-                Expanded(
-                  child: ListView.separated(
-                    itemCount: sortedItems.length,
-                    itemBuilder: (context, index) {
-                      final backpackItem = sortedItems.entries.elementAt(index);
-                      final item = Map<String, dynamic>.from(
-                          items[backpackItem.key] ?? {});
-                      if (item.isEmpty) {
-                        return const SizedBox.shrink();
-                      }
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8),
-                        child: ItemWidget(
-                          item: item,
-                          quantity: backpackItem.value['quantity'],
-                          onQuantityChange: (quantity) {
-                            if (quantity == 0) {
-                              widget.character['backpack']['items']
-                                  .remove(backpackItem.key);
-                            } else {
-                              widget.character['backpack']['items']
-                                  [backpackItem.key]['quantity'] = quantity;
-                            }
-                            context.read<CharacterBloc>().add(
-                                  CharacterUpdate(
-                                    character: widget.character,
-                                    slug: widget.slug,
-                                    persistData: true,
-                                    offline: context
-                                        .read<SettingsCubit>()
-                                        .state
-                                        .offlineMode,
-                                  ),
-                                );
-                          },
-                          isEquipped: backpackItem.value['isEquipped'],
-                          onEquip: (itemKey, isEquipped) {
-                            widget.character['backpack']['items'][itemKey]
-                                ['isEquipped'] = isEquipped;
-                            context.read<CharacterBloc>().add(
-                                  CharacterUpdate(
-                                    character: widget.character,
-                                    slug: widget.slug,
-                                    persistData: true,
-                                    offline: context
-                                        .read<SettingsCubit>()
-                                        .state
-                                        .offlineMode,
-                                  ),
-                                );
-                          },
-                        ),
-                      );
-                    },
-                    separatorBuilder: (context, index) => const SizedBox(
-                      child: Divider(
-                        height: 0,
-                      ),
-                    ),
-                  ),
+          flex: 3,
+          child: _buildItemList(sortedItems),
+        ),
+        const VerticalDivider(),
+        SizedBox(
+          width: 200,
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(right: 16.0),
+                child: CoinsWidget(
+                  character: widget.character,
+                  slug: widget.slug,
                 ),
-                const SizedBox(
-                  height: 8,
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 16),
-                    child: Divider(),
-                  ),
-                ),
-                Row(
-                  children: [
-                    Expanded(
-                      flex: 3,
-                      child: CoinsWidget(
-                        character: widget.character,
-                        slug: widget.slug,
-                      ),
-                    ),
-                    const SizedBox(
-                      width: 8,
-                      height: 80,
-                      child: VerticalDivider(),
-                    ),
-                    Expanded(
-                        child: Padding(
-                      padding: const EdgeInsets.only(right: 16.0),
-                      child: buildAddItemButton(),
-                    ))
-                  ],
-                ),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.only(
-                            left: 16.0, top: 8.0, bottom: 8.0),
-                        child: Text(
-                          'Total Weight: ${getTotalWeight(backpackItems, items)}',
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
-                      ),
-                    ),
-                  ],
-                )
-              ],
-            ),
+              ),
+              buildAddItemButton(),
+            ],
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildNarrowLayout(Map<String, Map<String, dynamic>> sortedItems) {
+    return Column(
+      children: [
+        Expanded(
+          child: _buildItemList(sortedItems),
+        ),
+        const SizedBox(
+          height: 8,
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16),
+            child: Divider(),
+          ),
+        ),
+        Row(
+          children: [
+            Expanded(
+              flex: 3,
+              child: CoinsWidget(
+                character: widget.character,
+                slug: widget.slug,
+              ),
+            ),
+            const SizedBox(
+              width: 8,
+              height: 80,
+              child: VerticalDivider(),
+            ),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.only(right: 16.0),
+                child: buildAddItemButton(),
+              ),
+            )
+          ],
+        ),
+        Row(
+          children: [
+            Expanded(
+              child: Padding(
+                padding:
+                    const EdgeInsets.only(left: 16.0, top: 8.0, bottom: 8.0),
+                child: Text(
+                  'Total Weight: ${getTotalWeight(widget.character['backpack']['items'], sortedItems)}',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  ListView _buildItemList(Map<String, Map<String, dynamic>> sortedItems) {
+    return ListView.separated(
+      itemCount: sortedItems.length,
+      itemBuilder: (context, index) {
+        final backpackItem = sortedItems.entries.elementAt(index);
+        final item = Map<String, dynamic>.from(items[backpackItem.key] ?? {});
+        if (item.isEmpty) {
+          return const SizedBox.shrink();
+        }
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: ItemWidget(
+            item: item,
+            quantity: backpackItem.value['quantity'],
+            onQuantityChange: (quantity) {
+              if (quantity == 0) {
+                widget.character['backpack']['items'].remove(backpackItem.key);
+              } else {
+                widget.character['backpack']['items'][backpackItem.key]
+                    ['quantity'] = quantity;
+              }
+              context.read<CharacterBloc>().add(
+                    CharacterUpdate(
+                      character: widget.character,
+                      slug: widget.slug,
+                      persistData: true,
+                      offline: context.read<SettingsCubit>().state.offlineMode,
+                    ),
+                  );
+            },
+            isEquipped: backpackItem.value['isEquipped'],
+            onEquip: (itemKey, isEquipped) {
+              widget.character['backpack']['items'][itemKey]['isEquipped'] =
+                  isEquipped;
+              context.read<CharacterBloc>().add(
+                    CharacterUpdate(
+                      character: widget.character,
+                      slug: widget.slug,
+                      persistData: true,
+                      offline: context.read<SettingsCubit>().state.offlineMode,
+                    ),
+                  );
+            },
+          ),
+        );
+      },
+      separatorBuilder: (context, index) => const SizedBox(
+        child: Divider(
+          height: 0,
+        ),
+      ),
     );
   }
 }
