@@ -81,7 +81,9 @@ class AddItemButtonState extends State<AddItemButton> {
 
   @override
   Widget build(BuildContext context) {
-    return TextButton(
+    final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context).size.width;
+    return IconButton(
       onPressed: () {
         showDialog(
           context: context,
@@ -89,73 +91,79 @@ class AddItemButtonState extends State<AddItemButton> {
             return Dialog(
               child: StatefulBuilder(
                 builder: (BuildContext context, StateSetter setDialogState) {
-                  return Flex(
-                    direction: Axis.vertical,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 16, horizontal: 24),
-                        child: TextField(
-                          controller: textEditingController,
-                          onChanged: (value) {
-                            setDialogState(() {});
-                          },
-                          decoration: InputDecoration(
-                            labelText: 'Search Items',
-                            border: const OutlineInputBorder(),
-                            suffixIcon: textEditingController.text.isEmpty
-                                ? const Icon(Icons.search)
-                                : IconButton(
-                                    icon: const Icon(Icons.clear),
-                                    onPressed: () {
-                                      textEditingController.clear();
-                                      setDialogState(() {});
-                                    },
-                                  ),
-                          ),
-                        ),
-                      ),
-                      Visibility(
-                        visible: textEditingController.text.isNotEmpty,
-                        child: Expanded(
-                          child: Builder(
-                            builder: (context) {
-                              final items =
-                                  context.read<RulesCubit>().getAllItems();
-                              final searchText =
-                                  textEditingController.text.toLowerCase();
-                              final searchResults =
-                                  _buildSearchResults(items, searchText);
-                              return Padding(
-                                padding: const EdgeInsets.only(
-                                    left: 12, right: 12, bottom: 24),
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    border: Border.all(),
-                                    borderRadius: BorderRadius.circular(8.0),
-                                  ),
-                                  child: searchResults.isEmpty
-                                      ? const Center(
-                                          child: Text('No items found'),
-                                        )
-                                      : ListView.separated(
-                                          itemCount: searchResults.length,
-                                          itemBuilder: (context, index) =>
-                                              searchResults[index],
-                                          separatorBuilder: (context, index) =>
-                                              const Padding(
-                                            padding: EdgeInsets.symmetric(
-                                                horizontal: 16.0),
-                                            child: Divider(),
-                                          ),
-                                        ),
-                                ),
-                              );
+                  return SizedBox(
+                    width: screenWidth * 0.8,
+                    height: screenHeight * 0.5,
+                    child: Flex(
+                      direction: Axis.vertical,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 16, horizontal: 24),
+                          child: TextField(
+                            autofocus: true,
+                            controller: textEditingController,
+                            onChanged: (value) {
+                              setDialogState(() {});
                             },
+                            decoration: InputDecoration(
+                              labelText: 'Search Items',
+                              border: const OutlineInputBorder(),
+                              suffixIcon: textEditingController.text.isEmpty
+                                  ? const Icon(Icons.search)
+                                  : IconButton(
+                                      icon: const Icon(Icons.clear),
+                                      onPressed: () {
+                                        textEditingController.clear();
+                                        setDialogState(() {});
+                                      },
+                                    ),
+                            ),
                           ),
                         ),
-                      ),
-                    ],
+                        Visibility(
+                          visible: textEditingController.text.isNotEmpty,
+                          child: Expanded(
+                            child: Builder(
+                              builder: (context) {
+                                final items =
+                                    context.read<RulesCubit>().getAllItems();
+                                final searchText =
+                                    textEditingController.text.toLowerCase();
+                                final searchResults =
+                                    _buildSearchResults(items, searchText);
+                                return Padding(
+                                  padding: const EdgeInsets.only(
+                                      left: 12, right: 12, bottom: 24),
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      border: Border.all(),
+                                      borderRadius: BorderRadius.circular(8.0),
+                                    ),
+                                    child: searchResults.isEmpty
+                                        ? const Center(
+                                            child: Text('No items found'),
+                                          )
+                                        : ListView.separated(
+                                            itemCount: searchResults.length,
+                                            itemBuilder: (context, index) =>
+                                                searchResults[index],
+                                            separatorBuilder:
+                                                (context, index) =>
+                                                    const Padding(
+                                              padding: EdgeInsets.symmetric(
+                                                  horizontal: 16.0),
+                                              child: Divider(),
+                                            ),
+                                          ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   );
                 },
               ),
@@ -163,7 +171,7 @@ class AddItemButtonState extends State<AddItemButton> {
           },
         );
       },
-      child: const Icon(Icons.add_box_outlined, size: 36),
+      icon: const Icon(Icons.add_box_outlined, size: 36),
     );
   }
 

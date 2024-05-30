@@ -31,7 +31,7 @@ class EquipTab extends StatelessWidget {
           SizedBox(
             height: MediaQuery.of(context).size.height * 0.75 < 300
                 ? 500
-                : MediaQuery.of(context).size.height * 0.75,
+                : MediaQuery.of(context).size.height * 0.9,
             child: BackpackWidget(
               character: character,
               slug: slug,

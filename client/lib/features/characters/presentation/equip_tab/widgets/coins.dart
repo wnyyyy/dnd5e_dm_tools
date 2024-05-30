@@ -163,24 +163,44 @@ class CoinsWidget extends StatelessWidget {
                       ),
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 8),
-                        child: SizedBox(
-                          width: 75,
-                          child: TextField(
-                            textAlign: TextAlign.center,
-                            decoration: const InputDecoration(
-                              border: OutlineInputBorder(),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              type == 'cp'
+                                  ? FontAwesome5.coins
+                                  : type == 'sp'
+                                      ? FontAwesome5.coins
+                                      : FontAwesome5.coins,
+                              color: type == 'cp'
+                                  ? Theme.of(context).copperColor
+                                  : type == 'sp'
+                                      ? Theme.of(context).silverColor
+                                      : Theme.of(context).goldColor,
+                              size: 20,
                             ),
-                            controller: TextEditingController(
-                                text: coinValue.toString())
-                              ..selection = TextSelection.collapsed(
-                                  offset: coinValue.toString().length),
-                            keyboardType: TextInputType.number,
-                            onChanged: (value) {
-                              int newQuantity =
-                                  int.tryParse(value) ?? coinValue;
-                              setState(() => updateCoins(type, newQuantity));
-                            },
-                          ),
+                            const SizedBox(width: 12),
+                            SizedBox(
+                              width: 75,
+                              child: TextField(
+                                textAlign: TextAlign.center,
+                                decoration: const InputDecoration(
+                                  border: OutlineInputBorder(),
+                                ),
+                                controller: TextEditingController(
+                                    text: coinValue.toString())
+                                  ..selection = TextSelection.collapsed(
+                                      offset: coinValue.toString().length),
+                                keyboardType: TextInputType.number,
+                                onChanged: (value) {
+                                  int newQuantity =
+                                      int.tryParse(value) ?? coinValue;
+                                  setState(
+                                      () => updateCoins(type, newQuantity));
+                                },
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                       GestureDetector(

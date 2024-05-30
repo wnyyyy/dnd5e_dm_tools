@@ -88,9 +88,12 @@ class ItemWidgetState extends State<ItemWidget> {
                   ],
                 ),
               )
-            : Padding(
-                padding: const EdgeInsets.only(top: 8.0),
-                child: Text(getItemDescriptor(widget.item)),
+            : GestureDetector(
+                onTap: () => _onItemTap(context),
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: Text(getItemDescriptor(widget.item)),
+                ),
               ),
         trailing: GestureDetector(
           onTap: () => _onItemTap(context),

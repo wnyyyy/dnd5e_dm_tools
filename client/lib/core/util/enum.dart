@@ -15,6 +15,11 @@ enum EquipmentType {
   scroll,
   music,
   torch,
+  backpack,
+  waterskin,
+  food,
+  bedroll,
+  clothes,
   unknown,
 }
 

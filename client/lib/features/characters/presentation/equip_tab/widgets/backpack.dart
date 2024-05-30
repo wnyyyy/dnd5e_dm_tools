@@ -54,90 +54,87 @@ class _BackpackWidgetState extends State<BackpackWidget> {
     );
   }
 
-  StatefulBuilder _buildQuantityDialog(BuildContext context, String itemSlug) {
+  AlertDialog _buildQuantityDialog(BuildContext context, String itemSlug) {
     int quantity = 1;
     Timer? timer;
+    TextEditingController controller = TextEditingController();
+    controller.text = quantity.toString();
 
-    return StatefulBuilder(
-      builder: (context, setState) {
-        return AlertDialog(
-          title: const Text('Quantity'),
-          content: _buildQuantitySelector(setState, quantity, timer),
-          actionsAlignment: MainAxisAlignment.spaceBetween,
-          actions: <Widget>[
-            TextButton(
-              child: const Icon(Icons.close),
-              onPressed: () {
-                Navigator.pop(context);
-              },
-            ),
-            TextButton(
-              child: const Icon(Icons.done),
-              onPressed: () {
-                _addItemToBackpack(itemSlug, quantity);
-                Navigator.pop(context);
-                Navigator.pop(context);
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
+    void incrementQuantity() {
+      setState(() {
+        quantity++;
+        controller.text = quantity.toString();
+      });
+    }
 
-  Row _buildQuantitySelector(StateSetter setState, int quantity, Timer? timer) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: <Widget>[
-        GestureDetector(
-          child: const Icon(Icons.remove_circle_outline),
-          onTap: () {
-            if (quantity > 1) {
-              setState(() => quantity--);
-            }
-          },
-          onLongPressStart: (details) {
-            timer = Timer.periodic(const Duration(milliseconds: 25), (t) {
-              setState(() {
-                quantity = max(1, quantity - 1);
+    void decrementQuantity() {
+      setState(() {
+        quantity = max(1, quantity - 1);
+        controller.text = quantity.toString();
+      });
+    }
+
+    return AlertDialog(
+      title: const Text('Quantity'),
+      content: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: <Widget>[
+          GestureDetector(
+            onTap: decrementQuantity,
+            onLongPressStart: (details) {
+              timer = Timer.periodic(const Duration(milliseconds: 100), (t) {
+                decrementQuantity();
               });
-            });
-          },
-          onLongPressEnd: (details) {
-            timer?.cancel();
-          },
-        ),
-        SizedBox(
-          width: 100,
-          child: TextField(
-            textAlign: TextAlign.center,
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-            ),
-            controller: TextEditingController(text: quantity.toString())
-              ..selection =
-                  TextSelection.collapsed(offset: quantity.toString().length),
-            keyboardType: TextInputType.number,
-            onChanged: (value) {
-              int newQuantity = int.tryParse(value) ?? 1;
-              setState(() => quantity = max(1, newQuantity));
             },
+            onLongPressEnd: (details) {
+              timer?.cancel();
+            },
+            child: const Icon(Icons.remove_circle_outline),
           ),
-        ),
-        GestureDetector(
-          child: const Icon(Icons.add_circle_outline),
-          onTap: () {
-            setState(() => quantity++);
-          },
-          onLongPressStart: (details) {
-            timer = Timer.periodic(const Duration(milliseconds: 50), (t) {
-              setState(() {
-                quantity++;
+          SizedBox(
+            width: 100,
+            child: TextField(
+              textAlign: TextAlign.center,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+              ),
+              controller: controller,
+              keyboardType: TextInputType.number,
+              onChanged: (value) {
+                int newQuantity = int.tryParse(value) ?? 1;
+                setState(() {
+                  quantity = max(1, newQuantity);
+                });
+              },
+            ),
+          ),
+          GestureDetector(
+            onTap: incrementQuantity,
+            onLongPressStart: (details) {
+              timer = Timer.periodic(const Duration(milliseconds: 100), (t) {
+                incrementQuantity();
               });
-            });
+            },
+            onLongPressEnd: (details) {
+              timer?.cancel();
+            },
+            child: const Icon(Icons.add_circle_outline),
+          ),
+        ],
+      ),
+      actionsAlignment: MainAxisAlignment.spaceBetween,
+      actions: <Widget>[
+        TextButton(
+          child: const Icon(Icons.close),
+          onPressed: () {
+            Navigator.pop(context);
           },
-          onLongPressEnd: (details) {
-            timer?.cancel();
+        ),
+        TextButton(
+          child: const Icon(Icons.done),
+          onPressed: () {
+            _addItemToBackpack(itemSlug, quantity);
+            Navigator.pop(context);
           },
         ),
       ],

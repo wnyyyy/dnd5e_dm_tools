@@ -19,10 +19,17 @@ class ItemDetailsDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final dialogWidth =
+        screenWidth > 600 ? screenWidth * 0.5 : screenWidth * 0.9;
+
     return AlertDialog(
-      content: ItemDetailsDialogContent(
-        item: item,
-        quantity: quantity,
+      content: SizedBox(
+        width: dialogWidth,
+        child: ItemDetailsDialogContent(
+          item: item,
+          quantity: quantity,
+        ),
       ),
       actionsAlignment: MainAxisAlignment.spaceBetween,
       actions: [
@@ -57,19 +64,17 @@ class ItemDetailsDialog extends StatelessWidget {
           actionsAlignment: MainAxisAlignment.spaceBetween,
           actions: <Widget>[
             TextButton(
-              child: const Icon(Icons.delete),
-              onPressed: () {
-                final delQuantity = int.tryParse(inputController.text) ?? 0;
-                final newQuantity = quantity! - delQuantity;
-                onQuantityChange?.call(newQuantity);
-                Navigator.of(context).pop();
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: const Icon(Icons.done),
+              child: const Icon(Icons.close),
               onPressed: () => Navigator.of(context).pop(),
             ),
+            TextButton(
+                child: const Icon(Icons.done),
+                onPressed: () {
+                  final delQuantity = int.tryParse(inputController.text) ?? 0;
+                  final newQuantity = quantity! - delQuantity;
+                  onQuantityChange?.call(newQuantity);
+                  Navigator.of(context).pop();
+                }),
           ],
         );
       },

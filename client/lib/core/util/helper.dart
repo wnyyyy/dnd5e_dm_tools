@@ -1,6 +1,10 @@
+import 'dart:math';
+
 import 'package:dnd5e_dm_tools/core/util/enum.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttericon/font_awesome5_icons.dart';
+import 'package:fluttericon/font_awesome_icons.dart';
+import 'package:fluttericon/maki_icons.dart';
 import 'package:fluttericon/octicons_icons.dart';
 import 'package:fluttericon/rpg_awesome_icons.dart';
 import 'package:petitparser/petitparser.dart';
@@ -275,12 +279,17 @@ EquipmentType getEquipmentType(String name) {
     return EquipmentType.unknown;
   }
   final equipment = name.toLowerCase().replaceAll(' ', '-').replaceAll("'", '');
+  if (equipment.contains('clothes')) {
+    return EquipmentType.clothes;
+  }
+  if (equipment.contains('rations')) {
+    return EquipmentType.food;
+  }
   switch (equipment) {
     case 'torch':
       return EquipmentType.torch;
     case 'ammunition':
       return EquipmentType.ammunition;
-
     case 'adventuring-gear':
       return EquipmentType.adventure;
 
@@ -393,6 +402,16 @@ Icon? itemToIcon(Map<String, dynamic> item) {
 
 Icon equipmentTypeToIcon(EquipmentType type) {
   switch (type) {
+    case EquipmentType.backpack:
+      return const Icon(Maki.shop);
+    case EquipmentType.bedroll:
+      return const Icon(FontAwesome5.bed);
+    case EquipmentType.clothes:
+      return const Icon(FontAwesome5.tshirt);
+    case EquipmentType.food:
+      return const Icon(FontAwesome.food);
+    case EquipmentType.waterskin:
+      return const Icon(RpgAwesome.round_bottom_flask);
     case EquipmentType.ammunition:
       return const Icon(RpgAwesome.arrow_cluster);
     case EquipmentType.adventure:
@@ -400,7 +419,7 @@ Icon equipmentTypeToIcon(EquipmentType type) {
     case EquipmentType.magic:
       return const Icon(RpgAwesome.fairy_wand);
     case EquipmentType.armor:
-      return const Icon(FontAwesome5.tshirt);
+      return const Icon(RpgAwesome.vest);
     case EquipmentType.profession:
       return const Icon(Icons.star);
     case EquipmentType.music:
@@ -424,6 +443,8 @@ Icon equipmentTypeToIcon(EquipmentType type) {
     case EquipmentType.scroll:
       return const Icon(RpgAwesome.book);
     case EquipmentType.torch:
+      return const Icon(RpgAwesome.torch);
+    case EquipmentType.unknown:
       return const Icon(RpgAwesome.torch);
     default:
       return const Icon(Icons.help);
