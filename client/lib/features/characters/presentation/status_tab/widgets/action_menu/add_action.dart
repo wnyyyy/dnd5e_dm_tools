@@ -901,6 +901,11 @@ class _AddActionDialogState extends State<_AddActionDialog> {
                 action['ammo'] = ammo;
                 break;
               case ActionMenuMode.spells:
+                if (_selectedEntry != 'none') {
+                  final spell = _selectedEntry;
+                  action['spell'] = spell;
+                }
+
                 break;
               default:
                 break;

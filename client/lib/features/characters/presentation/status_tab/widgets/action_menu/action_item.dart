@@ -90,7 +90,7 @@ class ActionItemState extends State<ActionItem> {
         resourceCount = 1;
       }
     }
-    final remaining = resourceCount - usedCount; // Use parsed integer value
+    final remaining = resourceCount - usedCount;
     final mustEquip = widget.action['must_equip'] ?? false;
     final resourceTypeStr = widget.action['resource_type'] ?? '';
     final resourceType = ResourceType.values.firstWhere(
@@ -119,7 +119,10 @@ class ActionItemState extends State<ActionItem> {
         canUse = true;
     }
 
-    Widget buildSubtitle(context) {
+    Widget buildSubtitle() {
+      final boldTheme = Theme.of(context).textTheme.labelLarge!.copyWith(
+            fontWeight: FontWeight.bold,
+          );
       List<Widget> children = [];
       switch (type) {
         case ActionMenuMode.abilities:
@@ -192,6 +195,106 @@ class ActionItemState extends State<ActionItem> {
               );
             }
           }
+        case ActionMenuMode.spells:
+          final spellSlug = widget.action['spell'];
+          if (spellSlug == null) {
+            break;
+          }
+          final spell = context.read<RulesCubit>().getSpell(spellSlug);
+          if (spell == null) {
+            break;
+          }
+          final level = spell['level'] ?? '0';
+          final school = spell['school'] ?? '';
+          children.add(
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  school.toString().sentenceCase,
+                  softWrap: false,
+                  style: Theme.of(context).textTheme.labelMedium,
+                ),
+                Text(
+                  '$level',
+                  softWrap: false,
+                  style: Theme.of(context).textTheme.labelMedium,
+                ),
+              ],
+            ),
+          );
+          final ritual = spell['ritual'] ?? "no";
+          if (ritual == "yes") {
+            children.add(
+              Text(
+                'Ritual',
+                style: boldTheme,
+                softWrap: false,
+                textAlign: TextAlign.center,
+              ),
+            );
+          }
+          final concentration = spell['concentration'] ?? "no";
+          if (concentration == "yes") {
+            children.add(
+              Text(
+                'Concentration',
+                style: boldTheme,
+                softWrap: false,
+                textAlign: TextAlign.center,
+              ),
+            );
+          }
+          final vsm = spell['components'] ?? '';
+          var components = '';
+          if (vsm.contains('V')) {
+            components += 'V';
+          }
+          if (vsm.contains('S')) {
+            components += 'S';
+          }
+          if (vsm.contains('M')) {
+            components += 'M';
+          }
+          List<TextSpan> componentSpans = [];
+          bool isFirst = true;
+          for (var component in components.split('')) {
+            TextSpan textSpan = TextSpan(
+              text: component,
+              style: boldTheme,
+            );
+            if (!isFirst) {
+              componentSpans.add(TextSpan(
+                text: ' • ',
+                style: Theme.of(context).textTheme.labelSmall,
+              ));
+            }
+            componentSpans.add(textSpan);
+            isFirst = false;
+          }
+          if (componentSpans.isNotEmpty) {
+            children.add(
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Components',
+                    style: Theme.of(context).textTheme.labelSmall,
+                    softWrap: false,
+                    textAlign: TextAlign.center,
+                  ),
+                  RichText(
+                    text: TextSpan(
+                      children: componentSpans,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            );
+          }
+
+          break;
         default:
           break;
       }
@@ -282,11 +385,12 @@ class ActionItemState extends State<ActionItem> {
             SizedBox(width: screenWidth * 0.8, child: const Divider()),
             Padding(
               padding: const EdgeInsets.only(left: 6, right: 6, bottom: 0),
-              child: buildSubtitle(context),
+              child: buildSubtitle(),
             ),
             AnimatedCrossFade(
               firstChild: Container(),
               secondChild: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   SizedBox(width: screenWidth * 0.8, child: const Divider()),
                   Padding(
