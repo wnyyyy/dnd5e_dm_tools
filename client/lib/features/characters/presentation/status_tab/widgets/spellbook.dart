@@ -369,10 +369,16 @@ class SpellbookState extends State<Spellbook> {
                     children: [
                       if (knownSpells.isNotEmpty)
                         Expanded(
-                          child: ListView(
-                            children: [
-                              for (int i = 0; i < 10; i++) _buildSpellList(i),
-                            ],
+                          child: ConstrainedBox(
+                            constraints: BoxConstraints(
+                              maxWidth: screenWidth * 0.5,
+                              minWidth: screenWidth * 0.5,
+                            ),
+                            child: ListView(
+                              children: [
+                                for (int i = 0; i < 10; i++) _buildSpellList(i),
+                              ],
+                            ),
                           ),
                         ),
                       _buildSpellSlotsList(),

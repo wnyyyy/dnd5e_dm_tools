@@ -31,13 +31,13 @@ class SkillsTab extends StatelessWidget {
     }
     return LayoutBuilder(
       builder: (context, constraints) {
-        if (constraints.maxWidth > 600) {
-          // Landscape Mode
+        if (constraints.maxWidth > 700) {
           return SingleChildScrollView(
             child: Padding(
               padding: const EdgeInsets.all(8.0),
               child: Flex(
                 direction: Axis.horizontal,
+                mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   _buildAttributesList(context),
                   const SizedBox(width: 8),
@@ -53,7 +53,8 @@ class SkillsTab extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(width: 8),
-                  Expanded(
+                  SizedBox(
+                    width: constraints.maxWidth * 0.3 + 100,
                     child: SkillList(
                       character: character,
                       classs: classs,
@@ -65,7 +66,6 @@ class SkillsTab extends StatelessWidget {
             ),
           );
         } else {
-          // Portrait Mode
           return SingleChildScrollView(
             child: Padding(
               padding: const EdgeInsets.all(8.0),
@@ -74,6 +74,7 @@ class SkillsTab extends StatelessWidget {
                 children: [
                   Flex(
                     direction: Axis.horizontal,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       _buildAttributesList(context),
                       const SizedBox(width: 8),
