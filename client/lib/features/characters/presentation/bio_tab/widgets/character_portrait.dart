@@ -95,7 +95,6 @@ class CharacterPortrait extends StatelessWidget {
     final name = character['name'].toString();
     final race = context.read<RulesCubit>().getRace(character['race']);
     final classs = context.read<RulesCubit>().getClass(character['class']);
-    final screenWidth = MediaQuery.of(context).size.width;
     return Column(
       children: [
         ClipRRect(
@@ -119,7 +118,7 @@ class CharacterPortrait extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     name,
@@ -139,11 +138,8 @@ class CharacterPortrait extends StatelessWidget {
                   ),
                 ],
               ),
-              SizedBox(
-                width: screenWidth * 0.1,
-              ),
               Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   GestureDetector(
                     onTap: () => _showRaceModal(context, race),

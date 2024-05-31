@@ -23,7 +23,7 @@ class AddActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return TextButton(
+    return IconButton(
       onPressed: () => showDialog(
         context: context,
         builder: (BuildContext context) => _AddActionDialog(
@@ -35,8 +35,7 @@ class AddActionButton extends StatelessWidget {
         ),
         barrierDismissible: false,
       ),
-      child:
-          actionSlug != null ? const Icon(Icons.edit) : const Icon(Icons.add),
+      icon: actionSlug != null ? const Icon(Icons.edit) : const Icon(Icons.add),
     );
   }
 }
@@ -186,41 +185,68 @@ class _AddActionDialogState extends State<_AddActionDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
     return PopScope(
       child: Dialog(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              Text('Add Action',
-                  style: Theme.of(context).textTheme.titleMedium),
-              const SizedBox(height: 20),
-              ActionCategoryRow(
-                showAll: false,
-                onSelected: (ActionMenuMode selected) {
-                  setState(() {
-                    _selectedEntry = 'none';
-                    _selected = selected;
-                  });
-                },
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxWidth: screenWidth > 900
+                ? screenWidth * 0.5
+                : screenWidth > 600
+                    ? screenWidth * 0.75
+                    : screenWidth * 0.9,
+            minWidth: 400,
+            maxHeight: screenHeight * 0.9,
+            minHeight: screenHeight * 0.9,
+          ),
+          child: Scrollbar(
+            thumbVisibility: true,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        Text('Add Action',
+                            style: Theme.of(context).textTheme.titleMedium),
+                        const SizedBox(height: 20),
+                        ActionCategoryRow(
+                          showAll: false,
+                          onSelected: (ActionMenuMode selected) {
+                            setState(() {
+                              _selectedEntry = 'none';
+                              _selected = selected;
+                            });
+                          },
+                        ),
+                        _buildSectionedList(),
+                        const SizedBox(height: 12),
+                        if (_selected == ActionMenuMode.items) _buildAddItem(),
+                        if (_selected == ActionMenuMode.abilities)
+                          _buildAddAbility(),
+                        const SizedBox(
+                          height: 24,
+                          child: Divider(),
+                        ),
+                        _buildCommonFields(),
+                        _buildExpansionTileFields(),
+                        const SizedBox(
+                          height: 24,
+                          child: Divider(),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 32),
+                      child: _buildActionButtons(context)),
+                ],
               ),
-              _buildSectionedList(),
-              const SizedBox(height: 12),
-              if (_selected == ActionMenuMode.items) _buildAddItem(),
-              if (_selected == ActionMenuMode.abilities) _buildAddAbility(),
-              const SizedBox(
-                height: 24,
-                child: Divider(),
-              ),
-              _buildCommonFields(),
-              _buildExpansionTileFields(),
-              const SizedBox(
-                height: 24,
-                child: Divider(),
-              ),
-              _buildActionButtons(context),
-            ],
+            ),
           ),
         ),
       ),
@@ -342,14 +368,17 @@ class _AddActionDialogState extends State<_AddActionDialog> {
                 setState(() {
                   if (selected) {
                     _selectedEntry = entry.key;
-                    _titleController.text = entry.value is String
-                        ? entry.key
-                        : entry.value['name'] ?? entry.key;
-                    _descriptionController.text = entry.value is String
-                        ? entry.value
-                        : entry.value['description'] ??
-                            entry.value['desc'] ??
-                            '';
+                    if (entry.value is String) {
+                      _titleController.text = entry.key;
+                      _descriptionController.text = entry.value;
+                    } else {
+                      _titleController.text = entry.value['name'] ?? entry.key;
+                      _descriptionController.text =
+                          entry.value['description'] ?? '';
+                      if (entry.value['desc']?.isNotEmpty ?? false) {
+                        _descriptionController.text = entry.value['desc'][0];
+                      }
+                    }
 
                     if (_selected == ActionMenuMode.spells &&
                         entry.value is Map<String, dynamic>) {
@@ -382,49 +411,47 @@ class _AddActionDialogState extends State<_AddActionDialog> {
 
   Widget _buildAddItem() {
     final screenWidth = MediaQuery.of(context).size.width;
-    return Column(
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        Row(
+        Column(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
             Text('Requires\nequipped\nitem',
                 style: Theme.of(context).textTheme.bodySmall,
                 textAlign: TextAlign.center),
-            Padding(
-              padding: EdgeInsets.only(right: screenWidth * 0.2),
-              child: Checkbox(
-                value: _requiresResource,
-                onChanged: (value) {
-                  if (value != null) {
-                    setState(() {
-                      _requiresResource = value;
-                      _resourceType = ResourceType.item;
-                    });
-                  }
-                },
-              ),
+            Checkbox(
+              value: _requiresResource,
+              onChanged: (value) {
+                if (value != null) {
+                  setState(() {
+                    _requiresResource = value;
+                    _resourceType = ResourceType.item;
+                  });
+                }
+              },
             ),
           ],
         ),
-        Row(
+        SizedBox(width: screenWidth > 600 ? 48 : 24),
+        Column(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
             Text('Expendable', style: Theme.of(context).textTheme.bodyMedium),
-            Padding(
-              padding: EdgeInsets.only(right: screenWidth * 0.2),
-              child: Checkbox(
-                value: _expendable,
-                onChanged: (value) {
-                  if (value != null) {
-                    setState(() {
-                      _expendable = value;
-                    });
-                  }
-                },
-              ),
+            Checkbox(
+              value: _expendable,
+              onChanged: (value) {
+                if (value != null) {
+                  setState(() {
+                    _expendable = value;
+                  });
+                }
+              },
             ),
           ],
         ),
+        SizedBox(width: screenWidth > 600 ? 48 : 24),
         Column(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
@@ -480,9 +507,10 @@ class _AddActionDialogState extends State<_AddActionDialog> {
             ),
           ],
         ),
+        const SizedBox(height: 12),
         if (_requiresResource)
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisSize: MainAxisSize.min,
             children: [
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -547,6 +575,7 @@ class _AddActionDialogState extends State<_AddActionDialog> {
                       });
                     },
                   ),
+                  const SizedBox(height: 8),
                   ChoiceChip(
                     label: const Text('Long rest'),
                     selected: _resourceType == ResourceType.longRest,

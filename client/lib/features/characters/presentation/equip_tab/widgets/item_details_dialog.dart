@@ -20,12 +20,18 @@ class ItemDetailsDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    final dialogWidth =
-        screenWidth > 600 ? screenWidth * 0.5 : screenWidth * 0.9;
+    final dialogWidth = screenWidth > 900
+        ? 810.0
+        : (screenWidth * 0.9) < 450.0
+            ? 450.0
+            : screenWidth * 0.9;
 
     return AlertDialog(
-      content: SizedBox(
-        width: dialogWidth,
+      content: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxWidth: dialogWidth,
+          minWidth: 450.0,
+        ),
         child: ItemDetailsDialogContent(
           item: item,
           quantity: quantity,

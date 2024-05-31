@@ -67,6 +67,7 @@ class FeatsListState extends State<FeatsList> {
           }
 
           final uniqueClassFeats = <String, dynamic>{...classFeats};
+          final screenWidth = MediaQuery.of(context).size.width;
 
           return StatefulBuilder(
             builder: (context, setState) {
@@ -99,144 +100,153 @@ class FeatsListState extends State<FeatsList> {
                 ];
               }
 
-              return AlertDialog(
-                title: const Text('Select a Feat'),
-                content: SingleChildScrollView(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Wrap(
-                        spacing: 8.0,
-                        children: [
-                          ChoiceChip(
-                            label: Text(
-                              'Character',
-                              style: Theme.of(context).textTheme.labelSmall,
-                            ),
-                            selected: selectedFilter == 'Character',
-                            onSelected: (bool selected) {
-                              setState(() {
-                                selectedFilter = 'Character';
-                              });
-                            },
-                          ),
-                          ChoiceChip(
-                            label: Text(
-                              'Racial',
-                              style: Theme.of(context).textTheme.labelSmall,
-                            ),
-                            selected: selectedFilter == 'Racial',
-                            onSelected: (bool selected) {
-                              setState(() {
-                                selectedFilter = 'Racial';
-                              });
-                            },
-                          ),
-                          ChoiceChip(
-                            label: Text(
-                              'Class',
-                              style: Theme.of(context).textTheme.labelSmall,
-                            ),
-                            selected: selectedFilter == 'Class',
-                            onSelected: (bool selected) {
-                              setState(() {
-                                selectedFilter = 'Class';
-                              });
-                            },
-                          ),
-                        ],
-                      ),
-                      Visibility(
-                        visible: selectedFilter == 'Racial',
-                        child: DropdownButtonFormField<String>(
-                          items: getDropdownItems(racialFeats),
-                          onChanged: (value) {
-                            setState(() {
-                              if (value != 'none') {
-                                final title = value!;
-                                final desc = racialFeats[value];
-                                updateTextFields(title, desc);
-                              } else {
-                                titleController.clear();
-                                descriptionController.clear();
-                              }
-                            });
-                          },
-                        ),
-                      ),
-                      Visibility(
-                        visible: selectedFilter == 'Class',
-                        child: DropdownButtonFormField<String>(
-                          items: getDropdownItems(uniqueClassFeats),
-                          onChanged: (value) {
-                            setState(() {
-                              if (value != 'none') {
-                                final title = value!;
-                                final desc =
-                                    uniqueClassFeats[value]['description'];
-                                updateTextFields(title, desc);
-                              } else {
-                                titleController.clear();
-                                descriptionController.clear();
-                              }
-                            });
-                          },
-                        ),
-                      ),
-                      Visibility(
-                        visible: selectedFilter == 'Character',
-                        child: DropdownButtonFormField<String>(
-                          items: getDropdownItems(feats),
-                          onChanged: (value) {
-                            setState(() {
-                              if (value != 'none') {
-                                final title = feats[value]['name'];
-                                final desc = feats[value]['desc'];
-                                updateTextFields(title, desc);
-                              } else {
-                                titleController.clear();
-                                descriptionController.clear();
-                              }
-                            });
-                          },
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      TextField(
-                        decoration: const InputDecoration(labelText: 'Title'),
-                        controller: titleController,
-                      ),
-                      TextField(
-                        minLines: 3,
-                        maxLines: null,
-                        decoration:
-                            const InputDecoration(labelText: 'Description'),
-                        controller: descriptionController,
-                      ),
-                    ],
-                  ),
+              return ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxWidth: screenWidth > 900
+                      ? screenWidth * 0.5
+                      : screenWidth > 600
+                          ? screenWidth * 0.75
+                          : screenWidth * 0.9,
                 ),
-                actionsAlignment: MainAxisAlignment.spaceBetween,
-                actions: <Widget>[
-                  TextButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                    child: const Icon(Icons.close),
+                child: AlertDialog(
+                  title: const Text('Select a Feat'),
+                  content: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Wrap(
+                          spacing: 8.0,
+                          children: [
+                            ChoiceChip(
+                              label: Text(
+                                'Character',
+                                style: Theme.of(context).textTheme.labelSmall,
+                              ),
+                              selected: selectedFilter == 'Character',
+                              onSelected: (bool selected) {
+                                setState(() {
+                                  selectedFilter = 'Character';
+                                });
+                              },
+                            ),
+                            ChoiceChip(
+                              label: Text(
+                                'Racial',
+                                style: Theme.of(context).textTheme.labelSmall,
+                              ),
+                              selected: selectedFilter == 'Racial',
+                              onSelected: (bool selected) {
+                                setState(() {
+                                  selectedFilter = 'Racial';
+                                });
+                              },
+                            ),
+                            ChoiceChip(
+                              label: Text(
+                                'Class',
+                                style: Theme.of(context).textTheme.labelSmall,
+                              ),
+                              selected: selectedFilter == 'Class',
+                              onSelected: (bool selected) {
+                                setState(() {
+                                  selectedFilter = 'Class';
+                                });
+                              },
+                            ),
+                          ],
+                        ),
+                        Visibility(
+                          visible: selectedFilter == 'Racial',
+                          child: DropdownButtonFormField<String>(
+                            items: getDropdownItems(racialFeats),
+                            onChanged: (value) {
+                              setState(() {
+                                if (value != 'none') {
+                                  final title = value!;
+                                  final desc = racialFeats[value];
+                                  updateTextFields(title, desc);
+                                } else {
+                                  titleController.clear();
+                                  descriptionController.clear();
+                                }
+                              });
+                            },
+                          ),
+                        ),
+                        Visibility(
+                          visible: selectedFilter == 'Class',
+                          child: DropdownButtonFormField<String>(
+                            items: getDropdownItems(uniqueClassFeats),
+                            onChanged: (value) {
+                              setState(() {
+                                if (value != 'none') {
+                                  final title = value!;
+                                  final desc =
+                                      uniqueClassFeats[value]['description'];
+                                  updateTextFields(title, desc);
+                                } else {
+                                  titleController.clear();
+                                  descriptionController.clear();
+                                }
+                              });
+                            },
+                          ),
+                        ),
+                        Visibility(
+                          visible: selectedFilter == 'Character',
+                          child: DropdownButtonFormField<String>(
+                            items: getDropdownItems(feats),
+                            onChanged: (value) {
+                              setState(() {
+                                if (value != 'none') {
+                                  final title = feats[value]['name'];
+                                  final desc = feats[value]['desc'];
+                                  updateTextFields(title, desc);
+                                } else {
+                                  titleController.clear();
+                                  descriptionController.clear();
+                                }
+                              });
+                            },
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        TextField(
+                          decoration: const InputDecoration(labelText: 'Title'),
+                          controller: titleController,
+                        ),
+                        TextField(
+                          minLines: 3,
+                          maxLines: null,
+                          decoration:
+                              const InputDecoration(labelText: 'Description'),
+                          controller: descriptionController,
+                        ),
+                      ],
+                    ),
                   ),
-                  TextButton(
-                    onPressed: () {
-                      final newFeat = {
-                        'name': titleController.text,
-                        'desc': descriptionController.text
-                      };
-                      characterFeats[titleController.text] = newFeat;
-                      onItemsChanged(characterFeats);
-                      Navigator.of(context).pop();
-                    },
-                    child: const Icon(Icons.add),
-                  ),
-                ],
+                  actionsAlignment: MainAxisAlignment.spaceBetween,
+                  actions: <Widget>[
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      child: const Icon(Icons.close),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        final newFeat = {
+                          'name': titleController.text,
+                          'desc': descriptionController.text
+                        };
+                        characterFeats[titleController.text] = newFeat;
+                        onItemsChanged(characterFeats);
+                        Navigator.of(context).pop();
+                      },
+                      child: const Icon(Icons.add),
+                    ),
+                  ],
+                ),
               );
             },
           );
@@ -248,17 +258,27 @@ class FeatsListState extends State<FeatsList> {
       showDialog(
         context: context,
         builder: (context) {
-          return AlertDialog(
-            title: Text(feat.value['name']),
-            content: DescriptionText(
-                inputText: feat.value['desc'],
-                baseStyle: Theme.of(context).textTheme.bodySmall!),
-            actions: [
-              TextButton(
-                child: const Icon(Icons.close),
-                onPressed: () => Navigator.pop(context),
-              ),
-            ],
+          final screenWidth = MediaQuery.of(context).size.width;
+          return ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: screenWidth > 900
+                  ? screenWidth * 0.5
+                  : screenWidth > 600
+                      ? screenWidth * 0.75
+                      : screenWidth * 0.9,
+            ),
+            child: AlertDialog(
+              title: Text(feat.value['name']),
+              content: DescriptionText(
+                  inputText: feat.value['desc'],
+                  baseStyle: Theme.of(context).textTheme.bodySmall!),
+              actions: [
+                TextButton(
+                  child: const Icon(Icons.close),
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ],
+            ),
           );
         },
       );

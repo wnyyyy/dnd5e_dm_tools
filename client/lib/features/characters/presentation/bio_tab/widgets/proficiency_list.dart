@@ -39,61 +39,77 @@ class ProficiencyList extends StatelessWidget {
       showDialog(
         context: context,
         builder: (BuildContext context) {
-          return AlertDialog(
-            title: const Text('Add proficiency'),
-            content: SingleChildScrollView(
-              child: ListBody(
-                children: <Widget>[
-                  TextFormField(
-                    controller: titleController,
-                    decoration: const InputDecoration(
-                      labelText: 'Title',
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Title is required';
-                      }
-                      return null;
-                    },
-                  ),
-                  TextFormField(
-                    controller: descriptionController,
-                    decoration: const InputDecoration(
-                      labelText: 'Description',
-                    ),
-                    minLines: 3,
-                    maxLines: 5,
-                  ),
-                ],
-              ),
+          final screenWidth = MediaQuery.of(context).size.width;
+          return ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: screenWidth > 900
+                  ? screenWidth * 0.5
+                  : screenWidth > 600
+                      ? screenWidth * 0.75
+                      : screenWidth * 0.9,
             ),
-            actionsAlignment: MainAxisAlignment.spaceBetween,
-            actions: <Widget>[
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: const Icon(Icons.close),
+            child: AlertDialog(
+              title: const Text('Add proficiency'),
+              content: ConstrainedBox(
+                constraints: const BoxConstraints(
+                  maxWidth: 400,
+                  maxHeight: 300,
+                ),
+                child: SingleChildScrollView(
+                  child: ListBody(
+                    children: <Widget>[
+                      TextFormField(
+                        controller: titleController,
+                        decoration: const InputDecoration(
+                          labelText: 'Title',
+                        ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Title is required';
+                          }
+                          return null;
+                        },
+                      ),
+                      TextFormField(
+                        controller: descriptionController,
+                        decoration: const InputDecoration(
+                          labelText: 'Description',
+                        ),
+                        minLines: 3,
+                        maxLines: 5,
+                      ),
+                    ],
+                  ),
+                ),
               ),
-              TextButton(
-                onPressed: () {
-                  if (titleController.text.isNotEmpty) {
-                    var slug = titleController.text
-                        .toLowerCase()
-                        .trim()
-                        .replaceAll(' ', '_');
-                    var newProf = proficiencies;
-                    newProf[slug] = {
-                      'title': titleController.text,
-                      'description': descriptionController.text,
-                    };
-                    onItemsChanged(newProf);
+              actionsAlignment: MainAxisAlignment.spaceBetween,
+              actions: <Widget>[
+                TextButton(
+                  onPressed: () {
                     Navigator.of(context).pop();
-                  }
-                },
-                child: const Icon(Icons.add),
-              ),
-            ],
+                  },
+                  child: const Icon(Icons.close),
+                ),
+                TextButton(
+                  onPressed: () {
+                    if (titleController.text.isNotEmpty) {
+                      var slug = titleController.text
+                          .toLowerCase()
+                          .trim()
+                          .replaceAll(' ', '_');
+                      var newProf = proficiencies;
+                      newProf[slug] = {
+                        'title': titleController.text,
+                        'description': descriptionController.text,
+                      };
+                      onItemsChanged(newProf);
+                      Navigator.of(context).pop();
+                    }
+                  },
+                  child: const Icon(Icons.add),
+                ),
+              ],
+            ),
           );
         },
       );
@@ -103,9 +119,21 @@ class ProficiencyList extends StatelessWidget {
       showDialog(
         context: context,
         builder: (context) {
+          final screenWidth = MediaQuery.of(context).size.width;
           return AlertDialog(
             title: Text(proficiency.value['title']),
-            content: Text(proficiency.value['description']),
+            content: ConstrainedBox(
+              constraints: BoxConstraints(
+                maxWidth: screenWidth > 900
+                    ? screenWidth * 0.5
+                    : screenWidth > 600
+                        ? screenWidth * 0.75
+                        : screenWidth * 0.9,
+              ),
+              child: SingleChildScrollView(
+                child: Text(proficiency.value['description']),
+              ),
+            ),
             actions: [
               TextButton(
                 child: const Icon(Icons.close),

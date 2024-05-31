@@ -37,84 +37,90 @@ class ItemDetailsDialogContent extends StatelessWidget {
     final baseQuantity = item['quantity'] ?? 1;
     final isWeapon = item['damage'] != null;
     final isArmor = item['armor_class'] != null;
+    final icon =
+        itemToIcon(item) ?? equipmentTypeToIcon(getEquipmentTypeFromItem(item));
+    final screenWidth = MediaQuery.of(context).size.width;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        RichText(
-          text: TextSpan(
-            children: [
-              WidgetSpan(
-                alignment: PlaceholderAlignment.middle,
-                child: equipmentTypeToIcon(getEquipmentTypeFromItem(item)),
-              ),
-              TextSpan(
-                text: '  ${item['name']}',
-                style: Theme.of(context).textTheme.headlineSmall,
-              ),
-              if (baseQuantity > 1)
+    return ConstrainedBox(
+      constraints:
+          BoxConstraints(maxWidth: screenWidth > 800 ? 720 : screenWidth * 0.9),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          RichText(
+            text: TextSpan(
+              children: [
+                WidgetSpan(
+                  alignment: PlaceholderAlignment.middle,
+                  child: icon,
+                ),
                 TextSpan(
-                  text: ' (x$baseQuantity)',
+                  text: '  ${item['name']}',
                   style: Theme.of(context).textTheme.headlineSmall,
                 ),
-            ],
+                if (baseQuantity > 1)
+                  TextSpan(
+                    text: ' (x$baseQuantity)',
+                    style: Theme.of(context).textTheme.headlineSmall,
+                  ),
+              ],
+            ),
           ),
-        ),
-        const SizedBox(height: 16),
-        Text(
-          rarity ?? 'Common',
-          style: Theme.of(context)
-              .textTheme
-              .labelSmall!
-              .copyWith(color: rarityToColor(rarity)),
-        ),
-        const SizedBox(height: 8),
-        SingleChildScrollView(
-          child: ListBody(
-            children: [
-              ...descs
-                  .map((desc) => DescriptionText(
-                        inputText: desc,
-                        baseStyle: Theme.of(context).textTheme.bodySmall!,
-                        addTabSpace: true,
-                      ))
-                  .toList(),
-              if (descs.isNotEmpty)
-                const SizedBox(
-                  height: 32,
-                  child: Divider(),
-                ),
-              Flex(
-                direction: Axis.horizontal,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  _getItemValue(context, 1, appendGp: true, ignoreBase: true),
-                  _getItemWeight(context, 1, ignoreBase: true),
-                ],
-              ),
-              Padding(
-                padding: const EdgeInsets.only(top: 16),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
+          const SizedBox(height: 16),
+          Text(
+            rarity ?? 'Common',
+            style: Theme.of(context)
+                .textTheme
+                .labelSmall!
+                .copyWith(color: rarityToColor(rarity)),
+          ),
+          const SizedBox(height: 8),
+          SingleChildScrollView(
+            child: ListBody(
+              children: [
+                ...descs
+                    .map((desc) => DescriptionText(
+                          inputText: desc,
+                          baseStyle: Theme.of(context).textTheme.bodySmall!,
+                          addTabSpace: true,
+                        ))
+                    .toList(),
+                if (descs.isNotEmpty)
+                  const SizedBox(
+                    height: 32,
+                    child: Divider(),
+                  ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    ...labels.map((label) => Padding(
-                          padding: const EdgeInsets.only(top: 8.0),
-                          child: Text(
-                            label,
-                            style: Theme.of(context).textTheme.titleMedium,
-                          ),
-                        )),
+                    _getItemValue(context, 1, appendGp: true, ignoreBase: true),
+                    _getItemWeight(context, 1, ignoreBase: true),
                   ],
                 ),
-              ),
-              if (isWeapon) _getWeaponInfo(context),
-              if (isArmor) _getArmorInfo(context),
-            ],
+                Padding(
+                  padding: const EdgeInsets.only(top: 16),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      ...labels.map((label) => Padding(
+                            padding: const EdgeInsets.only(top: 8.0),
+                            child: Text(
+                              label,
+                              style: Theme.of(context).textTheme.titleMedium,
+                            ),
+                          )),
+                    ],
+                  ),
+                ),
+                if (isWeapon) _getWeaponInfo(context),
+                if (isArmor) _getArmorInfo(context),
+              ],
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 

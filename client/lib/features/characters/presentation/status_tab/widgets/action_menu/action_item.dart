@@ -123,6 +123,9 @@ class ActionItemState extends State<ActionItem> {
       final boldTheme = Theme.of(context).textTheme.labelLarge!.copyWith(
             fontWeight: FontWeight.bold,
           );
+      final boldThemeMedium = Theme.of(context).textTheme.labelMedium!.copyWith(
+            fontWeight: FontWeight.bold,
+          );
       List<Widget> children = [];
       switch (type) {
         case ActionMenuMode.abilities:
@@ -204,25 +207,77 @@ class ActionItemState extends State<ActionItem> {
           if (spell == null) {
             break;
           }
-          final level = spell['level'] ?? '0';
+          final level = spell['level'] ?? 'Cantrip';
           final school = spell['school'] ?? '';
-          children.add(
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  school.toString().sentenceCase,
-                  softWrap: false,
-                  style: Theme.of(context).textTheme.labelMedium,
-                ),
-                Text(
-                  '$level',
-                  softWrap: false,
-                  style: Theme.of(context).textTheme.labelMedium,
-                ),
-              ],
-            ),
-          );
+          if (level == "Cantrip") {
+            children.add(
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(school.toString().sentenceCase,
+                      softWrap: false, style: boldThemeMedium),
+                  Text('$level', softWrap: false, style: boldThemeMedium),
+                ],
+              ),
+            );
+          } else {
+            final classSlug = widget.character['class'] ?? '';
+            final classs = context.read<RulesCubit>().getClass(classSlug) ?? {};
+            final tableStr = classs['table'] ?? '';
+            final table = parseTable(tableStr);
+            Map<int, int> totalSlotsMap =
+                getSpellSlotsForLevel(table, widget.character['level'] ?? 1);
+            final expendedSlotsMap = Map<String, int>.from(
+                widget.character['expended_spell_slots'] ?? {});
+            final levelInt = spell['level_int'] ?? 1;
+            final expendedSpellSlots = expendedSlotsMap[levelInt] ?? 0;
+            final totalSlots = totalSlotsMap[levelInt] ?? 0;
+            final availableSlots = totalSlots - expendedSpellSlots;
+            children.add(
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    school.toString().sentenceCase,
+                    softWrap: false,
+                    style: Theme.of(context).textTheme.labelMedium!.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
+                  Text(
+                    '$level',
+                    softWrap: false,
+                    style: Theme.of(context).textTheme.labelMedium!.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
+                  const SizedBox(
+                      width: 36,
+                      child: Divider(
+                        height: 6,
+                      )),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 2),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text('Slots: ',
+                            style: Theme.of(context).textTheme.labelSmall),
+                        Text(
+                          '$availableSlots/$totalSlots',
+                          style:
+                              Theme.of(context).textTheme.labelMedium!.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }
+
           final ritual = spell['ritual'] ?? "no";
           if (ritual == "yes") {
             children.add(
@@ -261,7 +316,9 @@ class ActionItemState extends State<ActionItem> {
           for (var component in components.split('')) {
             TextSpan textSpan = TextSpan(
               text: component,
-              style: boldTheme,
+              style: Theme.of(context).textTheme.labelMedium!.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
             );
             if (!isFirst) {
               componentSpans.add(TextSpan(
@@ -295,6 +352,75 @@ class ActionItemState extends State<ActionItem> {
           }
 
           break;
+        case ActionMenuMode.items:
+          final backpackItem =
+              getBackpackItem(widget.character, widget.action['item']);
+          final quantity = backpackItem['quantity'] ?? 0;
+          final equipped = backpackItem['isEquipped'] ?? false;
+          final equippedStr = equipped ? 'Equipped' : 'Not Equipped';
+          final requiresEquipped = widget.action['must_equip'] ?? false;
+          final quantityStr = '${quantity}x available';
+          final expendable = widget.action['expendable'] ?? false;
+          final hasAmmo = widget.action['ammo']?.toString().isNotEmpty ?? false;
+          final String ammoStr;
+          if (hasAmmo) {
+            final ammo = widget.action['ammo'];
+            final ammoItem = context.read<RulesCubit>().getItem(ammo);
+            if (ammoItem == null) {
+              break;
+            }
+            final ammoBackpackItem = getBackpackItem(widget.character, ammo);
+            final ammoQuantity = ammoBackpackItem['quantity'] ?? 0;
+            ammoStr = '${ammoQuantity}x ${ammoItem["name"]}';
+          } else {
+            ammoStr = '';
+          }
+          children.add(
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                if (requiresEquipped)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    child: Text(
+                      equippedStr,
+                      style: Theme.of(context).textTheme.labelMedium!.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                      softWrap: false,
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                if (expendable)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    child: Text(
+                      quantityStr,
+                      style: Theme.of(context).textTheme.labelMedium!.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                      softWrap: false,
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                if (ammoStr.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    child: Text(
+                      ammoStr,
+                      style: Theme.of(context).textTheme.labelMedium!.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                      softWrap: false,
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+              ],
+            ),
+          );
+          break;
         default:
           break;
       }
@@ -305,8 +431,6 @@ class ActionItemState extends State<ActionItem> {
       return LayoutBuilder(
         builder: (context, constraints) {
           int crossAxisCount = 4 + ((constraints.maxWidth - 300) / 100).floor();
-          print('Cross Axis Count: $crossAxisCount');
-          print('width: ${constraints.maxWidth}');
           if (constraints.maxWidth > 900) {
             return Wrap(
               crossAxisAlignment: WrapCrossAlignment.start,
@@ -410,8 +534,13 @@ class ActionItemState extends State<ActionItem> {
                                 final backpackItem = getBackpackItem(
                                     widget.character, widget.action['item']);
                                 return Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    const Divider(),
+                                    if (item['description']
+                                            ?.toString()
+                                            .isNotEmpty ??
+                                        false)
+                                      const Divider(),
                                     ItemDetailsDialogContent(
                                       item: item,
                                       quantity: backpackItem['quantity'],
