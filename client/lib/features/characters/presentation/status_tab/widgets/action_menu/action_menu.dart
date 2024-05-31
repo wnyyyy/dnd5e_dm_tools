@@ -207,7 +207,7 @@ class _ActionMenuState extends State<ActionMenu> {
           final backpackItem = getBackpackItem(widget.character, itemSlug);
           if (backpackItem['quantity'] > 0) {
             backpackItem['quantity']--;
-            widget.character['backpack'][itemSlug] = backpackItem;
+            widget.character['backpack']['items'][itemSlug] = backpackItem;
           }
         }
         if (action['ammo'] != null) {
@@ -215,7 +215,7 @@ class _ActionMenuState extends State<ActionMenu> {
           final ammoItem = getBackpackItem(widget.character, ammoSlug);
           if (ammoItem['quantity'] > 0) {
             ammoItem['quantity']--;
-            widget.character['backpack'][ammoSlug] = ammoItem;
+            widget.character['backpack']['items'][ammoSlug] = ammoItem;
           }
         }
         break;

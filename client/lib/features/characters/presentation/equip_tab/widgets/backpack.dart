@@ -394,6 +394,9 @@ class _BackpackWidgetState extends State<BackpackWidget> {
       itemCount: sortedItems.length,
       itemBuilder: (context, index) {
         final backpackItem = sortedItems.entries.elementAt(index);
+        if (backpackItem.value.isEmpty || backpackItem.value['quantity'] == 0) {
+          return const SizedBox.shrink();
+        }
         final item = Map<String, dynamic>.from(items[backpackItem.key] ?? {});
         if (item.isEmpty) {
           return const SizedBox.shrink();
