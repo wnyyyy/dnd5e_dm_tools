@@ -34,20 +34,18 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   print("Initializing...");
 
-  final Directory? hiveDir;
+  final String hiveDirPath;
   if (kIsWeb) {
-    await Hive.initFlutter();
-    hiveDir = null;
+    hiveDirPath = 'web/$hiveFolder';
+    await Hive.initFlutter(hiveDirPath);
   } else {
     final appDocumentDir = await getApplicationDocumentsDirectory();
     print(appDocumentDir.path);
-    hiveDir = Directory('${appDocumentDir.path}/$hiveFolder');
-    await Hive.initFlutter(hiveDir.path);
+    hiveDirPath = '${appDocumentDir.path}/$hiveFolder';
+    await Hive.initFlutter(hiveDirPath);
   }
 
-  final hiveDirPath = hiveDir?.path ?? 'web';
-
-  await checkHiveFiles(hiveDir);
+  await checkHiveFiles(hiveDirPath);
 
   print('Hive initialized at $hiveDirPath');
 
@@ -62,7 +60,7 @@ void main() async {
   runApp(Dnd5eDmTools());
 }
 
-Future<void> checkHiveFiles(Directory? hiveDir) async {
+Future<void> checkHiveFiles(String hiveDirPath) async {
   final fileList = [
     '$cacheClassesName.hive',
     '$cacheConditionsName.hive',
@@ -71,33 +69,28 @@ Future<void> checkHiveFiles(Directory? hiveDir) async {
     '$cacheSpellsName.hive',
     '$cacheSpellListsName.hive',
     '$cacheItemsName.hive',
-    '$cacheMagicItems.hive',
   ];
 
-  if (hiveDir != null) {
+  if (kIsWeb) {
+  } else {
+    final hiveDir = Directory(hiveDirPath);
     await hiveDir.create(recursive: true);
-  }
-
-  for (var fileName in fileList) {
-    final String hiveFilePath =
-        hiveDir != null ? '${hiveDir.path}/$fileName' : 'web/$fileName';
-    final hiveFile = File(hiveFilePath);
-    final exists = hiveDir != null
-        ? await hiveFile.exists()
-        : await assetExists('assets/precache/$fileName');
-    if (!exists) {
-      final assetPath = 'assets/precache/$fileName';
-      final data = await loadAsset(assetPath);
-      if (data != null) {
-        if (hiveDir != null) {
+    for (var fileName in fileList) {
+      final String hiveFilePath = '${hiveDir.path}/$fileName';
+      final hiveFile = File(hiveFilePath);
+      final exists = await hiveFile.exists();
+      if (!exists) {
+        final assetPath = 'assets/precache/$fileName';
+        final data = await loadAsset(assetPath);
+        if (data != null) {
           await hiveFile.writeAsBytes(data);
+          print('$fileName does not exist, copying from assets...');
+        } else {
+          print('$fileName does not exist and no asset found');
         }
-        print('$fileName does not exist, copying from assets...');
       } else {
-        print('$fileName does not exist and no asset found');
+        print('$fileName exists');
       }
-    } else {
-      print('$fileName exists');
     }
   }
 }

@@ -5,7 +5,6 @@ const cacheRacesName = 'races_cache';
 const cacheSpellsName = 'spells_cache';
 const cacheSpellListsName = 'spell_lists_cache';
 const cacheItemsName = 'items_cache';
-const cacheMagicItems = 'magic_items_cache';
 const cacheCharacterName = 'character_cache';
 const hiveFolder = '.hive';
 const wideScreenBreakpoint = 720.0;

@@ -78,7 +78,9 @@ class MainScreen extends StatelessWidget {
     return BlocBuilder<RulesCubit, RulesState>(
       builder: (context, rulesState) {
         if (rulesState is RulesStateInitial) {
+          print('Loading rules');
           context.read<RulesCubit>().loadRules();
+          print('Rules loaded');
           return Container();
         }
         if (rulesState is RulesStateError) {

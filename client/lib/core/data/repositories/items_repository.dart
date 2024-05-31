@@ -4,12 +4,10 @@ import 'package:dnd5e_dm_tools/core/util/const.dart';
 class ItemsRepository {
   final DatabaseProvider databaseProvider;
   final path = 'equipment/';
-  final magicItemsPath = 'magicitems/';
 
   ItemsRepository(this.databaseProvider);
 
   Future<void> init() async {
-    await databaseProvider.loadCache(cacheMagicItems);
     await databaseProvider.loadCache(cacheItemsName);
   }
 
