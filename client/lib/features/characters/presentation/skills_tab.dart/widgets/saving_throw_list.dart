@@ -42,7 +42,7 @@ class _SavingThrowListState extends State<SavingThrowList> {
   @override
   Widget build(BuildContext context) {
     final editMode = Provider.of<SettingsCubit>(context).state.isEditMode;
-    final asi = widget.character['asi'] as Map<String, int?>? ?? {};
+    final asi = getAsi(widget.character);
     final profBonus = getProfBonus(widget.character['level'] as int? ?? 1);
 
     void editSavingThrow(String attributeName) {

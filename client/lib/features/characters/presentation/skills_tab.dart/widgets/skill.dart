@@ -21,7 +21,7 @@ class Skill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final asi = character['asi'] as Map<String, int?>? ?? {};
+    final asi = getAsi(character);
     final attrValue = asi[attributeName.toLowerCase()] ?? 10;
     var value = proficiency != null
         ? getModifier(attrValue) + proficiency!

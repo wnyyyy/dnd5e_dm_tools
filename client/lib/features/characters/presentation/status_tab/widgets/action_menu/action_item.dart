@@ -59,17 +59,7 @@ class ActionItemState extends State<ActionItem> {
     int resourceCount = 0;
     final resourceFormula = widget.action['resource_formula'] as String?;
     if (resourceFormula != null) {
-      final asi = Map<String, int>.from(
-        (widget.character['asi'] as Map<String, int>?) ??
-            {
-              'strength': 10,
-              'dexterity': 10,
-              'constitution': 10,
-              'intelligence': 10,
-              'wisdom': 10,
-              'charisma': 10,
-            },
-      );
+      final asi = getAsi(widget.character);
       final level = widget.character['level'] as int? ?? 1;
       final prof = getProfBonus(level);
       try {
@@ -597,17 +587,7 @@ class ActionItemState extends State<ActionItem> {
     final actionFields = widget.action['fields'] as Map<String, dynamic>;
     final level = widget.character['level'] as int? ?? 1;
     final prof = getProfBonus(level);
-    final asi = Map<String, int>.from(
-      widget.character['asi'] as Map<String, int>? ??
-          {
-            'strength': 10,
-            'dexterity': 10,
-            'constitution': 10,
-            'intelligence': 10,
-            'wisdom': 10,
-            'charisma': 10,
-          },
-    );
+    final asi = getAsi(widget.character);
     final boldTheme = Theme.of(context).textTheme.labelLarge!.copyWith(
           fontWeight: FontWeight.bold,
         );

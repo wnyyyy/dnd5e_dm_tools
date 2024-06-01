@@ -27,17 +27,9 @@ class StatusTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    character['asi'] ??= {
-      'dexterity': 10,
-      'constitution': 10,
-      'wisdom': 10,
-      'intelligence': 10,
-      'charisma': 10,
-      'strength': 10,
-    };
+    final asi = getAsi(character);
     character['ac'] ??= 0;
-    character['initiative'] ??=
-        getModifier((character['asi'] as Map)['dexterity'] as int? ?? 10);
+    character['initiative'] ??= getModifier(asi['dexterity'] ?? 10);
     character['speed'] ??= 30;
     character['hp_max'] ??= 1;
     character['hp_curr'] ??= 1;
@@ -67,9 +59,7 @@ class StatusTab extends StatelessWidget {
               .toString()
               .toLowerCase();
       final spellcastingAttribute =
-          (character['asi'] as Map)[spellcastingAbility]
-              ?.toString()
-              .toLowerCase();
+          asi[spellcastingAbility]?.toString().toLowerCase();
       final mod =
           getModifier(int.tryParse(spellcastingAttribute ?? '10') ?? 10);
       spellSaveDC = 8 + mod + getProfBonus(character['level'] as int? ?? 1);

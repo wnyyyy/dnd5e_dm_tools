@@ -108,7 +108,7 @@ class SkillsTab extends StatelessWidget {
 
   Widget _buildAttributesList(BuildContext context) {
     final editMode = Provider.of<SettingsCubit>(context).state.isEditMode;
-    final asi = character['asi'] as Map<String, int>? ?? {};
+    final asi = getAsi(character);
 
     void editAttribute(String attributeName, int currentValue) {
       final TextEditingController controller =

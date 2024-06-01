@@ -68,21 +68,21 @@ class RulesCubit extends Cubit<RulesState> {
 
   Map<String, dynamic>? getRace(String slug) {
     if (state is RulesStateLoaded) {
-      return (state as RulesStateLoaded).races[slug] as Map<String, dynamic>;
+      return (state as RulesStateLoaded).races[slug] as Map<String, dynamic>?;
     }
     return null;
   }
 
   Map<String, dynamic>? getClass(String slug) {
     if (state is RulesStateLoaded) {
-      return (state as RulesStateLoaded).classes[slug] as Map<String, dynamic>;
+      return (state as RulesStateLoaded).classes[slug] as Map<String, dynamic>?;
     }
     return null;
   }
 
   Map<String, dynamic>? getFeat(String slug) {
     if (state is RulesStateLoaded) {
-      return (state as RulesStateLoaded).feats[slug] as Map<String, dynamic>;
+      return (state as RulesStateLoaded).feats[slug] as Map<String, dynamic>?;
     }
     return null;
   }
@@ -103,7 +103,7 @@ class RulesCubit extends Cubit<RulesState> {
 
   Map<String, dynamic>? getSpell(String slug) {
     if (state is RulesStateLoaded) {
-      return (state as RulesStateLoaded).spells[slug] as Map<String, dynamic>;
+      return (state as RulesStateLoaded).spells[slug] as Map<String, dynamic>?;
     }
     return null;
   }
@@ -136,7 +136,7 @@ class RulesCubit extends Cubit<RulesState> {
 
   Map<String, dynamic>? getItem(String slug) {
     if (state is RulesStateLoaded) {
-      return (state as RulesStateLoaded).items[slug] as Map<String, dynamic>;
+      return (state as RulesStateLoaded).items[slug] as Map<String, dynamic>?;
     }
     return null;
   }

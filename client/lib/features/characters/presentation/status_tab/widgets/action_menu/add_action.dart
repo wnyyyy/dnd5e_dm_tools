@@ -668,17 +668,7 @@ class _AddActionDialogState extends State<_AddActionDialog> {
                       setState(() {
                         var valid = true;
                         try {
-                          final asi = Map<String, int>.from(
-                            widget.character['asi'] as Map<String, int>? ??
-                                {
-                                  'strength': 10,
-                                  'dexterity': 10,
-                                  'constitution': 10,
-                                  'intelligence': 10,
-                                  'wisdom': 10,
-                                  'charisma': 10,
-                                },
-                          );
+                          final asi = getAsi(widget.character);
                           final t = parseFormula(value, asi, 0, 0);
                           final _ = int.parse(t);
                         } catch (e) {

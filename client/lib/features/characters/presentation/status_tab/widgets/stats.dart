@@ -14,12 +14,12 @@ class StatsView extends StatelessWidget {
   final VoidCallback? onSave;
 
   void editStats(BuildContext context) {
+    final asi = getAsi(character);
     final TextEditingController acController =
         TextEditingController(text: character['ac']?.toString() ?? '0');
     final TextEditingController initiativeController = TextEditingController(
       text: character['initiative']?.toString() ??
-          getModifier((character['asi'] as Map?)?['dexterity'] as int? ?? 10)
-              .toString(),
+          getModifier(asi['dexterity'] ?? 10).toString(),
     );
     final TextEditingController speedController =
         TextEditingController(text: character['speed']?.toString() ?? '30');
@@ -66,12 +66,12 @@ class StatsView extends StatelessWidget {
             TextButton(
               child: const Icon(Icons.check),
               onPressed: () {
+                final asi = getAsi(character);
                 character['ac'] = int.tryParse(acController.text) ?? 0;
                 character['initiative'] =
                     int.tryParse(initiativeController.text) ??
                         getModifier(
-                          (character['asi'] as Map?)?['dexterity'] as int? ??
-                              10,
+                          asi['dexterity'] ?? 10,
                         );
                 character['speed'] = int.tryParse(speedController.text) ?? 30;
                 onSave?.call();
@@ -87,8 +87,9 @@ class StatsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ac = int.tryParse(character['ac'].toString()) ?? 0;
+    final asi = getAsi(character);
     final initiative = int.tryParse(character['initiative'].toString()) ??
-        getModifier((character['asi'] as Map?)?['dexterity'] as int? ?? 10);
+        getModifier(asi['dexterity'] ?? 10);
     final speed = int.tryParse(character['speed'].toString()) ?? 30;
     final editMode = context.read<SettingsCubit>().state.isEditMode;
     return GestureDetector(

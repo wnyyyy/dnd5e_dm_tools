@@ -406,6 +406,20 @@ int getTotalWeight(Map<String, dynamic> backpack, Map<String, dynamic> items) {
   return totalWeight;
 }
 
+Map<String, int> getAsi(Map<String, dynamic> character) {
+  final asi = (character['asi'] as Map<dynamic, dynamic>?)
+          ?.map((key, value) => MapEntry(key as String, value as int)) ??
+      {
+        'strength': 10,
+        'dexterity': 10,
+        'constitution': 10,
+        'intelligence': 10,
+        'wisdom': 10,
+        'charisma': 10,
+      };
+  return asi;
+}
+
 Icon? itemToIcon(Map<String, dynamic> item) {
   if (item['index']?.toString().isEmpty ?? true) {
     return null;
