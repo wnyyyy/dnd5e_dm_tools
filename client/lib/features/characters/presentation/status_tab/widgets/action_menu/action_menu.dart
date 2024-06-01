@@ -30,6 +30,7 @@ class _ActionMenuState extends State<ActionMenu> {
   bool _isEditMode = false;
   ActionMenuMode _mode = ActionMenuMode.all;
   late Map<String, Map<String, dynamic>> actions;
+  late ScrollController _scrollController;
 
   void _enableEditMode() {
     setState(() {
@@ -43,6 +44,13 @@ class _ActionMenuState extends State<ActionMenu> {
     actions = Map<String, Map<String, dynamic>>.from(
       widget.character['actions'] as Map<String, dynamic>? ?? {},
     );
+    _scrollController = ScrollController();
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
   @override
@@ -136,7 +144,9 @@ class _ActionMenuState extends State<ActionMenu> {
                 SizedBox(
                   height: widget.height,
                   child: Scrollbar(
+                    controller: _scrollController,
                     child: SingleChildScrollView(
+                      controller: _scrollController,
                       child: Column(
                         children: [
                           if (filteredActions.isEmpty)

@@ -275,7 +275,7 @@ class ItemDetailsDialogContent extends StatelessWidget {
     bool appendGp = false,
     bool ignoreBase = false,
   }) {
-    final cost = item['cost'] as Map<String, dynamic>? ?? {};
+    final cost = Map<String, dynamic>.from(item['cost'] as Map? ?? {});
     final String costUnit = cost['unit'] as String? ?? 'gp';
     final int costValue = cost['quantity'] as int? ?? 0;
     final int baseQuantity = ignoreBase ? 1 : item['quantity'] as int? ?? 1;

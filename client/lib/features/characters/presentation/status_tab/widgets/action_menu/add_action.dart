@@ -110,12 +110,13 @@ class _AddActionDialogState extends State<_AddActionDialog> {
         this.classFeats[feat.key] = (feat.value as Map)['description'];
       }
     }
-    final archetype =
-        (classs?['archetypes'] as List<Map<String, dynamic>>?)?.firstWhere(
+    final archetypes = getArchetypes(classs ?? {});
+
+    final archetype = archetypes.firstWhere(
       (archetype) => archetype['slug'] == widget.character['subclass'],
       orElse: () => {},
     );
-    final archetypeDesc = archetype?['desc'] ?? '';
+    final archetypeDesc = archetype['desc'] ?? '';
     final subclassFeats = getArchetypeFeatures(archetypeDesc as String);
     for (final feat in subclassFeats.entries) {
       archetypeFeats[feat.key] = (feat.value as Map)['description'];

@@ -33,16 +33,7 @@ class _ClassDescriptionState extends State<ClassDescription> {
   void initState() {
     super.initState();
     selectedArchetypeSlug = widget.character['subclass'] as String? ?? '';
-    initializeArchetypes();
-  }
-
-  void initializeArchetypes() {
-    if (widget.classs['archetypes'] != null) {
-      archetypes = List<Map<String, dynamic>>.from(
-        (widget.classs['archetypes'] as List)
-            .map((item) => Map<String, dynamic>.from(item as Map)),
-      );
-    }
+    archetypes = getArchetypes(widget.classs);
   }
 
   @override
@@ -79,9 +70,7 @@ class _ClassDescriptionState extends State<ClassDescription> {
 
   Widget _buildClassTab() {
     final String archetypeChr = widget.character['subclass'] as String? ?? '';
-    final archetypeList =
-        widget.classs['archetypes'] as List<Map<String, dynamic>>? ?? [];
-    final Map<String, dynamic> archetype = archetypeList.firstWhere(
+    final Map<String, dynamic> archetype = archetypes.firstWhere(
       (element) => (element['slug']?.toString() ?? '') == archetypeChr,
       orElse: () => {},
     );
@@ -258,9 +247,7 @@ class _ClassDescriptionState extends State<ClassDescription> {
   }
 
   List<Widget> _buildArchetypeDetails(String archetypeSlug) {
-    final archetypeList =
-        widget.classs['archetypes'] as List<Map<String, dynamic>>? ?? [];
-    final Map<String, dynamic> archetype = archetypeList.firstWhere(
+    final Map<String, dynamic> archetype = archetypes.firstWhere(
       (element) => (element['slug']?.toString() ?? '') == archetypeSlug,
       orElse: () => {},
     );

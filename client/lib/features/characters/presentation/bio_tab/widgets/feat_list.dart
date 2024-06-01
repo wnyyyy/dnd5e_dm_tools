@@ -66,9 +66,13 @@ class FeatsListState extends State<FeatsList> {
 
           final archetype = widget.character['subclass'];
           if (archetype != null) {
-            final archetypeClass =
-                (classs['archetypes'] as List<Map<String, dynamic>>)
-                    .firstWhere((arch) => arch['slug'] == archetype);
+            final archetypes = getArchetypes(classs);
+            final archetypeClass = archetypes
+                    .where(
+                      (element) => element['name'] == archetype,
+                    )
+                    .firstOrNull ??
+                {};
             final archetypeDesc = archetypeClass['desc']?.toString() ?? '';
             classFeats.addAll(getArchetypeFeatures(archetypeDesc));
           }

@@ -406,6 +406,14 @@ int getTotalWeight(Map<String, dynamic> backpack, Map<String, dynamic> items) {
   return totalWeight;
 }
 
+List<Map<String, dynamic>> getArchetypes(Map<String, dynamic> classs) {
+  final archetypeList = (classs['archetypes'] as List<dynamic>?)
+          ?.map((e) => Map<String, dynamic>.from(e as Map))
+          .toList() ??
+      [];
+  return archetypeList;
+}
+
 Map<String, int> getAsi(Map<String, dynamic> character) {
   final asi = (character['asi'] as Map<dynamic, dynamic>?)
           ?.map((key, value) => MapEntry(key as String, value as int)) ??

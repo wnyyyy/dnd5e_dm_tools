@@ -79,72 +79,91 @@ class _SkillListState extends State<SkillList> {
             builder: (BuildContext context, StateSetter setDialogState) {
               return AlertDialog(
                 title: const Text('Edit Skill Proficiencies and Expertise'),
-                content: GridView.count(
-                  crossAxisCount: 2,
-                  shrinkWrap: true,
-                  children: skills.map((skill) {
-                    final skillSlug =
-                        skill.toLowerCase().trim().replaceAll(' ', '_');
-                    return Column(
-                      children: <Widget>[
-                        Row(
-                          children: <Widget>[
-                            Expanded(
-                              child: Text(skill),
-                            ),
-                            Checkbox(
-                              value: skillProf.contains(skillSlug),
-                              onChanged: (bool? value) {
-                                if (value != null) {
-                                  setDialogState(() {
-                                    if (value) {
-                                      if (!skillProf.contains(skillSlug)) {
-                                        skillProf.add(skillSlug);
-                                      }
-                                    } else {
-                                      skillProf.removeWhere(
-                                        (element) => element == skillSlug,
-                                      );
-                                      expertiseSkills.removeWhere(
-                                        (element) => element == skillSlug,
-                                      );
-                                    }
-                                  });
-                                }
-                              },
-                            ),
-                          ],
-                        ),
-                        if (skillProf.contains(skillSlug))
-                          Row(
-                            children: <Widget>[
-                              const Expanded(
-                                child: Text('Expertise'),
-                              ),
-                              Checkbox(
-                                value: expertiseSkills.contains(skillSlug),
-                                onChanged: (bool? value) {
-                                  if (value != null) {
-                                    setDialogState(() {
-                                      if (value) {
-                                        if (!expertiseSkills
-                                            .contains(skillSlug)) {
-                                          expertiseSkills.add(skillSlug);
+                content: SingleChildScrollView(
+                  child: Wrap(
+                    spacing: 8.0,
+                    runSpacing: 8.0,
+                    children: skills.map((skill) {
+                      final skillSlug =
+                          skill.toLowerCase().trim().replaceAll(' ', '_');
+                      return Card(
+                        elevation: 2,
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: IntrinsicWidth(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: <Widget>[
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: <Widget>[
+                                    Expanded(
+                                      child: Text(skill),
+                                    ),
+                                    Checkbox(
+                                      value: skillProf.contains(skillSlug),
+                                      onChanged: (bool? value) {
+                                        if (value != null) {
+                                          setDialogState(() {
+                                            if (value) {
+                                              if (!skillProf
+                                                  .contains(skillSlug)) {
+                                                skillProf.add(skillSlug);
+                                              }
+                                            } else {
+                                              skillProf.removeWhere(
+                                                (element) =>
+                                                    element == skillSlug,
+                                              );
+                                              expertiseSkills.removeWhere(
+                                                (element) =>
+                                                    element == skillSlug,
+                                              );
+                                            }
+                                          });
                                         }
-                                      } else {
-                                        expertiseSkills.removeWhere(
-                                          (element) => element == skillSlug,
-                                        );
-                                      }
-                                    });
-                                  }
-                                },
-                              ),
-                            ],
+                                      },
+                                    ),
+                                  ],
+                                ),
+                                if (skillProf.contains(skillSlug))
+                                  Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: <Widget>[
+                                      const Expanded(
+                                        child: Text('Expertise'),
+                                      ),
+                                      Checkbox(
+                                        value:
+                                            expertiseSkills.contains(skillSlug),
+                                        onChanged: (bool? value) {
+                                          if (value != null) {
+                                            setDialogState(() {
+                                              if (value) {
+                                                if (!expertiseSkills
+                                                    .contains(skillSlug)) {
+                                                  expertiseSkills
+                                                      .add(skillSlug);
+                                                }
+                                              } else {
+                                                expertiseSkills.removeWhere(
+                                                  (element) =>
+                                                      element == skillSlug,
+                                                );
+                                              }
+                                            });
+                                          }
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                              ],
+                            ),
                           ),
-                      ],
-                    );
-                  }).toList(),
+                        ),
+                      );
+                    }).toList(),
+                  ),
                 ),
                 actionsAlignment: MainAxisAlignment.spaceBetween,
                 actions: <Widget>[
