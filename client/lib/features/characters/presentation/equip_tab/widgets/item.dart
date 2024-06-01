@@ -139,14 +139,14 @@ class ItemWidgetState extends State<ItemWidget> {
   }) {
     final cost = widget.item['cost'] as Map? ?? {};
     final costUnit = cost['unit']?.toString() ?? 'gp';
-    final costValue = (cost['quantity'] as int?) ?? 0;
+    final costValue = (cost['quantity'] as num?) ?? 0;
     final baseQuantity =
         ignoreBase ? 1 : (widget.item['quantity'] as int?) ?? 1;
-    final double costTotal;
+    final num costTotal;
     if (appendGp) {
       costTotal = costValue.toDouble();
     } else {
-      costTotal = _getCostTotal(costUnit, costValue, quantity / baseQuantity);
+      costTotal = getCostTotal(costUnit, costValue, quantity / baseQuantity);
     }
     final bool isInt = costTotal % 1 == 0;
 
@@ -176,7 +176,7 @@ class ItemWidgetState extends State<ItemWidget> {
               ),
               TextSpan(
                 text:
-                    '  ${isInt ? costTotal.toInt() : costTotal.toStringAsFixed(appendGp ? 0 : 2)}',
+                    '  ${isInt ? costTotal.toDouble() : costTotal.toStringAsFixed(appendGp ? 0 : 2)}',
                 style: textStyle,
               ),
               if (appendGp) TextSpan(text: ' ${costUnit.toUpperCase()}'),
@@ -193,7 +193,7 @@ class ItemWidgetState extends State<ItemWidget> {
     bool ignoreBase = false,
   }) {
     final baseQuantity = widget.item['quantity'] as int? ?? 1;
-    final weight = (widget.item['weight'] as int? ?? 0.0).toDouble() *
+    final weight = (widget.item['weight'] as num? ?? 0.0).toDouble() *
         quantity /
         (ignoreBase ? 1 : baseQuantity);
     final TextStyle textStyle = Theme.of(context).textTheme.bodyMedium!;
@@ -226,18 +226,5 @@ class ItemWidgetState extends State<ItemWidget> {
         ),
       ),
     );
-  }
-
-  double _getCostTotal(String costUnit, int costValue, double quantity) {
-    switch (costUnit) {
-      case 'cp':
-        return costValue.toDouble() / 100.0 * quantity;
-      case 'sp':
-        return costValue.toDouble() / 10.0 * quantity;
-      case 'gp':
-        return costValue.toDouble() * quantity;
-      default:
-        return 0;
-    }
   }
 }

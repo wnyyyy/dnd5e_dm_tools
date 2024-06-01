@@ -188,7 +188,7 @@ Map<String, dynamic> getArchetypeFeatures(
 
   if (currentFeatureKey.isNotEmpty) {
     features[currentFeatureKey] = {
-      'description': currentFeatureDescription.join('\n'),  
+      'description': currentFeatureDescription.join('\n'),
     };
   }
 
@@ -237,7 +237,7 @@ bool isEquipable(Map<String, dynamic> item) {
   return item['armor_class'] != null || item['damage'] != null;
 }
 
-double getCostTotal(String costUnit, int costValue, double quantity) {
+double getCostTotal(String costUnit, num costValue, double quantity) {
   switch (costUnit) {
     case 'cp':
       return costValue.toDouble() / 100.0 * quantity;
@@ -379,8 +379,8 @@ EquipmentType getEquipmentType(String name) {
   }
 }
 
-int getTotalWeight(Map<String, dynamic> backpack, Map<String, dynamic> items) {
-  int totalWeight = 0;
+num getTotalWeight(Map<String, dynamic> backpack, Map<String, dynamic> items) {
+  num totalWeight = 0;
   if (backpack.isEmpty) {
     return totalWeight;
   }
@@ -394,13 +394,13 @@ int getTotalWeight(Map<String, dynamic> backpack, Map<String, dynamic> items) {
     }
     final quantity = (itemBackpack.value as Map)['quantity'] as double? ?? 0.0;
     final costMap = item['cost'] as Map;
-    final cost = int.tryParse(costMap['quantity'].toString()) ?? 0;
+    final cost = num.tryParse(costMap['quantity'].toString()) ?? 0;
     final costTotal = getCostTotal(
       costMap['unit']?.toString() ?? '',
       cost,
       quantity,
     );
-    totalWeight += costTotal.toInt();
+    totalWeight += costTotal;
   }
   return totalWeight;
 }
@@ -444,6 +444,15 @@ Icon? itemToIcon(Map<String, dynamic> item) {
   }
   if (item['index']?.toString().contains('dagger') ?? false) {
     return const Icon(RpgAwesome.plain_dagger);
+  }
+  if (item['index']?.toString().split('-').contains('maul') ?? false) {
+    return const Icon(RpgAwesome.large_hammer);
+  }
+  if (item['index']?.toString().split('-').contains('axe') ?? false) {
+    return const Icon(RpgAwesome.battered_axe);
+  }
+  if (item['index']?.toString().split('-').contains('greataxe') ?? false) {
+    return const Icon(RpgAwesome.axe);
   }
   if (item['armor_category'] != null &&
       (item['armor_category'].toString().toLowerCase().contains('medium') ||

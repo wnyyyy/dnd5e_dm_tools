@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:dnd5e_dm_tools/core/config/app_colors.dart';
 import 'package:dnd5e_dm_tools/core/util/helper.dart';
 import 'package:dnd5e_dm_tools/core/widgets/description_text.dart';
@@ -128,15 +130,20 @@ class ItemDetailsDialogContent extends StatelessWidget {
 
   Widget _getWeaponInfo(BuildContext context) {
     final String categoryRange = item['category_range'] as String? ?? '';
-    final List<Map> properties = item['properties'] as List<Map>? ?? [];
+    final List<LinkedHashMap> properties = (item['properties'] as List?)
+            ?.map((e) => LinkedHashMap<String, dynamic>.from(e as Map))
+            .toList() ??
+        [];
     final String rangeNormal =
-        (item['range'] as Map?)?['normal']?.toString() ?? '';
-    final String? rangeLong = (item['range'] as Map?)?['long']?.toString();
+        (item['range'] as LinkedHashMap?)?['normal']?.toString() ?? '';
+    final String? rangeLong =
+        (item['range'] as LinkedHashMap?)?['long']?.toString();
     final String damage =
-        (item['damage'] as Map?)?['damage_dice'] as String? ?? '';
-    final String damageType = ((item['damage'] as Map?)?['damage_type']
-            as Map?)?['name'] as String? ??
-        '';
+        (item['damage'] as LinkedHashMap?)?['damage_dice'] as String? ?? '';
+    final String damageType =
+        ((item['damage'] as LinkedHashMap?)?['damage_type']
+                as LinkedHashMap?)?['name'] as String? ??
+            '';
 
     return Container(
       padding: const EdgeInsets.all(8.0),
@@ -275,16 +282,17 @@ class ItemDetailsDialogContent extends StatelessWidget {
     bool appendGp = false,
     bool ignoreBase = false,
   }) {
-    final cost = Map<String, dynamic>.from(item['cost'] as Map? ?? {});
+    final cost =
+        Map<String, dynamic>.from(item['cost'] as LinkedHashMap? ?? {});
     final String costUnit = cost['unit'] as String? ?? 'gp';
-    final int costValue = cost['quantity'] as int? ?? 0;
+    final num costValue = cost['quantity'] as num? ?? 0;
     final int baseQuantity = ignoreBase ? 1 : item['quantity'] as int? ?? 1;
 
-    final double costTotal;
+    final num costTotal;
     if (appendGp) {
       costTotal = costValue.toDouble();
     } else {
-      costTotal = _getCostTotal(costUnit, costValue, quantity / baseQuantity);
+      costTotal = getCostTotal(costUnit, costValue, quantity / baseQuantity);
     }
     final bool isInt = costTotal % 1 == 0;
 
@@ -364,18 +372,5 @@ class ItemDetailsDialogContent extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  double _getCostTotal(String costUnit, int costValue, double quantity) {
-    switch (costUnit) {
-      case 'cp':
-        return costValue.toDouble() / 100.0 * quantity;
-      case 'sp':
-        return costValue.toDouble() / 10.0 * quantity;
-      case 'gp':
-        return costValue.toDouble() * quantity;
-      default:
-        return 0;
-    }
   }
 }

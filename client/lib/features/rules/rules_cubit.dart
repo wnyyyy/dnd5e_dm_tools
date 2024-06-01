@@ -66,6 +66,53 @@ class RulesCubit extends Cubit<RulesState> {
     }
   }
 
+  Future<void> reloadRule(String type) {
+    if (state is RulesStateLoaded) {
+      final currState = state as RulesStateLoaded;
+      emit(RulesStateLoading());
+      switch (type) {
+        case 'conditions':
+          conditionsRepository.getAll().then((conditions) {
+            emit(currState.copyWith(conditions: conditions));
+          });
+          return Future.value();
+        case 'races':
+          racesRepository.getAll().then((races) {
+            emit(currState.copyWith(races: races));
+          });
+          return Future.value();
+        case 'classes':
+          classesRepository.getAll().then((classes) {
+            emit(currState.copyWith(classes: classes));
+          });
+          return Future.value();
+        case 'spells':
+          spellsRepository.getAll().then((spells) {
+            emit(currState.copyWith(spells: spells));
+          });
+          return Future.value();
+        case 'feats':
+          featsRepository.getAll().then((feats) {
+            emit(currState.copyWith(feats: feats));
+          });
+          return Future.value();
+        case 'spellLists':
+          spellsRepository.getSpellLists().then((spellLists) {
+            emit(currState.copyWith(spellLists: spellLists));
+          });
+          return Future.value();
+        case 'items':
+          itemsRepository.getAll().then((items) {
+            emit(currState.copyWith(items: items));
+          });
+          return Future.value();
+        default:
+          return Future.value();
+      }
+    }
+    return Future.value();
+  }
+
   Map<String, dynamic>? getRace(String slug) {
     if (state is RulesStateLoaded) {
       return (state as RulesStateLoaded).races[slug] as Map<String, dynamic>?;

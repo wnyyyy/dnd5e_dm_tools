@@ -48,6 +48,18 @@ enum ActionMenuMode {
   spells,
 }
 
+enum EquipFilter {
+  all,
+  equipped,
+  canEquip,
+}
+
+enum EquipSort {
+  name,
+  value,
+  canEquip,
+}
+
 enum ResourceType {
   item,
   shortRest,

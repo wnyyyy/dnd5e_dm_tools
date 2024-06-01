@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:dnd5e_dm_tools/core/util/enum.dart';
 import 'package:dnd5e_dm_tools/core/util/helper.dart';
 import 'package:dnd5e_dm_tools/features/characters/bloc/character_bloc.dart';
 import 'package:dnd5e_dm_tools/features/characters/bloc/character_events.dart';
@@ -26,15 +27,25 @@ class BackpackWidget extends StatefulWidget {
 }
 
 class _BackpackWidgetState extends State<BackpackWidget> {
-  String sortCriteria = 'name';
-  String filterCriteria = 'all';
+  EquipSort sortCriteria = EquipSort.name;
+  EquipFilter filterCriteria = EquipFilter.all;
   Map<String, Map<String, dynamic>> items = {};
 
-  List<DropdownMenuItem<String>> get dropdownItems {
+  @override
+  void initState() {
+    super.initState();
+    sortCriteria = context.read<SettingsCubit>().state.selectedEquipSort;
+    filterCriteria = context.read<SettingsCubit>().state.selectedEquipFilter;
+  }
+
+  List<DropdownMenuItem<EquipSort>> get dropdownItems {
     return [
-      const DropdownMenuItem(value: 'name', child: Text('Name')),
-      const DropdownMenuItem(value: 'value', child: Text('Value')),
-      const DropdownMenuItem(value: 'equipable', child: Text('Can Equip')),
+      const DropdownMenuItem(value: EquipSort.name, child: Text('Name')),
+      const DropdownMenuItem(value: EquipSort.value, child: Text('Value')),
+      const DropdownMenuItem(
+        value: EquipSort.canEquip,
+        child: Text('Can Equip'),
+      ),
     ];
   }
 
@@ -171,13 +182,17 @@ class _BackpackWidgetState extends State<BackpackWidget> {
         );
   }
 
-  bool applyFilter(Map<String, dynamic> item, String filter, bool isEquipped) {
+  bool applyFilter(
+    Map<String, dynamic> item,
+    EquipFilter filter,
+    bool isEquipped,
+  ) {
     switch (filter) {
-      case 'all':
+      case EquipFilter.all:
         return true;
-      case 'equipped':
+      case EquipFilter.equipped:
         return isEquipped;
-      case 'equippable':
+      case EquipFilter.canEquip:
         return isEquipable(item);
       default:
         return true;
@@ -186,39 +201,39 @@ class _BackpackWidgetState extends State<BackpackWidget> {
 
   Map<String, Map<String, dynamic>> sortItems(
     Map<String, Map<String, dynamic>> items,
-    String criteria,
+    EquipSort criteria,
   ) {
     final sortedEntries = items.entries.toList();
 
     switch (criteria) {
-      case 'name':
+      case EquipSort.name:
         sortedEntries.sort(
           (a, b) => (a.value['name']?.toString() ?? '')
               .compareTo(b.value['name']?.toString() ?? ''),
         );
-      case 'value':
+      case EquipSort.value:
         sortedEntries.sort(
           (b, a) => getCostTotal(
             (a.value['cost'] as Map?)?['unit']?.toString() ?? 'none',
-            int.tryParse(
+            num.tryParse(
                   (a.value['cost'] as Map?)?['quantity']?.toString() ?? '0',
                 ) ??
                 0,
-            (int.tryParse(a.value['quantity']?.toString() ?? '0') ?? 0.0)
+            (num.tryParse(a.value['quantity']?.toString() ?? '0') ?? 0.0)
                 .toDouble(),
           ).compareTo(
             getCostTotal(
               (b.value['cost'] as Map?)?['unit']?.toString() ?? 'none',
-              int.tryParse(
+              num.tryParse(
                     (b.value['cost'] as Map?)?['quantity']?.toString() ?? '0',
                   ) ??
                   0,
-              (int.tryParse(b.value['quantity']?.toString() ?? '0') ?? 0.0)
+              (num.tryParse(b.value['quantity']?.toString() ?? '0') ?? 0.0)
                   .toDouble(),
             ),
           ),
         );
-      case 'equipable':
+      case EquipSort.canEquip:
         sortedEntries.sort((a, b) {
           if (isEquipable(a.value) && !isEquipable(b.value)) return -1;
           if (!isEquipable(a.value) && isEquipable(b.value)) return 1;
@@ -300,39 +315,51 @@ class _BackpackWidgetState extends State<BackpackWidget> {
             children: [
               ChoiceChip(
                 label: const Text('All Items'),
-                selected: filterCriteria == 'all',
+                selected: filterCriteria == EquipFilter.all,
                 onSelected: (bool selected) {
                   setState(() {
-                    filterCriteria = 'all';
+                    filterCriteria = EquipFilter.all;
                   });
+                  context
+                      .read<SettingsCubit>()
+                      .toggleEquipFilter(EquipFilter.all);
                 },
               ),
               ChoiceChip(
                 label: const Text('Equipped'),
-                selected: filterCriteria == 'equipped',
+                selected: filterCriteria == EquipFilter.equipped,
                 onSelected: (bool selected) {
                   setState(() {
-                    filterCriteria = 'equipped';
+                    filterCriteria = EquipFilter.equipped;
                   });
+                  context
+                      .read<SettingsCubit>()
+                      .toggleEquipFilter(EquipFilter.equipped);
                 },
               ),
               ChoiceChip(
                 label: const Text('Can Equip'),
-                selected: filterCriteria == 'equippable',
+                selected: filterCriteria == EquipFilter.canEquip,
                 onSelected: (bool selected) {
                   setState(() {
-                    filterCriteria = 'equippable';
+                    filterCriteria = EquipFilter.canEquip;
+                    context
+                        .read<SettingsCubit>()
+                        .toggleEquipFilter(EquipFilter.canEquip);
                   });
                 },
               ),
             ],
           ),
-          DropdownButton<String>(
+          DropdownButton<EquipSort>(
             value: sortCriteria,
             items: dropdownItems,
-            onChanged: (String? value) {
+            onChanged: (EquipSort? value) {
               setState(() {
-                sortCriteria = value ?? 'name';
+                sortCriteria = value ?? EquipSort.name;
+                context
+                    .read<SettingsCubit>()
+                    .toggleEquipSort(value ?? EquipSort.name);
               });
             },
           ),
@@ -459,6 +486,7 @@ class _BackpackWidgetState extends State<BackpackWidget> {
             isEquipped: backpackItem.value['isEquipped'] as bool? ?? false,
             onEquip: (itemKey, isEquipped) {
               items[itemKey]?['isEquipped'] = isEquipped;
+              (widget.character['backpack'] as Map)['items'] = items;
               context.read<CharacterBloc>().add(
                     CharacterUpdate(
                       character: widget.character,

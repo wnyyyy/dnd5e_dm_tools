@@ -96,17 +96,18 @@ class DatabaseEditorScreenState extends State<DatabaseEditorScreen> {
     ][_selectedIndex];
     chips.add(
       ActionChip.elevated(
-          label: const Text('Sync'),
-          onPressed: () {
-            final slug = (context.read<DatabaseEditorCubit>().state
-                    as DatabaseEditorLoaded)
-                .slug;
-            final entry = (context.read<DatabaseEditorCubit>().state
-                    as DatabaseEditorLoaded)
-                .entry;
-            context.read<DatabaseEditorCubit>().sync(entry, type, slug);
-            context.read<RulesCubit>().loadRules();
-          },),
+        label: const Text('Sync'),
+        onPressed: () {
+          final slug = (context.read<DatabaseEditorCubit>().state
+                  as DatabaseEditorLoaded)
+              .slug;
+          final entry = (context.read<DatabaseEditorCubit>().state
+                  as DatabaseEditorLoaded)
+              .entry;
+          context.read<DatabaseEditorCubit>().sync(entry, type, slug);
+          context.read<RulesCubit>().reloadRule(type);
+        },
+      ),
     );
     return chips;
   }
@@ -129,9 +130,10 @@ class DatabaseEditorScreenState extends State<DatabaseEditorScreen> {
       fields.add(
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
-          child: Text('$key:',
-              style:
-                  const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),),
+          child: Text(
+            '$key:',
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          ),
         ),
       );
 
@@ -149,86 +151,103 @@ class DatabaseEditorScreenState extends State<DatabaseEditorScreen> {
 
   void _buildListFields(List<Widget> fields, String key, List<dynamic> list) {
     final List<TextEditingController> controllers = _controllers.putIfAbsent(
-        key,
-        () => List.generate(list.length,
-            (index) => TextEditingController(text: list[index].toString()),),);
+      key,
+      () => List.generate(
+        list.length,
+        (index) => TextEditingController(text: list[index].toString()),
+      ),
+    );
 
     for (int i = 0; i < controllers.length; i++) {
       fields.add(_buildArrayField(key, i, controllers[i]));
     }
 
-    fields.add(ElevatedButton(
-      onPressed: () => setState(() {
-        controllers.add(TextEditingController(text: ''));
-      }),
-      child: Text('Add new item to $key'),
-    ),);
+    fields.add(
+      ElevatedButton(
+        onPressed: () => setState(() {
+          controllers.add(TextEditingController(text: ''));
+        }),
+        child: Text('Add new item to $key'),
+      ),
+    );
   }
 
   void _buildMapFields(
-      List<Widget> fields, String key, Map<String, dynamic> map,) {
+    List<Widget> fields,
+    String key,
+    Map<String, dynamic> map,
+  ) {
     map.forEach((subKey, subValue) {
       final String fieldKey = '$key.$subKey';
       _controllers[fieldKey] ??= [
         TextEditingController(text: subValue.toString()),
       ];
 
-      fields.add(Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8.0),
-        child: Row(
-          children: [
-            Expanded(
-              child: TextFormField(
-                controller: _controllers[fieldKey]!.first,
-                decoration: InputDecoration(
-                  labelText: fieldKey,
-                  border: const OutlineInputBorder(),
+      fields.add(
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
+          child: Row(
+            children: [
+              Expanded(
+                child: TextFormField(
+                  controller: _controllers[fieldKey]!.first,
+                  decoration: InputDecoration(
+                    labelText: fieldKey,
+                    border: const OutlineInputBorder(),
+                  ),
+                  keyboardType: TextInputType.multiline,
+                  maxLines: null,
                 ),
-                keyboardType: TextInputType.multiline,
-                maxLines: null,
               ),
-            ),
-            IconButton(
-              icon: const Icon(Icons.remove_circle_outline),
-              onPressed: () => setState(() {
-                map.remove(subKey);
-                _controllers.remove(fieldKey);
-              }),
-            ),
-          ],
+              IconButton(
+                icon: const Icon(Icons.remove_circle_outline),
+                onPressed: () => setState(() {
+                  map.remove(subKey);
+                  _controllers.remove(fieldKey);
+                }),
+              ),
+            ],
+          ),
         ),
-      ),);
+      );
     });
 
-    fields.add(ElevatedButton(
-      onPressed: () {
-        const String newKey = 'newKey'; // Generate or ask for a new key
-        map[newKey] = ''; // Default new value
-        _controllers['$key.$newKey'] = [TextEditingController(text: '')];
-        setState(() {});
-      },
-      child: Text('Add new entry to $key'),
-    ),);
+    fields.add(
+      ElevatedButton(
+        onPressed: () {
+          const String newKey = 'newKey'; // Generate or ask for a new key
+          map[newKey] = ''; // Default new value
+          _controllers['$key.$newKey'] = [TextEditingController(text: '')];
+          setState(() {});
+        },
+        child: Text('Add new entry to $key'),
+      ),
+    );
   }
 
   void _buildTextField(List<Widget> fields, String key, String value) {
     _controllers[key] ??= [TextEditingController(text: value)];
-    fields.add(Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: TextFormField(
-        controller: _controllers[key]!.first,
-        decoration: InputDecoration(
-          labelText: key,
-          border: const OutlineInputBorder(),
+    fields.add(
+      Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8.0),
+        child: TextFormField(
+          controller: _controllers[key]!.first,
+          decoration: InputDecoration(
+            labelText: key,
+            border: const OutlineInputBorder(),
+          ),
+          keyboardType: TextInputType.multiline,
+          maxLines: null,
         ),
-        keyboardType: TextInputType.multiline,
-        maxLines: null,
       ),
-    ),);
+    );
   }
 
   Widget _buildArrayField(
-      String key, int index, TextEditingController controller,) {
+    String key,
+    int index,
+    TextEditingController controller,
+  ) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(

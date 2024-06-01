@@ -227,6 +227,7 @@ class _ClassDescriptionState extends State<ClassDescription> {
                           slug: widget.slug,
                           offline:
                               context.read<SettingsCubit>().state.offlineMode,
+                          persistData: true,
                         ),
                       );
                 },

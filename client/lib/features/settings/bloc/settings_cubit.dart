@@ -11,7 +11,6 @@ import 'package:dnd5e_dm_tools/features/settings/bloc/settings_states.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class SettingsCubit extends Cubit<SettingsState> {
-
   SettingsCubit({
     required this.spellsRepository,
     required this.featsRepository,
@@ -35,7 +34,10 @@ class SettingsCubit extends Cubit<SettingsState> {
     await saveConfig('char_name', name);
     if (caster != null) {
       await saveConfig('is_caster', caster.toString());
-      emit((state as SettingsLoaded).copyWith(name: name, isCaster: caster));
+      emit(
+        (state as SettingsLoaded)
+            .copyWith(name: name, isCaster: caster, isOnboardingComplete: true),
+      );
       return;
     }
     emit((state as SettingsLoaded).copyWith(name: name));
@@ -44,8 +46,10 @@ class SettingsCubit extends Cubit<SettingsState> {
   Future<void> changeTheme(ThemeColor themeColor, bool isDarkMode) async {
     await saveConfig('theme_color', themeColor.name);
     await saveConfig('is_dark_mode', isDarkMode.toString());
-    emit((state as SettingsLoaded)
-        .copyWith(themeColor: themeColor, isDarkMode: isDarkMode),);
+    emit(
+      (state as SettingsLoaded)
+          .copyWith(themeColor: themeColor, isDarkMode: isDarkMode),
+    );
   }
 
   Future<void> toggleEditMode() async {
@@ -74,6 +78,36 @@ class SettingsCubit extends Cubit<SettingsState> {
     emit((state as SettingsLoaded).copyWith(offlineMode: offlineMode));
   }
 
+  Future<void> toggleActionFilter(ActionMenuMode selected) async {
+    if (state is! SettingsLoaded) return;
+    await saveConfig('selected_action_filter', selected.name);
+    emit(
+      (state as SettingsLoaded).copyWith(
+        selectedActionFilter: selected,
+      ),
+    );
+  }
+
+  Future<void> toggleEquipFilter(EquipFilter selected) async {
+    if (state is! SettingsLoaded) return;
+    await saveConfig('selected_equip_filter', selected.name);
+    emit(
+      (state as SettingsLoaded).copyWith(
+        selectedEquipFilter: selected,
+      ),
+    );
+  }
+
+  Future<void> toggleEquipSort(EquipSort selected) async {
+    if (state is! SettingsLoaded) return;
+    await saveConfig('selected_equip_sort', selected.name);
+    emit(
+      (state as SettingsLoaded).copyWith(
+        selectedEquipSort: selected,
+      ),
+    );
+  }
+
   Future<void> init() async {
     emit(SettingsLoading());
     try {
@@ -85,9 +119,28 @@ class SettingsCubit extends Cubit<SettingsState> {
           await readConfig('theme_color') ?? ThemeColor.chestnutBrown.name;
       final isDarkMode = await readConfig('is_dark_mode') ?? 'false';
       final themeColor = ThemeColor.values.firstWhere(
-          (e) => e.name == themeColorName,
-          orElse: () => ThemeColor.chestnutBrown,);
+        (e) => e.name == themeColorName,
+        orElse: () => ThemeColor.chestnutBrown,
+      );
       final isOnboardingComplete = name.trim().isNotEmpty;
+      final selectedActionFilterName =
+          await readConfig('selected_action_filter') ?? ActionMenuMode.all.name;
+      final selectedActionFilter = ActionMenuMode.values.firstWhere(
+        (e) => e.name == selectedActionFilterName,
+        orElse: () => ActionMenuMode.all,
+      );
+      final selectedEquipFilterName =
+          await readConfig('selected_equip_filter') ?? EquipFilter.all.name;
+      final selectedEquipFilter = EquipFilter.values.firstWhere(
+        (e) => e.name == selectedEquipFilterName,
+        orElse: () => EquipFilter.all,
+      );
+      final selectedEquipSortName =
+          await readConfig('selected_equip_sort') ?? EquipSort.name.name;
+      final selectedEquipSort = EquipSort.values.firstWhere(
+        (e) => e.name == selectedEquipSortName,
+        orElse: () => EquipSort.name,
+      );
 
       await spellsRepository.init();
       await featsRepository.init();
@@ -98,16 +151,21 @@ class SettingsCubit extends Cubit<SettingsState> {
       await charactersRepository.init();
       print('Settings loaded');
 
-      emit(SettingsLoaded(
-        name: name,
-        isCaster: isCaster == 'true',
-        classOnlySpells: classOnly == 'true',
-        isEditMode: false,
-        themeColor: themeColor,
-        isDarkMode: isDarkMode == 'true',
-        offlineMode: offlineMode == 'true',
-        isOnboardingComplete: isOnboardingComplete,
-      ),);
+      emit(
+        SettingsLoaded(
+          name: name,
+          isCaster: isCaster == 'true',
+          classOnlySpells: classOnly == 'true',
+          isEditMode: false,
+          themeColor: themeColor,
+          isDarkMode: isDarkMode == 'true',
+          offlineMode: offlineMode == 'true',
+          isOnboardingComplete: isOnboardingComplete,
+          selectedActionFilter: selectedActionFilter,
+          selectedEquipFilter: selectedEquipFilter,
+          selectedEquipSort: selectedEquipSort,
+        ),
+      );
     } catch (error) {
       emit(SettingsError('Failed to load settings'));
     }

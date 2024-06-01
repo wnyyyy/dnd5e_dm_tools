@@ -1,5 +1,3 @@
-// ignore_for_file: require_trailing_commas
-
 import 'package:dnd5e_dm_tools/core/config/app_colors.dart';
 import 'package:dnd5e_dm_tools/core/widgets/trait_description.dart';
 import 'package:dnd5e_dm_tools/features/rules/rules_cubit.dart';
@@ -97,7 +95,7 @@ class DescriptionText extends StatelessWidget {
     };
 
     final regex = RegExp(
-      r'(\d+\s?(ft|feet|foot|radius|hour|minute|minutes|hours))|\b(successful|success|failure|fail|fails|succeed)\b|(\d+d\d+)( \w+)?',
+      r'(\d+\s?(ft|feet|foot|radius|minutes|minute|hours|hour))|\b(successful|success|failure|fail|fails|succeed)\b|(\d+d\d+)( \w+)?',
       caseSensitive: false,
     );
 
@@ -158,8 +156,9 @@ class DescriptionText extends StatelessWidget {
           } else {
             final lines = parts[i].split('\n');
             for (var j = 0; j < lines.length; j++) {
-              final words = lines[j]
-                  .split(RegExp(r'(\s+|(?=\p{P})|(?<=\p{P}))', unicode: true));
+              final words = lines[j].split(
+                RegExp(r'(\s+|(?=\p{P})|(?<=\p{P})(?<!\d,))', unicode: true),
+              );
               for (var k = 0; k < words.length; k++) {
                 if (words[k].isEmpty) continue;
                 final lowerWord = words[k].toLowerCase();
@@ -205,7 +204,8 @@ class DescriptionText extends StatelessWidget {
                     TextSpan(
                       text: words[k],
                       style: baseStyle.copyWith(
-                          color: damageTypeColors[lowerWord]),
+                        color: damageTypeColors[lowerWord],
+                      ),
                     ),
                   );
                 } else if (conditions.containsKey(lowerWord)) {
@@ -264,17 +264,74 @@ class DescriptionText extends StatelessWidget {
     final List<TextSpan> processedSpans = [];
     for (int i = 0; i < spans.length; i++) {
       processedSpans.add(spans[i]);
-      if (i < spans.length - 1 && _needsSpace(spans[i], spans[i + 1])) {
+      final previousSpan = i > 0 ? spans[i - 1] : null;
+      final nextSpan = i < spans.length - 1 ? spans[i + 1] : null;
+      final isNumSeparator = _isNumSeparator(previousSpan, spans[i], nextSpan);
+      if (i < spans.length - 1 &&
+          _needsSpace(
+            spans[i],
+            nextSpan,
+          ) &&
+          !isNumSeparator) {
         processedSpans.add(const TextSpan(text: ' '));
+      }
+      if (isNumSeparator) {
+        final correctionIndex = processedSpans.length - 2;
+        if (correctionIndex >= 0) {
+          final style = nextSpan?.style ?? baseStyle;
+          processedSpans[correctionIndex] = TextSpan(
+            text: processedSpans[correctionIndex].text,
+            style: style,
+          );
+          processedSpans[correctionIndex + 1] = TextSpan(
+            text: processedSpans[correctionIndex + 1].text,
+            style: style,
+          );
+        }
       }
     }
     return _processCompoundWords(_removeDuplicateSpaces(processedSpans));
   }
 
-  bool _needsSpace(TextSpan currentSpan, TextSpan nextSpan) {
+  bool _isNumSeparator(
+    TextSpan? previousSpan,
+    TextSpan currentSpan,
+    TextSpan? nextSpan,
+  ) {
+    if (currentSpan.text != null && currentSpan.text == ',') {
+      if (previousSpan == null || nextSpan == null) return true;
+      if (nextSpan.text == null || previousSpan.text == null) return true;
+      final prevSpanTextArr = previousSpan.text!.split(' ');
+      final lastElement = prevSpanTextArr.last;
+      bool isNumLast = true;
+      try {
+        int.parse(lastElement);
+      } catch (e) {
+        isNumLast = false;
+      }
+      final nextSpanTextArr = nextSpan.text!.split(' ');
+      final firstElement = nextSpanTextArr.first;
+      bool isNumFirst = true;
+      try {
+        int.parse(firstElement);
+      } catch (e) {
+        isNumFirst = false;
+      }
+      if (isNumLast && isNumFirst) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  bool _needsSpace(TextSpan currentSpan, TextSpan? nextSpan) {
+    if (nextSpan == null) return false;
     if (currentSpan.text == null || nextSpan.text == null) return false;
     final currentText = currentSpan.text!;
     final nextText = nextSpan.text!;
+    if (currentText == '-') {
+      return true;
+    }
     final noSpaceBefore = RegExp(r"[.,;:!?'\’]");
     final noSpaceAfterCloseParen = RegExp(r'^\)');
     final noSpaceBeforeOpenParen = RegExp(r'\($');
@@ -301,7 +358,12 @@ class DescriptionText extends StatelessWidget {
           spans[i + 1].text != null &&
           (processedSpans.last.text!.endsWith("'") ||
               processedSpans.last.text!.endsWith('’')) &&
-          spans[i + 1].text!.startsWith('s')) {
+          (spans[i + 1].text! == 're' ||
+              spans[i + 1].text! == 've' ||
+              spans[i + 1].text! == 'll' ||
+              spans[i + 1].text! == 'd' ||
+              spans[i + 1].text! == 't' ||
+              spans[i + 1].text! == 's')) {
         continue;
       }
       // Remove spaces around hyphens in the middle of words
@@ -312,7 +374,19 @@ class DescriptionText extends StatelessWidget {
         final previousText = spans[i - 1].text!;
         final nextText = spans[i + 1].text!;
         if (previousText.endsWith('-') || nextText.startsWith('-')) {
-          continue;
+          bool isNewParagraph = false;
+          try {
+            final antipreviousSpan = spans[i - 2];
+            if (antipreviousSpan.text != null &&
+                antipreviousSpan.text!.endsWith('\n')) {
+              isNewParagraph = true;
+            }
+          } catch (e) {
+            isNewParagraph = false;
+          }
+          if (!isNewParagraph) {
+            continue;
+          }
         }
       }
       processedSpans.add(spans[i]);
@@ -323,7 +397,7 @@ class DescriptionText extends StatelessWidget {
   List<TextSpan> _processCompoundWords(List<TextSpan> spans) {
     final List<TextSpan> processedSpans = [];
     final compoundRegex = RegExp(
-      r'\b\w+-(\w*(feet|foot|ft|hour|minute|minutes|hours)\b(?:-\w+)?)',
+      r'\b\w+-(\w*(feet|foot|ft|hour|minutes|minute|hours)\b(?:-\w+)?)',
       caseSensitive: false,
     );
 

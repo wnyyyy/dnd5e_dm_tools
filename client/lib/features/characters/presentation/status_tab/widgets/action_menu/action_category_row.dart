@@ -1,9 +1,10 @@
 import 'package:dnd5e_dm_tools/core/util/enum.dart';
+import 'package:dnd5e_dm_tools/features/settings/bloc/settings_cubit.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttericon/font_awesome5_icons.dart';
 
 class ActionCategoryRow extends StatefulWidget {
-
   const ActionCategoryRow({
     super.key,
     required this.onSelected,
@@ -39,6 +40,7 @@ class ActionCategoryRowState extends State<ActionCategoryRow> {
               onSelected: (selected) {
                 setState(() {
                   _selected = ActionMenuMode.all;
+                  context.read<SettingsCubit>().toggleActionFilter(_selected);
                   widget.onSelected(_selected);
                 });
               },
@@ -53,6 +55,7 @@ class ActionCategoryRowState extends State<ActionCategoryRow> {
             onSelected: (selected) {
               setState(() {
                 _selected = ActionMenuMode.abilities;
+                context.read<SettingsCubit>().toggleActionFilter(_selected);
                 widget.onSelected(_selected);
               });
             },
@@ -67,6 +70,7 @@ class ActionCategoryRowState extends State<ActionCategoryRow> {
             onSelected: (selected) {
               setState(() {
                 _selected = ActionMenuMode.items;
+                context.read<SettingsCubit>().toggleActionFilter(_selected);
                 widget.onSelected(_selected);
               });
             },
@@ -81,6 +85,7 @@ class ActionCategoryRowState extends State<ActionCategoryRow> {
             onSelected: (selected) {
               setState(() {
                 _selected = ActionMenuMode.spells;
+                context.read<SettingsCubit>().toggleActionFilter(_selected);
                 widget.onSelected(_selected);
               });
             },
