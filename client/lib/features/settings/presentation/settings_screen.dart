@@ -31,19 +31,19 @@ class SettingsScreen extends StatelessWidget {
                 children: [
                   Padding(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 32, vertical: 16),
+                        horizontal: 32, vertical: 16,),
                     child: _buildNameField(context),
                   ),
                   Padding(
                     padding: EdgeInsets.symmetric(
-                        horizontal: MediaQuery.of(context).size.width * 0.2),
+                        horizontal: MediaQuery.of(context).size.width * 0.2,),
                     child: _buildIsCasterToggle(context),
                   ),
                 ],
               ),
               Padding(
                 padding: EdgeInsets.symmetric(
-                    horizontal: MediaQuery.of(context).size.width * 0.2),
+                    horizontal: MediaQuery.of(context).size.width * 0.2,),
                 child: _buildIsOfflineModeToggle(context),
               ),
               Padding(
@@ -75,7 +75,7 @@ class SettingsScreen extends StatelessWidget {
                   BlocProvider.of<CharacterBloc>(context)
                       .add(const PersistCharacter(
                     offline: false,
-                  ));
+                  ),);
                 },
                 child: const Text('Persist'),
               ),
@@ -115,7 +115,7 @@ class SettingsScreen extends StatelessWidget {
                     BlocProvider.of<SettingsCubit>(context)
                         .toggleClassOnlySpells();
                   },
-                )),
+                ),),
           ],
         );
       },
@@ -136,11 +136,11 @@ class SettingsScreen extends StatelessWidget {
                   BlocProvider.of<CharacterBloc>(context).add(CharacterLoad(
                     _nameController.text,
                     offline: context.read<SettingsCubit>().state.offlineMode,
-                  ));
+                  ),);
                   BlocProvider.of<SettingsCubit>(context).toggleEditMode();
                   BlocProvider.of<CharacterBloc>(context).add(PersistCharacter(
                     offline: context.read<SettingsCubit>().state.offlineMode,
-                  ));
+                  ),);
                 },
                 child: const Text('Save'),
               ),
@@ -151,7 +151,7 @@ class SettingsScreen extends StatelessWidget {
                   BlocProvider.of<CharacterBloc>(context).add(CharacterLoad(
                     state.name,
                     offline: context.read<SettingsCubit>().state.offlineMode,
-                  ));
+                  ),);
                 },
                 child: const Text('Cancel'),
               ),

@@ -4,9 +4,6 @@ import 'package:dnd5e_dm_tools/features/characters/bloc/character_states.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class CharacterBloc extends Bloc<CharacterEvent, CharacterState> {
-  final CharactersRepository charactersRepository;
-  final String name = '';
-
   CharacterBloc({
     required this.charactersRepository,
   }) : super(CharacterInitial()) {
@@ -14,15 +11,21 @@ class CharacterBloc extends Bloc<CharacterEvent, CharacterState> {
     on<CharacterUpdate>(_onCharacterUpdate);
     on<PersistCharacter>(_onPersistCharacter);
   }
+  final CharactersRepository charactersRepository;
+  final String name = '';
 
   Future<void> _onCharacterLoad(
-      CharacterLoad event, Emitter<CharacterState> emit) async {
-    print("Loading name: ${event.characterName}");
+    CharacterLoad event,
+    Emitter<CharacterState> emit,
+  ) async {
+    print('Loading name: ${event.characterName}');
     emit(CharacterLoading(slug: event.characterName));
     try {
       final slug = event.characterName;
-      Map<String, dynamic> character =
-          await charactersRepository.get(slug, event.offline);
+      final Map<String, dynamic> character = await charactersRepository.get(
+        slug,
+        event.offline,
+      ) as Map<String, dynamic>;
       emit(
         CharacterLoaded(
           character: character,
@@ -32,19 +35,23 @@ class CharacterBloc extends Bloc<CharacterEvent, CharacterState> {
     } catch (error) {
       emit(
         CharacterError(
-            error: "Failed to load characters", slug: event.characterName),
+          error: 'Failed to load characters',
+          slug: event.characterName,
+        ),
       );
     }
   }
 
   Future<void> _onCharacterUpdate(
-      CharacterUpdate event, Emitter<CharacterState> emit) async {
+    CharacterUpdate event,
+    Emitter<CharacterState> emit,
+  ) async {
     try {
       if (state is! CharacterLoaded) {
         return;
       }
-      var character = Map.from(event.character).cast<String, dynamic>();
-      var newState = (state as CharacterLoaded).copyWith(
+      final character = Map.from(event.character).cast<String, dynamic>();
+      final newState = (state as CharacterLoaded).copyWith(
         character: character,
       );
 
@@ -58,13 +65,15 @@ class CharacterBloc extends Bloc<CharacterEvent, CharacterState> {
       }
     } catch (error) {
       emit(
-        CharacterError(error: "Failed to load characters", slug: event.slug),
+        CharacterError(error: 'Failed to load characters', slug: event.slug),
       );
     }
   }
 
   Future<void> _onPersistCharacter(
-      PersistCharacter event, Emitter<CharacterState> emit) async {
+    PersistCharacter event,
+    Emitter<CharacterState> emit,
+  ) async {
     if (this.state is! CharacterLoaded) {
       return;
     }
@@ -77,7 +86,7 @@ class CharacterBloc extends Bloc<CharacterEvent, CharacterState> {
       );
     } catch (error) {
       emit(
-        CharacterError(error: "Failed to persist character", slug: state.slug),
+        CharacterError(error: 'Failed to persist character', slug: state.slug),
       );
     }
   }

@@ -8,11 +8,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 
 class ClassDescription extends StatefulWidget {
-  final Map<String, dynamic> classs;
-  final Map<String, dynamic> character;
-  final String slug;
-  final bool editMode;
-
   const ClassDescription({
     super.key,
     required this.classs,
@@ -20,6 +15,11 @@ class ClassDescription extends StatefulWidget {
     required this.editMode,
     required this.slug,
   });
+
+  final Map<String, dynamic> classs;
+  final Map<String, dynamic> character;
+  final String slug;
+  final bool editMode;
 
   @override
   State<ClassDescription> createState() => _ClassDescriptionState();
@@ -32,14 +32,16 @@ class _ClassDescriptionState extends State<ClassDescription> {
   @override
   void initState() {
     super.initState();
-    selectedArchetypeSlug = widget.character['subclass'] ?? '';
+    selectedArchetypeSlug = widget.character['subclass'] as String? ?? '';
     initializeArchetypes();
   }
 
   void initializeArchetypes() {
     if (widget.classs['archetypes'] != null) {
-      archetypes = List<Map<String, dynamic>>.from(widget.classs['archetypes']
-          .map((item) => Map<String, dynamic>.from(item)));
+      archetypes = List<Map<String, dynamic>>.from(
+        (widget.classs['archetypes'] as List)
+            .map((item) => Map<String, dynamic>.from(item as Map)),
+      );
     }
   }
 
@@ -76,10 +78,12 @@ class _ClassDescriptionState extends State<ClassDescription> {
   }
 
   Widget _buildClassTab() {
-    final archetypeChr = widget.character['subclass'] ?? '';
-    final archetype = widget.classs['archetypes'].firstWhere(
-      (element) => element['slug'] == archetypeChr,
-      orElse: () => null,
+    final String archetypeChr = widget.character['subclass'] as String? ?? '';
+    final archetypeList =
+        widget.classs['archetypes'] as List<Map<String, dynamic>>? ?? [];
+    final Map<String, dynamic> archetype = archetypeList.firstWhere(
+      (element) => (element['slug']?.toString() ?? '') == archetypeChr,
+      orElse: () => {},
     );
     return SingleChildScrollView(
       child: Padding(
@@ -88,38 +92,61 @@ class _ClassDescriptionState extends State<ClassDescription> {
           children: [
             Padding(
               padding: const EdgeInsets.only(top: 8.0, right: 8, left: 8),
-              child: Text(widget.classs['name'],
-                  style: Theme.of(context).textTheme.headlineMedium),
+              child: Text(
+                widget.classs['name'] as String,
+                style: Theme.of(context).textTheme.headlineMedium,
+              ),
             ),
-            if (archetype != null)
+            if (archetype.isNotEmpty &&
+                (archetype['name']?.toString().isNotEmpty ?? false))
               Padding(
                 padding: const EdgeInsets.only(bottom: 8.0),
                 child: Text(
-                  '(${archetype['name']})',
+                  '(${archetype['name'] as String})',
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
               ),
             StaggeredGrid.count(
               crossAxisCount:
-                  Orientation.landscape == MediaQuery.of(context).orientation
+                  MediaQuery.of(context).orientation == Orientation.landscape
                       ? 4
                       : 2,
               crossAxisSpacing: 8,
               mainAxisSpacing: 8,
               children: [
-                _buildGridCard('Hit Dice', widget.classs['hit_dice'], context),
-                _buildGridCard('Saving Throws',
-                    widget.classs['prof_saving_throws'], context),
-                _buildGridCard('Armor\nProficiencies',
-                    widget.classs['prof_armor'], context),
+                _buildGridCard(
+                  'Hit Dice',
+                  widget.classs['hit_dice'] as String,
+                  context,
+                ),
+                _buildGridCard(
+                  'Saving Throws',
+                  widget.classs['prof_saving_throws'] as String,
+                  context,
+                ),
+                _buildGridCard(
+                  'Armor\nProficiencies',
+                  widget.classs['prof_armor'] as String,
+                  context,
+                ),
                 if (widget.classs['spellcasting_ability'] != null &&
-                    widget.classs['spellcasting_ability'].isNotEmpty)
-                  _buildGridCard('Spellcasting\nAbility',
-                      widget.classs['spellcasting_ability'], context),
-                _buildGridCard('Weapon\nProficiencies',
-                    widget.classs['prof_weapons'], context),
-                _buildGridCard('Tools\nProficiencies',
-                    widget.classs['prof_tools'] ?? 'None', context),
+                    (widget.classs['spellcasting_ability'] as String)
+                        .isNotEmpty)
+                  _buildGridCard(
+                    'Spellcasting\nAbility',
+                    widget.classs['spellcasting_ability'] as String,
+                    context,
+                  ),
+                _buildGridCard(
+                  'Weapon\nProficiencies',
+                  widget.classs['prof_weapons'] as String,
+                  context,
+                ),
+                _buildGridCard(
+                  'Tools\nProficiencies',
+                  widget.classs['prof_tools'] as String? ?? 'None',
+                  context,
+                ),
                 StaggeredGridTile.fit(
                   crossAxisCellCount: 2,
                   child: Card(
@@ -134,7 +161,7 @@ class _ClassDescriptionState extends State<ClassDescription> {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            widget.classs['prof_skills'] ?? 'None',
+                            widget.classs['prof_skills'] as String? ?? 'None',
                             style: Theme.of(context).textTheme.bodySmall,
                           ),
                         ],
@@ -189,11 +216,12 @@ class _ClassDescriptionState extends State<ClassDescription> {
                     ? noneOption
                     : archetypes.firstWhere(
                         (element) => element['slug'] == selectedArchetypeSlug!,
-                        orElse: () => noneOption),
+                        orElse: () => noneOption,
+                      ),
             onChanged: (Map<String, dynamic>? newValue) {
               setState(
                 () {
-                  selectedArchetypeSlug = newValue!['slug'];
+                  selectedArchetypeSlug = newValue!['slug'] as String;
                   widget.character['subclass'] = selectedArchetypeSlug;
                   context.read<CharacterBloc>().add(
                         CharacterUpdate(
@@ -201,7 +229,6 @@ class _ClassDescriptionState extends State<ClassDescription> {
                           slug: widget.slug,
                           offline:
                               context.read<SettingsCubit>().state.offlineMode,
-                          persistData: false,
                         ),
                       );
                 },
@@ -213,7 +240,7 @@ class _ClassDescriptionState extends State<ClassDescription> {
               (Map<String, dynamic> archetype) {
                 return DropdownMenuItem<Map<String, dynamic>>(
                   value: archetype,
-                  child: Text(archetype['name']),
+                  child: Text(archetype['name'] as String),
                 );
               },
             ).toList(),
@@ -231,51 +258,59 @@ class _ClassDescriptionState extends State<ClassDescription> {
   }
 
   List<Widget> _buildArchetypeDetails(String archetypeSlug) {
-    final archetype = widget.classs['archetypes']
-        .firstWhere((element) => element['slug'] == archetypeSlug);
-    List<Widget> widgets = [];
-    widgets.add(
-      Text(
-        archetype?['name'] ?? '',
-        style: Theme.of(context).textTheme.headlineMedium,
-      ),
+    final archetypeList =
+        widget.classs['archetypes'] as List<Map<String, dynamic>>? ?? [];
+    final Map<String, dynamic> archetype = archetypeList.firstWhere(
+      (element) => (element['slug']?.toString() ?? '') == archetypeSlug,
+      orElse: () => {},
     );
-    final archetypeFeatures = getArchetypeFeatures(archetype['desc'] ?? '');
-    for (final feature in archetypeFeatures.entries) {
+    final List<Widget> widgets = [];
+    if (archetype.isNotEmpty && archetype['name'] != null) {
       widgets.add(
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: ExpansionTile(
-            title: Text(
-              feature.key,
-              style: Theme.of(context).textTheme.titleSmall,
-            ),
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: DescriptionText(
-                  inputText: feature.value['description'] ?? '',
-                  baseStyle: Theme.of(context).textTheme.bodySmall!,
-                ),
-              ),
-            ],
-          ),
+        Text(
+          archetype['name'] as String,
+          style: Theme.of(context).textTheme.headlineMedium,
         ),
       );
+      final Map<String, dynamic> archetypeFeatures =
+          getArchetypeFeatures(archetype['desc'] as String? ?? '');
+      for (final feature in archetypeFeatures.entries) {
+        widgets.add(
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: ExpansionTile(
+              title: Text(
+                feature.key,
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: DescriptionText(
+                    inputText:
+                        (feature.value as Map)['description'] as String? ?? '',
+                    baseStyle: Theme.of(context).textTheme.bodySmall!,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      }
     }
-
     return widgets;
   }
 
   Widget _buildTableTab() {
-    final table = parseTable(widget.classs['table'] ?? '');
+    final List<Map<String, dynamic>> table =
+        parseTable(widget.classs['table'] as String? ?? '');
 
-    List<Widget> levels = [];
+    final List<Widget> levels = [];
     final bool caster =
-        widget.classs['spellcasting_ability']?.isNotEmpty ?? false;
+        (widget.classs['spellcasting_ability'] as String?)?.isNotEmpty ?? false;
 
     for (var i = 1; i < table.length; i++) {
-      List<Widget> entries = [];
+      final List<Widget> entries = [];
       for (final entry in table[i].entries) {
         if (entry.key == 'Level') {
           continue;
@@ -307,7 +342,6 @@ class _ClassDescriptionState extends State<ClassDescription> {
     }
 
     return SingleChildScrollView(
-      scrollDirection: Axis.vertical,
       child: Column(
         children: levels,
       ),

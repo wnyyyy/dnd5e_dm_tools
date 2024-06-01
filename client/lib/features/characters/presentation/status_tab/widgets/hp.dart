@@ -1,20 +1,20 @@
 import 'dart:async';
 import 'dart:math';
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+
 import 'package:dnd5e_dm_tools/features/characters/bloc/character_bloc.dart';
 import 'package:dnd5e_dm_tools/features/characters/bloc/character_events.dart';
 import 'package:dnd5e_dm_tools/features/settings/bloc/settings_cubit.dart';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class Hitpoints extends StatefulWidget {
-  final Map<String, dynamic> character;
-  final String slug;
-
   const Hitpoints({
     super.key,
     required this.character,
     required this.slug,
   });
+  final Map<String, dynamic> character;
+  final String slug;
 
   @override
   State<Hitpoints> createState() => HitpointsState();
@@ -31,9 +31,9 @@ class HitpointsState extends State<Hitpoints> {
   @override
   void initState() {
     super.initState();
-    maxHp = widget.character['hp_max'] ?? 0;
-    currentHp = widget.character['hp_curr'] ?? maxHp;
-    tempHp = widget.character['hp_temp'] ?? 0;
+    maxHp = widget.character['hp_max'] as int? ?? 0;
+    currentHp = widget.character['hp_curr'] as int? ?? maxHp;
+    tempHp = widget.character['hp_temp'] as int? ?? 0;
   }
 
   @override
@@ -66,12 +66,14 @@ class HitpointsState extends State<Hitpoints> {
     widget.character['hp_max'] = maxHp;
     widget.character['hp_curr'] = currentHp;
     widget.character['hp_temp'] = tempHp;
-    context.read<CharacterBloc>().add(CharacterUpdate(
-          character: widget.character,
-          slug: widget.slug,
-          persistData: true,
-          offline: context.read<SettingsCubit>().state.offlineMode,
-        ));
+    context.read<CharacterBloc>().add(
+          CharacterUpdate(
+            character: widget.character,
+            slug: widget.slug,
+            persistData: true,
+            offline: context.read<SettingsCubit>().state.offlineMode,
+          ),
+        );
   }
 
   @override
@@ -99,8 +101,10 @@ class HitpointsState extends State<Hitpoints> {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  Text('Hit Points',
-                      style: Theme.of(context).textTheme.titleSmall),
+                  Text(
+                    'Hit Points',
+                    style: Theme.of(context).textTheme.titleSmall,
+                  ),
                   const SizedBox(width: 8),
                   GestureDetector(
                     onLongPress: () => setState(() {
@@ -123,24 +127,26 @@ class HitpointsState extends State<Hitpoints> {
                     child: Padding(
                       padding: const EdgeInsets.only(right: 6),
                       child: IconButton(
-                          onPressed: () => _updateHp(-1, offline),
-                          iconSize: 32,
-                          icon: const Icon(Icons.remove_circle_outline)),
+                        onPressed: () => _updateHp(-1, offline),
+                        iconSize: 32,
+                        icon: const Icon(Icons.remove_circle_outline),
+                      ),
                     ),
                   ),
                   GestureDetector(
                     onDoubleTap: () => _showAdjustHpModal(context),
-                    child: Text('$currentHp'.padLeft(2, '0'),
-                        style:
-                            Theme.of(context).textTheme.displaySmall!.copyWith(
-                                  color: currentHp <= maxHp / 3
-                                      ? Colors.redAccent
-                                      : currentHp <= maxHp / 2
-                                          ? Colors.orange
-                                          : currentHp <= maxHp / 1.5
-                                              ? Colors.orangeAccent
-                                              : Colors.green,
-                                )),
+                    child: Text(
+                      '$currentHp'.padLeft(2, '0'),
+                      style: Theme.of(context).textTheme.displaySmall!.copyWith(
+                            color: currentHp <= maxHp / 3
+                                ? Colors.redAccent
+                                : currentHp <= maxHp / 2
+                                    ? Colors.orange
+                                    : currentHp <= maxHp / 1.5
+                                        ? Colors.orangeAccent
+                                        : Colors.green,
+                          ),
+                    ),
                   ),
                   GestureDetector(
                     onLongPress: () => _startTimer(1, offline),
@@ -148,9 +154,10 @@ class HitpointsState extends State<Hitpoints> {
                     child: Padding(
                       padding: const EdgeInsets.only(left: 6.0),
                       child: IconButton(
-                          iconSize: 32,
-                          onPressed: () => _updateHp(1, offline),
-                          icon: const Icon(Icons.add_circle_outline)),
+                        iconSize: 32,
+                        onPressed: () => _updateHp(1, offline),
+                        icon: const Icon(Icons.add_circle_outline),
+                      ),
                     ),
                   ),
                 ],
@@ -168,11 +175,13 @@ class HitpointsState extends State<Hitpoints> {
                 ),
               ),
               if (tempHp > 0)
-                Text('+$tempHp',
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleLarge!
-                        .copyWith(color: Colors.blue)),
+                Text(
+                  '+$tempHp',
+                  style: Theme.of(context)
+                      .textTheme
+                      .titleLarge!
+                      .copyWith(color: Colors.blue),
+                ),
               if (currentHp < 1) _buildDeathSave(),
             ],
           ),
@@ -182,9 +191,9 @@ class HitpointsState extends State<Hitpoints> {
   }
 
   void _showAdjustHpModal(BuildContext context) {
-    TextEditingController numberController = TextEditingController();
+    final TextEditingController numberController = TextEditingController();
     bool increaseHp = false;
-    FocusNode focusNode = FocusNode();
+    final FocusNode focusNode = FocusNode();
 
     showDialog(
       context: context,
@@ -236,7 +245,11 @@ class HitpointsState extends State<Hitpoints> {
                       keyboardType: TextInputType.number,
                       onSubmitted: (String value) {
                         _submitChange(
-                            numberController, increaseHp, focusNode, context);
+                          numberController,
+                          increaseHp,
+                          focusNode,
+                          context,
+                        );
                       },
                       decoration: const InputDecoration(
                         hintText: '',
@@ -269,8 +282,12 @@ class HitpointsState extends State<Hitpoints> {
     );
   }
 
-  void _submitChange(TextEditingController numberController, bool increaseHp,
-      FocusNode focusNode, BuildContext context) {
+  void _submitChange(
+    TextEditingController numberController,
+    bool increaseHp,
+    FocusNode focusNode,
+    BuildContext context,
+  ) {
     int changeValue = int.tryParse(numberController.text) ?? 0;
     if (!increaseHp) {
       changeValue = -changeValue;
@@ -283,7 +300,8 @@ class HitpointsState extends State<Hitpoints> {
 
   Widget _buildDeathSave() {
     final character = widget.character;
-    final deathSave = character['death_save'] ?? [0, 0, 0, 0, 0, 0];
+    final deathSave =
+        character['death_save'] as List<int>? ?? [0, 0, 0, 0, 0, 0];
 
     return Column(
       children: [
@@ -298,22 +316,24 @@ class HitpointsState extends State<Hitpoints> {
               children: [
                 for (int i = 0; i < 3; i++)
                   Checkbox(
-                      value: deathSave[i] == 1,
-                      onChanged: (value) {
-                        setState(() {
-                          deathSave[i] = value! ? 1 : 0;
-                          character['death_save'] = deathSave;
-                          context.read<CharacterBloc>().add(CharacterUpdate(
+                    value: deathSave[i] == 1,
+                    onChanged: (value) {
+                      setState(() {
+                        deathSave[i] = value! ? 1 : 0;
+                        character['death_save'] = deathSave;
+                        context.read<CharacterBloc>().add(
+                              CharacterUpdate(
                                 character: character,
                                 slug: widget.slug,
-                                persistData: false,
                                 offline: context
                                     .read<SettingsCubit>()
                                     .state
                                     .offlineMode,
-                              ));
-                        });
-                      }),
+                              ),
+                            );
+                      });
+                    },
+                  ),
               ],
             ),
             Text('Fails', style: Theme.of(context).textTheme.labelSmall),
@@ -321,22 +341,24 @@ class HitpointsState extends State<Hitpoints> {
               children: [
                 for (int i = 3; i < 6; i++)
                   Checkbox(
-                      value: deathSave[i] == 1,
-                      onChanged: (value) {
-                        setState(() {
-                          deathSave[i] = value! ? 1 : 0;
-                          character['death_save'] = deathSave;
-                          context.read<CharacterBloc>().add(CharacterUpdate(
+                    value: deathSave[i] == 1,
+                    onChanged: (value) {
+                      setState(() {
+                        deathSave[i] = value! ? 1 : 0;
+                        character['death_save'] = deathSave;
+                        context.read<CharacterBloc>().add(
+                              CharacterUpdate(
                                 character: character,
                                 slug: widget.slug,
-                                persistData: false,
                                 offline: context
                                     .read<SettingsCubit>()
                                     .state
                                     .offlineMode,
-                              ));
-                        });
-                      }),
+                              ),
+                            );
+                      });
+                    },
+                  ),
               ],
             ),
           ],
@@ -364,8 +386,7 @@ class HitpointsState extends State<Hitpoints> {
                 TextField(
                   controller: maxHpController,
                   decoration: const InputDecoration(labelText: 'Max Hitpoints'),
-                  keyboardType: const TextInputType.numberWithOptions(
-                      signed: false, decimal: false),
+                  keyboardType: TextInputType.number,
                   onChanged: (value) {
                     maxHp = int.tryParse(value) ?? maxHp;
                   },
@@ -374,8 +395,7 @@ class HitpointsState extends State<Hitpoints> {
                   controller: currentHpController,
                   decoration:
                       const InputDecoration(labelText: 'Current Hitpoints'),
-                  keyboardType: const TextInputType.numberWithOptions(
-                      signed: false, decimal: false),
+                  keyboardType: TextInputType.number,
                   onChanged: (value) {
                     currentHp = int.tryParse(value) ?? currentHp;
                   },
@@ -384,8 +404,7 @@ class HitpointsState extends State<Hitpoints> {
                   controller: tempHpController,
                   decoration:
                       const InputDecoration(labelText: 'Temporary Hitpoints'),
-                  keyboardType: const TextInputType.numberWithOptions(
-                      signed: false, decimal: false),
+                  keyboardType: TextInputType.number,
                   onChanged: (value) {
                     tempHp = int.tryParse(value) ?? tempHp;
                   },
@@ -426,7 +445,7 @@ class HitpointsState extends State<Hitpoints> {
         if (tempHpMode) {
           tempHp += delta;
         } else {
-          int potentialHp = currentHp + delta;
+          final int potentialHp = currentHp + delta;
           currentHp = min(potentialHp, maxHp);
         }
       } else if (delta < 0) {

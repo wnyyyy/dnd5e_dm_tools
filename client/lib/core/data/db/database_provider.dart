@@ -29,7 +29,7 @@ class DatabaseProvider {
     print('Getting document: $path');
     if (cacheBoxName != null) {
       final cacheBox = Hive.box<Map>(cacheBoxName);
-      var cachedData = cacheBox.get(path);
+      final cachedData = cacheBox.get(path);
       if (cachedData != null) {
         final casted = Map<String, dynamic>.from(cachedData);
         print('Found cache data for $path');
@@ -39,7 +39,7 @@ class DatabaseProvider {
 
     print('No cache data found for $path // fetching from Firestore...');
     final reference = _db.doc(path);
-    var snapshot = await reference.get();
+    final snapshot = await reference.get();
     if (snapshot.exists) {
       if (cacheBoxName != null) {
         final cacheBox = Hive.box<Map>(cacheBoxName);
@@ -61,17 +61,17 @@ class DatabaseProvider {
     if (cacheBoxName != null) {
       final cacheBox = Hive.box<Map>(cacheBoxName);
       if (cacheBox.isNotEmpty) {
-        for (var key in cacheBox.keys) {
+        for (final key in cacheBox.keys) {
           try {
-            var map = cacheBox.get(key);
+            final map = cacheBox.get(key);
             if (map != null) {
-              Map<String, dynamic> castedMap = {};
+              final Map<String, dynamic> castedMap = {};
               map.forEach((k, v) {
                 if (k is String) {
                   castedMap[k] = v;
                 }
               });
-              data[key] = castedMap;
+              data[key.toString()] = castedMap;
             }
           } catch (e) {
             print('Error getting cache data: $e');
@@ -86,7 +86,7 @@ class DatabaseProvider {
     final reference = _db.collection(path);
     final snapshot = await reference.get();
 
-    for (var doc in snapshot.docs) {
+    for (final doc in snapshot.docs) {
       data[doc.id] = doc.data();
       if (cacheBoxName != null) {
         final cacheBox = Hive.box<Map>(cacheBoxName);
@@ -101,7 +101,13 @@ class DatabaseProvider {
   Future<void> loadCache(String cacheBoxName) async {
     print('Checking cache for $cacheBoxName...');
     try {
-      var box = await Hive.openBox<Map>(cacheBoxName);
+      final isOpen = Hive.isBoxOpen(cacheBoxName);
+      final Box box;
+      if (!isOpen) {
+        box = await Hive.openBox<Map>(cacheBoxName);
+      } else {
+        box = Hive.box<Map>(cacheBoxName);
+      }
       print('Cache for $cacheBoxName loaded with ${box.length} items');
     } catch (e) {
       print('Error loading cache from .hive file: $e // $cacheBoxName');

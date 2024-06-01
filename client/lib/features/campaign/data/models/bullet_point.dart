@@ -1,15 +1,15 @@
 import 'package:equatable/equatable.dart';
 
 class BulletPoint extends Equatable {
-  final String id;
-  final String content;
-  final int timestamp;
 
   const BulletPoint({
     required this.id,
     required this.content,
     required this.timestamp,
   });
+  final String id;
+  final String content;
+  final int timestamp;
 
   BulletPoint copyWith({
     String? id,

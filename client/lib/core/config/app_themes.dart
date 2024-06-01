@@ -54,19 +54,19 @@ extension ThemeColorExtension on ThemeColor {
   String get name {
     switch (this) {
       case ThemeColor.chestnutBrown:
-        return "Classic";
+        return 'Classic';
       case ThemeColor.crimsonRed:
-        return "Flamingo Red";
+        return 'Flamingo Red';
       case ThemeColor.forestGreen:
-        return "Forest Green";
+        return 'Forest Green';
       case ThemeColor.midnightBlue:
-        return "Midnight Blue";
+        return 'Midnight Blue';
       case ThemeColor.lavenderViolet:
-        return "Lavender Violet";
+        return 'Lavender Violet';
       case ThemeColor.slateGrey:
-        return "Slate Grey";
+        return 'Slate Grey';
       default:
-        return "Unknown";
+        return 'Unknown';
     }
   }
 }

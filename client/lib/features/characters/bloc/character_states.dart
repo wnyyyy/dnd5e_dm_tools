@@ -13,40 +13,40 @@ class CharacterInitial extends CharacterState {
 }
 
 class CharacterLoading extends CharacterState {
-  final String slug;
 
   const CharacterLoading({
     required this.slug,
   });
+  final String slug;
 
   @override
   List<Object> get props => [slug];
 }
 
 class CharacterError extends CharacterState {
-  final String slug;
-  final String error;
   const CharacterError({
     required this.error,
     required this.slug,
   });
+  final String slug;
+  final String error;
 
   @override
   List<Object> get props => [error, slug];
 }
 
 class CharacterLoaded extends CharacterState {
-  final Map<String, dynamic> character;
-  final String slug;
   const CharacterLoaded({
     required this.character,
     required this.slug,
   });
+  final Map<String, dynamic> character;
+  final String slug;
 
   CharacterLoaded copyWith(
       {Map<String, dynamic>? character,
       String? slug,
-      Map<String, dynamic>? spells}) {
+      Map<String, dynamic>? spells,}) {
     return CharacterLoaded(
       character: character ?? this.character,
       slug: slug ?? this.slug,

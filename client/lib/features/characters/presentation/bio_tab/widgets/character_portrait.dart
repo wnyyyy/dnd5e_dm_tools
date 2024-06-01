@@ -11,14 +11,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class CharacterPortrait extends StatelessWidget {
-  final Map<String, dynamic> character;
-  final String slug;
-
   const CharacterPortrait({
     super.key,
     required this.character,
     required this.slug,
   });
+  final Map<String, dynamic> character;
+  final String slug;
 
   void _showEditLevel(BuildContext context) {
     final offline = context.read<SettingsCubit>().state.offlineMode;
@@ -52,9 +51,10 @@ class CharacterPortrait extends StatelessWidget {
       context: context,
       builder: (context) {
         if (data == null) return Container();
-        final racialTraits = getRacialFeatures(data['traits']);
+        final Map<String, dynamic> racialTraits =
+            getRacialFeatures(data['traits']?.toString() ?? '');
         return AlertDialog(
-          title: Text(data['name'] ?? "Error"),
+          title: Text(data['name'] as String? ?? 'Error'),
           content: SingleChildScrollView(
             child: Column(
               children: [
@@ -69,13 +69,14 @@ class CharacterPortrait extends StatelessWidget {
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         child: DescriptionText(
-                            inputText: trait.value,
-                            baseStyle: Theme.of(context).textTheme.bodySmall!),
+                          inputText: trait.value?.toString() ?? '',
+                          baseStyle: Theme.of(context).textTheme.bodySmall!,
+                        ),
                       ),
                       const Divider(),
-                      const SizedBox(height: 8)
+                      const SizedBox(height: 8),
                     ],
-                  )
+                  ),
               ],
             ),
           ),
@@ -92,19 +93,26 @@ class CharacterPortrait extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final name = character['name'].toString();
-    final race = context.read<RulesCubit>().getRace(character['race']);
-    final classs = context.read<RulesCubit>().getClass(character['class']);
+    final String name = character['name'] as String;
+    final Map<String, dynamic>? race =
+        context.read<RulesCubit>().getRace(character['race'] as String);
+    final Map<String, dynamic>? classs =
+        context.read<RulesCubit>().getClass(character['class'] as String);
+    final String imageUrl = character['image_url'] as String? ?? '';
+    final int level = character['level'] as int? ?? 1;
+
     return Column(
       children: [
         ClipRRect(
           child: Container(
             decoration: BoxDecoration(
               border: Border.all(
-                  color: Theme.of(context).colorScheme.outline, width: 3),
+                color: Theme.of(context).colorScheme.outline,
+                width: 3,
+              ),
             ),
             child: CachedNetworkImage(
-              imageUrl: character['image_url'],
+              imageUrl: imageUrl,
               placeholder: (context, url) => const Center(
                 child: CircularProgressIndicator(),
               ),
@@ -132,7 +140,7 @@ class CharacterPortrait extends StatelessWidget {
                         ? _showEditLevel(context)
                         : null,
                     child: Text(
-                      'Level ${character['level']}',
+                      'Level $level',
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
                   ),
@@ -144,7 +152,7 @@ class CharacterPortrait extends StatelessWidget {
                   GestureDetector(
                     onTap: () => _showRaceModal(context, race),
                     child: Text(
-                      '${race?['name'] ?? 'Race not found'}',
+                      race?['name'] as String? ?? 'Race not found',
                       style: Theme.of(context).textTheme.headlineSmall,
                       softWrap: false,
                     ),
@@ -156,14 +164,15 @@ class CharacterPortrait extends StatelessWidget {
                       builder: (context) {
                         if (classs == null) return Container();
                         return ClassDescription(
-                            classs: classs,
-                            character: character,
-                            slug: slug,
-                            editMode: false);
+                          classs: classs,
+                          character: character,
+                          slug: slug,
+                          editMode: false,
+                        );
                       },
                     ),
                     child: Text(
-                      '${classs?['name'] ?? 'Class not found'}',
+                      classs?['name'] as String? ?? 'Class not found',
                       style: Theme.of(context).textTheme.headlineSmall,
                     ),
                   ),

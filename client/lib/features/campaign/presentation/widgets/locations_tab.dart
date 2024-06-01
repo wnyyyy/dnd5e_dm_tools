@@ -1,9 +1,9 @@
-import 'package:dnd5e_dm_tools/features/campaign/data/models/location.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:dnd5e_dm_tools/features/campaign/cubit/campaign_cubit.dart';
 import 'package:dnd5e_dm_tools/features/campaign/cubit/campaign_states.dart';
+import 'package:dnd5e_dm_tools/features/campaign/data/models/location.dart';
 import 'package:dnd5e_dm_tools/features/campaign/presentation/screens/location_screen.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class LocationsTab extends StatelessWidget {
   const LocationsTab({super.key});
@@ -15,7 +15,7 @@ class LocationsTab extends StatelessWidget {
         if (state is CampaignLoading) {
           return const Center(child: CircularProgressIndicator());
         } else if (state is CampaignLoaded) {
-          List<Location> sortedLocations = List<Location>.from(state.locations);
+          final List<Location> sortedLocations = List<Location>.from(state.locations);
           sortedLocations.sort((a, b) => a.name.compareTo(b.name));
 
           return Padding(
@@ -38,7 +38,7 @@ class LocationsTab extends StatelessWidget {
                                 value: BlocProvider.of<CampaignCubit>(context),
                                 child: LocationDetailsScreen(
                                     key: ValueKey(location.name),
-                                    location: location),
+                                    location: location,),
                               ),
                             ),
                           );

@@ -1,15 +1,15 @@
 import 'dart:math';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:dnd5e_dm_tools/core/widgets/error_handler.dart';
 import 'package:dnd5e_dm_tools/features/onboarding/bloc/onboarding_cubit.dart';
 import 'package:dnd5e_dm_tools/features/onboarding/bloc/onboarding_state.dart';
+import 'package:dnd5e_dm_tools/features/settings/bloc/settings_cubit.dart';
+import 'package:dnd5e_dm_tools/features/settings/bloc/settings_states.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:dnd5e_dm_tools/features/settings/bloc/settings_cubit.dart';
-import 'package:dnd5e_dm_tools/features/settings/bloc/settings_states.dart';
-import 'package:dnd5e_dm_tools/core/widgets/error_handler.dart';
 import 'package:fluttericon/elusive_icons.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -36,8 +36,11 @@ class OnboardingScreenState extends State<OnboardingScreen> {
 
   Future<void> _preloadCharacterImages() async {
     final characters = context.read<OnboardingCubit>().state.characters;
-    for (var character in characters.values) {
-      await precacheImage(NetworkImage(character['image_url']), context);
+    for (final character in characters.values) {
+      await precacheImage(
+        NetworkImage((character as Map)['image_url']?.toString() ?? ''),
+        context,
+      );
     }
   }
 
@@ -113,7 +116,10 @@ class OnboardingScreenState extends State<OnboardingScreen> {
               }
               if (state is OnboardingLoaded) {
                 return _buildOnboardingContentDetails(
-                    context, state.characters, state.selectedCharacter);
+                  context,
+                  state.characters,
+                  state.selectedCharacter,
+                );
               }
 
               return Container();
@@ -135,9 +141,17 @@ class OnboardingScreenState extends State<OnboardingScreen> {
         return Center(
           child: orientation == Orientation.portrait
               ? _buildPortraitContent(
-                  context, characters, selectedCharacter, pageController)
+                  context,
+                  characters,
+                  selectedCharacter,
+                  pageController,
+                )
               : _buildLandscapeContent(
-                  context, characters, selectedCharacter, pageController),
+                  context,
+                  characters,
+                  selectedCharacter,
+                  pageController,
+                ),
         );
       },
     );
@@ -151,19 +165,23 @@ class OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   Widget _buildPortraitContent(
-      BuildContext context,
-      Map<String, dynamic> characters,
-      String selectedCharacter,
-      PageController pageController) {
+    BuildContext context,
+    Map<String, dynamic> characters,
+    String selectedCharacter,
+    PageController pageController,
+  ) {
     final screenHeight = MediaQuery.of(context).size.height;
-    final character = characters[selectedCharacter];
-    final longName = character['name'].length > 7;
+    final character = characters[selectedCharacter] as Map<String, dynamic>;
+    final longName = (character['name']?.toString() ?? '').length > 7;
     final baseTheme = longName
         ? Theme.of(context).textTheme.displayMedium
         : Theme.of(context).textTheme.displayLarge;
-    var color = character['color'] ?? Theme.of(context).colorScheme.onSurface;
-    if (color is String) {
-      color = hexToColor(color);
+    final colorChar = character['color']?.toString() ?? '';
+    final Color color;
+    if (colorChar.isEmpty) {
+      color = hexToColor(colorChar);
+    } else {
+      color = Theme.of(context).colorScheme.onSurface;
     }
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -181,10 +199,10 @@ class OnboardingScreenState extends State<OnboardingScreen> {
               });
             },
             itemBuilder: (context, index) {
-              final characterPaged =
-                  characters.values.elementAt(index % characters.length);
+              final characterPaged = characters.values
+                  .elementAt(index % characters.length) as Map<String, dynamic>;
               return CachedNetworkImage(
-                imageUrl: characterPaged['image_url'],
+                imageUrl: characterPaged['image_url']?.toString() ?? '',
                 fit: BoxFit.cover,
                 placeholder: (context, url) => const Center(
                   child: CircularProgressIndicator(),
@@ -215,11 +233,10 @@ class OnboardingScreenState extends State<OnboardingScreen> {
             ),
             Expanded(
               child: Padding(
-                padding: longName
-                    ? const EdgeInsets.only(top: 12)
-                    : const EdgeInsets.only(top: 0),
+                padding:
+                    longName ? const EdgeInsets.only(top: 12) : EdgeInsets.zero,
                 child: Text(
-                  character['name'],
+                  character['name']?.toString() ?? '',
                   textAlign: TextAlign.center,
                   style: baseTheme!.copyWith(
                     fontFamily: GoogleFonts.patuaOne().fontFamily,
@@ -261,7 +278,7 @@ class OnboardingScreenState extends State<OnboardingScreen> {
         onPressed: () {
           var caster = false;
           if (character['known_spells'] != null &&
-              character['known_spells'].isNotEmpty) {
+              (character['known_spells'] as List).isNotEmpty) {
             caster = true;
           }
           context
@@ -274,35 +291,40 @@ class OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   Widget _buildLandscapeContent(
-      BuildContext context,
-      Map<String, dynamic> characters,
-      String selectedCharacter,
-      PageController pageController) {
-    final character = characters[selectedCharacter];
-    final longName = character['name'].length > 7;
+    BuildContext context,
+    Map<String, dynamic> characters,
+    String selectedCharacter,
+    PageController pageController,
+  ) {
+    final character = characters[selectedCharacter] as Map<String, dynamic>;
+    final longName = (character['name']?.toString() ?? '').length > 7;
     final baseTheme = longName
         ? Theme.of(context).textTheme.displayMedium
         : Theme.of(context).textTheme.displayLarge;
-    var color = character['color'] ?? Theme.of(context).colorScheme.onSurface;
-    if (color is String) {
-      color = hexToColor(color);
+    final colorChar = character['color']?.toString() ?? '';
+    final Color color;
+    if (colorChar.isEmpty) {
+      color = hexToColor(colorChar);
+    } else {
+      color = Theme.of(context).colorScheme.onSurface;
     }
     final extraScrollSpeed = MediaQuery.of(context).size.height * 0.6;
     pageController.addListener(() {
-      ScrollDirection scrollDirection =
+      final ScrollDirection scrollDirection =
           pageController.position.userScrollDirection;
       if (scrollDirection != ScrollDirection.idle && isMouseScrolling) {
         double scrollEnd = pageController.offset +
             (scrollDirection == ScrollDirection.reverse
                 ? extraScrollSpeed
                 : -extraScrollSpeed);
-        scrollEnd = min(pageController.position.maxScrollExtent,
-            max(pageController.position.minScrollExtent, scrollEnd));
+        scrollEnd = min(
+          pageController.position.maxScrollExtent,
+          max(pageController.position.minScrollExtent, scrollEnd),
+        );
         pageController.jumpTo(scrollEnd);
       }
     });
     return Row(
-      mainAxisAlignment: MainAxisAlignment.start,
       children: [
         Expanded(
           flex: 2,
@@ -319,9 +341,9 @@ class OnboardingScreenState extends State<OnboardingScreen> {
             },
             itemBuilder: (context, index) {
               final characterPaged =
-                  characters.values.elementAt(index % characters.length);
+                  characters.values.elementAt(index % characters.length) as Map;
               return CachedNetworkImage(
-                imageUrl: characterPaged['image_url'],
+                imageUrl: characterPaged['image_url']?.toString() ?? '',
                 fit: BoxFit.cover,
                 placeholder: (context, url) => const Center(
                   child: CircularProgressIndicator(),
@@ -334,7 +356,6 @@ class OnboardingScreenState extends State<OnboardingScreen> {
         Expanded(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               IconButton(
                 iconSize: 36,
@@ -352,9 +373,9 @@ class OnboardingScreenState extends State<OnboardingScreen> {
                 width: double.infinity,
                 padding: longName
                     ? const EdgeInsets.symmetric(vertical: 6)
-                    : const EdgeInsets.symmetric(vertical: 0),
+                    : EdgeInsets.zero,
                 child: Text(
-                  character['name'],
+                  character['name']?.toString() ?? '',
                   textAlign: TextAlign.center,
                   style: baseTheme!.copyWith(
                     fontFamily: GoogleFonts.patuaOne().fontFamily,
@@ -378,7 +399,7 @@ class OnboardingScreenState extends State<OnboardingScreen> {
                 padding: const EdgeInsets.only(top: 16),
                 child:
                     _buildAdvanceButton(context, selectedCharacter, character),
-              )
+              ),
             ],
           ),
         ),

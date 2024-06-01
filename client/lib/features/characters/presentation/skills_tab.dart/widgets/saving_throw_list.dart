@@ -42,8 +42,8 @@ class _SavingThrowListState extends State<SavingThrowList> {
   @override
   Widget build(BuildContext context) {
     final editMode = Provider.of<SettingsCubit>(context).state.isEditMode;
-    final asi = widget.character['asi'];
-    final profBonus = getProfBonus(widget.character['level']);
+    final asi = widget.character['asi'] as Map<String, int?>? ?? {};
+    final profBonus = getProfBonus(widget.character['level'] as int? ?? 1);
 
     void editSavingThrow(String attributeName) {
       showDialog(
@@ -86,12 +86,16 @@ class _SavingThrowListState extends State<SavingThrowList> {
                     onPressed: () {
                       widget.character['prof_saving_throws'] =
                           charProf.join(',');
-                      context.read<CharacterBloc>().add(CharacterUpdate(
-                            character: widget.character,
-                            slug: widget.slug,
-                            offline:
-                                context.read<SettingsCubit>().state.offlineMode,
-                          ));
+                      context.read<CharacterBloc>().add(
+                            CharacterUpdate(
+                              character: widget.character,
+                              slug: widget.slug,
+                              offline: context
+                                  .read<SettingsCubit>()
+                                  .state
+                                  .offlineMode,
+                            ),
+                          );
                       Navigator.of(context).pop();
                     },
                   ),
@@ -125,7 +129,7 @@ class _SavingThrowListState extends State<SavingThrowList> {
                       children: [
                         SavingThrow(
                           attributePrefix: 'STR',
-                          attributeValue: asi['strength'],
+                          attributeValue: asi['strength'] ?? 10,
                           color: Theme.of(context).strengthColor,
                           proficiency:
                               charProf.contains('strength') ? profBonus : null,
@@ -137,7 +141,7 @@ class _SavingThrowListState extends State<SavingThrowList> {
                         const SizedBox(height: 12),
                         SavingThrow(
                           attributePrefix: 'DEX',
-                          attributeValue: asi['dexterity'],
+                          attributeValue: asi['dexterity'] ?? 10,
                           color: Theme.of(context).dexterityColor,
                           proficiency:
                               charProf.contains('dexterity') ? profBonus : null,
@@ -149,7 +153,7 @@ class _SavingThrowListState extends State<SavingThrowList> {
                         const SizedBox(height: 12),
                         SavingThrow(
                           attributePrefix: 'CON',
-                          attributeValue: asi['constitution'],
+                          attributeValue: asi['constitution'] ?? 10,
                           color: Theme.of(context).constitutionColor,
                           proficiency: charProf.contains('constitution')
                               ? profBonus
@@ -166,7 +170,7 @@ class _SavingThrowListState extends State<SavingThrowList> {
                       children: [
                         SavingThrow(
                           attributePrefix: 'INT',
-                          attributeValue: asi['intelligence'],
+                          attributeValue: asi['intelligence'] ?? 10,
                           color: Theme.of(context).intelligenceColor,
                           proficiency: charProf.contains('intelligence')
                               ? profBonus
@@ -179,7 +183,7 @@ class _SavingThrowListState extends State<SavingThrowList> {
                         const SizedBox(height: 12),
                         SavingThrow(
                           attributePrefix: 'WIS',
-                          attributeValue: asi['wisdom'],
+                          attributeValue: asi['wisdom'] ?? 10,
                           color: Theme.of(context).wisdomColor,
                           proficiency:
                               charProf.contains('wisdom') ? profBonus : null,
@@ -190,7 +194,7 @@ class _SavingThrowListState extends State<SavingThrowList> {
                         const SizedBox(height: 12),
                         SavingThrow(
                           attributePrefix: 'CHA',
-                          attributeValue: asi['charisma'],
+                          attributeValue: asi['charisma'] ?? 10,
                           color: Theme.of(context).charismaColor,
                           proficiency:
                               charProf.contains('charisma') ? profBonus : null,
@@ -200,7 +204,7 @@ class _SavingThrowListState extends State<SavingThrowList> {
                           onLongPress: () => editSavingThrow('Charisma'),
                         ),
                       ],
-                    )
+                    ),
                   ],
                 ),
               ],

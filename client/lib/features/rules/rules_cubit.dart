@@ -8,12 +8,6 @@ import 'package:dnd5e_dm_tools/features/rules/rules_states.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class RulesCubit extends Cubit<RulesState> {
-  final ConditionsRepository conditionsRepository;
-  final RacesRepository racesRepository;
-  final FeatsRepository featsRepository;
-  final ClassesRepository classesRepository;
-  final SpellsRepository spellsRepository;
-  final ItemsRepository itemsRepository;
   RulesCubit({
     required this.conditionsRepository,
     required this.racesRepository,
@@ -22,18 +16,27 @@ class RulesCubit extends Cubit<RulesState> {
     required this.spellsRepository,
     required this.itemsRepository,
   }) : super(RulesStateInitial());
+  final ConditionsRepository conditionsRepository;
+  final RacesRepository racesRepository;
+  final FeatsRepository featsRepository;
+  final ClassesRepository classesRepository;
+  final SpellsRepository spellsRepository;
+  final ItemsRepository itemsRepository;
 
-  void loadRules() async {
+  Future<void> loadRules() async {
     emit(RulesStateLoading());
     var results = [];
     try {
-      final conditions = conditionsRepository.getAll();
-      final races = racesRepository.getAll();
-      final classes = classesRepository.getAll();
-      final spells = spellsRepository.getAll();
-      final feats = featsRepository.getAll();
-      final spellLists = spellsRepository.getSpellLists();
-      final items = itemsRepository.getAll();
+      final conditions =
+          conditionsRepository.getAll() as Future<Map<String, dynamic>>;
+      final races = racesRepository.getAll() as Future<Map<String, dynamic>>;
+      final classes =
+          classesRepository.getAll() as Future<Map<String, dynamic>>;
+      final spells = spellsRepository.getAll() as Future<Map<String, dynamic>>;
+      final feats = featsRepository.getAll() as Future<Map<String, dynamic>>;
+      final spellLists =
+          spellsRepository.getSpellLists() as Future<Map<String, dynamic>>;
+      final items = itemsRepository.getAll() as Future<Map<String, dynamic>>;
       results = await Future.wait([
         conditions,
         races,
@@ -49,13 +52,13 @@ class RulesCubit extends Cubit<RulesState> {
     try {
       emit(
         RulesStateLoaded(
-          conditions: results[0],
-          races: results[1],
-          classes: results[2],
-          spells: results[3],
-          feats: results[4],
-          spellLists: results[5],
-          items: results[6],
+          conditions: results[0] as Map<String, dynamic>,
+          races: results[1] as Map<String, dynamic>,
+          classes: results[2] as Map<String, dynamic>,
+          spells: results[3] as Map<String, dynamic>,
+          feats: results[4] as Map<String, dynamic>,
+          spellLists: results[5] as Map<String, dynamic>,
+          items: results[6] as Map<String, dynamic>,
         ),
       );
     } catch (e) {
@@ -65,21 +68,21 @@ class RulesCubit extends Cubit<RulesState> {
 
   Map<String, dynamic>? getRace(String slug) {
     if (state is RulesStateLoaded) {
-      return (state as RulesStateLoaded).races[slug];
+      return (state as RulesStateLoaded).races[slug] as Map<String, dynamic>;
     }
     return null;
   }
 
   Map<String, dynamic>? getClass(String slug) {
     if (state is RulesStateLoaded) {
-      return (state as RulesStateLoaded).classes[slug];
+      return (state as RulesStateLoaded).classes[slug] as Map<String, dynamic>;
     }
     return null;
   }
 
   Map<String, dynamic>? getFeat(String slug) {
     if (state is RulesStateLoaded) {
-      return (state as RulesStateLoaded).feats[slug];
+      return (state as RulesStateLoaded).feats[slug] as Map<String, dynamic>;
     }
     return null;
   }
@@ -100,26 +103,28 @@ class RulesCubit extends Cubit<RulesState> {
 
   Map<String, dynamic>? getSpell(String slug) {
     if (state is RulesStateLoaded) {
-      return (state as RulesStateLoaded).spells[slug];
+      return (state as RulesStateLoaded).spells[slug] as Map<String, dynamic>;
     }
     return null;
   }
 
   Map<String, dynamic> getSpellsByClass(String classs) {
     if (state is RulesStateLoaded) {
-      Map<String, Map<String, dynamic>> spellList = {};
-      final allSpells = (state as RulesStateLoaded).spells;
+      final Map<String, Map<String, dynamic>> spellList = {};
+      final stateCast = state as RulesStateLoaded;
+      final allSpells = stateCast.spells;
       final extraSuffix = ['a5e'];
       var classSpellListEntry = getClass(classs)?['spell_list'];
       classSpellListEntry ??= classs;
-      final classSpellList = (state as RulesStateLoaded)
-              .spellLists[classSpellListEntry]?['spells'] ??
+      final classSpellList = (stateCast.spellLists[classSpellListEntry]
+              as Map?)?['spells'] as List<String>? ??
           [];
-      for (var spell in classSpellList) {
-        spellList[spell] = allSpells[spell] ?? {};
-        for (var suffix in extraSuffix) {
-          final extraSpell = allSpells['$spell-$suffix'];
-          if (extraSpell != null) {
+      for (final spell in classSpellList) {
+        spellList[spell] = (allSpells[spell] as Map<String, dynamic>?) ?? {};
+        for (final suffix in extraSuffix) {
+          final extraSpell =
+              allSpells['$spell-$suffix'] as Map<String, dynamic>? ?? {};
+          if (extraSpell.isNotEmpty) {
             spellList['$spell-$suffix'] = extraSpell;
           }
         }
@@ -131,7 +136,7 @@ class RulesCubit extends Cubit<RulesState> {
 
   Map<String, dynamic>? getItem(String slug) {
     if (state is RulesStateLoaded) {
-      return (state as RulesStateLoaded).items[slug];
+      return (state as RulesStateLoaded).items[slug] as Map<String, dynamic>;
     }
     return null;
   }

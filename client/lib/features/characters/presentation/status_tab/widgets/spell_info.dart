@@ -1,15 +1,9 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:dnd5e_dm_tools/core/widgets/description_text.dart';
 import 'package:dnd5e_dm_tools/features/rules/rules_cubit.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class SpellInfoDialog extends StatefulWidget {
-  final String spellSlug;
-  final Map<String, dynamic> spells;
-  final List<String> knownSpells;
-  final Map<String, bool> preparedSpells;
-  final VoidCallback updateCharacter;
-
   const SpellInfoDialog({
     super.key,
     required this.spellSlug,
@@ -18,6 +12,11 @@ class SpellInfoDialog extends StatefulWidget {
     required this.preparedSpells,
     required this.updateCharacter,
   });
+  final String spellSlug;
+  final Map<String, dynamic> spells;
+  final List<String> knownSpells;
+  final Map<String, bool> preparedSpells;
+  final VoidCallback updateCharacter;
 
   @override
   SpellInfoDialogState createState() => SpellInfoDialogState();
@@ -36,11 +35,16 @@ class SpellInfoDialogState extends State<SpellInfoDialog> {
 
   @override
   Widget build(BuildContext context) {
-    var spell = widget.spells[widget.spellSlug];
-    spell ??= context.read<RulesCubit>().getAllSpells()[widget.spellSlug] ?? {};
+    var spell = widget.spells[widget.spellSlug] as Map<String, dynamic>?;
+    spell ??= context.read<RulesCubit>().getAllSpells()[widget.spellSlug]
+            as Map<String, dynamic>? ??
+        {};
+    if (spell.isEmpty) {
+      return Container();
+    }
 
     return AlertDialog(
-      title: Text(spell['name']),
+      title: Text(spell['name']?.toString() ?? ''),
       content: SingleChildScrollView(
         child: ConstrainedBox(
           constraints: const BoxConstraints(
@@ -53,16 +57,22 @@ class SpellInfoDialogState extends State<SpellInfoDialog> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(spell['level'],
-                          style: Theme.of(context).textTheme.bodySmall!),
-                      Text(spell['school'],
-                          style: Theme.of(context).textTheme.bodySmall!),
+                      Text(
+                        spell['level']?.toString() ?? '',
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                      Text(
+                        spell['school']?.toString() ?? '',
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
                     ],
                   ),
                   const Spacer(),
-                  if (spell['document__title'] != null)
-                    Text(spell['document__title'],
-                        style: Theme.of(context).textTheme.bodySmall),
+                  if (spell['document__title']?.toString() != null)
+                    Text(
+                      spell['document__title']?.toString() ?? '',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
                 ],
               ),
               const SizedBox(
@@ -70,7 +80,7 @@ class SpellInfoDialogState extends State<SpellInfoDialog> {
                 child: Divider(),
               ),
               DescriptionText(
-                inputText: spell['desc'],
+                inputText: spell['desc']?.toString() ?? '',
                 baseStyle: Theme.of(context).textTheme.bodyMedium!,
               ),
               const SizedBox(
@@ -107,10 +117,10 @@ class SpellInfoDialogState extends State<SpellInfoDialog> {
               SizedBox(
                 width: double.infinity,
                 child: Wrap(
-                  direction: Axis.horizontal,
                   spacing: 16,
                   children: [
-                    if (spell['range'] != null && spell['range'].isNotEmpty)
+                    if (spell['range'] != null &&
+                        (spell['range'] as String).isNotEmpty)
                       Flex(
                         mainAxisSize: MainAxisSize.min,
                         direction: Axis.horizontal,
@@ -122,11 +132,11 @@ class SpellInfoDialogState extends State<SpellInfoDialog> {
                                 .bodySmall!
                                 .copyWith(fontWeight: FontWeight.bold),
                           ),
-                          Text(spell['range']),
+                          Text(spell['range']?.toString() ?? ''),
                         ],
                       ),
                     if (spell['components'] != null &&
-                        spell['components'].isNotEmpty)
+                        (spell['components'] as String).isNotEmpty)
                       Flex(
                         mainAxisSize: MainAxisSize.min,
                         direction: Axis.horizontal,
@@ -138,11 +148,11 @@ class SpellInfoDialogState extends State<SpellInfoDialog> {
                                 .bodySmall!
                                 .copyWith(fontWeight: FontWeight.bold),
                           ),
-                          Text(spell['components']),
+                          Text(spell['components']?.toString() ?? ''),
                         ],
                       ),
                     if (spell['duration'] != null &&
-                        spell['duration'].isNotEmpty)
+                        (spell['duration'] as String).isNotEmpty)
                       Flex(
                         mainAxisSize: MainAxisSize.min,
                         direction: Axis.horizontal,
@@ -154,11 +164,11 @@ class SpellInfoDialogState extends State<SpellInfoDialog> {
                                 .bodySmall!
                                 .copyWith(fontWeight: FontWeight.bold),
                           ),
-                          Text(spell['duration']),
+                          Text(spell['duration']?.toString() ?? ''),
                         ],
                       ),
                     if (spell['casting_time'] != null &&
-                        spell['casting_time'].isNotEmpty)
+                        (spell['casting_time'] as String).isNotEmpty)
                       Flex(
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -174,7 +184,11 @@ class SpellInfoDialogState extends State<SpellInfoDialog> {
                                   .copyWith(fontWeight: FontWeight.bold),
                             ),
                           ),
-                          Flexible(child: Text(spell['casting_time'])),
+                          Flexible(
+                            child: Text(
+                              spell['casting_time']?.toString() ?? '',
+                            ),
+                          ),
                         ],
                       ),
                   ],

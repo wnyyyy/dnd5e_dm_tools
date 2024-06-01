@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:dnd5e_dm_tools/core/util/enum.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttericon/font_awesome5_icons.dart';
@@ -38,8 +36,8 @@ int getProfBonus(int level) {
 }
 
 String getOrdinal(int number) {
-  int lastDigit = number % 10;
-  int lastTwoDigits = number % 100;
+  final int lastDigit = number % 10;
+  final int lastTwoDigits = number % 100;
 
   if ((lastTwoDigits >= 11) && (lastTwoDigits <= 13)) {
     return '${number}th';
@@ -58,12 +56,15 @@ String getOrdinal(int number) {
 }
 
 int fromOrdinal(String ordinal) {
-  return int.tryParse(ordinal.replaceAll(RegExp(r'[a-zA-Z]'), '')) ?? 0;
+  return int.tryParse(ordinal.replaceAll(RegExp('[a-zA-Z]'), '')) ?? 0;
 }
 
-Map<String, dynamic> getClassFeatures(String desc,
-    {int level = 20, List<Map<String, dynamic>> table = const []}) {
-  var features = <String, dynamic>{};
+Map<String, dynamic> getClassFeatures(
+  String desc, {
+  int level = 20,
+  List<Map<String, dynamic>> table = const [],
+}) {
+  final Map<String, dynamic> features = <String, dynamic>{};
   List<String> lines = desc.split('\n');
   lines = lines
       .map((line) => line.trim())
@@ -74,25 +75,26 @@ Map<String, dynamic> getClassFeatures(String desc,
   String currentSubFeatureKey = '';
   List<String> currentFeatureDescription = [];
   List<String> currentSubFeatureDescription = [];
+  Map<String, dynamic> currentFeature = {};
 
-  for (var line in lines) {
+  for (final line in lines) {
     if (line.startsWith('### ')) {
+      currentFeature =
+          features[currentFeatureKey] as Map<String, dynamic>? ?? {};
       if (currentFeatureKey.isNotEmpty) {
         if (currentSubFeatureKey.isNotEmpty) {
-          features[currentFeatureKey][currentSubFeatureKey] =
+          currentFeature[currentSubFeatureKey] =
               currentSubFeatureDescription.join('\n');
           currentSubFeatureKey = '';
           currentSubFeatureDescription = [];
         }
-        features[currentFeatureKey]['description'] =
-            currentFeatureDescription.join('\n');
+        currentFeature['description'] = currentFeatureDescription.join('\n');
       }
       currentFeatureKey = line.substring(4).trim();
       currentFeatureDescription = [];
-      features[currentFeatureKey] = {};
     } else if (line.startsWith('#### ')) {
       if (currentSubFeatureKey.isNotEmpty) {
-        features[currentFeatureKey][currentSubFeatureKey] =
+        currentFeature[currentSubFeatureKey] =
             currentSubFeatureDescription.join('\n');
       }
       currentSubFeatureKey = line.substring(5).trim();
@@ -108,18 +110,17 @@ Map<String, dynamic> getClassFeatures(String desc,
 
   if (currentFeatureKey.isNotEmpty) {
     if (currentSubFeatureKey.isNotEmpty) {
-      features[currentFeatureKey][currentSubFeatureKey] =
+      currentFeature[currentSubFeatureKey] =
           currentSubFeatureDescription.join('\n');
     }
-    features[currentFeatureKey]['description'] =
-        currentFeatureDescription.join('\n');
+    currentFeature['description'] = currentFeatureDescription.join('\n');
   }
 
   if (table.isNotEmpty) {
-    var filteredFeatures = <String, dynamic>{};
-    for (var feature in features.keys) {
-      for (var entry in table) {
-        final levelEntry = fromOrdinal(entry['Level']);
+    final Map<String, dynamic> filteredFeatures = <String, dynamic>{};
+    for (final feature in features.keys) {
+      for (final entry in table) {
+        final int levelEntry = fromOrdinal(entry['Level'] as String);
         if ((entry['Features'] ?? '')
                 .toString()
                 .toLowerCase()
@@ -136,12 +137,12 @@ Map<String, dynamic> getClassFeatures(String desc,
 }
 
 Map<String, dynamic> getRacialFeatures(String desc) {
-  var features = <String, dynamic>{};
-  var rawFeatures = desc.split('***');
+  final features = <String, dynamic>{};
+  final rawFeatures = desc.split('***');
 
   for (var i = 1; i < rawFeatures.length; i += 2) {
     var name = rawFeatures[i].trim();
-    var description =
+    final description =
         (i + 1 < rawFeatures.length) ? rawFeatures[i + 1].trim() : '';
 
     if (name.endsWith('.')) {
@@ -156,9 +157,12 @@ Map<String, dynamic> getRacialFeatures(String desc) {
   return features;
 }
 
-Map<String, dynamic> getArchetypeFeatures(String desc,
-    {int level = 20, List<Map<String, dynamic>> table = const []}) {
-  var features = <String, dynamic>{};
+Map<String, dynamic> getArchetypeFeatures(
+  String desc, {
+  int level = 20,
+  List<Map<String, dynamic>> table = const [],
+}) {
+  final Map<String, dynamic> features = <String, dynamic>{};
   List<String> lines = desc.split('\n');
   lines = lines
       .map((line) => line.trim())
@@ -167,12 +171,13 @@ Map<String, dynamic> getArchetypeFeatures(String desc,
 
   String currentFeatureKey = '';
   List<String> currentFeatureDescription = [];
-
-  for (var line in lines) {
+  Map<String, dynamic> currentFeature = {};
+  for (final line in lines) {
     if (line.startsWith('##### ')) {
+      currentFeature =
+          features[currentFeatureKey] as Map<String, dynamic>? ?? {};
       if (currentFeatureKey.isNotEmpty) {
-        features[currentFeatureKey]['description'] =
-            currentFeatureDescription.join('\n');
+        currentFeature['description'] = currentFeatureDescription.join('\n');
       }
       currentFeatureKey = line.substring(6).trim();
       currentFeatureDescription = [];
@@ -183,15 +188,16 @@ Map<String, dynamic> getArchetypeFeatures(String desc,
   }
 
   if (currentFeatureKey.isNotEmpty) {
-    features[currentFeatureKey]['description'] =
-        currentFeatureDescription.join('\n');
+    currentFeature['description'] = currentFeatureDescription.join('\n');
   }
 
+  features[currentFeatureKey] = currentFeature;
+
   if (table.isNotEmpty) {
-    var filteredFeatures = <String, dynamic>{};
-    for (var feature in features.keys) {
-      for (var entry in table) {
-        final levelEntry = fromOrdinal(entry['Level']);
+    final Map<String, dynamic> filteredFeatures = <String, dynamic>{};
+    for (final feature in features.keys) {
+      for (final entry in table) {
+        final int levelEntry = fromOrdinal(entry['Level'] as String? ?? '');
         if ((entry['Features'] ?? '')
                 .toString()
                 .toLowerCase()
@@ -208,13 +214,23 @@ Map<String, dynamic> getArchetypeFeatures(String desc,
 }
 
 Map<String, dynamic> getBackpackItem(
-    Map<String, dynamic> character, String item) {
-  final backpack = character['backpack'] ?? {};
-  final backpackItems = backpack['items'] ?? {};
-  final backpackItem = backpackItems.entries
-          .firstWhere((element) => element.key == item)
-          ?.value ??
-      {'isEquipped': false, 'quantity': 0};
+  Map<String, dynamic> character,
+  String item,
+) {
+  final Map<String, dynamic> backpack =
+      character['backpack'] as Map<String, dynamic>? ?? {};
+  final Map<String, dynamic> backpackItems =
+      backpack['items'] as Map<String, dynamic>? ?? {};
+  final Map<String, dynamic> backpackItem = backpackItems.entries
+      .firstWhere(
+        (element) => element.key == item,
+        orElse: () => MapEntry<String, dynamic>(
+          item,
+          {'isEquipped': false, 'quantity': 0},
+        ),
+      )
+      .value as Map<String, dynamic>;
+
   return backpackItem;
 }
 
@@ -255,19 +271,23 @@ Color? rarityToColor(String? rarity) {
 }
 
 EquipmentType getEquipmentTypeFromItem(Map<String, dynamic> item) {
-  var type = getEquipmentType(item['index']);
+  var type = getEquipmentType(item['index']?.toString() ?? '');
   if (type != EquipmentType.unknown) {
     return type;
   }
-  type = getEquipmentType(item['tool_category'] ?? '');
+  type = getEquipmentType(item['tool_category']?.toString() ?? '');
   if (type != EquipmentType.unknown) {
     return type;
   }
-  type = getEquipmentType(item['gear_category']?['name'] ?? '');
+  type = getEquipmentType(
+    (item['gear_category'] as Map?)?['name']?.toString() ?? '',
+  );
   if (type != EquipmentType.unknown) {
     return type;
   }
-  type = getEquipmentType(item['equipment_category']?['name'] ?? '');
+  type = getEquipmentType(
+    (item['equipment_category'] as Map?)?['name']?.toString() ?? '',
+  );
   if (type != EquipmentType.unknown) {
     return type;
   }
@@ -365,31 +385,35 @@ int getTotalWeight(Map<String, dynamic> backpack, Map<String, dynamic> items) {
   if (backpack.isEmpty) {
     return totalWeight;
   }
-  for (var itemBackpack in backpack.entries) {
-    final item = items[itemBackpack.key];
-    if (item == null ||
-        item['cost'] == null ||
-        item['cost']['unit'] == null ||
-        item['cost']['quantity'] == null ||
-        itemBackpack.value['quantity'] == null) {
+  for (final itemBackpack in backpack.entries) {
+    final item = items[itemBackpack.key] as Map? ?? {};
+    if (item['cost'] == null ||
+        (item['cost'] as Map)['unit'] == null ||
+        (item['cost'] as Map)['quantity'] == null ||
+        (itemBackpack.value as Map?)?['quantity'] == null) {
       continue;
     }
-    final cost = int.tryParse(item['cost']['quantity'].toString()) ?? 0;
+    final quantity = (itemBackpack.value as Map)['quantity'] as double? ?? 0.0;
+    final costMap = item['cost'] as Map;
+    final cost = int.tryParse(costMap['quantity'].toString()) ?? 0;
     final costTotal = getCostTotal(
-        item['cost']['unit'], cost, itemBackpack.value['quantity'].toDouble());
+      costMap['unit']?.toString() ?? '',
+      cost,
+      quantity,
+    );
     totalWeight += costTotal.toInt();
   }
   return totalWeight;
 }
 
 Icon? itemToIcon(Map<String, dynamic> item) {
-  if (item['index'].isEmpty) {
+  if (item['index']?.toString().isEmpty ?? true) {
     return null;
   }
-  if (item['index'].contains('bow')) {
+  if (item['index']?.toString().contains('bow') ?? false) {
     return const Icon(RpgAwesome.crossbow);
   }
-  if (item['index'].contains('dagger')) {
+  if (item['index']?.toString().contains('dagger') ?? false) {
     return const Icon(RpgAwesome.plain_dagger);
   }
   if (item['armor_category'] != null &&
@@ -461,50 +485,66 @@ Future<void> saveConfig(String key, String value) async {
   await prefs.setString(key, value);
 }
 
-Map<int, int> getSpellSlotsForLevel(List<dynamic> table, int level) {
-  var entry = table.firstWhere(
-      (element) => element['Level'] == getOrdinal(level),
-      orElse: () => <String, dynamic>{});
+Map<int, int> getSpellSlotsForLevel(
+  List<Map<String, dynamic>> table,
+  int level,
+) {
+  final entry = table.firstWhere(
+    (element) => element['Level'] == getOrdinal(level),
+    orElse: () => <String, dynamic>{},
+  );
+
   if (entry.isEmpty) {
     return {};
   }
 
-  Map<int, int> slots = {};
+  final Map<int, int> slots = {};
   for (int i = 1; i <= 9; i++) {
     final key = getOrdinal(i);
     if (entry[key] != null && entry[key] != '-') {
-      slots[i] = entry[key];
+      slots[i] = entry[key] as int? ?? 0;
     }
   }
   return slots;
 }
 
 String getItemDescriptor(Map<String, dynamic> item) {
-  return item['tool_category'] ??
-      item['gear_category']?['name'] ??
-      item['equipment_category']?['name'] ??
-      'Misc';
+  final toolCategory = item['tool_category']?.toString() ?? '';
+  if (toolCategory.isNotEmpty) {
+    return toolCategory;
+  }
+  final gearCategory =
+      (item['gear_category'] as Map?)?['name']?.toString() ?? '';
+  if (gearCategory.isNotEmpty) {
+    return gearCategory;
+  }
+  final equipmentCategory =
+      (item['equipment_category'] as Map?)?['name']?.toString() ?? '';
+  if (equipmentCategory.isNotEmpty) {
+    return equipmentCategory;
+  }
+  return 'Misc';
 }
 
 final Map<int, List<Map<String, dynamic>>> _tableCache = {};
 
 List<Map<String, dynamic>> parseTable(String table) {
-  int tableHash = table.hashCode;
+  final int tableHash = table.hashCode;
 
   if (_tableCache.containsKey(tableHash)) {
     return _tableCache[tableHash]!;
   }
 
-  List<Map<String, dynamic>> result = [];
-  List<String> rows = table.trim().split('\n');
-  List<String> headers = rows[0]
+  final List<Map<String, dynamic>> result = [];
+  final List<String> rows = table.trim().split('\n');
+  final List<String> headers = rows[0]
       .split('|')
       .map((e) => e.trim())
       .where((e) => e.isNotEmpty)
       .toList();
 
   for (var i = 1; i < rows.length; i++) {
-    List<String> rowValues = rows[i]
+    final List<String> rowValues = rows[i]
         .split('|')
         .map((e) => e.trim())
         .where((e) => e.isNotEmpty)
@@ -514,7 +554,7 @@ List<Map<String, dynamic>> parseTable(String table) {
       throw const FormatException('Row does not match header length');
     }
 
-    Map<String, dynamic> rowMap = {};
+    final Map<String, dynamic> rowMap = {};
     for (var j = 0; j < headers.length; j++) {
       rowMap[headers[j]] = _parseValue(rowValues[j]);
     }
@@ -532,18 +572,22 @@ dynamic _parseValue(String value) {
 }
 
 String parseFormula(
-    String description, Map<String, int> attributes, int prof, int level) {
-  Map<String, int> values = {
+  String description,
+  Map<String, int> attributes,
+  int prof,
+  int level,
+) {
+  final Map<String, int> values = {
     'prof': prof,
     'level': level,
   };
 
-  for (var entry in attributes.entries) {
+  for (final entry in attributes.entries) {
     final prefix = entry.key.substring(0, 3).toLowerCase();
     final modifier = getModifier(entry.value);
     values[prefix] = modifier;
   }
-  RegExp regExp = RegExp(r'\b(?:str|dex|con|int|wis|cha|prof|level)\b');
+  final RegExp regExp = RegExp(r'\b(?:str|dex|con|int|wis|cha|prof|level)\b');
 
   String processed = description.replaceAllMapped(regExp, (match) {
     return values[match.group(0)]!.toString();
@@ -557,10 +601,12 @@ String parseFormula(
 String _processFormula(String formula) {
   final arithmeticRegex = RegExp(r'(?<!\d)d|(?<![d])(\d+[\+\-\*/]\d+)');
 
+  String currentFormula = formula;
   String previousFormula;
+
   do {
-    previousFormula = formula;
-    formula = formula.replaceAllMapped(
+    previousFormula = currentFormula;
+    currentFormula = currentFormula.replaceAllMapped(
       arithmeticRegex,
       (match) {
         if (match.group(0)!.contains('d')) {
@@ -570,9 +616,9 @@ String _processFormula(String formula) {
         }
       },
     );
-  } while (formula != previousFormula);
+  } while (currentFormula != previousFormula);
 
-  return formula;
+  return currentFormula;
 }
 
 num _evaluateExpression(String expression) {
@@ -590,7 +636,10 @@ Parser<num> buildParser() {
   final builder = ExpressionBuilder<num>();
 
   builder.primitive(
-      (char('(') & ref0(buildParser) & char(')')).map((values) => values[1]));
+    (char('(') & ref0(buildParser) & char(')')).map(
+      (values) => values[1] as num? ?? 0,
+    ),
+  );
   builder.primitive(digit().plus().flatten().trim().map(num.parse));
 
   builder.group()

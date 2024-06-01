@@ -12,16 +12,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class ActionMenu extends StatefulWidget {
-  final Map<String, dynamic> character;
-  final String slug;
-  final double? height;
-
   const ActionMenu({
     super.key,
     required this.character,
     required this.slug,
     this.height,
   });
+  final Map<String, dynamic> character;
+  final String slug;
+  final double? height;
 
   @override
   State<ActionMenu> createState() => _ActionMenuState();
@@ -41,8 +40,9 @@ class _ActionMenuState extends State<ActionMenu> {
   @override
   void initState() {
     super.initState();
-    actions =
-        Map<String, Map<String, dynamic>>.from(widget.character['actions']);
+    actions = Map<String, Map<String, dynamic>>.from(
+      widget.character['actions'] as Map<String, dynamic>? ?? {},
+    );
   }
 
   @override
@@ -93,7 +93,11 @@ class _ActionMenuState extends State<ActionMenu> {
                     ),
                     child: Padding(
                       padding: const EdgeInsets.only(
-                          left: 16, bottom: 8, top: 8, right: 4),
+                        left: 16,
+                        bottom: 8,
+                        top: 8,
+                        right: 4,
+                      ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -113,7 +117,8 @@ class _ActionMenuState extends State<ActionMenu> {
                               IconButton(
                                 onPressed: _enableEditMode,
                                 icon: Icon(
-                                    _isEditMode ? Icons.check : Icons.edit),
+                                  _isEditMode ? Icons.check : Icons.edit,
+                                ),
                               ),
                               if (_isEditMode)
                                 AddActionButton(
@@ -122,7 +127,7 @@ class _ActionMenuState extends State<ActionMenu> {
                                   onActionsChanged: onActionsChanged,
                                 ),
                             ],
-                          )
+                          ),
                         ],
                       ),
                     ),
@@ -137,8 +142,10 @@ class _ActionMenuState extends State<ActionMenu> {
                           if (filteredActions.isEmpty)
                             Padding(
                               padding: const EdgeInsets.all(16),
-                              child: Text('No actions.',
-                                  style: Theme.of(context).textTheme.bodyLarge),
+                              child: Text(
+                                'No actions.',
+                                style: Theme.of(context).textTheme.bodyLarge,
+                              ),
                             ),
                           ...filteredActions.keys.map(
                             (key) {
@@ -157,7 +164,8 @@ class _ActionMenuState extends State<ActionMenu> {
                                   ),
                                 ),
                                 child: ActionItem(
-                                  action: filteredActions[key]!,
+                                  action: filteredActions[key]
+                                      as Map<String, dynamic>,
                                   actionSlug: key,
                                   character: widget.character,
                                   characterSlug: widget.slug,
@@ -187,55 +195,56 @@ class _ActionMenuState extends State<ActionMenu> {
     required ActionMenuMode type,
     bool recharge = false,
   }) {
+    final items = (widget.character['backpack']
+            as Map<String, dynamic>?)?['items'] as Map<String, dynamic>? ??
+        {};
     switch (type) {
       case ActionMenuMode.abilities:
-        var usedCount = action['used_count'] ?? 0;
+        var usedCount = action['used_count'] as int? ?? 0;
         if (recharge) {
           usedCount = 0;
         } else {
           usedCount++;
         }
         action['used_count'] = usedCount;
-        widget.character['actions'][slug] = action;
-        break;
+        actions[slug] = action;
       case ActionMenuMode.items:
         if (recharge) {
           break;
         }
-        if (action['expendable']) {
-          final itemSlug = action['item'] ?? '';
+        if (action['expendable'] as bool? ?? false) {
+          final itemSlug = action['item'] as String? ?? '';
           final backpackItem = getBackpackItem(widget.character, itemSlug);
-          if (backpackItem['quantity'] > 0) {
-            backpackItem['quantity']--;
-            widget.character['backpack']['items'][itemSlug] = backpackItem;
+          if ((backpackItem['quantity'] as int? ?? 0) > 0) {
+            backpackItem['quantity'] = (backpackItem['quantity'] as int) - 1;
+            items[itemSlug] = backpackItem;
           }
         }
         if (action['ammo'] != null) {
-          final ammoSlug = action['ammo'] ?? '';
+          final ammoSlug = action['ammo'] as String? ?? '';
           final ammoItem = getBackpackItem(widget.character, ammoSlug);
-          if (ammoItem['quantity'] > 0) {
-            ammoItem['quantity']--;
-            widget.character['backpack']['items'][ammoSlug] = ammoItem;
+          if ((ammoItem['quantity'] as int? ?? 0) > 0) {
+            ammoItem['quantity'] = (ammoItem['quantity'] as int) - 1;
+            items[ammoSlug] = ammoItem;
           }
         }
-        break;
       case ActionMenuMode.spells:
         if (recharge) {
           break;
         }
-        final actionSpell = action['spell'] ?? '';
+        final actionSpell = action['spell'] as String? ?? '';
         final spell = context.read<RulesCubit>().getSpell(actionSpell);
         if (spell != null) {
-          final level = spell['level_int'] ?? 0;
+          final level = spell['level_int'] as int? ?? 0;
           if (level > 0) {
             final expendedSlotsMap =
-                widget.character['expended_spell_slots'] ?? {};
-            final expendedSlots = expendedSlotsMap[level.toString()] ?? 0;
+                widget.character['expended_spell_slots'] as Map? ?? {};
+            final expendedSlots =
+                expendedSlotsMap[level.toString()] as int? ?? 0;
             expendedSlotsMap[level.toString()] = expendedSlots + 1;
             widget.character['expended_spell_slots'] = expendedSlotsMap;
           }
         }
-        break;
       default:
         break;
     }
@@ -264,11 +273,12 @@ class _ActionMenuState extends State<ActionMenu> {
   }
 
   Map<String, dynamic> _getFilteredItems(
-      Map<String, Map<String, dynamic>> actions) {
+    Map<String, Map<String, dynamic>> actions,
+  ) {
     if (_mode == ActionMenuMode.all) {
       return actions;
     }
-    var filtered = <String, Map<String, dynamic>>{};
+    final filtered = <String, Map<String, dynamic>>{};
     for (final key in actions.keys) {
       final action = actions[key]!;
       final type = ActionMenuMode.values.firstWhere(

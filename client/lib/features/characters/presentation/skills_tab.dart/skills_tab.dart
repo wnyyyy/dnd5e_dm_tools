@@ -12,18 +12,19 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
 class SkillsTab extends StatelessWidget {
-  final Map<String, dynamic> character;
-  final String slug;
-
   const SkillsTab({
     super.key,
     required this.character,
     required this.slug,
   });
+  final Map<String, dynamic> character;
+  final String slug;
 
   @override
   Widget build(BuildContext context) {
-    final classs = context.read<RulesCubit>().getClass(character['class']);
+    final classs = context
+        .read<RulesCubit>()
+        .getClass(character['class'] as String? ?? '');
     if (classs == null) {
       return const Center(
         child: Text('Class not found'),
@@ -37,7 +38,6 @@ class SkillsTab extends StatelessWidget {
               padding: const EdgeInsets.all(8.0),
               child: Flex(
                 direction: Axis.horizontal,
-                mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   _buildAttributesList(context),
                   const SizedBox(width: 8),
@@ -96,7 +96,7 @@ class SkillsTab extends StatelessWidget {
                     character: character,
                     classs: classs,
                     slug: slug,
-                  )
+                  ),
                 ],
               ),
             ),
@@ -108,7 +108,7 @@ class SkillsTab extends StatelessWidget {
 
   Widget _buildAttributesList(BuildContext context) {
     final editMode = Provider.of<SettingsCubit>(context).state.isEditMode;
-    final asi = character['asi'];
+    final asi = character['asi'] as Map<String, int>? ?? {};
 
     void editAttribute(String attributeName, int currentValue) {
       final TextEditingController controller =
@@ -140,14 +140,16 @@ class SkillsTab extends StatelessWidget {
                   if (newValue != null &&
                       newValue != currentValue &&
                       newValue >= 0) {
-                    character['asi'][attributeName.toLowerCase()] = newValue;
-                    context.read<CharacterBloc>().add(CharacterUpdate(
-                          character: character,
-                          slug: slug,
-                          offline:
-                              context.read<SettingsCubit>().state.offlineMode,
-                          persistData: true,
-                        ));
+                    asi[attributeName.toLowerCase()] = newValue;
+                    context.read<CharacterBloc>().add(
+                          CharacterUpdate(
+                            character: character,
+                            slug: slug,
+                            offline:
+                                context.read<SettingsCubit>().state.offlineMode,
+                            persistData: true,
+                          ),
+                        );
                     Navigator.of(context).pop();
                   }
                 },
@@ -163,55 +165,64 @@ class SkillsTab extends StatelessWidget {
       children: [
         AttributeCard(
           attributeName: 'Strength',
-          attributeValue: asi['strength'],
+          attributeValue: asi['strength'] ?? 10,
           color: Theme.of(context).strengthColor,
           onTap: editMode
-              ? () => editAttribute('Strength', asi['strength'])
+              ? () => editAttribute('Strength', asi['strength'] ?? 10)
               : null,
-          onLongPress: () => editAttribute('Strength', asi['strength']),
+          onLongPress: () => editAttribute('Strength', asi['strength'] ?? 10),
         ),
         AttributeCard(
           attributeName: 'Dexterity',
-          attributeValue: asi['dexterity'],
+          attributeValue: asi['dexterity'] ?? 10,
           color: Theme.of(context).dexterityColor,
           onTap: editMode
-              ? () => editAttribute('Dexterity', asi['dexterity'])
+              ? () => editAttribute('Dexterity', asi['dexterity'] ?? 10)
               : null,
-          onLongPress: () => editAttribute('Dexterity', asi['dexterity']),
+          onLongPress: () => editAttribute('Dexterity', asi['dexterity'] ?? 10),
         ),
         AttributeCard(
           attributeName: 'Constitution',
-          attributeValue: asi['constitution'],
+          attributeValue: asi['constitution'] ?? 10,
           color: Theme.of(context).constitutionColor,
           onTap: editMode
-              ? () => editAttribute('Constitution', asi['constitution'])
+              ? () => editAttribute(
+                    'Constitution',
+                    asi['constitution'] ?? 10,
+                  )
               : null,
-          onLongPress: () => editAttribute('Constitution', asi['constitution']),
+          onLongPress: () => editAttribute(
+            'Constitution',
+            asi['constitution'] ?? 10,
+          ),
         ),
         AttributeCard(
           attributeName: 'Intelligence',
-          attributeValue: asi['intelligence'],
+          attributeValue: asi['intelligence'] ?? 10,
           color: Theme.of(context).intelligenceColor,
           onTap: editMode
-              ? () => editAttribute('Intelligence', asi['intelligence'])
+              ? () => editAttribute('Intelligence', asi['intelligence'] ?? 10)
               : null,
-          onLongPress: () => editAttribute('Intelligence', asi['intelligence']),
+          onLongPress: () =>
+              editAttribute('Intelligence', asi['intelligence'] ?? 10),
         ),
         AttributeCard(
           attributeName: 'Wisdom',
-          attributeValue: asi['wisdom'],
+          attributeValue: asi['wisdom'] ?? 10,
           color: Theme.of(context).wisdomColor,
-          onTap: editMode ? () => editAttribute('Wisdom', asi['wisdom']) : null,
-          onLongPress: () => editAttribute('Wisdom', asi['wisdom']),
+          onTap: editMode
+              ? () => editAttribute('Wisdom', asi['wisdom'] ?? 10)
+              : null,
+          onLongPress: () => editAttribute('Wisdom', asi['wisdom'] ?? 10),
         ),
         AttributeCard(
           attributeName: 'Charisma',
-          attributeValue: asi['charisma'],
+          attributeValue: asi['charisma'] ?? 10,
           color: Theme.of(context).charismaColor,
           onTap: editMode
-              ? () => editAttribute('Charisma', asi['charisma'])
+              ? () => editAttribute('Charisma', asi['charisma'] ?? 10)
               : null,
-          onLongPress: () => editAttribute('Charisma', asi['charisma']),
+          onLongPress: () => editAttribute('Charisma', asi['charisma'] ?? 10),
         ),
       ],
     );
@@ -236,7 +247,7 @@ class SkillsTab extends StatelessWidget {
               direction: Axis.horizontal,
               children: [
                 Text(
-                  '+${getProfBonus(character['level'])}',
+                  '+${getProfBonus(character['level'] as int? ?? 1)}',
                   style: Theme.of(context).textTheme.displaySmall!.copyWith(
                         fontFamily: GoogleFonts.majorMonoDisplay().fontFamily,
                       ),
@@ -255,7 +266,8 @@ class SkillsTab extends StatelessWidget {
 
   void _showEditPassivePerception(BuildContext context) {
     final TextEditingController controller = TextEditingController(
-        text: character['passive_perception']?.toString() ?? '');
+      text: character['passive_perception']?.toString() ?? '',
+    );
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -284,13 +296,15 @@ class SkillsTab extends StatelessWidget {
                     newValue != character['passive_perception'] &&
                     newValue >= 0) {
                   character['passive_perception'] = newValue;
-                  context.read<CharacterBloc>().add(CharacterUpdate(
-                        character: character,
-                        slug: slug,
-                        offline:
-                            context.read<SettingsCubit>().state.offlineMode,
-                        persistData: true,
-                      ));
+                  context.read<CharacterBloc>().add(
+                        CharacterUpdate(
+                          character: character,
+                          slug: slug,
+                          offline:
+                              context.read<SettingsCubit>().state.offlineMode,
+                          persistData: true,
+                        ),
+                      );
                   Navigator.of(context).pop();
                 }
               },
@@ -325,8 +339,10 @@ class SkillsTab extends StatelessWidget {
                 children: [
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 6),
-                    child: Text('${character['passive_perception'] ?? 0}',
-                        style: Theme.of(context).textTheme.displaySmall),
+                    child: Text(
+                      '${character['passive_perception'] ?? 0}',
+                      style: Theme.of(context).textTheme.displaySmall,
+                    ),
                   ),
                   const Padding(
                     padding: EdgeInsets.only(right: 8.0),

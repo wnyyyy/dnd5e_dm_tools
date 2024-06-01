@@ -7,4 +7,5 @@ const cacheSpellListsName = 'spell_lists_cache';
 const cacheItemsName = 'items_cache';
 const cacheCharacterName = 'character_cache';
 const hiveFolder = '.hive';
+const hiveWebSubdir = 'precache';
 const wideScreenBreakpoint = 720.0;

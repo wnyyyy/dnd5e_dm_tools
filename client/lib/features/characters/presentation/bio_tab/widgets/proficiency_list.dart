@@ -6,19 +6,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class ProficiencyList extends StatelessWidget {
-  final Map<String, dynamic> character;
-  final String slug;
-
   const ProficiencyList({
     super.key,
     required this.character,
     required this.slug,
   });
+  final Map<String, dynamic> character;
+  final String slug;
 
   @override
   Widget build(BuildContext context) {
-    final proficiencies =
-        Map<String, Map>.from(character['proficiencies'] ?? {});
+    final proficiencies = Map<String, Map>.from(
+        character['proficiencies'] as Map<String, Map>? ?? {},);
     final offline = context.read<SettingsCubit>().state.offlineMode;
     void onItemsChanged(Map<String, dynamic> newProficiencies) {
       character['proficiencies'] = newProficiencies;
@@ -32,7 +31,7 @@ class ProficiencyList extends StatelessWidget {
           );
     }
 
-    void onAddItem() async {
+    Future<void> onAddItem() async {
       final TextEditingController titleController = TextEditingController();
       final TextEditingController descriptionController =
           TextEditingController();
@@ -93,11 +92,11 @@ class ProficiencyList extends StatelessWidget {
                 TextButton(
                   onPressed: () {
                     if (titleController.text.isNotEmpty) {
-                      var slug = titleController.text
+                      final slug = titleController.text
                           .toLowerCase()
                           .trim()
                           .replaceAll(' ', '_');
-                      var newProf = proficiencies;
+                      final newProf = proficiencies;
                       newProf[slug] = {
                         'title': titleController.text,
                         'description': descriptionController.text,
@@ -121,7 +120,7 @@ class ProficiencyList extends StatelessWidget {
         builder: (context) {
           final screenWidth = MediaQuery.of(context).size.width;
           return AlertDialog(
-            title: Text(proficiency.value['title']),
+            title: Text(proficiency.value['title']?.toString() ?? 'Error'),
             content: ConstrainedBox(
               constraints: BoxConstraints(
                 maxWidth: screenWidth > 900
@@ -131,7 +130,7 @@ class ProficiencyList extends StatelessWidget {
                         : screenWidth * 0.9,
               ),
               child: SingleChildScrollView(
-                child: Text(proficiency.value['description']),
+                child: Text(proficiency.value['description']?.toString() ?? ''),
               ),
             ),
             actions: [

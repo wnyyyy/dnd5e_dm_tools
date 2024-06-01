@@ -5,41 +5,42 @@ import 'package:flutter/material.dart';
 import 'package:fluttericon/font_awesome5_icons.dart';
 
 class ItemDetailsDialogContent extends StatelessWidget {
-  final Map<String, dynamic> item;
-  final int? quantity;
-
   const ItemDetailsDialogContent({
     super.key,
     required this.item,
     this.quantity,
   });
 
+  final Map<String, dynamic> item;
+  final int? quantity;
+
   @override
   Widget build(BuildContext context) {
-    var descs = item['desc'] ?? [];
-    List<String> resultList = [];
+    final List<dynamic> descs = item['desc'] as List<dynamic>? ?? [];
+    final List<String> resultList = [];
     for (int i = 0; i < descs.length; i++) {
-      resultList.add(descs[i]);
+      resultList.add(descs[i] as String);
       if (i != descs.length - 1) {
         resultList.add('');
       }
     }
-    descs = resultList;
 
-    final equipmentCategory = item['equipment_category']?['name'];
-    final gearCategory = item['gear_category']?['name'];
-    final toolCategory = item['tool_category'];
-    final labels = [];
+    final String? equipmentCategory =
+        (item['equipment_category'] as Map?)?['name'] as String?;
+    final String? gearCategory =
+        (item['gear_category'] as Map?)?['name'] as String?;
+    final String? toolCategory = item['tool_category'] as String?;
+    final List<String> labels = [];
     if (equipmentCategory != null) labels.add(equipmentCategory);
     if (gearCategory != null) labels.add(gearCategory);
     if (toolCategory != null) labels.add(toolCategory);
-    final rarity = item['rarity']?['name'];
-    final baseQuantity = item['quantity'] ?? 1;
-    final isWeapon = item['damage'] != null;
-    final isArmor = item['armor_class'] != null;
-    final icon =
+    final String? rarity = (item['rarity'] as Map?)?['name'] as String?;
+    final int baseQuantity = item['quantity'] as int? ?? 1;
+    final bool isWeapon = item['damage'] != null;
+    final bool isArmor = item['armor_class'] != null;
+    final Icon icon =
         itemToIcon(item) ?? equipmentTypeToIcon(getEquipmentTypeFromItem(item));
-    final screenWidth = MediaQuery.of(context).size.width;
+    final double screenWidth = MediaQuery.of(context).size.width;
 
     return ConstrainedBox(
       constraints:
@@ -79,13 +80,13 @@ class ItemDetailsDialogContent extends StatelessWidget {
           SingleChildScrollView(
             child: ListBody(
               children: [
-                ...descs
-                    .map((desc) => DescriptionText(
-                          inputText: desc,
-                          baseStyle: Theme.of(context).textTheme.bodySmall!,
-                          addTabSpace: true,
-                        ))
-                    .toList(),
+                ...descs.map(
+                  (desc) => DescriptionText(
+                    inputText: desc as String,
+                    baseStyle: Theme.of(context).textTheme.bodySmall!,
+                    addTabSpace: true,
+                  ),
+                ),
                 if (descs.isNotEmpty)
                   const SizedBox(
                     height: 32,
@@ -101,16 +102,17 @@ class ItemDetailsDialogContent extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.only(top: 16),
                   child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      ...labels.map((label) => Padding(
-                            padding: const EdgeInsets.only(top: 8.0),
-                            child: Text(
-                              label,
-                              style: Theme.of(context).textTheme.titleMedium,
-                            ),
-                          )),
+                      ...labels.map(
+                        (label) => Padding(
+                          padding: const EdgeInsets.only(top: 8.0),
+                          child: Text(
+                            label,
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -125,12 +127,16 @@ class ItemDetailsDialogContent extends StatelessWidget {
   }
 
   Widget _getWeaponInfo(BuildContext context) {
-    final categoryRange = item['category_range'] ?? '';
-    final properties = item['properties'] ?? [];
-    final rangeNormal = item['range']?['normal'] ?? '';
-    final rangeLong = item['range']?['long'];
-    final damage = item['damage']?['damage_dice'] ?? '';
-    final damageType = item['damage']?['damage_type']?['name'] ?? '';
+    final String categoryRange = item['category_range'] as String? ?? '';
+    final List<Map> properties = item['properties'] as List<Map>? ?? [];
+    final String rangeNormal =
+        (item['range'] as Map?)?['normal']?.toString() ?? '';
+    final String? rangeLong = (item['range'] as Map?)?['long']?.toString();
+    final String damage =
+        (item['damage'] as Map?)?['damage_dice'] as String? ?? '';
+    final String damageType = ((item['damage'] as Map?)?['damage_type']
+            as Map?)?['name'] as String? ??
+        '';
 
     return Container(
       padding: const EdgeInsets.all(8.0),
@@ -140,21 +146,24 @@ class ItemDetailsDialogContent extends StatelessWidget {
           padding: const EdgeInsets.all(16.0),
           child: Column(
             children: [
-              Text(categoryRange,
-                  style: Theme.of(context).textTheme.titleMedium),
+              Text(
+                categoryRange,
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
               Padding(
                 padding: const EdgeInsets.only(top: 4, bottom: 6),
                 child: Column(
-                  children: [
-                    for (final prop in properties)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 8.0),
-                        child: Text(
-                          prop['name'],
-                          style: Theme.of(context).textTheme.bodySmall,
+                  children: properties
+                      .map(
+                        (prop) => Padding(
+                          padding: const EdgeInsets.only(top: 8.0),
+                          child: Text(
+                            prop['name'] as String,
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
                         ),
-                      ),
-                  ],
+                      )
+                      .toList(),
                 ),
               ),
               const SizedBox(
@@ -194,11 +203,13 @@ class ItemDetailsDialogContent extends StatelessWidget {
   }
 
   Widget _getArmorInfo(BuildContext context) {
-    final armorCategory = item['armor_category'] ?? '';
-    final minimumStr = item['str_minimum'];
-    final stealthDisadvantage = item['stealth_disadvantage'] ?? false;
-    final armorClass = item['armor_class']?['base'] ?? 0;
-    final dexBonus = item['armor_class']?['dex_bonus'] ?? false;
+    final String armorCategory = item['armor_category'] as String? ?? '';
+    final int? minimumStr = item['str_minimum'] as int?;
+    final bool stealthDisadvantage =
+        item['stealth_disadvantage'] as bool? ?? false;
+    final int armorClass = (item['armor_class'] as Map?)?['base'] as int? ?? 0;
+    final bool dexBonus =
+        (item['armor_class'] as Map?)?['dex_bonus'] as bool? ?? false;
 
     return Container(
       padding: const EdgeInsets.all(8.0),
@@ -264,9 +275,10 @@ class ItemDetailsDialogContent extends StatelessWidget {
     bool appendGp = false,
     bool ignoreBase = false,
   }) {
-    final costUnit = item['cost']?['unit'] ?? 'gp';
-    final costValue = item['cost']?['quantity'] ?? 0;
-    final baseQuantity = ignoreBase ? 1 : item['quantity'] ?? 1;
+    final cost = item['cost'] as Map<String, dynamic>? ?? {};
+    final String costUnit = cost['unit'] as String? ?? 'gp';
+    final int costValue = cost['quantity'] as int? ?? 0;
+    final int baseQuantity = ignoreBase ? 1 : item['quantity'] as int? ?? 1;
 
     final double costTotal;
     if (appendGp) {
@@ -305,8 +317,7 @@ class ItemDetailsDialogContent extends StatelessWidget {
                     '  ${isInt ? costTotal.toInt() : costTotal.toStringAsFixed(appendGp ? 0 : 2)}',
                 style: textStyle,
               ),
-              if (appendGp)
-                TextSpan(text: ' ${costUnit.toString().toUpperCase()}'),
+              if (appendGp) TextSpan(text: ' ${costUnit.toUpperCase()}'),
             ],
           ),
         ),
@@ -314,10 +325,13 @@ class ItemDetailsDialogContent extends StatelessWidget {
     );
   }
 
-  Widget _getItemWeight(BuildContext context, int quantity,
-      {bool ignoreBase = false}) {
-    final baseQuantity = item['quantity'] ?? 1;
-    final weight = (item['weight'] ?? 0.0).toDouble() *
+  Widget _getItemWeight(
+    BuildContext context,
+    int quantity, {
+    bool ignoreBase = false,
+  }) {
+    final int baseQuantity = item['quantity'] as int? ?? 1;
+    final double weight = (item['weight'] as num? ?? 0.0).toDouble() *
         quantity /
         (ignoreBase ? 1 : baseQuantity);
     final TextStyle textStyle = Theme.of(context).textTheme.bodyMedium!;
@@ -344,7 +358,7 @@ class ItemDetailsDialogContent extends StatelessWidget {
               TextSpan(
                 text: '  ${isInt ? weight.toInt() : weight} lb',
                 style: textStyle,
-              )
+              ),
             ],
           ),
         ),

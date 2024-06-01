@@ -1,28 +1,29 @@
 import 'dart:io' show Directory, File;
-import 'package:dnd5e_dm_tools/features/onboarding/bloc/onboarding_cubit.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dnd5e_dm_tools/core/data/db/database_provider.dart';
 import 'package:dnd5e_dm_tools/core/data/db/realtime_database_provider.dart';
-import 'package:dnd5e_dm_tools/features/campaign/data/repository/campaign_repository.dart';
 import 'package:dnd5e_dm_tools/core/data/repositories/characters_repository.dart';
 import 'package:dnd5e_dm_tools/core/data/repositories/classes_repository.dart';
+import 'package:dnd5e_dm_tools/core/data/repositories/conditions_repository.dart';
 import 'package:dnd5e_dm_tools/core/data/repositories/feats_repository.dart';
 import 'package:dnd5e_dm_tools/core/data/repositories/items_repository.dart';
 import 'package:dnd5e_dm_tools/core/data/repositories/races_repository.dart';
-import 'package:dnd5e_dm_tools/core/data/repositories/conditions_repository.dart';
 import 'package:dnd5e_dm_tools/core/data/repositories/spells_repository.dart';
 import 'package:dnd5e_dm_tools/core/util/const.dart';
 import 'package:dnd5e_dm_tools/features/campaign/cubit/campaign_cubit.dart';
+import 'package:dnd5e_dm_tools/features/campaign/data/repository/campaign_repository.dart';
+import 'package:dnd5e_dm_tools/features/characters/bloc/character_bloc.dart';
 import 'package:dnd5e_dm_tools/features/database_editor/cubit/database_editor_cubit.dart';
 import 'package:dnd5e_dm_tools/features/main_screen/cubit/main_screen_cubit.dart';
-import 'package:dnd5e_dm_tools/features/characters/bloc/character_bloc.dart';
 import 'package:dnd5e_dm_tools/features/main_screen/presentation/screens/main_screen.dart';
+import 'package:dnd5e_dm_tools/features/onboarding/bloc/onboarding_cubit.dart';
 import 'package:dnd5e_dm_tools/features/rules/rules_cubit.dart';
 import 'package:dnd5e_dm_tools/features/screen_splitter/cubit/screen_splitter_cubit.dart';
 import 'package:dnd5e_dm_tools/features/settings/bloc/settings_cubit.dart';
 import 'package:dnd5e_dm_tools/firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -32,15 +33,13 @@ import 'package:provider/provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  print("Initializing...");
+  print('Initializing...');
 
-  final String hiveDirPath;
+  String? hiveDirPath;
   if (kIsWeb) {
-    hiveDirPath = 'web/$hiveFolder';
-    await Hive.initFlutter(hiveDirPath);
+    await Hive.initFlutter();
   } else {
     final appDocumentDir = await getApplicationDocumentsDirectory();
-    print(appDocumentDir.path);
     hiveDirPath = '${appDocumentDir.path}/$hiveFolder';
     await Hive.initFlutter(hiveDirPath);
   }
@@ -60,7 +59,7 @@ void main() async {
   runApp(Dnd5eDmTools());
 }
 
-Future<void> checkHiveFiles(String hiveDirPath) async {
+Future<void> checkHiveFiles(String? hiveDirPath) async {
   final fileList = [
     '$cacheClassesName.hive',
     '$cacheConditionsName.hive',
@@ -71,17 +70,15 @@ Future<void> checkHiveFiles(String hiveDirPath) async {
     '$cacheItemsName.hive',
   ];
 
-  if (kIsWeb) {
-  } else {
+  if (hiveDirPath != null) {
     final hiveDir = Directory(hiveDirPath);
     await hiveDir.create(recursive: true);
-    for (var fileName in fileList) {
-      final String hiveFilePath = '${hiveDir.path}/$fileName';
+    for (final fileName in fileList) {
+      final hiveFilePath = '${hiveDir.path}/$fileName';
       final hiveFile = File(hiveFilePath);
       final exists = await hiveFile.exists();
       if (!exists) {
-        final assetPath = 'assets/precache/$fileName';
-        final data = await loadAsset(assetPath);
+        final data = await loadAssetIfExists('assets/precache/$fileName');
         if (data != null) {
           await hiveFile.writeAsBytes(data);
           print('$fileName does not exist, copying from assets...');
@@ -92,34 +89,35 @@ Future<void> checkHiveFiles(String hiveDirPath) async {
         print('$fileName exists');
       }
     }
+  } else {
+    for (final fileName in fileList) {
+      final data = await loadAssetIfExists('assets/precache/$fileName');
+      if (data != null) {
+        print('$fileName does not exist, copying from assets...');
+        await Hive.openBox<Map>(fileName.split('.').first, bytes: data);
+      } else {
+        print('$fileName does not exist and no asset found');
+      }
+    }
   }
 }
 
-Future<bool> assetExists(String path) async {
-  try {
-    await rootBundle.load(path);
-    return true;
-  } catch (e) {
-    return false;
-  }
-}
-
-Future<Uint8List?> loadAsset(String path) async {
+Future<Uint8List?> loadAssetIfExists(String path) async {
   try {
     final byteData = await rootBundle.load(path);
     return byteData.buffer.asUint8List();
   } catch (e) {
-    print('Failed to load $path: $e');
+    print('Error loading asset: $e');
     return null;
   }
 }
 
 class Dnd5eDmTools extends StatelessWidget {
+
+  Dnd5eDmTools({super.key});
   final DatabaseProvider databaseProvider = DatabaseProvider();
   final RealtimeDatabaseProvider realtimeDatabaseProvider =
       RealtimeDatabaseProvider();
-
-  Dnd5eDmTools({super.key});
   @override
   Widget build(BuildContext context) {
     return MultiProvider(

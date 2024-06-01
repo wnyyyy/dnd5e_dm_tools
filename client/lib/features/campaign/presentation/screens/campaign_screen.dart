@@ -1,10 +1,10 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:dnd5e_dm_tools/features/campaign/cubit/campaign_cubit.dart';
 import 'package:dnd5e_dm_tools/features/campaign/cubit/campaign_states.dart';
-import 'package:dnd5e_dm_tools/features/campaign/presentation/widgets/locations_tab.dart';
-import 'package:dnd5e_dm_tools/features/campaign/presentation/widgets/characters_tab.dart';
 import 'package:dnd5e_dm_tools/features/campaign/presentation/widgets/adventure_tab.dart';
+import 'package:dnd5e_dm_tools/features/campaign/presentation/widgets/characters_tab.dart';
+import 'package:dnd5e_dm_tools/features/campaign/presentation/widgets/locations_tab.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class CampaignScreen extends StatelessWidget {
   const CampaignScreen({super.key});
@@ -41,7 +41,7 @@ class CampaignScreen extends StatelessWidget {
                 ],
               ),
             ),
-          ]),
+          ],),
         ),
       ),
     );

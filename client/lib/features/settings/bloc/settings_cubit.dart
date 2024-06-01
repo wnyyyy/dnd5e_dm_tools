@@ -1,23 +1,16 @@
 import 'package:dnd5e_dm_tools/core/data/repositories/characters_repository.dart';
-import 'package:dnd5e_dm_tools/core/util/enum.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:dnd5e_dm_tools/core/data/repositories/classes_repository.dart';
 import 'package:dnd5e_dm_tools/core/data/repositories/conditions_repository.dart';
 import 'package:dnd5e_dm_tools/core/data/repositories/feats_repository.dart';
 import 'package:dnd5e_dm_tools/core/data/repositories/items_repository.dart';
 import 'package:dnd5e_dm_tools/core/data/repositories/races_repository.dart';
 import 'package:dnd5e_dm_tools/core/data/repositories/spells_repository.dart';
+import 'package:dnd5e_dm_tools/core/util/enum.dart';
 import 'package:dnd5e_dm_tools/core/util/helper.dart';
 import 'package:dnd5e_dm_tools/features/settings/bloc/settings_states.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class SettingsCubit extends Cubit<SettingsState> {
-  final SpellsRepository spellsRepository;
-  final FeatsRepository featsRepository;
-  final ClassesRepository classesRepository;
-  final ConditionsRepository conditionsRepository;
-  final RacesRepository racesRepository;
-  final ItemsRepository itemsRepository;
-  final CharactersRepository charactersRepository;
 
   SettingsCubit({
     required this.spellsRepository,
@@ -28,8 +21,15 @@ class SettingsCubit extends Cubit<SettingsState> {
     required this.itemsRepository,
     required this.charactersRepository,
   }) : super(SettingsInitial());
+  final SpellsRepository spellsRepository;
+  final FeatsRepository featsRepository;
+  final ClassesRepository classesRepository;
+  final ConditionsRepository conditionsRepository;
+  final RacesRepository racesRepository;
+  final ItemsRepository itemsRepository;
+  final CharactersRepository charactersRepository;
 
-  void changeName({required String name, bool? caster}) async {
+  Future<void> changeName({required String name, bool? caster}) async {
     if (name.isEmpty) return;
     if (state is! SettingsLoaded) return;
     await saveConfig('char_name', name);
@@ -41,40 +41,40 @@ class SettingsCubit extends Cubit<SettingsState> {
     emit((state as SettingsLoaded).copyWith(name: name));
   }
 
-  void changeTheme(ThemeColor themeColor, bool isDarkMode) async {
+  Future<void> changeTheme(ThemeColor themeColor, bool isDarkMode) async {
     await saveConfig('theme_color', themeColor.name);
     await saveConfig('is_dark_mode', isDarkMode.toString());
     emit((state as SettingsLoaded)
-        .copyWith(themeColor: themeColor, isDarkMode: isDarkMode));
+        .copyWith(themeColor: themeColor, isDarkMode: isDarkMode),);
   }
 
-  void toggleEditMode() async {
+  Future<void> toggleEditMode() async {
     if (state is! SettingsLoaded) return;
     emit((state as SettingsLoaded).copyWith(isEditMode: !state.isEditMode));
   }
 
-  void toggleIsCaster() async {
+  Future<void> toggleIsCaster() async {
     if (state is! SettingsLoaded) return;
     final isCaster = !state.isCaster;
     await saveConfig('is_caster', isCaster.toString());
     emit((state as SettingsLoaded).copyWith(isCaster: isCaster));
   }
 
-  void toggleClassOnlySpells() async {
+  Future<void> toggleClassOnlySpells() async {
     if (state is! SettingsLoaded) return;
     final classOnly = !state.classOnlySpells;
     await saveConfig('class_only_spells', classOnly.toString());
     emit((state as SettingsLoaded).copyWith(classOnlySpells: classOnly));
   }
 
-  void toggleOfflineMode() async {
+  Future<void> toggleOfflineMode() async {
     if (state is! SettingsLoaded) return;
     final offlineMode = !state.offlineMode;
     await saveConfig('offline_mode', offlineMode.toString());
     emit((state as SettingsLoaded).copyWith(offlineMode: offlineMode));
   }
 
-  void init() async {
+  Future<void> init() async {
     emit(SettingsLoading());
     try {
       final name = await readConfig('char_name') ?? '';
@@ -86,7 +86,7 @@ class SettingsCubit extends Cubit<SettingsState> {
       final isDarkMode = await readConfig('is_dark_mode') ?? 'false';
       final themeColor = ThemeColor.values.firstWhere(
           (e) => e.name == themeColorName,
-          orElse: () => ThemeColor.chestnutBrown);
+          orElse: () => ThemeColor.chestnutBrown,);
       final isOnboardingComplete = name.trim().isNotEmpty;
 
       await spellsRepository.init();
@@ -107,7 +107,7 @@ class SettingsCubit extends Cubit<SettingsState> {
         isDarkMode: isDarkMode == 'true',
         offlineMode: offlineMode == 'true',
         isOnboardingComplete: isOnboardingComplete,
-      ));
+      ),);
     } catch (error) {
       emit(SettingsError('Failed to load settings'));
     }

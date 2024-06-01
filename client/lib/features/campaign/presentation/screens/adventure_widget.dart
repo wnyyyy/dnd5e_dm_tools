@@ -1,21 +1,21 @@
+import 'package:dnd5e_dm_tools/features/campaign/cubit/campaign_cubit.dart';
 import 'package:dnd5e_dm_tools/features/campaign/cubit/campaign_states.dart';
 import 'package:dnd5e_dm_tools/features/campaign/data/models/adventure.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:dnd5e_dm_tools/features/campaign/cubit/campaign_cubit.dart';
 
 class AdventureWidget extends StatefulWidget {
-  final Adventure adventure;
 
   const AdventureWidget({super.key, required this.adventure});
+  final Adventure adventure;
 
   @override
   AdventureWidgetState createState() => AdventureWidgetState();
 }
 
 class AdventureWidgetState extends State<AdventureWidget> {
-  var editMode = false;
+  bool editMode = false;
   late Adventure updatedAdventure;
 
   void _toggleEditMode() {
@@ -93,14 +93,14 @@ class AdventureWidgetState extends State<AdventureWidget> {
                                                 builder: (context) =>
                                                     AlertDialog(
                                                   title: const Text(
-                                                      'Delete Entry'),
+                                                      'Delete Entry',),
                                                   content: const Text(
-                                                      'Are you sure you want to delete this entry?'),
+                                                      'Are you sure you want to delete this entry?',),
                                                   actions: [
                                                     TextButton(
                                                       onPressed: () =>
                                                           Navigator.pop(
-                                                              context),
+                                                              context,),
                                                       child:
                                                           const Text('Cancel'),
                                                     ),
@@ -125,7 +125,7 @@ class AdventureWidgetState extends State<AdventureWidget> {
                                                 ),
                                               );
                                             },
-                                            icon: const Icon(Icons.delete))
+                                            icon: const Icon(Icons.delete),),
                                       ],
                                     ),
                                   )
@@ -173,7 +173,7 @@ class AdventureWidgetState extends State<AdventureWidget> {
   }
 
   void _showEntryDialog({String? entryId, String initialText = ''}) {
-    TextEditingController dialogController =
+    final TextEditingController dialogController =
         TextEditingController(text: initialText);
     showDialog(
       context: context,
@@ -182,7 +182,7 @@ class AdventureWidgetState extends State<AdventureWidget> {
         content: TextFormField(
           controller: dialogController,
           maxLines: null,
-          decoration: const InputDecoration(hintText: "Enter text here"),
+          decoration: const InputDecoration(hintText: 'Enter text here'),
         ),
         actions: [
           TextButton(
@@ -191,7 +191,7 @@ class AdventureWidgetState extends State<AdventureWidget> {
           ),
           TextButton(
             onPressed: () {
-              var content = dialogController.text.trim();
+              final content = dialogController.text.trim();
               if (entryId == null) {
                 if (content.isNotEmpty) {
                   context.read<CampaignCubit>().addEntry(

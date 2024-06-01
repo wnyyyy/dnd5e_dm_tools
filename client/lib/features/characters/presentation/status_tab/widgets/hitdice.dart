@@ -19,15 +19,17 @@ class HitDice extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final editMode = Provider.of<SettingsCubit>(context).state.isEditMode;
-    final maxHd = character['hd_max'] ?? character['level'] ?? 1;
-    final currentHd = character['hd_curr'] ?? maxHd;
-    final hd = classs['hit_dice'] ?? '1d8';
+    final maxHd =
+        character['hd_max'] as int? ?? character['level'] as int? ?? 1;
+    final currentHd = character['hd_curr'] as int? ?? maxHd;
+    final hd = classs['hit_dice'] as String? ?? '1d8';
 
     void editHd(String attributeName) {
       final TextEditingController maxHpController =
           TextEditingController(text: character['hd_max']?.toString() ?? '0');
       final TextEditingController currentHpController = TextEditingController(
-          text: character['hd_curr']?.toString() ?? maxHpController.text);
+        text: character['hd_curr']?.toString() ?? maxHpController.text,
+      );
 
       showDialog(
         context: context,
@@ -42,16 +44,14 @@ class HitDice extends StatelessWidget {
                   decoration: const InputDecoration(
                     labelText: 'Max Hitdice',
                   ),
-                  keyboardType: const TextInputType.numberWithOptions(
-                      signed: false, decimal: false),
+                  keyboardType: TextInputType.number,
                 ),
                 TextField(
                   controller: currentHpController,
                   decoration: const InputDecoration(
                     labelText: 'Current Hitdice',
                   ),
-                  keyboardType: const TextInputType.numberWithOptions(
-                      signed: false, decimal: false),
+                  keyboardType: TextInputType.number,
                 ),
               ],
             ),
@@ -90,7 +90,7 @@ class HitDice extends StatelessWidget {
       );
     }
 
-    void showRestDialog(int currHitDie, maxHitDie) {
+    void showRestDialog(int currHitDie, int maxHitDie) {
       bool isShort = true;
       int currHitDieInput = currHitDie;
       showDialog(
@@ -155,10 +155,11 @@ class HitDice extends StatelessWidget {
                                         const Icon(Icons.remove_circle_outline),
                                   ),
                                 ),
-                                Text('$currHitDieInput',
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .displaySmall),
+                                Text(
+                                  '$currHitDieInput',
+                                  style:
+                                      Theme.of(context).textTheme.displaySmall,
+                                ),
                                 Padding(
                                   padding: const EdgeInsets.only(left: 6.0),
                                   child: IconButton(
@@ -192,35 +193,39 @@ class HitDice extends StatelessWidget {
                     child: const Icon(Icons.check),
                     onPressed: () {
                       Navigator.of(context).pop();
-                      final characterActions = character['actions'] ?? [];
+                      final characterActions =
+                          character['actions'] as List<Map<String, dynamic>>? ??
+                              [];
                       if (isShort) {
                         if (currHitDieInput > 0) {
                           character['hd_curr'] = currHitDie - currHitDieInput;
                           if (character['class'] == 'warlock') {
                             character['expended_spell_slots'] = {};
                           }
-                          for (var action in characterActions) {
-                            if (action['requires_resource'] ?? false) {
+                          for (final action in characterActions) {
+                            if (action['requires_resource'] as bool? ?? false) {
                               if (action['resource_type']?.toString() ==
                                   'shortRest') {
                                 action['used_count'] = 0;
                               }
                             }
                           }
-                          context.read<CharacterBloc>().add(CharacterUpdate(
-                                character: character,
-                                slug: slug,
-                                offline: context
-                                    .read<SettingsCubit>()
-                                    .state
-                                    .offlineMode,
-                              ));
+                          context.read<CharacterBloc>().add(
+                                CharacterUpdate(
+                                  character: character,
+                                  slug: slug,
+                                  offline: context
+                                      .read<SettingsCubit>()
+                                      .state
+                                      .offlineMode,
+                                ),
+                              );
                         }
                       } else {
                         character['hd_curr'] = maxHitDie;
                         character['expended_spell_slots'] = {};
-                        for (var action in characterActions) {
-                          if (action['requires_resource'] ?? false) {
+                        for (final action in characterActions) {
+                          if (action['requires_resource'] as bool? ?? false) {
                             if (action['resource_type']?.toString() ==
                                     'longRest' ||
                                 action['resource_type']?.toString() ==
@@ -268,8 +273,10 @@ class HitDice extends StatelessWidget {
                 Column(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    Text('$currentHd/$maxHd',
-                        style: Theme.of(context).textTheme.displaySmall),
+                    Text(
+                      '$currentHd/$maxHd',
+                      style: Theme.of(context).textTheme.displaySmall,
+                    ),
                   ],
                 ),
                 TextButton(

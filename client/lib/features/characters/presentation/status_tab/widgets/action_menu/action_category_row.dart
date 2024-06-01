@@ -3,14 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:fluttericon/font_awesome5_icons.dart';
 
 class ActionCategoryRow extends StatefulWidget {
-  final Function(ActionMenuMode) onSelected;
-  final bool showAll;
 
   const ActionCategoryRow({
     super.key,
     required this.onSelected,
     this.showAll = true,
   });
+  final Function(ActionMenuMode) onSelected;
+  final bool showAll;
 
   @override
   ActionCategoryRowState createState() => ActionCategoryRowState();

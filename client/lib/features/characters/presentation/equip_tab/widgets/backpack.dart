@@ -13,11 +13,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class BackpackWidget extends StatefulWidget {
+  const BackpackWidget({
+    super.key,
+    required this.character,
+    required this.slug,
+  });
   final Map<String, dynamic> character;
   final String slug;
-
-  const BackpackWidget(
-      {super.key, required this.character, required this.slug});
 
   @override
   State<BackpackWidget> createState() => _BackpackWidgetState();
@@ -30,9 +32,9 @@ class _BackpackWidgetState extends State<BackpackWidget> {
 
   List<DropdownMenuItem<String>> get dropdownItems {
     return [
-      const DropdownMenuItem(value: "name", child: Text("Name")),
-      const DropdownMenuItem(value: "value", child: Text("Value")),
-      const DropdownMenuItem(value: "equipable", child: Text("Can Equip")),
+      const DropdownMenuItem(value: 'name', child: Text('Name')),
+      const DropdownMenuItem(value: 'value', child: Text('Value')),
+      const DropdownMenuItem(value: 'equipable', child: Text('Can Equip')),
     ];
   }
 
@@ -47,7 +49,7 @@ class _BackpackWidgetState extends State<BackpackWidget> {
             },
           );
         } else {
-          _addItemToBackpack(itemSlug, 1, isEquipped: false);
+          _addItemToBackpack(itemSlug, 1);
           Navigator.pop(context);
         }
       },
@@ -57,7 +59,7 @@ class _BackpackWidgetState extends State<BackpackWidget> {
   AlertDialog _buildQuantityDialog(BuildContext context, String itemSlug) {
     int quantity = 1;
     Timer? timer;
-    TextEditingController controller = TextEditingController();
+    final TextEditingController controller = TextEditingController();
     controller.text = quantity.toString();
 
     void incrementQuantity() {
@@ -101,7 +103,7 @@ class _BackpackWidgetState extends State<BackpackWidget> {
               controller: controller,
               keyboardType: TextInputType.number,
               onChanged: (value) {
-                int newQuantity = int.tryParse(value) ?? 1;
+                final int newQuantity = int.tryParse(value) ?? 1;
                 setState(() {
                   quantity = max(1, newQuantity);
                 });
@@ -141,12 +143,21 @@ class _BackpackWidgetState extends State<BackpackWidget> {
     );
   }
 
-  void _addItemToBackpack(String itemSlug, int quantity,
-      {bool isEquipped = false}) {
-    final currQuantity = widget.character['backpack']['items'][itemSlug] != null
-        ? widget.character['backpack']['items'][itemSlug]['quantity']
-        : 0;
-    widget.character['backpack']['items'][itemSlug] = {
+  void _addItemToBackpack(
+    String itemSlug,
+    int quantity, {
+    bool isEquipped = false,
+  }) {
+    final items = (widget.character['backpack'] as Map?)?['items']
+            as Map<String, dynamic>? ??
+        {};
+    final currQuantity = (items[itemSlug] != null
+            ? int.tryParse(
+                (items[itemSlug] as Map)['quantity']?.toString() ?? '0',
+              )
+            : 0) ??
+        0;
+    items[itemSlug] = {
       'quantity': currQuantity + quantity,
       'isEquipped': isEquipped,
     };
@@ -174,32 +185,45 @@ class _BackpackWidgetState extends State<BackpackWidget> {
   }
 
   Map<String, Map<String, dynamic>> sortItems(
-      Map<String, Map<String, dynamic>> items, String criteria) {
-    var sortedEntries = items.entries.toList();
+    Map<String, Map<String, dynamic>> items,
+    String criteria,
+  ) {
+    final sortedEntries = items.entries.toList();
 
     switch (criteria) {
       case 'name':
-        sortedEntries
-            .sort((a, b) => a.value['name'].compareTo(b.value['name']));
-        break;
+        sortedEntries.sort(
+          (a, b) => (a.value['name']?.toString() ?? '')
+              .compareTo(b.value['name']?.toString() ?? ''),
+        );
       case 'value':
-        sortedEntries.sort((b, a) => getCostTotal(
-                    a.value['cost']?['unit'] ?? 'none',
-                    a.value['cost']?['quantity'] ?? 0,
-                    (a.value['quantity'] ?? 0.0).toDouble())
-                .compareTo(getCostTotal(
-              b.value['cost']?['unit'] ?? 'none',
-              b.value['cost']?['quantity'] ?? 0,
-              (b.value['quantity'] ?? 0.0).toDouble(),
-            )));
-        break;
+        sortedEntries.sort(
+          (b, a) => getCostTotal(
+            (a.value['cost'] as Map?)?['unit']?.toString() ?? 'none',
+            int.tryParse(
+                  (a.value['cost'] as Map?)?['quantity']?.toString() ?? '0',
+                ) ??
+                0,
+            (int.tryParse(a.value['quantity']?.toString() ?? '0') ?? 0.0)
+                .toDouble(),
+          ).compareTo(
+            getCostTotal(
+              (b.value['cost'] as Map?)?['unit']?.toString() ?? 'none',
+              int.tryParse(
+                    (b.value['cost'] as Map?)?['quantity']?.toString() ?? '0',
+                  ) ??
+                  0,
+              (int.tryParse(b.value['quantity']?.toString() ?? '0') ?? 0.0)
+                  .toDouble(),
+            ),
+          ),
+        );
       case 'equipable':
         sortedEntries.sort((a, b) {
           if (isEquipable(a.value) && !isEquipable(b.value)) return -1;
           if (!isEquipable(a.value) && isEquipable(b.value)) return 1;
           return 0;
         });
-        break;
     }
     return Map.fromEntries(sortedEntries);
   }
@@ -207,9 +231,9 @@ class _BackpackWidgetState extends State<BackpackWidget> {
   @override
   Widget build(BuildContext context) {
     final Map<String, dynamic> backpack =
-        Map<String, dynamic>.from(widget.character['backpack'] ?? {});
+        Map<String, dynamic>.from((widget.character['backpack'] as Map?) ?? {});
     final Map<String, Map> backpackItems = backpack['items'] != null
-        ? Map<String, Map>.from(backpack['items'])
+        ? Map<String, Map>.from(backpack['items'] as Map)
         : {};
     final screenWidth = MediaQuery.of(context).size.width;
 
@@ -218,10 +242,13 @@ class _BackpackWidgetState extends State<BackpackWidget> {
     for (final backpackItem in backpackItems.entries) {
       final item = context.read<RulesCubit>().getItem(backpackItem.key);
       if (item != null) {
-        Map<String, dynamic> typedItem = Map<String, dynamic>.from(item);
+        final Map<String, dynamic> typedItem = Map<String, dynamic>.from(item);
 
-        if (applyFilter(typedItem, filterCriteria,
-            backpackItem.value['isEquipped'] ?? false)) {
+        if (applyFilter(
+          typedItem,
+          filterCriteria,
+          backpackItem.value['isEquipped'] as bool? ?? false,
+        )) {
           items[backpackItem.key] = typedItem;
           items[backpackItem.key]?['quantity'] =
               backpackItem.value['quantity'] ?? 0;
@@ -244,7 +271,9 @@ class _BackpackWidgetState extends State<BackpackWidget> {
             Expanded(
               child: Card(
                 margin: EdgeInsets.symmetric(
-                    horizontal: horizontalPadding, vertical: 8),
+                  horizontal: horizontalPadding,
+                  vertical: 8,
+                ),
                 child: isWide
                     ? _buildWideLayout(sortedItems)
                     : _buildNarrowLayout(sortedItems),
@@ -259,7 +288,10 @@ class _BackpackWidgetState extends State<BackpackWidget> {
   Widget _buildFilters(double horizontalPadding) {
     return Padding(
       padding: EdgeInsets.only(
-          right: horizontalPadding, left: horizontalPadding, top: 8),
+        right: horizontalPadding,
+        left: horizontalPadding,
+        top: 8,
+      ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -368,7 +400,7 @@ class _BackpackWidgetState extends State<BackpackWidget> {
                 padding: const EdgeInsets.only(right: 16.0),
                 child: buildAddItemButton(),
               ),
-            )
+            ),
           ],
         ),
         Row(
@@ -378,7 +410,7 @@ class _BackpackWidgetState extends State<BackpackWidget> {
                 padding:
                     const EdgeInsets.only(left: 16.0, top: 8.0, bottom: 8.0),
                 child: Text(
-                  'Total Weight: ${getTotalWeight(widget.character['backpack']['items'], sortedItems)}',
+                  'Total Weight: ${getTotalWeight(items, sortedItems)}',
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
               ),
@@ -405,13 +437,15 @@ class _BackpackWidgetState extends State<BackpackWidget> {
           padding: const EdgeInsets.symmetric(vertical: 8),
           child: ItemWidget(
             item: item,
-            quantity: backpackItem.value['quantity'],
+            quantity: int.tryParse(
+                  backpackItem.value['quantity']?.toString() ?? '0',
+                ) ??
+                0,
             onQuantityChange: (quantity) {
               if (quantity == 0) {
-                widget.character['backpack']['items'].remove(backpackItem.key);
+                items.remove(backpackItem.key);
               } else {
-                widget.character['backpack']['items'][backpackItem.key]
-                    ['quantity'] = quantity;
+                (items[backpackItem.key] as Map?)?['quantity'] = quantity;
               }
               context.read<CharacterBloc>().add(
                     CharacterUpdate(
@@ -422,10 +456,9 @@ class _BackpackWidgetState extends State<BackpackWidget> {
                     ),
                   );
             },
-            isEquipped: backpackItem.value['isEquipped'],
+            isEquipped: backpackItem.value['isEquipped'] as bool? ?? false,
             onEquip: (itemKey, isEquipped) {
-              widget.character['backpack']['items'][itemKey]['isEquipped'] =
-                  isEquipped;
+              items[itemKey]?['isEquipped'] = isEquipped;
               context.read<CharacterBloc>().add(
                     CharacterUpdate(
                       character: widget.character,

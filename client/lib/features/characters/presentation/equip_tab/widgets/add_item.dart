@@ -4,12 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class AddItemButton extends StatefulWidget {
-  final Function(String, bool) onAdd;
-
   const AddItemButton({
     super.key,
     required this.onAdd,
   });
+
+  final Function(String, bool) onAdd;
 
   @override
   AddItemButtonState createState() => AddItemButtonState();
@@ -24,56 +24,70 @@ class AddItemButtonState extends State<AddItemButton> {
   }
 
   List<Widget> _buildSearchResults(
-      Map<String, dynamic> items, String searchText) {
-    List<Widget> searchResults = [];
+    Map<String, dynamic> items,
+    String searchText,
+  ) {
+    final List<Widget> searchResults = [];
     if (searchText.isEmpty) {
       return searchResults;
     }
-    if (items.containsKey(searchText) && items[searchText]['rarity'] != null) {
-      searchResults.add(ListTile(
-        title: Text(
-          items[searchText]['name'],
+    if (items.containsKey(searchText) &&
+        (items[searchText] as Map?)?['rarity'] != null) {
+      final itemSearch = items[searchText] as Map<String, dynamic>;
+      searchResults.add(
+        ListTile(
+          title: Text(
+            itemSearch['name']?.toString() ?? '',
+          ),
+          subtitle: Text(
+            (itemSearch['rarity'] as Map?)?['name']?.toString() ?? '',
+          ),
+          onTap: () {
+            widget.onAdd(searchText, true);
+          },
         ),
-        subtitle: Text(items[searchText]?['rarity']?['name'].toString() ?? ''),
-        onTap: () {
-          widget.onAdd(searchText, true);
-        },
-      ));
+      );
       return searchResults;
     }
 
-    List<Map<String, dynamic>> filteredItems = [];
+    final List<Map<String, dynamic>> filteredItems = [];
 
-    for (var entry in items.entries) {
-      final item = entry.value;
-      if (item['name'].toLowerCase().contains(searchText) &&
-          (item['rarity'] == null || item['rarity']['name'] == 'Common')) {
+    for (final entry in items.entries) {
+      final item = entry.value as Map<String, dynamic>;
+      if (item['name'].toString().toLowerCase().contains(searchText) &&
+          (item['rarity'] == null ||
+              (item['rarity'] as Map)['name'] == 'Common')) {
         item['entryKey'] = entry.key;
         filteredItems.add(item);
       }
     }
 
     filteredItems.sort((a, b) {
-      final aCat = a['equipment_category']?['index'];
-      final bCat = b['equipment_category']?['index'];
+      final String aCat =
+          (a['equipment_category'] as Map?)?['index']?.toString() ?? '';
+      final String bCat =
+          (b['equipment_category'] as Map?)?['index']?.toString() ?? '';
       if (aCat == 'weapon' && bCat != 'weapon') return -1;
       if (bCat == 'weapon' && aCat != 'weapon') return 1;
       if (aCat == 'armor' && bCat != 'armor') return -1;
       if (bCat == 'armor' && aCat != 'armor') return 1;
-      return a['name'].compareTo(b['name']);
+      return (a['name']?.toString() ?? '')
+          .compareTo(b['name']?.toString() ?? '');
     });
 
-    for (var item in filteredItems) {
+    for (final item in filteredItems) {
       if (searchResults.length >= 15) break;
       final String subtitle = getItemDescriptor(item);
 
-      searchResults.add(ListTile(
-        title: Text(item['name']),
-        subtitle: Text(subtitle),
-        onTap: () {
-          widget.onAdd(item['entryKey'], false);
-        },
-      ));
+      searchResults.add(
+        ListTile(
+          title: Text(item['name'] as String),
+          subtitle: Text(subtitle),
+          onTap: () {
+            widget.onAdd(item['entryKey'] as String, false);
+          },
+        ),
+      );
     }
 
     return searchResults;
@@ -81,8 +95,8 @@ class AddItemButtonState extends State<AddItemButton> {
 
   @override
   Widget build(BuildContext context) {
-    final screenHeight = MediaQuery.of(context).size.height;
-    final screenWidth = MediaQuery.of(context).size.width;
+    final double screenHeight = MediaQuery.of(context).size.height;
+    final double screenWidth = MediaQuery.of(context).size.width;
     return IconButton(
       onPressed: () {
         showDialog(
@@ -99,7 +113,9 @@ class AddItemButtonState extends State<AddItemButton> {
                       children: [
                         Padding(
                           padding: const EdgeInsets.symmetric(
-                              vertical: 16, horizontal: 24),
+                            vertical: 16,
+                            horizontal: 24,
+                          ),
                           child: TextField(
                             autofocus: true,
                             controller: textEditingController,
@@ -126,15 +142,18 @@ class AddItemButtonState extends State<AddItemButton> {
                           child: Expanded(
                             child: Builder(
                               builder: (context) {
-                                final items =
+                                final Map<String, dynamic> items =
                                     context.read<RulesCubit>().getAllItems();
-                                final searchText =
+                                final String searchText =
                                     textEditingController.text.toLowerCase();
-                                final searchResults =
+                                final List<Widget> searchResults =
                                     _buildSearchResults(items, searchText);
                                 return Padding(
                                   padding: const EdgeInsets.only(
-                                      left: 12, right: 12, bottom: 24),
+                                    left: 12,
+                                    right: 12,
+                                    bottom: 24,
+                                  ),
                                   child: Container(
                                     decoration: BoxDecoration(
                                       border: Border.all(),
@@ -152,7 +171,8 @@ class AddItemButtonState extends State<AddItemButton> {
                                                 (context, index) =>
                                                     const Padding(
                                               padding: EdgeInsets.symmetric(
-                                                  horizontal: 16.0),
+                                                horizontal: 16.0,
+                                              ),
                                               child: Divider(),
                                             ),
                                           ),

@@ -18,10 +18,10 @@ class DatabaseEditorLoading extends DatabaseEditorState {
 }
 
 class DatabaseEditorLoaded extends DatabaseEditorState {
-  final Map<String, dynamic> entry;
-  final String slug;
 
   DatabaseEditorLoaded({required this.entry, required this.slug});
+  final Map<String, dynamic> entry;
+  final String slug;
   @override
   List<Object?> get props => [entry, slug];
 }

@@ -1,22 +1,22 @@
+import 'package:dnd5e_dm_tools/features/campaign/cubit/campaign_cubit.dart';
 import 'package:dnd5e_dm_tools/features/campaign/cubit/campaign_states.dart';
+import 'package:dnd5e_dm_tools/features/campaign/data/models/character.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:photo_view/photo_view.dart';
-import 'package:dnd5e_dm_tools/features/campaign/data/models/character.dart';
-import 'package:dnd5e_dm_tools/features/campaign/cubit/campaign_cubit.dart';
 
 class CharacterDetailsScreen extends StatefulWidget {
-  final Character character;
 
   const CharacterDetailsScreen({super.key, required this.character});
+  final Character character;
 
   @override
   CharacterDetailsScreenState createState() => CharacterDetailsScreenState();
 }
 
 class CharacterDetailsScreenState extends State<CharacterDetailsScreen> {
-  var editMode = false;
+  bool editMode = false;
   late Character updatedCharacter;
 
   void _toggleEditMode() {
@@ -124,7 +124,7 @@ class CharacterDetailsScreenState extends State<CharacterDetailsScreen> {
   }
 
   void _showEntryDialog({String? entryId, String initialText = ''}) {
-    TextEditingController dialogController =
+    final TextEditingController dialogController =
         TextEditingController(text: initialText);
     showDialog(
       context: context,
@@ -133,7 +133,7 @@ class CharacterDetailsScreenState extends State<CharacterDetailsScreen> {
         content: TextFormField(
           controller: dialogController,
           maxLines: null,
-          decoration: const InputDecoration(hintText: "Enter text here"),
+          decoration: const InputDecoration(hintText: 'Enter text here'),
         ),
         actions: [
           TextButton(
@@ -142,7 +142,7 @@ class CharacterDetailsScreenState extends State<CharacterDetailsScreen> {
           ),
           TextButton(
             onPressed: () {
-              var content = dialogController.text.trim();
+              final content = dialogController.text.trim();
               if (entryId == null) {
                 if (content.isNotEmpty) {
                   context.read<CampaignCubit>().addEntry(

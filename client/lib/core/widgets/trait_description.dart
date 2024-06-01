@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 
 class TraitDescription extends StatelessWidget {
-  final String inputText;
-  final String separator;
-  final bool boldify;
 
   const TraitDescription({
     super.key,
@@ -11,10 +8,13 @@ class TraitDescription extends StatelessWidget {
     this.separator = '***',
     this.boldify = true,
   });
+  final String inputText;
+  final String separator;
+  final bool boldify;
 
   @override
   Widget build(BuildContext context) {
-    List<TextSpan> spans = [];
+    final List<TextSpan> spans = [];
     final parts = inputText.split(separator);
 
     if (boldify) {
@@ -27,12 +27,12 @@ class TraitDescription extends StatelessWidget {
             style: Theme.of(context).textTheme.bodyMedium!.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
-          ));
+          ),);
         } else {
           spans.add(TextSpan(
             text: '${parts[i]}\n',
             style: Theme.of(context).textTheme.bodyMedium,
-          ));
+          ),);
         }
       }
     } else {
@@ -42,7 +42,7 @@ class TraitDescription extends StatelessWidget {
         spans.add(TextSpan(
           text: '${i != 1 ? '\n' : ''}${parts[i]}',
           style: Theme.of(context).textTheme.bodyMedium,
-        ));
+        ),);
       }
     }
 

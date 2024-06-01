@@ -3,18 +3,18 @@ import 'package:dnd5e_dm_tools/features/onboarding/bloc/onboarding_state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class OnboardingCubit extends Cubit<OnboardingState> {
-  final CharactersRepository charactersRepository;
 
   OnboardingCubit({
     required this.charactersRepository,
   }) : super(OnboardingInitial());
+  final CharactersRepository charactersRepository;
 
-  void loadCharacters(int startPos) async {
+  Future<void> loadCharacters(int startPos) async {
     emit(OnboardingLoading());
     try {
       final characters = await charactersRepository.getAll();
       if (characters.isEmpty) {
-        emit(OnboardingError("No characters found"));
+        emit(OnboardingError('No characters found'));
         return;
       }
       final index = startPos % characters.length;
@@ -22,9 +22,9 @@ class OnboardingCubit extends Cubit<OnboardingState> {
       emit(OnboardingLoaded(
         characters: characters,
         selectedCharacter: firstCharacter,
-      ));
+      ),);
     } catch (error) {
-      emit(OnboardingError("Failed to load characters"));
+      emit(OnboardingError('Failed to load characters'));
     }
   }
 

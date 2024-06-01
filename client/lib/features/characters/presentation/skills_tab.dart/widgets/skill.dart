@@ -3,13 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class Skill extends StatelessWidget {
-  final String skillName;
-  final String attributeName;
-  final int? proficiency;
-  final bool expertise;
-  final Color color;
-  final Map<String, dynamic> character;
-
   const Skill({
     super.key,
     required this.skillName,
@@ -19,10 +12,17 @@ class Skill extends StatelessWidget {
     required this.color,
     required this.character,
   });
+  final String skillName;
+  final String attributeName;
+  final int? proficiency;
+  final bool expertise;
+  final Color color;
+  final Map<String, dynamic> character;
 
   @override
   Widget build(BuildContext context) {
-    final attrValue = character['asi'][attributeName.toLowerCase()];
+    final asi = character['asi'] as Map<String, int?>? ?? {};
+    final attrValue = asi[attributeName.toLowerCase()] ?? 10;
     var value = proficiency != null
         ? getModifier(attrValue) + proficiency!
         : getModifier(attrValue);
@@ -75,7 +75,7 @@ class Skill extends StatelessWidget {
                 ),
               ),
             ],
-          )
+          ),
         ],
       ),
     );

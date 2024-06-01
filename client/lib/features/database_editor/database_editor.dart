@@ -17,7 +17,7 @@ class DatabaseEditorScreenState extends State<DatabaseEditorScreen> {
   final TextEditingController _searchController = TextEditingController();
   final Map<String, List<TextEditingController>> _controllers = {};
   final TextEditingController _slugController = TextEditingController();
-  var maySync = false;
+  bool maySync = false;
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +47,6 @@ class DatabaseEditorScreenState extends State<DatabaseEditorScreen> {
             const SizedBox(height: 20),
             Wrap(
               spacing: 10,
-              alignment: WrapAlignment.start,
               children: _buildCategoryChips(),
             ),
             const SizedBox(height: 20),
@@ -60,15 +59,15 @@ class DatabaseEditorScreenState extends State<DatabaseEditorScreen> {
   }
 
   List<Widget> _buildCategoryChips() {
-    List<String> categories = [
+    final List<String> categories = [
       'Feat',
       'Race',
       'Spell',
       'Class',
       'Item',
-      'Character'
+      'Character',
     ];
-    List<Widget> chips = [];
+    final List<Widget> chips = [];
     chips.addAll(
       List<Widget>.generate(
         categories.length,
@@ -93,7 +92,7 @@ class DatabaseEditorScreenState extends State<DatabaseEditorScreen> {
       'spells',
       'classes',
       'items',
-      'characters'
+      'characters',
     ][_selectedIndex];
     chips.add(
       ActionChip.elevated(
@@ -107,7 +106,7 @@ class DatabaseEditorScreenState extends State<DatabaseEditorScreen> {
                 .entry;
             context.read<DatabaseEditorCubit>().sync(entry, type, slug);
             context.read<RulesCubit>().loadRules();
-          }),
+          },),
     );
     return chips;
   }
@@ -119,20 +118,20 @@ class DatabaseEditorScreenState extends State<DatabaseEditorScreen> {
           return const CircularProgressIndicator();
         }
         if (state is DatabaseEditorLoaded) return _buildInputs(state.entry);
-        return const Text("No data loaded");
+        return const Text('No data loaded');
       },
     );
   }
 
   Widget _buildInputs(Map<String, dynamic> entries) {
-    List<Widget> fields = [];
+    final List<Widget> fields = [];
     entries.forEach((key, value) {
       fields.add(
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
           child: Text('$key:',
               style:
-                  const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                  const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),),
         ),
       );
 
@@ -149,10 +148,10 @@ class DatabaseEditorScreenState extends State<DatabaseEditorScreen> {
   }
 
   void _buildListFields(List<Widget> fields, String key, List<dynamic> list) {
-    List<TextEditingController> controllers = _controllers.putIfAbsent(
+    final List<TextEditingController> controllers = _controllers.putIfAbsent(
         key,
         () => List.generate(list.length,
-            (index) => TextEditingController(text: list[index].toString())));
+            (index) => TextEditingController(text: list[index].toString()),),);
 
     for (int i = 0; i < controllers.length; i++) {
       fields.add(_buildArrayField(key, i, controllers[i]));
@@ -163,15 +162,15 @@ class DatabaseEditorScreenState extends State<DatabaseEditorScreen> {
         controllers.add(TextEditingController(text: ''));
       }),
       child: Text('Add new item to $key'),
-    ));
+    ),);
   }
 
   void _buildMapFields(
-      List<Widget> fields, String key, Map<String, dynamic> map) {
+      List<Widget> fields, String key, Map<String, dynamic> map,) {
     map.forEach((subKey, subValue) {
-      String fieldKey = '$key.$subKey';
+      final String fieldKey = '$key.$subKey';
       _controllers[fieldKey] ??= [
-        TextEditingController(text: subValue.toString())
+        TextEditingController(text: subValue.toString()),
       ];
 
       fields.add(Padding(
@@ -195,21 +194,21 @@ class DatabaseEditorScreenState extends State<DatabaseEditorScreen> {
                 map.remove(subKey);
                 _controllers.remove(fieldKey);
               }),
-            )
+            ),
           ],
         ),
-      ));
+      ),);
     });
 
     fields.add(ElevatedButton(
       onPressed: () {
-        String newKey = 'newKey'; // Generate or ask for a new key
+        const String newKey = 'newKey'; // Generate or ask for a new key
         map[newKey] = ''; // Default new value
         _controllers['$key.$newKey'] = [TextEditingController(text: '')];
         setState(() {});
       },
       child: Text('Add new entry to $key'),
-    ));
+    ),);
   }
 
   void _buildTextField(List<Widget> fields, String key, String value) {
@@ -225,11 +224,11 @@ class DatabaseEditorScreenState extends State<DatabaseEditorScreen> {
         keyboardType: TextInputType.multiline,
         maxLines: null,
       ),
-    ));
+    ),);
   }
 
   Widget _buildArrayField(
-      String key, int index, TextEditingController controller) {
+      String key, int index, TextEditingController controller,) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
@@ -250,7 +249,7 @@ class DatabaseEditorScreenState extends State<DatabaseEditorScreen> {
             onPressed: () => setState(() {
               _controllers[key]?.removeAt(index);
             }),
-          )
+          ),
         ],
       ),
     );
@@ -264,7 +263,7 @@ class DatabaseEditorScreenState extends State<DatabaseEditorScreen> {
       'spells',
       'classes',
       'items',
-      'characters'
+      'characters',
     ][_selectedIndex];
     final offline = context.read<SettingsCubit>().state.offlineMode;
     context
@@ -277,7 +276,7 @@ class DatabaseEditorScreenState extends State<DatabaseEditorScreen> {
     _searchController.dispose();
     _slugController.dispose();
     _controllers.forEach((key, list) {
-      for (var controller in list) {
+      for (final controller in list) {
         controller.dispose();
       }
     });

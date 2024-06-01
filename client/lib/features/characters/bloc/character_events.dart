@@ -8,25 +8,25 @@ abstract class CharacterEvent extends Equatable {
 }
 
 class CharacterLoad extends CharacterEvent {
+  const CharacterLoad(this.characterName, {this.offline = false});
   final String characterName;
   final bool offline;
-  const CharacterLoad(this.characterName, {this.offline = false});
 
   @override
   List<Object> get props => [];
 }
 
 class CharacterUpdate extends CharacterEvent {
-  final Map<String, dynamic> character;
-  final String slug;
-  final bool persistData;
-  final bool offline;
   const CharacterUpdate({
     required this.character,
     required this.slug,
     required this.offline,
     this.persistData = false,
   });
+  final Map<String, dynamic> character;
+  final String slug;
+  final bool persistData;
+  final bool offline;
 
   @override
   List<Object> get props => [
@@ -36,8 +36,8 @@ class CharacterUpdate extends CharacterEvent {
 }
 
 class PersistCharacter extends CharacterEvent {
-  final bool offline;
   const PersistCharacter({required this.offline});
+  final bool offline;
 
   @override
   List<Object> get props => [offline];

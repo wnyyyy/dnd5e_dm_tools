@@ -2,14 +2,13 @@ import 'package:dnd5e_dm_tools/features/characters/presentation/equip_tab/widget
 import 'package:flutter/material.dart';
 
 class EquipTab extends StatelessWidget {
-  final Map<String, dynamic> character;
-  final String slug;
-
   const EquipTab({
     super.key,
     required this.character,
     required this.slug,
   });
+  final Map<String, dynamic> character;
+  final String slug;
 
   @override
   Widget build(BuildContext context) {
@@ -21,8 +20,9 @@ class EquipTab extends StatelessWidget {
         'items': Map<String, dynamic>.from({}),
       };
     }
-    if (character['backpack']['items'] == null) {
-      character['backpack']['items'] = Map<String, dynamic>.from({});
+    final backpack = character['backpack'] as Map<String, dynamic>;
+    if (backpack['items'] == null) {
+      backpack['items'] = Map<String, dynamic>.from({});
     }
     return SingleChildScrollView(
       child: Flex(

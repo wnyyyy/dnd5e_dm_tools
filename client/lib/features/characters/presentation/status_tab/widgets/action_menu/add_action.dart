@@ -1,17 +1,11 @@
+import 'package:dnd5e_dm_tools/core/util/enum.dart';
 import 'package:dnd5e_dm_tools/core/util/helper.dart';
+import 'package:dnd5e_dm_tools/features/characters/presentation/status_tab/widgets/action_menu/action_category_row.dart';
 import 'package:dnd5e_dm_tools/features/rules/rules_cubit.dart';
 import 'package:flutter/material.dart';
-import 'package:dnd5e_dm_tools/core/util/enum.dart';
-import 'package:dnd5e_dm_tools/features/characters/presentation/status_tab/widgets/action_menu/action_category_row.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class AddActionButton extends StatelessWidget {
-  final Map<String, dynamic> character;
-  final String slug;
-  final Map<String, dynamic>? action;
-  final String? actionSlug;
-  final Function(Map<String, Map<String, dynamic>>) onActionsChanged;
-
   const AddActionButton({
     required this.character,
     required this.slug,
@@ -20,6 +14,11 @@ class AddActionButton extends StatelessWidget {
     this.actionSlug,
     super.key,
   });
+  final Map<String, dynamic> character;
+  final String slug;
+  final Map<String, dynamic>? action;
+  final String? actionSlug;
+  final Function(Map<String, Map<String, dynamic>>) onActionsChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -41,12 +40,6 @@ class AddActionButton extends StatelessWidget {
 }
 
 class _AddActionDialog extends StatefulWidget {
-  final Map<String, dynamic> character;
-  final String slug;
-  final Map<String, dynamic>? action;
-  final String? editActionSlug;
-  final Function(Map<String, Map<String, dynamic>>) onActionsChanged;
-
   const _AddActionDialog({
     required this.character,
     required this.slug,
@@ -54,6 +47,11 @@ class _AddActionDialog extends StatefulWidget {
     this.editActionSlug,
     required this.onActionsChanged,
   });
+  final Map<String, dynamic> character;
+  final String slug;
+  final Map<String, dynamic>? action;
+  final String? editActionSlug;
+  final Function(Map<String, Map<String, dynamic>>) onActionsChanged;
   @override
   _AddActionDialogState createState() => _AddActionDialogState();
 }
@@ -96,41 +94,51 @@ class _AddActionDialogState extends State<_AddActionDialog> {
   @override
   void initState() {
     super.initState();
-    final classs =
-        context.read<RulesCubit>().getClass(widget.character['class'] ?? '');
-    final race = context.read<RulesCubit>().getRace(widget.character['race']);
-    final table = parseTable(classs?['table'] ?? {});
-    final classFeats = getClassFeatures(classs?['desc'] ?? '',
-        level: widget.character['level'] ?? 1, table: table);
-    for (var feat in classFeats.entries) {
+    final classs = context
+        .read<RulesCubit>()
+        .getClass(widget.character['class'] as String? ?? '');
+    final race =
+        context.read<RulesCubit>().getRace(widget.character['race'] as String);
+    final table = parseTable(classs?['table'] as String? ?? '');
+    final classFeats = getClassFeatures(
+      classs?['desc'] as String? ?? '',
+      level: widget.character['level'] as int? ?? 1,
+      table: table,
+    );
+    for (final feat in classFeats.entries) {
       if (feat.key != 'Ability Score Improvement') {
-        this.classFeats[feat.key] = feat.value['description'];
+        this.classFeats[feat.key] = (feat.value as Map)['description'];
       }
     }
-    final archetype = classs?['archetypes']?.firstWhere(
-        (archetype) => archetype['slug'] == widget.character['subclass'],
-        orElse: () => null);
+    final archetype =
+        (classs?['archetypes'] as List<Map<String, dynamic>>?)?.firstWhere(
+      (archetype) => archetype['slug'] == widget.character['subclass'],
+      orElse: () => {},
+    );
     final archetypeDesc = archetype?['desc'] ?? '';
-    final subclassFeats = getArchetypeFeatures(archetypeDesc);
-    for (var feat in subclassFeats.entries) {
-      archetypeFeats[feat.key] = feat.value['description'];
+    final subclassFeats = getArchetypeFeatures(archetypeDesc as String);
+    for (final feat in subclassFeats.entries) {
+      archetypeFeats[feat.key] = (feat.value as Map)['description'];
     }
-    final racialFeats = getRacialFeatures(race?['traits'] ?? {});
-    for (var feat in racialFeats.entries) {
+    final racialFeats = getRacialFeatures(race?['traits'] as String? ?? '');
+    for (final feat in racialFeats.entries) {
       raceFeats[feat.key] = feat.value;
     }
 
-    for (var spellSlug in widget.character['known_spells'] ?? []) {
-      final spell = context.read<RulesCubit>().getSpell(spellSlug);
+    for (final spellSlug
+        in widget.character['known_spells'] as List<dynamic>? ?? []) {
+      final spell = context.read<RulesCubit>().getSpell(spellSlug as String);
       if (spell != null) {
         spells[spellSlug] = spell;
       }
     }
 
-    final characterBackpack =
-        Map<String, dynamic>.from(widget.character['backpack'] ?? {});
-    final characterItems =
-        Map<String, dynamic>.from(characterBackpack['items'] ?? {});
+    final characterBackpack = Map<String, dynamic>.from(
+      widget.character['backpack'] as Map<String, dynamic>? ?? {},
+    );
+    final characterItems = Map<String, dynamic>.from(
+      characterBackpack['items'] as Map<String, dynamic>? ?? {},
+    );
     for (final charItem in characterItems.entries) {
       final item = context.read<RulesCubit>().getItem(charItem.key);
       if (item != null) {
@@ -140,43 +148,47 @@ class _AddActionDialogState extends State<_AddActionDialog> {
 
     if (widget.action != null) {
       final actionType = ActionMenuMode.values.firstWhere(
-          (e) => e.name == widget.action!['type'],
-          orElse: () => ActionMenuMode.abilities);
+        (e) => e.name == widget.action!['type'],
+        orElse: () => ActionMenuMode.abilities,
+      );
       _selected = actionType;
-      _descriptionController.text = widget.action!['description'] ?? '';
-      _titleController.text = widget.action!['title'] ?? '';
-      _healController.text = widget.action!['fields']['heal'] ?? '';
-      _damageController.text = widget.action!['fields']['damage'] ?? '';
-      _attackController.text = widget.action!['fields']['attack'] ?? '';
-      _saveDcController.text = widget.action!['fields']['save_dc'] ?? '';
-      _areaController.text = widget.action!['fields']['area'] ?? '';
-      _rangeController.text = widget.action!['fields']['range'] ?? '';
-      _conditionsController.text = widget.action!['fields']['conditions'] ?? '';
-      _durationController.text = widget.action!['fields']['duration'] ?? '';
-      _castTimeController.text = widget.action!['fields']['cast_time'] ?? '';
-      _typeController.text = widget.action!['fields']['type'] ?? '';
-      _selectedSaveAttribute = widget.action!['fields']['save'] ?? 'None';
-      _halfOnSuccess = widget.action!['fields']['half_on_success'] ?? false;
+      _descriptionController.text =
+          widget.action!['description'] as String? ?? '';
+      _titleController.text = widget.action!['title'] as String? ?? '';
+      final fields = widget.action!['fields'] as Map<String, dynamic>? ?? {};
+      _healController.text = fields['heal'] as String? ?? '';
+      _damageController.text = fields['damage'] as String? ?? '';
+      _attackController.text = fields['attack'] as String? ?? '';
+      _saveDcController.text = fields['save_dc'] as String? ?? '';
+      _areaController.text = fields['area'] as String? ?? '';
+      _rangeController.text = fields['range'] as String? ?? '';
+      _conditionsController.text = fields['conditions'] as String? ?? '';
+      _durationController.text = fields['duration'] as String? ?? '';
+      _castTimeController.text = fields['cast_time'] as String? ?? '';
+      _typeController.text = fields['type'] as String? ?? '';
+      _selectedSaveAttribute = fields['save'] as String? ?? 'None';
+      _halfOnSuccess = fields['half_on_success'] as bool? ?? false;
       _isAdditionalFieldsExpanded = true;
 
       switch (actionType) {
         case ActionMenuMode.abilities:
-          _selectedEntry = widget.action!['ability'] ?? 'none';
-          _requiresResource = widget.action!['requires_resource'] ?? false;
+          _selectedEntry = widget.action!['ability'] as String? ?? 'none';
+          _requiresResource =
+              widget.action!['requires_resource'] as bool? ?? false;
           _resourceType = ResourceType.values.firstWhere(
-              (e) => e.name == (widget.action!['resource_type'] ?? 'none'),
-              orElse: () => ResourceType.none);
-          _resourceCount = widget.action!['resource_count'] ?? 0;
-          break;
+            (e) =>
+                e.name ==
+                (widget.action!['resource_type'] as String? ?? 'none'),
+            orElse: () => ResourceType.none,
+          );
+          _resourceCount = widget.action!['resource_count'] as int? ?? 0;
         case ActionMenuMode.items:
-          _selectedEntry = widget.action!['item'] ?? 'none';
-          _requiresResource = widget.action!['must_equip'] ?? false;
-          _expendable = widget.action!['expendable'] ?? false;
-          _ammo = widget.action!['ammo'] ?? 'none';
-          break;
+          _selectedEntry = widget.action!['item'] as String? ?? 'none';
+          _requiresResource = widget.action!['must_equip'] as bool? ?? false;
+          _expendable = widget.action!['expendable'] as bool? ?? false;
+          _ammo = widget.action!['ammo'] as String? ?? 'none';
         case ActionMenuMode.spells:
-          _selectedEntry = widget.action!['spell'] ?? 'none';
-          break;
+          _selectedEntry = widget.action!['spell'] as String? ?? 'none';
         default:
           _selected = ActionMenuMode.abilities;
       }
@@ -211,8 +223,10 @@ class _AddActionDialogState extends State<_AddActionDialog> {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: <Widget>[
-                        Text('Add Action',
-                            style: Theme.of(context).textTheme.titleMedium),
+                        Text(
+                          'Add Action',
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
                         const SizedBox(height: 20),
                         ActionCategoryRow(
                           showAll: false,
@@ -242,8 +256,9 @@ class _AddActionDialogState extends State<_AddActionDialog> {
                     ),
                   ),
                   Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 32),
-                      child: _buildActionButtons(context)),
+                    padding: const EdgeInsets.symmetric(horizontal: 32),
+                    child: _buildActionButtons(context),
+                  ),
                 ],
               ),
             ),
@@ -287,35 +302,57 @@ class _AddActionDialogState extends State<_AddActionDialog> {
         if (raceFeats.isNotEmpty) {
           options.addAll(_buildSection('Racial feats', raceFeats));
         }
-        break;
       case ActionMenuMode.items:
         final equipableItems = Map.fromEntries(
-            items.entries.where((entry) => isEquipable(entry.value)).toList());
+          items.entries
+              .where(
+                (entry) =>
+                    isEquipable(entry.value as Map<String, dynamic>? ?? {}),
+              )
+              .toList(),
+        );
         if (equipableItems.isNotEmpty) {
           options.addAll(_buildSection('Equippable', equipableItems));
         }
         final misc = Map.fromEntries(
-            items.entries.where((entry) => !isEquipable(entry.value)).toList());
+          items.entries
+              .where(
+                (entry) =>
+                    !isEquipable(entry.value as Map<String, dynamic>? ?? {}),
+              )
+              .toList(),
+        );
         if (misc.isNotEmpty) {
           options.addAll(_buildSection('Misc', misc));
         }
-        break;
       case ActionMenuMode.spells:
-        final cantrips = Map.fromEntries(spells.entries
-            .where((entry) => entry.value['level_int'] == 0)
-            .toList());
+        final cantrips = Map.fromEntries(
+          spells.entries
+              .where(
+                (entry) =>
+                    (entry.value as Map<String, dynamic>? ?? {})['level_int'] ==
+                    0,
+              )
+              .toList(),
+        );
         if (cantrips.isNotEmpty) {
           options.addAll(_buildSection('Cantrips', cantrips));
         }
         for (var i = 1; i < 10; i++) {
-          final spellsByLevel = Map.fromEntries(spells.entries
-              .where((entry) => entry.value['level_int'] == i)
-              .toList());
+          final spellsByLevel = Map.fromEntries(
+            spells.entries
+                .where(
+                  (entry) =>
+                      (entry.value as Map<String, dynamic>? ??
+                          {})['level_int'] ==
+                      i,
+                )
+                .toList(),
+          );
           if (spellsByLevel.isNotEmpty) {
             options.addAll(_buildSection('Level $i', spellsByLevel));
           }
         }
-        break;
       default:
         break;
     }
@@ -344,23 +381,21 @@ class _AddActionDialogState extends State<_AddActionDialog> {
     );
   }
 
-  List<Widget> _buildSection(String label, Map<dynamic, dynamic> items) {
+  List<Widget> _buildSection(String label, Map<String, dynamic> items) {
     return [
       Text(label.toUpperCase(), style: Theme.of(context).textTheme.titleSmall),
       SizedBox(width: label.length * 10, child: const Divider()),
       Wrap(
-        direction: Axis.horizontal,
         spacing: 4,
-        runSpacing: 0,
         children: [
-          for (var entry in items.entries)
+          for (final entry in items.entries)
             ChoiceChip(
-              labelPadding: const EdgeInsets.all(0),
+              labelPadding: EdgeInsets.zero,
               showCheckmark: false,
               label: Text(
                 entry.value is String
                     ? entry.key
-                    : entry.value['name'] ?? entry.key,
+                    : (entry.value as Map?)?['name']?.toString() ?? entry.key,
                 style: Theme.of(context).textTheme.labelSmall,
               ),
               selected: _selectedEntry == entry.key,
@@ -370,25 +405,36 @@ class _AddActionDialogState extends State<_AddActionDialog> {
                     _selectedEntry = entry.key;
                     if (entry.value is String) {
                       _titleController.text = entry.key;
-                      _descriptionController.text = entry.value;
-                    } else {
-                      _titleController.text = entry.value['name'] ?? entry.key;
                       _descriptionController.text =
-                          entry.value['description'] ?? '';
-                      if (entry.value['desc']?.isNotEmpty ?? false) {
-                        _descriptionController.text = entry.value['desc'][0];
+                          entry.value as String? ?? '';
+                    } else {
+                      _titleController.text =
+                          (entry.value as Map?)?['name']?.toString() ??
+                              entry.key;
+                      _descriptionController.text =
+                          (entry.value as Map?)?['description']?.toString() ??
+                              '';
+                      if ((entry.value as Map?)?['desc']
+                              ?.toString()
+                              .isNotEmpty ??
+                          false) {
+                        _descriptionController.text =
+                            ((entry.value as Map?)?['desc'] as List<String>? ??
+                                [])[0];
                       }
                     }
 
                     if (_selected == ActionMenuMode.spells &&
                         entry.value is Map<String, dynamic>) {
-                      final spell = entry.value;
-                      _rangeController.text = spell['range'] ?? '';
-                      _durationController.text = spell['duration'] ?? '';
+                      final spell = entry.value as Map<String, dynamic>;
+                      _rangeController.text = spell['range'] as String? ?? '';
+                      _durationController.text =
+                          spell['duration'] as String? ?? '';
                       final proficiency =
-                          widget.character['proficiency_bonus'] ?? 2;
-                      final attributeValue =
-                          widget.character[spell['casting_attribute']] ?? 0;
+                          widget.character['proficiency_bonus'] as int? ?? 2;
+                      final attributeValue = widget
+                              .character[spell['casting_attribute']] as int? ??
+                          0;
                       _saveDcController.text =
                           (8 + proficiency + attributeValue).toString();
                     }
@@ -402,7 +448,7 @@ class _AddActionDialogState extends State<_AddActionDialog> {
                   }
                 });
               },
-            )
+            ),
         ],
       ),
       const SizedBox(height: 12),
@@ -418,9 +464,11 @@ class _AddActionDialogState extends State<_AddActionDialog> {
         Column(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            Text('Requires\nequipped\nitem',
-                style: Theme.of(context).textTheme.bodySmall,
-                textAlign: TextAlign.center),
+            Text(
+              'Requires\nequipped\nitem',
+              style: Theme.of(context).textTheme.bodySmall,
+              textAlign: TextAlign.center,
+            ),
             Checkbox(
               value: _requiresResource,
               onChanged: (value) {
@@ -455,8 +503,10 @@ class _AddActionDialogState extends State<_AddActionDialog> {
         Column(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            Text('Requires Ammo',
-                style: Theme.of(context).textTheme.bodyMedium),
+            Text(
+              'Requires Ammo',
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
             DropdownButton<String>(
               value: _ammo,
               onChanged: (String? newValue) {
@@ -467,14 +517,16 @@ class _AddActionDialogState extends State<_AddActionDialog> {
               items: [
                 DropdownMenuItem(
                   value: 'none',
-                  child: Text('None',
-                      style: Theme.of(context).textTheme.titleSmall),
+                  child: Text(
+                    'None',
+                    style: Theme.of(context).textTheme.titleSmall,
+                  ),
                 ),
-                for (var item in items.entries)
+                for (final item in items.entries)
                   DropdownMenuItem(
                     value: item.key,
                     child: Text(
-                      item.value['name'],
+                      (item.value as Map)['name'] as String,
                       overflow: TextOverflow.fade,
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
@@ -518,14 +570,17 @@ class _AddActionDialogState extends State<_AddActionDialog> {
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
                     border: Border.all(
-                        color: Theme.of(context).colorScheme.outline),
+                      color: Theme.of(context).colorScheme.outline,
+                    ),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Column(
                     children: [
-                      Text('Resource\ncount',
-                          style: Theme.of(context).textTheme.bodySmall,
-                          textAlign: TextAlign.center),
+                      Text(
+                        'Resource\ncount',
+                        style: Theme.of(context).textTheme.bodySmall,
+                        textAlign: TextAlign.center,
+                      ),
                       IconButton(
                         onPressed: () {
                           setState(() {
@@ -614,14 +669,14 @@ class _AddActionDialogState extends State<_AddActionDialog> {
                         var valid = true;
                         try {
                           final asi = Map<String, int>.from(
-                            widget.character['asi'] ??
+                            widget.character['asi'] as Map<String, int>? ??
                                 {
                                   'strength': 10,
                                   'dexterity': 10,
                                   'constitution': 10,
                                   'intelligence': 10,
                                   'wisdom': 10,
-                                  'charisma': 10
+                                  'charisma': 10,
                                 },
                           );
                           final t = parseFormula(value, asi, 0, 0);
@@ -640,14 +695,15 @@ class _AddActionDialogState extends State<_AddActionDialog> {
           actionsAlignment: MainAxisAlignment.spaceBetween,
           actions: <Widget>[
             IconButton(
-                onPressed: () {
-                  _formulaController.clear();
-                  setState(() {
-                    _isFormulaValid = true;
-                  });
-                  Navigator.of(context).pop();
-                },
-                icon: const Icon(Icons.close)),
+              onPressed: () {
+                _formulaController.clear();
+                setState(() {
+                  _isFormulaValid = true;
+                });
+                Navigator.of(context).pop();
+              },
+              icon: const Icon(Icons.close),
+            ),
             IconButton(
               onPressed: () {
                 if (_isFormulaValid) {
@@ -669,8 +725,10 @@ class _AddActionDialogState extends State<_AddActionDialog> {
 
   Widget _buildExpansionTileFields() {
     return ExpansionTile(
-      title: Text('Additional Fields',
-          style: Theme.of(context).textTheme.titleSmall),
+      title: Text(
+        'Additional Fields',
+        style: Theme.of(context).textTheme.titleSmall,
+      ),
       initiallyExpanded: _isAdditionalFieldsExpanded,
       children: [
         Row(
@@ -729,17 +787,15 @@ class _AddActionDialogState extends State<_AddActionDialog> {
                     _selectedSaveAttribute = newValue!;
                     if (_saveDcController.text.isEmpty) {
                       final classSlug = widget.character['class'];
-                      final classs =
-                          context.read<RulesCubit>().getClass(classSlug);
+                      final classs = context
+                          .read<RulesCubit>()
+                          .getClass(classSlug as String);
                       final castingAttribute =
-                          classs?['spellcasting_ability'] ?? '   ';
-                      final prefix = castingAttribute.length > 0
-                          ? castingAttribute
-                              .toString()
-                              .toLowerCase()
-                              .substring(0, 3)
+                          classs?['spellcasting_ability'] as String? ?? '';
+                      final prefix = castingAttribute.isNotEmpty
+                          ? castingAttribute.toLowerCase().substring(0, 3)
                           : '';
-                      _saveDcController.text = "8+prof+$prefix";
+                      _saveDcController.text = '8+prof+$prefix';
                     }
                     if (_selectedSaveAttribute == 'None') {
                       _saveDcController.clear();
@@ -753,13 +809,17 @@ class _AddActionDialogState extends State<_AddActionDialog> {
                   'Constitution',
                   'Intelligence',
                   'Wisdom',
-                  'Charisma'
+                  'Charisma',
                 ]
-                    .map((attribute) => DropdownMenuItem(
-                          value: attribute,
-                          child: Text(attribute,
-                              style: const TextStyle(fontSize: 12)),
-                        ))
+                    .map(
+                      (attribute) => DropdownMenuItem(
+                        value: attribute,
+                        child: Text(
+                          attribute,
+                          style: const TextStyle(fontSize: 12),
+                        ),
+                      ),
+                    )
                     .toList(),
                 decoration: const InputDecoration(
                   labelText: 'Save',
@@ -773,8 +833,10 @@ class _AddActionDialogState extends State<_AddActionDialog> {
                 padding: const EdgeInsets.only(top: 16),
                 child: Column(
                   children: [
-                    Text('Half on Success',
-                        style: Theme.of(context).textTheme.bodySmall),
+                    Text(
+                      'Half on Success',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
                     Checkbox(
                       value: _halfOnSuccess,
                       onChanged: (bool? newValue) {
@@ -782,7 +844,7 @@ class _AddActionDialogState extends State<_AddActionDialog> {
                           _halfOnSuccess = newValue!;
                         });
                       },
-                    )
+                    ),
                   ],
                 ),
               ),
@@ -918,7 +980,6 @@ class _AddActionDialogState extends State<_AddActionDialog> {
                 action['ability'] = ability;
                 action['requires_resource'] = requiresResource;
                 action['resource_type'] = resourceType.name;
-                break;
               case ActionMenuMode.items:
                 final item = _selectedEntry;
                 final requiresResource = _requiresResource;
@@ -928,14 +989,12 @@ class _AddActionDialogState extends State<_AddActionDialog> {
                 action['must_equip'] = requiresResource;
                 action['expendable'] = expendable;
                 action['ammo'] = ammo;
-                break;
               case ActionMenuMode.spells:
                 if (_selectedEntry != 'none') {
                   final spell = _selectedEntry;
                   action['spell'] = spell;
                 }
 
-                break;
               default:
                 break;
             }
@@ -945,12 +1004,11 @@ class _AddActionDialogState extends State<_AddActionDialog> {
             }
 
             widget.character['actions'] ??= {};
+            final actions = widget.character['actions'] as Map<String, dynamic>;
             if (actionSlug.isNotEmpty) {
-              widget.character['actions'][actionSlug] = action;
-              final updatedActions = Map<String, Map<String, dynamic>>.from(
-                  widget.character['actions']
-                          ?.cast<String, Map<String, dynamic>>() ??
-                      {});
+              actions[actionSlug] = action;
+              final updatedActions =
+                  Map<String, Map<String, dynamic>>.from(actions);
               widget.onActionsChanged(updatedActions);
             }
 
@@ -978,11 +1036,11 @@ class _AddActionDialogState extends State<_AddActionDialog> {
             ),
             TextButton(
               onPressed: () {
-                widget.character['actions']?.remove(widget.editActionSlug);
-                final updatedActions = Map<String, Map<String, dynamic>>.from(
-                    widget.character['actions']
-                            ?.cast<String, Map<String, dynamic>>() ??
-                        {});
+                final actions =
+                    widget.character['actions'] as Map<String, dynamic>;
+                actions.remove(widget.editActionSlug);
+                final updatedActions =
+                    Map<String, Map<String, dynamic>>.from(actions);
                 widget.onActionsChanged(updatedActions);
                 Navigator.of(context).pop();
               },

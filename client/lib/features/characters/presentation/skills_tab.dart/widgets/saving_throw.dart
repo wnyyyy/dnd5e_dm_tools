@@ -3,12 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class SavingThrow extends StatelessWidget {
-  final String attributePrefix;
-  final int attributeValue;
-  final int? proficiency;
-  final Color color;
-  final VoidCallback? onTap;
-  final VoidCallback? onLongPress;
 
   const SavingThrow({
     super.key,
@@ -19,6 +13,12 @@ class SavingThrow extends StatelessWidget {
     this.onTap,
     this.onLongPress,
   });
+  final String attributePrefix;
+  final int attributeValue;
+  final int? proficiency;
+  final Color color;
+  final VoidCallback? onTap;
+  final VoidCallback? onLongPress;
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +38,7 @@ class SavingThrow extends StatelessWidget {
                       fontFamily: GoogleFonts.sourceCodePro().fontFamily,
                       fontWeight: FontWeight.bold,
                       color: color,
-                    )),
+                    ),),
             Row(
               children: [
                 Padding(
@@ -63,7 +63,7 @@ class SavingThrow extends StatelessWidget {
                   ),
                 ],
               ],
-            )
+            ),
           ],
         ),
       ),

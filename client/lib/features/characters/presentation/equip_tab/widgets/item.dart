@@ -1,16 +1,10 @@
 import 'package:dnd5e_dm_tools/core/config/app_colors.dart';
 import 'package:dnd5e_dm_tools/core/util/helper.dart';
+import 'package:dnd5e_dm_tools/features/characters/presentation/equip_tab/widgets/item_details_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttericon/font_awesome5_icons.dart';
-import 'item_details_dialog.dart';
 
 class ItemWidget extends StatefulWidget {
-  final Map<String, dynamic> item;
-  final int? quantity;
-  final bool? isEquipped;
-  final Function(String, bool)? onEquip;
-  final Function(int)? onQuantityChange;
-
   const ItemWidget({
     super.key,
     required this.item,
@@ -19,6 +13,11 @@ class ItemWidget extends StatefulWidget {
     this.onQuantityChange,
     required this.onEquip,
   });
+  final Map<String, dynamic> item;
+  final int? quantity;
+  final bool? isEquipped;
+  final Function(String, bool)? onEquip;
+  final Function(int)? onQuantityChange;
 
   @override
   ItemWidgetState createState() => ItemWidgetState();
@@ -41,7 +40,7 @@ class ItemWidgetState extends State<ItemWidget> {
     final type = getEquipmentTypeFromItem(widget.item);
     final title = (widget.quantity ?? 1) > 1
         ? '${widget.item['name'] ?? ''} x${widget.quantity}'
-        : widget.item['name'] ?? '';
+        : widget.item['name']?.toString() ?? '';
 
     final equipable = isEquipable(widget.item);
 
@@ -61,7 +60,10 @@ class ItemWidgetState extends State<ItemWidget> {
                 onTap: () {
                   setState(() {
                     isEquipped = !isEquipped;
-                    widget.onEquip?.call(widget.item['index'], isEquipped);
+                    widget.onEquip?.call(
+                      widget.item['index']?.toString() ?? '',
+                      isEquipped,
+                    );
                   });
                 },
                 child: Row(
@@ -75,16 +77,20 @@ class ItemWidgetState extends State<ItemWidget> {
                           if (newValue != null) {
                             setState(() {
                               isEquipped = newValue;
-                              widget.onEquip
-                                  ?.call(widget.item['index'], isEquipped);
+                              widget.onEquip?.call(
+                                widget.item['index']?.toString() ?? '',
+                                isEquipped,
+                              );
                             });
                           }
                         },
                       ),
                     ),
                     const SizedBox(width: 8),
-                    Text(isEquipped ? 'Equipped' : 'Not Equipped',
-                        style: Theme.of(context).textTheme.labelSmall)
+                    Text(
+                      isEquipped ? 'Equipped' : 'Not Equipped',
+                      style: Theme.of(context).textTheme.labelSmall,
+                    ),
                   ],
                 ),
               )
@@ -98,7 +104,6 @@ class ItemWidgetState extends State<ItemWidget> {
         trailing: GestureDetector(
           onTap: () => _onItemTap(context),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               _getItemWeight(context, widget.quantity ?? 1),
@@ -132,10 +137,11 @@ class ItemWidgetState extends State<ItemWidget> {
     bool appendGp = false,
     bool ignoreBase = false,
   }) {
-    final costUnit = widget.item['cost']?['unit'] ?? 'gp';
-    final costValue = widget.item['cost']?['quantity'] ?? 0;
-    final baseQuantity = ignoreBase ? 1 : widget.item['quantity'] ?? 1;
-
+    final cost = widget.item['cost'] as Map? ?? {};
+    final costUnit = cost['unit']?.toString() ?? 'gp';
+    final costValue = (cost['quantity'] as int?) ?? 0;
+    final baseQuantity =
+        ignoreBase ? 1 : (widget.item['quantity'] as int?) ?? 1;
     final double costTotal;
     if (appendGp) {
       costTotal = costValue.toDouble();
@@ -173,8 +179,7 @@ class ItemWidgetState extends State<ItemWidget> {
                     '  ${isInt ? costTotal.toInt() : costTotal.toStringAsFixed(appendGp ? 0 : 2)}',
                 style: textStyle,
               ),
-              if (appendGp)
-                TextSpan(text: ' ${costUnit.toString().toUpperCase()}'),
+              if (appendGp) TextSpan(text: ' ${costUnit.toUpperCase()}'),
             ],
           ),
         ),
@@ -182,10 +187,13 @@ class ItemWidgetState extends State<ItemWidget> {
     );
   }
 
-  Widget _getItemWeight(BuildContext context, int quantity,
-      {bool ignoreBase = false}) {
-    final baseQuantity = widget.item['quantity'] ?? 1;
-    final weight = (widget.item['weight'] ?? 0.0).toDouble() *
+  Widget _getItemWeight(
+    BuildContext context,
+    int quantity, {
+    bool ignoreBase = false,
+  }) {
+    final baseQuantity = widget.item['quantity'] as int? ?? 1;
+    final weight = (widget.item['weight'] as int? ?? 0.0).toDouble() *
         quantity /
         (ignoreBase ? 1 : baseQuantity);
     final TextStyle textStyle = Theme.of(context).textTheme.bodyMedium!;
@@ -212,7 +220,7 @@ class ItemWidgetState extends State<ItemWidget> {
               TextSpan(
                 text: '  ${isInt ? weight.toInt() : weight} lb',
                 style: textStyle,
-              )
+              ),
             ],
           ),
         ),

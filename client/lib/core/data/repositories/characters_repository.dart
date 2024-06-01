@@ -1,14 +1,15 @@
-import 'package:dnd5e_dm_tools/core/data/db/database_provider.dart';
-import 'package:dnd5e_dm_tools/core/util/const.dart';
 import 'dart:async';
 
+import 'package:dnd5e_dm_tools/core/data/db/database_provider.dart';
+import 'package:dnd5e_dm_tools/core/util/const.dart';
+
 class CharactersRepository {
+
+  CharactersRepository(this.databaseProvider);
   final DatabaseProvider databaseProvider;
   final path = 'characters/';
   Timer? _debounceTimer;
   final Duration _debounceDuration = const Duration(seconds: 5);
-
-  CharactersRepository(this.databaseProvider);
 
   Future<void> init() async {
     await databaseProvider.loadCache(cacheCharacterName);
@@ -17,7 +18,7 @@ class CharactersRepository {
   Future<dynamic> get(String slug, bool offline) async {
     if (offline) {
       return await databaseProvider.getDocument(
-          path: '$path$slug', cacheBoxName: cacheCharacterName);
+          path: '$path$slug', cacheBoxName: cacheCharacterName,);
     }
     final data = await databaseProvider.getDocument(path: '$path$slug');
     return data;

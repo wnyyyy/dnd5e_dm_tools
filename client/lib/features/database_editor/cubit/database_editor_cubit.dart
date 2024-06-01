@@ -8,13 +8,6 @@ import 'package:dnd5e_dm_tools/features/database_editor/cubit/database_editor_st
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class DatabaseEditorCubit extends Cubit<DatabaseEditorState> {
-  final SpellsRepository spellsRepository;
-  final FeatsRepository featsRepository;
-  final ClassesRepository classesRepository;
-  final RacesRepository racesRepository;
-  final ItemsRepository itemsRepository;
-  final CharactersRepository charactersRepository;
-
   DatabaseEditorCubit({
     required this.spellsRepository,
     required this.featsRepository,
@@ -23,6 +16,12 @@ class DatabaseEditorCubit extends Cubit<DatabaseEditorState> {
     required this.itemsRepository,
     required this.charactersRepository,
   }) : super(DatabaseEditorInitial());
+  final SpellsRepository spellsRepository;
+  final FeatsRepository featsRepository;
+  final ClassesRepository classesRepository;
+  final RacesRepository racesRepository;
+  final ItemsRepository itemsRepository;
+  final CharactersRepository charactersRepository;
 
   Future<void> fetch(String slug, String type, {bool offline = false}) async {
     emit(DatabaseEditorLoading());
@@ -30,23 +29,18 @@ class DatabaseEditorCubit extends Cubit<DatabaseEditorState> {
       final Map<String, dynamic> entry;
       switch (type) {
         case 'spells':
-          entry = await spellsRepository.get(slug);
-          break;
+          entry = await spellsRepository.get(slug) as Map<String, dynamic>;
         case 'feats':
-          entry = await featsRepository.get(slug);
-          break;
+          entry = await featsRepository.get(slug) as Map<String, dynamic>;
         case 'classes':
-          entry = await classesRepository.get(slug);
-          break;
+          entry = await classesRepository.get(slug) as Map<String, dynamic>;
         case 'races':
-          entry = await racesRepository.get(slug);
-          break;
+          entry = await racesRepository.get(slug) as Map<String, dynamic>;
         case 'items':
-          entry = await itemsRepository.get(slug);
-          break;
+          entry = await itemsRepository.get(slug) as Map<String, dynamic>;
         case 'characters':
-          entry = await charactersRepository.get(slug, offline);
-          break;
+          entry = await charactersRepository.get(slug, offline)
+              as Map<String, dynamic>;
         default:
           emit(DatabaseEditorError());
           return;
@@ -58,23 +52,21 @@ class DatabaseEditorCubit extends Cubit<DatabaseEditorState> {
   }
 
   Future<void> sync(
-      Map<String, dynamic> entry, String type, String slug) async {
+    Map<String, dynamic> entry,
+    String type,
+    String slug,
+  ) async {
     switch (type) {
       case 'spells':
         await spellsRepository.sync(slug, entry);
-        break;
       case 'feats':
         await featsRepository.sync(slug, entry);
-        break;
       case 'classes':
         await classesRepository.sync(slug, entry);
-        break;
       case 'races':
         await racesRepository.sync(slug, entry);
-        break;
       case 'items':
         await itemsRepository.sync(slug, entry);
-        break;
       case 'characters':
         return;
       default:
@@ -93,22 +85,16 @@ class DatabaseEditorCubit extends Cubit<DatabaseEditorState> {
       switch (type) {
         case 'spells':
           await spellsRepository.save(slug, entry, false);
-          break;
         case 'feats':
           await featsRepository.save(slug, entry, false);
-          break;
         case 'classes':
           await classesRepository.save(slug, entry, false);
-          break;
         case 'races':
           await racesRepository.save(slug, entry, false);
-          break;
         case 'items':
           await itemsRepository.save(slug, entry, false);
-          break;
         case 'characters':
           await charactersRepository.updateCharacter(slug, entry, false);
-          break;
         default:
           emit(DatabaseEditorError());
           return;

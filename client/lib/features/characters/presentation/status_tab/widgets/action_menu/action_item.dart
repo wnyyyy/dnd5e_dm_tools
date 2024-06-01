@@ -19,14 +19,6 @@ typedef OnUseActionCallback = void Function({
 });
 
 class ActionItem extends StatefulWidget {
-  final Map<String, dynamic> action;
-  final String actionSlug;
-  final Map<String, dynamic> character;
-  final String characterSlug;
-  final bool isEditMode;
-  final Function(Map<String, Map<String, dynamic>>) onActionsChanged;
-  final OnUseActionCallback? onUse;
-
   const ActionItem({
     super.key,
     required this.action,
@@ -37,6 +29,13 @@ class ActionItem extends StatefulWidget {
     required this.onActionsChanged,
     required this.onUse,
   });
+  final Map<String, dynamic> action;
+  final String actionSlug;
+  final Map<String, dynamic> character;
+  final String characterSlug;
+  final bool isEditMode;
+  final Function(Map<String, Map<String, dynamic>>) onActionsChanged;
+  final OnUseActionCallback? onUse;
 
   @override
   ActionItemState createState() => ActionItemState();
@@ -58,10 +57,10 @@ class ActionItemState extends State<ActionItem> {
     final usedCount =
         int.tryParse(widget.action['used_count']?.toString() ?? '0') ?? 0;
     int resourceCount = 0;
-    final resourceFormula = widget.action['resource_formula'];
+    final resourceFormula = widget.action['resource_formula'] as String?;
     if (resourceFormula != null) {
       final asi = Map<String, int>.from(
-        widget.character['asi'] ??
+        (widget.character['asi'] as Map<String, int>?) ??
             {
               'strength': 10,
               'dexterity': 10,
@@ -71,7 +70,7 @@ class ActionItemState extends State<ActionItem> {
               'charisma': 10,
             },
       );
-      final level = widget.character['level'] ?? 1;
+      final level = widget.character['level'] as int? ?? 1;
       final prof = getProfBonus(level);
       try {
         final parsedValue =
@@ -91,30 +90,35 @@ class ActionItemState extends State<ActionItem> {
       }
     }
     final remaining = resourceCount - usedCount;
-    final mustEquip = widget.action['must_equip'] ?? false;
+    final mustEquip = widget.action['must_equip'] as bool? ?? false;
     final resourceTypeStr = widget.action['resource_type'] ?? '';
     final resourceType = ResourceType.values.firstWhere(
-        (e) => e.name == resourceTypeStr,
-        orElse: () => ResourceType.none);
+      (e) => e.name == resourceTypeStr,
+      orElse: () => ResourceType.none,
+    );
     switch (type) {
       case ActionMenuMode.abilities:
         if (requiresResource) {
           canUse = remaining > 0;
           usable = true;
         }
-        break;
       case ActionMenuMode.items:
-        final backpackItem =
-            getBackpackItem(widget.character, widget.action['item']);
-        canUse = mustEquip ? backpackItem['isEquipped'] ?? false : true;
-        canUse = canUse && (backpackItem['quantity'] ?? 0) > 0;
-        if (widget.action['expendable'] ?? false) {
+        final backpackItem = getBackpackItem(
+          widget.character,
+          widget.action['item']?.toString() ?? '',
+        );
+        if (mustEquip) {
+          canUse = backpackItem['isEquipped'] as bool? ?? false;
+        } else {
+          canUse = true;
+        }
+        canUse = canUse && (backpackItem['quantity'] as int? ?? 0) > 0;
+        if (widget.action['expendable'] as bool? ?? false) {
           usable = true;
         }
         if (widget.action['ammo']?.toString().isNotEmpty ?? false) {
           usable = true;
         }
-        break;
       default:
         canUse = true;
     }
@@ -126,10 +130,10 @@ class ActionItemState extends State<ActionItem> {
       final boldThemeMedium = Theme.of(context).textTheme.labelMedium!.copyWith(
             fontWeight: FontWeight.bold,
           );
-      List<Widget> children = [];
+      final List<Widget> children = [];
       switch (type) {
         case ActionMenuMode.abilities:
-          if (widget.action['requires_resource']) {
+          if (widget.action['requires_resource'] as bool? ?? false) {
             final color = remaining > 0
                 ? Theme.of(context).colorScheme.secondary
                 : Theme.of(context).colorScheme.error;
@@ -199,7 +203,7 @@ class ActionItemState extends State<ActionItem> {
             }
           }
         case ActionMenuMode.spells:
-          final spellSlug = widget.action['spell'];
+          final spellSlug = widget.action['spell'] as String?;
           if (spellSlug == null) {
             break;
           }
@@ -209,26 +213,32 @@ class ActionItemState extends State<ActionItem> {
           }
           final level = spell['level'] ?? 'Cantrip';
           final school = spell['school'] ?? '';
-          if (level == "Cantrip") {
+          if (level == 'Cantrip') {
             children.add(
               Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(school.toString().sentenceCase,
-                      softWrap: false, style: boldThemeMedium),
+                  Text(
+                    school.toString().sentenceCase,
+                    softWrap: false,
+                    style: boldThemeMedium,
+                  ),
                   Text('$level', softWrap: false, style: boldThemeMedium),
                 ],
               ),
             );
           } else {
-            final classSlug = widget.character['class'] ?? '';
+            final classSlug = widget.character['class']?.toString() ?? '';
             final classs = context.read<RulesCubit>().getClass(classSlug) ?? {};
-            final tableStr = classs['table'] ?? '';
+            final tableStr = classs['table'] as String? ?? '';
             final table = parseTable(tableStr);
-            Map<int, int> totalSlotsMap =
-                getSpellSlotsForLevel(table, widget.character['level'] ?? 1);
+            final Map<int, int> totalSlotsMap = getSpellSlotsForLevel(
+              table,
+              widget.character['level'] as int? ?? 1,
+            );
             final expendedSlotsMap = Map<String, int>.from(
-                widget.character['expended_spell_slots'] ?? {});
+              widget.character['expended_spell_slots'] as Map<int, int>? ?? {},
+            );
             final levelInt = spell['level_int'] ?? 1;
             final expendedSpellSlots = expendedSlotsMap[levelInt] ?? 0;
             final totalSlots = totalSlotsMap[levelInt] ?? 0;
@@ -252,17 +262,20 @@ class ActionItemState extends State<ActionItem> {
                         ),
                   ),
                   const SizedBox(
-                      width: 36,
-                      child: Divider(
-                        height: 6,
-                      )),
+                    width: 36,
+                    child: Divider(
+                      height: 6,
+                    ),
+                  ),
                   Padding(
                     padding: const EdgeInsets.only(bottom: 2),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text('Slots: ',
-                            style: Theme.of(context).textTheme.labelSmall),
+                        Text(
+                          'Slots: ',
+                          style: Theme.of(context).textTheme.labelSmall,
+                        ),
                         Text(
                           '$availableSlots/$totalSlots',
                           style:
@@ -278,8 +291,8 @@ class ActionItemState extends State<ActionItem> {
             );
           }
 
-          final ritual = spell['ritual'] ?? "no";
-          if (ritual == "yes") {
+          final ritual = spell['ritual'] ?? 'no';
+          if (ritual == 'yes') {
             children.add(
               Text(
                 'Ritual',
@@ -289,8 +302,8 @@ class ActionItemState extends State<ActionItem> {
               ),
             );
           }
-          final concentration = spell['concentration'] ?? "no";
-          if (concentration == "yes") {
+          final concentration = spell['concentration'] ?? 'no';
+          if (concentration == 'yes') {
             children.add(
               Text(
                 'Concentration',
@@ -300,7 +313,7 @@ class ActionItemState extends State<ActionItem> {
               ),
             );
           }
-          final vsm = spell['components'] ?? '';
+          final vsm = spell['components'] as String? ?? '';
           var components = '';
           if (vsm.contains('V')) {
             components += 'V';
@@ -311,20 +324,22 @@ class ActionItemState extends State<ActionItem> {
           if (vsm.contains('M')) {
             components += 'M';
           }
-          List<TextSpan> componentSpans = [];
+          final List<TextSpan> componentSpans = [];
           bool isFirst = true;
-          for (var component in components.split('')) {
-            TextSpan textSpan = TextSpan(
+          for (final component in components.split('')) {
+            final TextSpan textSpan = TextSpan(
               text: component,
               style: Theme.of(context).textTheme.labelMedium!.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
             );
             if (!isFirst) {
-              componentSpans.add(TextSpan(
-                text: ' • ',
-                style: Theme.of(context).textTheme.labelSmall,
-              ));
+              componentSpans.add(
+                TextSpan(
+                  text: ' • ',
+                  style: Theme.of(context).textTheme.labelSmall,
+                ),
+              );
             }
             componentSpans.add(textSpan);
             isFirst = false;
@@ -351,20 +366,22 @@ class ActionItemState extends State<ActionItem> {
             );
           }
 
-          break;
         case ActionMenuMode.items:
-          final backpackItem =
-              getBackpackItem(widget.character, widget.action['item']);
-          final quantity = backpackItem['quantity'] ?? 0;
-          final equipped = backpackItem['isEquipped'] ?? false;
+          final backpackItem = getBackpackItem(
+            widget.character,
+            widget.action['item']?.toString() ?? '',
+          );
+          final quantity = backpackItem['quantity'] as int? ?? 0;
+          final equipped = backpackItem['isEquipped'] as bool? ?? false;
           final equippedStr = equipped ? 'Equipped' : 'Not Equipped';
-          final requiresEquipped = widget.action['must_equip'] ?? false;
+          final requiresEquipped =
+              widget.action['must_equip'] as bool? ?? false;
           final quantityStr = '${quantity}x available';
-          final expendable = widget.action['expendable'] ?? false;
+          final expendable = widget.action['expendable'] as bool? ?? false;
           final hasAmmo = widget.action['ammo']?.toString().isNotEmpty ?? false;
           final String ammoStr;
           if (hasAmmo) {
-            final ammo = widget.action['ammo'];
+            final ammo = widget.action['ammo'] as String? ?? '';
             final ammoItem = context.read<RulesCubit>().getItem(ammo);
             if (ammoItem == null) {
               break;
@@ -379,7 +396,6 @@ class ActionItemState extends State<ActionItem> {
             Column(
               mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 if (requiresEquipped)
                   Padding(
@@ -420,7 +436,6 @@ class ActionItemState extends State<ActionItem> {
               ],
             ),
           );
-          break;
         default:
           break;
       }
@@ -430,11 +445,10 @@ class ActionItemState extends State<ActionItem> {
 
       return LayoutBuilder(
         builder: (context, constraints) {
-          int crossAxisCount = 4 + ((constraints.maxWidth - 300) / 100).floor();
+          final int crossAxisCount =
+              4 + ((constraints.maxWidth - 300) / 100).floor();
           if (constraints.maxWidth > 900) {
             return Wrap(
-              crossAxisAlignment: WrapCrossAlignment.start,
-              runAlignment: WrapAlignment.start,
               children: List.generate(children.length, (index) {
                 return Card.outlined(
                   child: Padding(
@@ -454,7 +468,9 @@ class ActionItemState extends State<ActionItem> {
                   child: Card.outlined(
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 4),
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
                       child: children[index],
                     ),
                   ),
@@ -489,7 +505,7 @@ class ActionItemState extends State<ActionItem> {
                     child: Padding(
                       padding: const EdgeInsets.only(top: 12, left: 24),
                       child: Text(
-                        widget.action['title'],
+                        widget.action['title'] as String? ?? '',
                         style: Theme.of(context).textTheme.titleLarge!.copyWith(
                               fontFamily: GoogleFonts.montserrat().fontFamily,
                             ),
@@ -508,7 +524,7 @@ class ActionItemState extends State<ActionItem> {
             ),
             SizedBox(width: screenWidth * 0.8, child: const Divider()),
             Padding(
-              padding: const EdgeInsets.only(left: 6, right: 6, bottom: 0),
+              padding: const EdgeInsets.only(left: 6, right: 6),
               child: buildSubtitle(),
             ),
             AnimatedCrossFade(
@@ -522,17 +538,21 @@ class ActionItemState extends State<ActionItem> {
                     child: Column(
                       children: [
                         DescriptionText(
-                            inputText: widget.action['description'],
-                            baseStyle: Theme.of(context).textTheme.bodySmall!),
+                          inputText:
+                              widget.action['description'] as String? ?? '',
+                          baseStyle: Theme.of(context).textTheme.bodySmall!,
+                        ),
                         if (widget.action['item'] != null)
                           BlocBuilder<RulesCubit, RulesState>(
                             builder: (context, state) {
-                              final item = context
-                                  .read<RulesCubit>()
-                                  .getItem(widget.action['item'] ?? '');
+                              final item = context.read<RulesCubit>().getItem(
+                                    widget.action['item']?.toString() ?? '',
+                                  );
                               if (item != null) {
                                 final backpackItem = getBackpackItem(
-                                    widget.character, widget.action['item']);
+                                  widget.character,
+                                  widget.action['item']?.toString() ?? '',
+                                );
                                 return Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
@@ -543,8 +563,9 @@ class ActionItemState extends State<ActionItem> {
                                       const Divider(),
                                     ItemDetailsDialogContent(
                                       item: item,
-                                      quantity: backpackItem['quantity'],
-                                    )
+                                      quantity:
+                                          backpackItem['quantity'] as int? ?? 0,
+                                    ),
                                   ],
                                 );
                               } else {
@@ -573,11 +594,11 @@ class ActionItemState extends State<ActionItem> {
 
   List<Widget> _buildFields(BuildContext context) {
     final children = <Widget>[];
-    final actionFields = widget.action['fields'];
-    final level = widget.character['level'] ?? 1;
+    final actionFields = widget.action['fields'] as Map<String, dynamic>;
+    final level = widget.character['level'] as int? ?? 1;
     final prof = getProfBonus(level);
     final asi = Map<String, int>.from(
-      widget.character['asi'] ??
+      widget.character['asi'] as Map<String, int>? ??
           {
             'strength': 10,
             'dexterity': 10,
@@ -592,18 +613,30 @@ class ActionItemState extends State<ActionItem> {
         );
 
     if (actionFields['heal']?.toString().isNotEmpty ?? false) {
-      final heal = parseFormula(actionFields['heal'], asi, prof, level);
+      final heal = parseFormula(
+        actionFields['heal']?.toString() ?? '',
+        asi,
+        prof,
+        level,
+      );
       children.add(
-          _buildVerticalField('Heal', heal, context, valueTheme: boldTheme));
+        _buildVerticalField('Heal', heal, context, valueTheme: boldTheme),
+      );
     }
 
     if (actionFields['damage']?.toString().isNotEmpty ?? false) {
-      final damage = parseFormula(actionFields['damage'], asi, prof, level);
+      final damage = parseFormula(
+        actionFields['damage']?.toString() ?? '',
+        asi,
+        prof,
+        level,
+      );
       if (actionFields['type']?.toString().isNotEmpty ?? false) {
         final type = actionFields['type'].toString().sentenceCase;
         final typeWidget = DescriptionText(
-            inputText: type,
-            baseStyle: Theme.of(context).textTheme.labelSmall!);
+          inputText: type,
+          baseStyle: Theme.of(context).textTheme.labelSmall!,
+        );
         children.add(
           _buildVerticalField(
             'Damage',
@@ -614,13 +647,24 @@ class ActionItemState extends State<ActionItem> {
           ),
         );
       } else {
-        children.add(_buildVerticalField('Damage', damage, context,
-            valueTheme: boldTheme));
+        children.add(
+          _buildVerticalField(
+            'Damage',
+            damage,
+            context,
+            valueTheme: boldTheme,
+          ),
+        );
       }
     }
 
     if (actionFields['attack']?.toString().isNotEmpty ?? false) {
-      final attack = parseFormula(actionFields['attack'], asi, prof, level);
+      final attack = parseFormula(
+        actionFields['attack']?.toString() ?? '',
+        asi,
+        prof,
+        level,
+      );
       final attackStr = (int.tryParse(attack) ?? 0) > 0 ? '+$attack' : attack;
       children.add(
         _buildVerticalField(
@@ -636,14 +680,18 @@ class ActionItemState extends State<ActionItem> {
         (actionFields['save'].toString().toLowerCase() != 'none')) {
       final save = actionFields['save'].toString().sentenceCase;
       if (actionFields['save_dc']?.toString().isNotEmpty ?? false) {
-        final saveDc = parseFormula(actionFields['save_dc'], asi, prof, level);
+        final saveDc = parseFormula(
+          actionFields['save_dc']?.toString() ?? '',
+          asi,
+          prof,
+          level,
+        );
         final saveWidget = DescriptionText(
           inputText: save,
           baseStyle: Theme.of(context).textTheme.labelMedium!,
         );
         final saveRow = Row(
           mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
@@ -655,7 +703,7 @@ class ActionItemState extends State<ActionItem> {
               saveDc,
               softWrap: true,
               style: boldTheme,
-            )
+            ),
           ],
         );
 
@@ -720,19 +768,22 @@ class ActionItemState extends State<ActionItem> {
         conditions = conditionsField.titleCase;
         baseStyle = Theme.of(context).textTheme.labelLarge!;
       }
-      children.add(Column(
-        children: [
-          Text(
-            'Condition',
-            style: Theme.of(context).textTheme.labelSmall,
-            softWrap: true,
-          ),
-          DescriptionText(
+      children.add(
+        Column(
+          children: [
+            Text(
+              'Condition',
+              style: Theme.of(context).textTheme.labelSmall,
+              softWrap: true,
+            ),
+            DescriptionText(
               textAlign: TextAlign.center,
               inputText: conditions,
-              baseStyle: baseStyle),
-        ],
-      ));
+              baseStyle: baseStyle,
+            ),
+          ],
+        ),
+      );
     }
 
     if (actionFields['cast_time']?.toString().isNotEmpty ?? false) {
@@ -743,10 +794,14 @@ class ActionItemState extends State<ActionItem> {
     return children;
   }
 
-  Widget _buildVerticalField(String field, String value, BuildContext context,
-      {Widget? extra, TextStyle? valueTheme}) {
+  Widget _buildVerticalField(
+    String field,
+    String value,
+    BuildContext context, {
+    Widget? extra,
+    TextStyle? valueTheme,
+  }) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Text(
           field,
@@ -784,30 +839,27 @@ class ActionItemState extends State<ActionItem> {
       return ActionChip(
         label: const Text('Recharge'),
         onPressed: () {
-          if (widget.onUse != null) {
-            widget.onUse!(
-              action: widget.action,
-              slug: widget.actionSlug,
-              type: ActionMenuMode.abilities,
-              recharge: true,
-            );
-          }
+          widget.onUse?.call(
+            action: widget.action,
+            slug: widget.actionSlug,
+            type: ActionMenuMode.abilities,
+            recharge: true,
+          );
         },
       );
     }
     final type = ActionMenuMode.values.firstWhere(
-        (e) => e.name == widget.action['type'],
-        orElse: () => ActionMenuMode.all);
+      (e) => e.name == widget.action['type'],
+      orElse: () => ActionMenuMode.all,
+    );
     return ActionChip(
       label: const Text('Use'),
       onPressed: () {
-        if (widget.onUse != null) {
-          widget.onUse!(
-            action: widget.action,
-            slug: widget.actionSlug,
-            type: type,
-          );
-        }
+        widget.onUse?.call(
+          action: widget.action,
+          slug: widget.actionSlug,
+          type: type,
+        );
       },
     );
   }

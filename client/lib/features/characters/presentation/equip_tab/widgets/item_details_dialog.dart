@@ -2,11 +2,6 @@ import 'package:dnd5e_dm_tools/features/characters/presentation/equip_tab/widget
 import 'package:flutter/material.dart';
 
 class ItemDetailsDialog extends StatelessWidget {
-  final Map<String, dynamic> item;
-  final int? quantity;
-  final Function(int)? onQuantityChange;
-  final bool isEquipped;
-  final Function(String, bool)? onEquip;
 
   const ItemDetailsDialog({
     super.key,
@@ -16,6 +11,11 @@ class ItemDetailsDialog extends StatelessWidget {
     required this.isEquipped,
     this.onEquip,
   });
+  final Map<String, dynamic> item;
+  final int? quantity;
+  final Function(int)? onQuantityChange;
+  final bool isEquipped;
+  final Function(String, bool)? onEquip;
 
   @override
   Widget build(BuildContext context) {
@@ -80,7 +80,7 @@ class ItemDetailsDialog extends StatelessWidget {
                   final newQuantity = quantity! - delQuantity;
                   onQuantityChange?.call(newQuantity);
                   Navigator.of(context).pop();
-                }),
+                },),
           ],
         );
       },

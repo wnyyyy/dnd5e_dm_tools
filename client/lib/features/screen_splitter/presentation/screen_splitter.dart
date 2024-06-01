@@ -6,11 +6,11 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class ScreenSplitter extends StatelessWidget {
-  final Widget upperChild;
-  final Widget lowerChild;
 
   const ScreenSplitter(
-      {super.key, required this.upperChild, required this.lowerChild});
+      {super.key, required this.upperChild, required this.lowerChild,});
+  final Widget upperChild;
+  final Widget lowerChild;
 
   @override
   Widget build(BuildContext context) {

@@ -1,8 +1,8 @@
 abstract class OnboardingState {
-  var characters = Map<String, dynamic>.from({});
-  String selectedCharacter = '';
 
   OnboardingState();
+  Map<String, dynamic> characters = Map<String, dynamic>.from({});
+  String selectedCharacter = '';
 }
 
 class OnboardingInitial extends OnboardingState {}
@@ -10,9 +10,9 @@ class OnboardingInitial extends OnboardingState {}
 class OnboardingLoading extends OnboardingState {}
 
 class OnboardingError extends OnboardingState {
-  final String message;
 
   OnboardingError(this.message);
+  final String message;
 }
 
 class OnboardingLoaded extends OnboardingState {

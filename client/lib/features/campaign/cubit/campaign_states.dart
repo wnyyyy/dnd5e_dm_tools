@@ -11,9 +11,9 @@ class CampaignInitial extends CampaignState {
 }
 
 class CampaignError extends CampaignState {
-  final String message;
 
   CampaignError({required this.message});
+  final String message;
   @override
   List<Object?> get props => [message];
 }
@@ -24,15 +24,15 @@ class CampaignLoading extends CampaignState {
 }
 
 class CampaignLoaded extends CampaignState {
-  final List<Location> locations;
-  final List<Character> characters;
-  final Adventure adventure;
 
   CampaignLoaded({
     required this.locations,
     required this.characters,
     required this.adventure,
   });
+  final List<Location> locations;
+  final List<Character> characters;
+  final Adventure adventure;
   @override
   List<Object?> get props => [locations, characters, adventure];
 

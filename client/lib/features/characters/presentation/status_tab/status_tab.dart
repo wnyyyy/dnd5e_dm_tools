@@ -15,16 +15,15 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttericon/octicons_icons.dart';
 
 class StatusTab extends StatelessWidget {
-  final Map<String, dynamic> character;
-  final String slug;
-  final List<Map<String, dynamic>> table;
-
   const StatusTab({
     super.key,
     required this.character,
     required this.slug,
     required this.table,
   });
+  final Map<String, dynamic> character;
+  final String slug;
+  final List<Map<String, dynamic>> table;
 
   @override
   Widget build(BuildContext context) {
@@ -37,14 +36,17 @@ class StatusTab extends StatelessWidget {
       'strength': 10,
     };
     character['ac'] ??= 0;
-    character['initiative'] ??= getModifier(character['asi']?['dexterity']);
+    character['initiative'] ??=
+        getModifier((character['asi'] as Map)['dexterity'] as int? ?? 10);
     character['speed'] ??= 30;
     character['hp_max'] ??= 1;
     character['hp_curr'] ??= 1;
     character['hd_max'] ??= 1;
     character['hd_curr'] ??= 1;
 
-    final classs = context.read<RulesCubit>().getClass(character['class']);
+    final classs = context
+        .read<RulesCubit>()
+        .getClass(character['class'] as String? ?? '');
     final isCaster = context.read<SettingsCubit>().state.isCaster;
     final Map<String, dynamic> spells = {};
     int spellAttackBonus = 0;
@@ -54,7 +56,9 @@ class StatusTab extends StatelessWidget {
       final classOnly = context.read<SettingsCubit>().state.classOnlySpells;
       spells.addAll(
         classOnly
-            ? context.read<RulesCubit>().getSpellsByClass(character['class'])
+            ? context
+                .read<RulesCubit>()
+                .getSpellsByClass(character['class'] as String? ?? '0')
             : context.read<RulesCubit>().getAllSpells(),
       );
 
@@ -62,9 +66,14 @@ class StatusTab extends StatelessWidget {
           (classs?['spellcasting_ability'] ?? 'intelligence')
               .toString()
               .toLowerCase();
-      final mod = getModifier(character['asi']![spellcastingAbility] ?? 0);
-      spellSaveDC = 8 + mod + getProfBonus(character['level'] ?? 1);
-      spellAttackBonus = mod + getProfBonus(character['level'] ?? 1);
+      final spellcastingAttribute =
+          (character['asi'] as Map)[spellcastingAbility]
+              ?.toString()
+              .toLowerCase();
+      final mod =
+          getModifier(int.tryParse(spellcastingAttribute ?? '10') ?? 10);
+      spellSaveDC = 8 + mod + getProfBonus(character['level'] as int? ?? 1);
+      spellAttackBonus = mod + getProfBonus(character['level'] as int? ?? 1);
     }
 
     if (classs == null) {
@@ -74,10 +83,22 @@ class StatusTab extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         return constraints.maxWidth > wideScreenBreakpoint
-            ? _buildWideLayout(context, classs, isCaster, spells,
-                spellAttackBonus, spellSaveDC)
-            : _buildNarrowLayout(context, classs, isCaster, spells,
-                spellAttackBonus, spellSaveDC);
+            ? _buildWideLayout(
+                context,
+                classs,
+                isCaster,
+                spells,
+                spellAttackBonus,
+                spellSaveDC,
+              )
+            : _buildNarrowLayout(
+                context,
+                classs,
+                isCaster,
+                spells,
+                spellAttackBonus,
+                spellSaveDC,
+              );
       },
     );
   }
@@ -109,8 +130,11 @@ class StatusTab extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         HitDice(
-                            character: character, classs: classs, slug: slug),
-                        Inspiration(character: character, slug: slug)
+                          character: character,
+                          classs: classs,
+                          slug: slug,
+                        ),
+                        Inspiration(character: character, slug: slug),
                       ],
                     ),
                   ],
@@ -121,7 +145,11 @@ class StatusTab extends StatelessWidget {
                   children: [
                     if (isCaster)
                       _buildSpellInfo(
-                          context, spells, spellAttackBonus, spellSaveDC),
+                        context,
+                        spells,
+                        spellAttackBonus,
+                        spellSaveDC,
+                      ),
                     StatsView(
                       onSave: () => context.read<CharacterBloc>().add(
                             CharacterUpdate(
@@ -183,7 +211,10 @@ class StatusTab extends StatelessWidget {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           HitDice(
-                              character: character, classs: classs, slug: slug),
+                            character: character,
+                            classs: classs,
+                            slug: slug,
+                          ),
                           Inspiration(character: character, slug: slug),
                         ],
                       ),
@@ -195,7 +226,11 @@ class StatusTab extends StatelessWidget {
                   children: [
                     if (isCaster)
                       _buildSpellInfo(
-                          context, spells, spellAttackBonus, spellSaveDC),
+                        context,
+                        spells,
+                        spellAttackBonus,
+                        spellSaveDC,
+                      ),
                     StatsView(
                       onSave: () => context.read<CharacterBloc>().add(
                             CharacterUpdate(
@@ -279,7 +314,10 @@ class StatusTab extends StatelessWidget {
               child: Row(
                 children: [
                   _buildSpellStat(
-                      context, '+$spellAttackBonus', 'Spell\nAttack\nBonus'),
+                    context,
+                    '+$spellAttackBonus',
+                    'Spell\nAttack\nBonus',
+                  ),
                   const Padding(
                     padding: EdgeInsets.symmetric(horizontal: 12),
                     child: SizedBox(

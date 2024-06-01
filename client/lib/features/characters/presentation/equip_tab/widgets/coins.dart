@@ -11,15 +11,14 @@ import 'package:fluttericon/font_awesome5_icons.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class CoinsWidget extends StatelessWidget {
+  const CoinsWidget({super.key, required this.character, required this.slug});
   final Map<String, dynamic> character;
   final String slug;
-
-  const CoinsWidget({super.key, required this.character, required this.slug});
 
   @override
   Widget build(BuildContext context) {
     final Map<String, dynamic> backpack =
-        Map<String, dynamic>.from(character['backpack'] ?? {});
+        Map<String, dynamic>.from(character['backpack'] as Map? ?? {});
     return GestureDetector(
       onLongPress: () => _showCoinEdit(context),
       child: ListTile(
@@ -43,45 +42,57 @@ class CoinsWidget extends StatelessWidget {
                     WidgetSpan(
                       child: Padding(
                         padding: const EdgeInsets.only(right: 8),
-                        child: Icon(FontAwesome5.coins,
-                            color: Theme.of(context).copperColor, size: 15),
+                        child: Icon(
+                          FontAwesome5.coins,
+                          color: Theme.of(context).copperColor,
+                          size: 15,
+                        ),
                       ),
                     ),
                     const TextSpan(text: 'CP:'),
                     TextSpan(
-                        text: ' ${backpack['cp'] ?? 0}\n',
-                        style: Theme.of(context).textTheme.labelLarge!.copyWith(
-                              fontFamily: GoogleFonts.roboto().fontFamily,
-                              fontWeight: FontWeight.bold,
-                            )),
+                      text: ' ${backpack['cp'] ?? 0}\n',
+                      style: Theme.of(context).textTheme.labelLarge!.copyWith(
+                            fontFamily: GoogleFonts.roboto().fontFamily,
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
                     WidgetSpan(
                       child: Padding(
                         padding: const EdgeInsets.only(right: 8),
-                        child: Icon(FontAwesome5.coins,
-                            color: Theme.of(context).silverColor, size: 15),
+                        child: Icon(
+                          FontAwesome5.coins,
+                          color: Theme.of(context).silverColor,
+                          size: 15,
+                        ),
                       ),
                     ),
                     const TextSpan(text: 'SP:'),
                     TextSpan(
-                        text: ' ${backpack['sp'] ?? 0}\n',
-                        style: Theme.of(context).textTheme.labelLarge!.copyWith(
-                              fontFamily: GoogleFonts.roboto().fontFamily,
-                              fontWeight: FontWeight.bold,
-                            )),
+                      text: ' ${backpack['sp'] ?? 0}\n',
+                      style: Theme.of(context).textTheme.labelLarge!.copyWith(
+                            fontFamily: GoogleFonts.roboto().fontFamily,
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
                     WidgetSpan(
                       child: Padding(
                         padding: const EdgeInsets.only(right: 8),
-                        child: Icon(FontAwesome5.coins,
-                            color: Theme.of(context).goldColor, size: 15),
+                        child: Icon(
+                          FontAwesome5.coins,
+                          color: Theme.of(context).goldColor,
+                          size: 15,
+                        ),
                       ),
                     ),
                     const TextSpan(text: 'GP:'),
                     TextSpan(
-                        text: ' ${backpack['gp'] ?? 0}',
-                        style: Theme.of(context).textTheme.labelLarge!.copyWith(
-                              fontFamily: GoogleFonts.roboto().fontFamily,
-                              fontWeight: FontWeight.bold,
-                            )),
+                      text: ' ${backpack['gp'] ?? 0}',
+                      style: Theme.of(context).textTheme.labelLarge!.copyWith(
+                            fontFamily: GoogleFonts.roboto().fontFamily,
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
                   ],
                 ),
               ),
@@ -97,25 +108,24 @@ class CoinsWidget extends StatelessWidget {
   }
 
   Future<void> _showCoinEdit(BuildContext context) async {
+    final Map<String, dynamic> backpack =
+        Map<String, dynamic>.from(character['backpack'] as Map? ?? {});
     return showDialog(
       context: context,
       builder: (BuildContext context) {
-        int cp = character['backpack']['cp'] ?? 0;
-        int sp = character['backpack']['sp'] ?? 0;
-        int gp = character['backpack']['gp'] ?? 0;
-        Map<String, Timer?> timers = {'cp': null, 'sp': null, 'gp': null};
+        int cp = int.parse(backpack['cp']?.toString() ?? '0');
+        int sp = int.parse(backpack['sp']?.toString() ?? '0');
+        int gp = int.parse(backpack['gp']?.toString() ?? '0');
+        final Map<String, Timer?> timers = {'cp': null, 'sp': null, 'gp': null};
 
         void updateCoins(String type, int value) {
           switch (type) {
             case 'cp':
               cp = max(0, value);
-              break;
             case 'sp':
               sp = max(0, value);
-              break;
             case 'gp':
               gp = max(0, value);
-              break;
           }
         }
 
@@ -126,7 +136,7 @@ class CoinsWidget extends StatelessWidget {
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: ['cp', 'sp', 'gp'].map((type) {
-                  int coinValue = type == 'cp'
+                  final int coinValue = type == 'cp'
                       ? cp
                       : type == 'sp'
                           ? sp
@@ -145,16 +155,14 @@ class CoinsWidget extends StatelessWidget {
                             switch (type) {
                               case 'cp':
                                 currentCoinValue = cp;
-                                break;
                               case 'sp':
                                 currentCoinValue = sp;
-                                break;
                               case 'gp':
                                 currentCoinValue = gp;
-                                break;
                             }
                             setState(
-                                () => updateCoins(type, currentCoinValue - 1));
+                              () => updateCoins(type, currentCoinValue - 1),
+                            );
                           });
                         },
                         onLongPressEnd: (details) {
@@ -188,15 +196,17 @@ class CoinsWidget extends StatelessWidget {
                                   border: OutlineInputBorder(),
                                 ),
                                 controller: TextEditingController(
-                                    text: coinValue.toString())
-                                  ..selection = TextSelection.collapsed(
-                                      offset: coinValue.toString().length),
+                                  text: coinValue.toString(),
+                                )..selection = TextSelection.collapsed(
+                                    offset: coinValue.toString().length,
+                                  ),
                                 keyboardType: TextInputType.number,
                                 onChanged: (value) {
-                                  int newQuantity =
+                                  final int newQuantity =
                                       int.tryParse(value) ?? coinValue;
                                   setState(
-                                      () => updateCoins(type, newQuantity));
+                                    () => updateCoins(type, newQuantity),
+                                  );
                                 },
                               ),
                             ),
@@ -214,16 +224,14 @@ class CoinsWidget extends StatelessWidget {
                             switch (type) {
                               case 'cp':
                                 currentCoinValue = cp;
-                                break;
                               case 'sp':
                                 currentCoinValue = sp;
-                                break;
                               case 'gp':
                                 currentCoinValue = gp;
-                                break;
                             }
                             setState(
-                                () => updateCoins(type, currentCoinValue + 1));
+                              () => updateCoins(type, currentCoinValue + 1),
+                            );
                           });
                         },
                         onLongPressEnd: (details) {
@@ -239,7 +247,7 @@ class CoinsWidget extends StatelessWidget {
                 TextButton(
                   child: const Icon(Icons.close),
                   onPressed: () {
-                    for (var timer in timers.values) {
+                    for (final timer in timers.values) {
                       timer?.cancel();
                     }
                     Navigator.pop(context);
@@ -248,12 +256,13 @@ class CoinsWidget extends StatelessWidget {
                 TextButton(
                   child: const Icon(Icons.done),
                   onPressed: () {
-                    for (var timer in timers.values) {
+                    for (final timer in timers.values) {
                       timer?.cancel();
                     }
-                    character['backpack']['cp'] = cp;
-                    character['backpack']['sp'] = sp;
-                    character['backpack']['gp'] = gp;
+                    backpack['cp'] = cp;
+                    backpack['sp'] = sp;
+                    backpack['gp'] = gp;
+                    character['backpack'] = backpack;
                     context.read<CharacterBloc>().add(
                           CharacterUpdate(
                             character: character,

@@ -5,21 +5,22 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttericon/rpg_awesome_icons.dart';
 
 class StatsView extends StatelessWidget {
-  final Map<String, dynamic> character;
-  final VoidCallback? onSave;
-
   const StatsView({
     super.key,
     required this.character,
     this.onSave,
   });
+  final Map<String, dynamic> character;
+  final VoidCallback? onSave;
 
   void editStats(BuildContext context) {
     final TextEditingController acController =
         TextEditingController(text: character['ac']?.toString() ?? '0');
     final TextEditingController initiativeController = TextEditingController(
-        text: character['initiative']?.toString() ??
-            getModifier(character['asi']?['dexterity']).toString());
+      text: character['initiative']?.toString() ??
+          getModifier((character['asi'] as Map?)?['dexterity'] as int? ?? 10)
+              .toString(),
+    );
     final TextEditingController speedController =
         TextEditingController(text: character['speed']?.toString() ?? '30');
 
@@ -36,8 +37,7 @@ class StatsView extends StatelessWidget {
                 decoration: const InputDecoration(
                   labelText: 'Armor Class',
                 ),
-                keyboardType: const TextInputType.numberWithOptions(
-                    signed: false, decimal: false),
+                keyboardType: TextInputType.number,
               ),
               TextField(
                 controller: initiativeController,
@@ -45,15 +45,15 @@ class StatsView extends StatelessWidget {
                   labelText: 'Initiative',
                 ),
                 keyboardType: const TextInputType.numberWithOptions(
-                    signed: true, decimal: false),
+                  signed: true,
+                ),
               ),
               TextField(
                 controller: speedController,
                 decoration: const InputDecoration(
                   labelText: 'Speed',
                 ),
-                keyboardType: const TextInputType.numberWithOptions(
-                    signed: false, decimal: false),
+                keyboardType: TextInputType.number,
               ),
             ],
           ),
@@ -69,7 +69,10 @@ class StatsView extends StatelessWidget {
                 character['ac'] = int.tryParse(acController.text) ?? 0;
                 character['initiative'] =
                     int.tryParse(initiativeController.text) ??
-                        getModifier(character['asi']?['dexterity']);
+                        getModifier(
+                          (character['asi'] as Map?)?['dexterity'] as int? ??
+                              10,
+                        );
                 character['speed'] = int.tryParse(speedController.text) ?? 30;
                 onSave?.call();
                 Navigator.of(context).pop();
@@ -85,7 +88,7 @@ class StatsView extends StatelessWidget {
   Widget build(BuildContext context) {
     final ac = int.tryParse(character['ac'].toString()) ?? 0;
     final initiative = int.tryParse(character['initiative'].toString()) ??
-        getModifier(character['asi']?['dexterity']);
+        getModifier((character['asi'] as Map?)?['dexterity'] as int? ?? 10);
     final speed = int.tryParse(character['speed'].toString()) ?? 30;
     final editMode = context.read<SettingsCubit>().state.isEditMode;
     return GestureDetector(
@@ -100,8 +103,12 @@ class StatsView extends StatelessWidget {
               buildStat(context, 'Armor Class', Icons.shield_outlined, ac),
               const Divider(),
               buildStat(
-                  context, 'Initiative', RpgAwesome.lightning_bolt, initiative,
-                  showSign: true),
+                context,
+                'Initiative',
+                RpgAwesome.lightning_bolt,
+                initiative,
+                showSign: true,
+              ),
               const Divider(),
               buildStat(context, 'Speed', Icons.directions_run, speed),
             ],
@@ -111,8 +118,13 @@ class StatsView extends StatelessWidget {
     );
   }
 
-  Widget buildStat(BuildContext context, String label, IconData icon, int value,
-      {bool showSign = false}) {
+  Widget buildStat(
+    BuildContext context,
+    String label,
+    IconData icon,
+    int value, {
+    bool showSign = false,
+  }) {
     return Column(
       children: [
         Padding(

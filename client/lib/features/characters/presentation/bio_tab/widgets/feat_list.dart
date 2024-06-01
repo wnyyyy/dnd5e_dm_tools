@@ -9,14 +9,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class FeatsList extends StatefulWidget {
-  final Map<String, dynamic> character;
-  final String slug;
-
   const FeatsList({
     super.key,
     required this.character,
     required this.slug,
   });
+  final Map<String, dynamic> character;
+  final String slug;
 
   @override
   FeatsListState createState() => FeatsListState();
@@ -31,11 +30,14 @@ class FeatsListState extends State<FeatsList> {
   @override
   Widget build(BuildContext context) {
     final characterFeats =
-        Map<String, Map>.from(widget.character['feats'] ?? {});
+        Map<String, Map>.from(widget.character['feats'] as Map? ?? {});
     final offline = context.read<SettingsCubit>().state.offlineMode;
-    final race = context.read<RulesCubit>().getRace(widget.character['race']);
-    final classs =
-        context.read<RulesCubit>().getClass(widget.character['class']);
+    final race = context
+        .read<RulesCubit>()
+        .getRace(widget.character['race']?.toString() ?? '');
+    final classs = context
+        .read<RulesCubit>()
+        .getClass(widget.character['class']?.toString() ?? '');
 
     void onItemsChanged(Map<String, dynamic> newFeats) {
       widget.character['feats'] = newFeats;
@@ -50,19 +52,24 @@ class FeatsListState extends State<FeatsList> {
     }
 
     void onAddItem() {
+      if (classs == null || race == null) {
+        return;
+      }
       showDialog(
         context: context,
         builder: (BuildContext context) {
           final feats = context.read<RulesCubit>().getAllFeats();
-          final racialFeats = getRacialFeatures(race?['traits'] ?? '');
-          var classFeats = <String, dynamic>{};
-          classFeats.addAll(getClassFeatures(classs?['desc'] ?? ''));
+          final racialFeats =
+              getRacialFeatures(race['traits']?.toString() ?? '');
+          final classFeats = <String, dynamic>{};
+          classFeats.addAll(getClassFeatures(classs['desc']?.toString() ?? ''));
 
           final archetype = widget.character['subclass'];
           if (archetype != null) {
-            final archetypeClass = classs?['archetypes']
-                .firstWhere((arch) => arch['slug'] == archetype);
-            final archetypeDesc = archetypeClass['desc'];
+            final archetypeClass =
+                (classs['archetypes'] as List<Map<String, dynamic>>)
+                    .firstWhere((arch) => arch['slug'] == archetype);
+            final archetypeDesc = archetypeClass['desc']?.toString() ?? '';
             classFeats.addAll(getArchetypeFeatures(archetypeDesc));
           }
 
@@ -77,26 +84,34 @@ class FeatsListState extends State<FeatsList> {
               }
 
               List<DropdownMenuItem<String>> getDropdownItems(
-                  Map<String, dynamic> feats) {
+                Map<String, dynamic> feats,
+              ) {
                 final bool isString = feats.values.first is String;
                 return [
                   const DropdownMenuItem(
                     value: 'none',
                     child: Text('None'),
                   ),
-                  ...feats.entries.map((entry) => DropdownMenuItem(
-                        value: entry.key,
-                        child: isString
-                            ? Text(entry.key,
-                                style: Theme.of(context).textTheme.bodySmall)
-                            : entry.value['name'] != null
-                                ? Text(entry.value['name'],
-                                    style:
-                                        Theme.of(context).textTheme.bodySmall)
-                                : Text(entry.key,
-                                    style:
-                                        Theme.of(context).textTheme.bodySmall),
-                      )),
+                  ...feats.entries.map(
+                    (entry) => DropdownMenuItem(
+                      value: entry.key,
+                      child: isString
+                          ? Text(
+                              entry.key,
+                              style: Theme.of(context).textTheme.bodySmall,
+                            )
+                          : (entry.value as Map)['name'] != null
+                              ? Text(
+                                  (entry.value as Map)['name']?.toString() ??
+                                      '',
+                                  style: Theme.of(context).textTheme.bodySmall,
+                                )
+                              : Text(
+                                  entry.key,
+                                  style: Theme.of(context).textTheme.bodySmall,
+                                ),
+                    ),
+                  ),
                 ];
               }
 
@@ -163,7 +178,8 @@ class FeatsListState extends State<FeatsList> {
                               setState(() {
                                 if (value != 'none') {
                                   final title = value!;
-                                  final desc = racialFeats[value];
+                                  final desc =
+                                      racialFeats[value]?.toString() ?? '';
                                   updateTextFields(title, desc);
                                 } else {
                                   titleController.clear();
@@ -181,8 +197,10 @@ class FeatsListState extends State<FeatsList> {
                               setState(() {
                                 if (value != 'none') {
                                   final title = value!;
-                                  final desc =
-                                      uniqueClassFeats[value]['description'];
+                                  final desc = (uniqueClassFeats[value]
+                                              as Map?)?['description']
+                                          ?.toString() ??
+                                      '';
                                   updateTextFields(title, desc);
                                 } else {
                                   titleController.clear();
@@ -199,8 +217,9 @@ class FeatsListState extends State<FeatsList> {
                             onChanged: (value) {
                               setState(() {
                                 if (value != 'none') {
-                                  final title = feats[value]['name'];
-                                  final desc = feats[value]['desc'];
+                                  final feat = feats[value] as Map? ?? {};
+                                  final title = feat['name']?.toString() ?? '';
+                                  final desc = feat['desc']?.toString() ?? '';
                                   updateTextFields(title, desc);
                                 } else {
                                   titleController.clear();
@@ -237,7 +256,7 @@ class FeatsListState extends State<FeatsList> {
                       onPressed: () {
                         final newFeat = {
                           'name': titleController.text,
-                          'desc': descriptionController.text
+                          'desc': descriptionController.text,
                         };
                         characterFeats[titleController.text] = newFeat;
                         onItemsChanged(characterFeats);
@@ -268,10 +287,11 @@ class FeatsListState extends State<FeatsList> {
                       : screenWidth * 0.9,
             ),
             child: AlertDialog(
-              title: Text(feat.value['name']),
+              title: Text(feat.value['name']?.toString() ?? 'Error'),
               content: DescriptionText(
-                  inputText: feat.value['desc'],
-                  baseStyle: Theme.of(context).textTheme.bodySmall!),
+                inputText: feat.value['desc']?.toString() ?? '',
+                baseStyle: Theme.of(context).textTheme.bodySmall!,
+              ),
               actions: [
                 TextButton(
                   child: const Icon(Icons.close),

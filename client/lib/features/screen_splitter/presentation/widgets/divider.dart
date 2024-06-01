@@ -1,12 +1,6 @@
 import 'package:flutter/material.dart';
 
 class ScreenDivider extends StatelessWidget {
-  final Function() onUpper;
-  final Function() onLower;
-  final Function() onMiddle;
-  final bool upperHidden;
-  final bool lowerHidden;
-
   const ScreenDivider({
     super.key,
     required this.onUpper,
@@ -15,12 +9,17 @@ class ScreenDivider extends StatelessWidget {
     this.upperHidden = false,
     this.lowerHidden = false,
   });
+  final Function() onUpper;
+  final Function() onLower;
+  final Function() onMiddle;
+  final bool upperHidden;
+  final bool lowerHidden;
 
   @override
   Widget build(BuildContext context) {
     final color = Theme.of(context).colorScheme.surfaceContainerHighest;
     final screenWidth = MediaQuery.of(context).size.width;
-    return Container(
+    return ColoredBox(
       color: color,
       child: Stack(
         alignment: Alignment.center,

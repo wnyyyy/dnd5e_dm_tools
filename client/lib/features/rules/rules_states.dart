@@ -13,9 +13,8 @@ class RulesStateInitial extends RulesState {
 }
 
 class RulesStateError extends RulesState {
-  final String message;
-
   const RulesStateError(this.message);
+  final String message;
 
   @override
   List<Object> get props => [message];
@@ -27,14 +26,6 @@ class RulesStateLoading extends RulesState {
 }
 
 class RulesStateLoaded extends RulesState {
-  final Map<String, dynamic> races;
-  final Map<String, dynamic> classes;
-  final Map<String, dynamic> conditions;
-  final Map<String, dynamic> feats;
-  final Map<String, dynamic> spells;
-  final Map<String, dynamic> spellLists;
-  final Map<String, dynamic> items;
-
   const RulesStateLoaded({
     required this.conditions,
     required this.races,
@@ -44,16 +35,23 @@ class RulesStateLoaded extends RulesState {
     required this.spellLists,
     required this.items,
   });
+  final Map<String, dynamic> races;
+  final Map<String, dynamic> classes;
+  final Map<String, dynamic> conditions;
+  final Map<String, dynamic> feats;
+  final Map<String, dynamic> spells;
+  final Map<String, dynamic> spellLists;
+  final Map<String, dynamic> items;
 
   RulesStateLoaded copyWith({
-    final Map<String, dynamic>? races,
-    final Map<String, dynamic>? classes,
-    final Map<String, dynamic>? conditions,
-    final Map<String, dynamic>? feats,
-    final Map<String, dynamic>? spells,
-    final Map<String, dynamic>? spellLists,
-    final Map<String, dynamic>? items,
-    final Map<String, dynamic>? magicItems,
+    Map<String, dynamic>? races,
+    Map<String, dynamic>? classes,
+    Map<String, dynamic>? conditions,
+    Map<String, dynamic>? feats,
+    Map<String, dynamic>? spells,
+    Map<String, dynamic>? spellLists,
+    Map<String, dynamic>? items,
+    Map<String, dynamic>? magicItems,
   }) {
     return RulesStateLoaded(
       classes: classes ?? this.classes,

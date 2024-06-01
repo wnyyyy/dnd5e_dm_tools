@@ -1,14 +1,6 @@
 import 'package:flutter/material.dart';
 
 class ItemList extends StatefulWidget {
-  final Map<String, Map>? items;
-  final Function(Map<String, Map>) onItemsChanged;
-  final Function() onAddItem;
-  final Function(MapEntry<String, Map>) onSelectItem;
-  final String tableName;
-  final String displayKey;
-  final String emptyMessage;
-
   const ItemList({
     super.key,
     required this.items,
@@ -19,6 +11,13 @@ class ItemList extends StatefulWidget {
     required this.onSelectItem,
     this.emptyMessage = 'No items',
   });
+  final Map<String, Map>? items;
+  final Function(Map<String, Map>) onItemsChanged;
+  final Function() onAddItem;
+  final Function(MapEntry<String, Map>) onSelectItem;
+  final String tableName;
+  final String displayKey;
+  final String emptyMessage;
 
   @override
   ItemListState createState() => ItemListState();
@@ -35,9 +34,9 @@ class ItemListState extends State<ItemList> {
 
   void _editItem(String key, Map item) {
     final TextEditingController titleController =
-        TextEditingController(text: item[widget.displayKey]);
+        TextEditingController(text: item[widget.displayKey]?.toString() ?? '');
     final TextEditingController descriptionController =
-        TextEditingController(text: item['description']);
+        TextEditingController(text: item['description']?.toString() ?? '');
 
     showDialog(
       context: context,
@@ -74,7 +73,7 @@ class ItemListState extends State<ItemList> {
             TextButton(
               onPressed: () {
                 if (titleController.text.isNotEmpty) {
-                  var newItem = {
+                  final newItem = {
                     widget.displayKey: titleController.text,
                     'description': descriptionController.text,
                   };
@@ -124,7 +123,11 @@ class ItemListState extends State<ItemList> {
               ),
               child: Padding(
                 padding: const EdgeInsets.only(
-                    left: 16, bottom: 8, top: 8, right: 4),
+                  left: 16,
+                  bottom: 8,
+                  top: 8,
+                  right: 4,
+                ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -149,7 +152,7 @@ class ItemListState extends State<ItemList> {
                           icon: Icon(_isEditMode ? Icons.check : Icons.edit),
                         ),
                       ],
-                    )
+                    ),
                   ],
                 ),
               ),
@@ -158,12 +161,16 @@ class ItemListState extends State<ItemList> {
           if (widget.items?.isEmpty ?? true)
             Padding(
               padding: const EdgeInsets.all(16),
-              child: Text(widget.emptyMessage,
-                  style: Theme.of(context).textTheme.bodyLarge),
+              child: Text(
+                widget.emptyMessage,
+                style: Theme.of(context).textTheme.bodyLarge,
+              ),
             ),
           ...widget.items?.keys.map((key) {
                 return ListTile(
-                  title: Text(widget.items?[key]?[widget.displayKey] ?? ''),
+                  title: Text(
+                    widget.items?[key]?[widget.displayKey]?.toString() ?? '',
+                  ),
                   onTap: () => widget.onSelectItem(
                     MapEntry(key, widget.items?[key] ?? {}),
                   ),

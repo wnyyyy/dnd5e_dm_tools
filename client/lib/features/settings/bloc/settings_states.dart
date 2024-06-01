@@ -1,16 +1,16 @@
 import 'package:dnd5e_dm_tools/core/util/enum.dart';
 
 abstract class SettingsState {
-  var name = '';
-  var isEditMode = false;
-  var isCaster = false;
-  var classOnlySpells = false;
-  var isDarkMode = false;
-  var themeColor = ThemeColor.chestnutBrown;
-  var offlineMode = false;
-  var isOnboardingComplete = false;
 
   SettingsState();
+  String name = '';
+  bool isEditMode = false;
+  bool isCaster = false;
+  bool classOnlySpells = false;
+  bool isDarkMode = false;
+  ThemeColor themeColor = ThemeColor.chestnutBrown;
+  bool offlineMode = false;
+  bool isOnboardingComplete = false;
 }
 
 class SettingsInitial extends SettingsState {}
@@ -18,9 +18,9 @@ class SettingsInitial extends SettingsState {}
 class SettingsLoading extends SettingsState {}
 
 class SettingsError extends SettingsState {
-  final String message;
 
   SettingsError(this.message);
+  final String message;
 }
 
 class SettingsLoaded extends SettingsState {

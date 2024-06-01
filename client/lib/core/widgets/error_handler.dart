@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
 class ErrorHandler extends StatelessWidget {
-  final String error;
-  final VoidCallback? onRetry;
 
   const ErrorHandler({super.key, required this.error, this.onRetry});
+  final String error;
+  final VoidCallback? onRetry;
 
   @override
   Widget build(BuildContext context) {

@@ -6,12 +6,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:recase/recase.dart';
 
 class Spellbook extends StatefulWidget {
-  final Map<String, dynamic> character;
-  final String slug;
-  final Map<String, dynamic> spells;
-  final List<Map<String, dynamic>> table;
-  final VoidCallback? updateCharacter;
-
   const Spellbook({
     super.key,
     required this.character,
@@ -20,6 +14,11 @@ class Spellbook extends StatefulWidget {
     required this.table,
     this.updateCharacter,
   });
+  final Map<String, dynamic> character;
+  final String slug;
+  final Map<String, dynamic> spells;
+  final List<Map<String, dynamic>> table;
+  final VoidCallback? updateCharacter;
 
   @override
   SpellbookState createState() => SpellbookState();
@@ -35,75 +34,87 @@ class SpellbookState extends State<Spellbook> {
   void initState() {
     super.initState();
     if (widget.character.containsKey('known_spells')) {
-      knownSpells = List<String>.from(widget.character['known_spells']);
+      knownSpells =
+          List<String>.from(widget.character['known_spells'] as List<dynamic>);
     }
     if (widget.character.containsKey('prepared_spells')) {
-      preparedSpells =
-          Map<String, bool>.from(widget.character['prepared_spells']);
+      preparedSpells = Map<String, bool>.from(
+        widget.character['prepared_spells'] as Map<dynamic, dynamic>,
+      );
     }
   }
 
   List<Widget> _buildSearchResults() {
-    List<Widget> searchResults = [];
+    final List<Widget> searchResults = [];
     if (searchText.isEmpty) {
       return searchResults;
     }
 
-    List<MapEntry<String, dynamic>> matchingEntries = [];
-    for (var entry in widget.spells.entries) {
-      final spell = entry.value;
-      if (spell['name'].toLowerCase().contains(searchText.toLowerCase())) {
+    final List<MapEntry<String, dynamic>> matchingEntries = [];
+    for (final entry in widget.spells.entries) {
+      final spell = entry.value as Map<String, dynamic>;
+      if (spell['name']
+              ?.toString()
+              .toLowerCase()
+              .contains(searchText.toLowerCase()) ??
+          false) {
         matchingEntries.add(entry);
       }
     }
 
     matchingEntries.sort(
       (a, b) {
-        int levelA = a.value['level_int'] ?? 0;
-        int levelB = b.value['level_int'] ?? 0;
+        final int levelA = (a.value as Map)['level_int'] as int? ?? 0;
+        final int levelB = (b.value as Map)['level_int'] as int? ?? 0;
         return levelA.compareTo(levelB);
       },
     );
 
-    for (var entry in matchingEntries) {
-      final spell = entry.value;
-      searchResults.add(ListTile(
-        title: Text(spell['name'] ?? ''),
-        subtitle: Row(
-          children: [
-            Text(spell['level'] ?? ''),
-            const Spacer(),
-            Text(spell['school'].toString().sentenceCase),
-          ],
+    for (final entry in matchingEntries) {
+      final spell = entry.value as Map<String, dynamic>;
+      searchResults.add(
+        ListTile(
+          title: Text(spell['name']?.toString() ?? ''),
+          subtitle: Row(
+            children: [
+              Text(spell['level']?.toString() ?? ''),
+              const Spacer(),
+              Text(spell['school'].toString().sentenceCase),
+            ],
+          ),
+          onTap: () {
+            _showSpellDialog(entry.key);
+          },
         ),
-        onTap: () {
-          _showSpellDialog(entry.key);
-        },
-      ));
+      );
     }
 
     return searchResults;
   }
 
   Widget _buildSpellList(int level) {
-    List<dynamic> spellSlugs = widget.character['known_spells'] ?? [];
+    final List<dynamic> spellSlugs =
+        widget.character['known_spells'] as List<dynamic>? ?? [];
     if (spellSlugs.isEmpty) {
       return Container();
     }
-    List<MapEntry<String, dynamic>> spells = [];
-    for (var spellSlug in spellSlugs) {
-      var spell = widget.spells[spellSlug];
-      spell ??= context.read<RulesCubit>().getAllSpells()[spellSlug] ?? {};
+    final List<MapEntry<String, dynamic>> spells = [];
+    for (final spellSlug in spellSlugs) {
+      var spell = widget.spells[spellSlug] as Map<String, dynamic>?;
+      spell ??= context.read<RulesCubit>().getAllSpells()[spellSlug]
+              as Map<String, dynamic>? ??
+          {};
       if (spell['level_int'] == level) {
-        spells.add(MapEntry(spellSlug, spell));
+        spells.add(MapEntry(spellSlug as String, spell));
       }
     }
     if (spells.isEmpty) {
       return Container();
     }
-    String label =
-        level == 0 ? 'Cantrips' : '${spells[0].value['level']} spells';
-    String spellCountLabel =
+    final String label = level == 0
+        ? 'Cantrips'
+        : '${(spells[0].value as Map?)?['level']} spells';
+    final String spellCountLabel =
         '${spells.length} ${spells.length == 1 ? 'spell' : 'spells'}';
     return Padding(
       padding: const EdgeInsets.all(8.0),
@@ -115,10 +126,11 @@ class SpellbookState extends State<Spellbook> {
           ],
         ),
         children: [
-          for (var entry in spells)
+          for (final entry in spells)
             ListTile(
-              title: Text(entry.value['name']),
-              subtitle: Text(entry.value['school'].toString().sentenceCase),
+              title: Text((entry.value as Map)['name']?.toString() ?? ''),
+              subtitle:
+                  Text((entry.value as Map)['school'].toString().sentenceCase),
               onTap: () {
                 _showSpellDialog(entry.key);
               },
@@ -129,39 +141,50 @@ class SpellbookState extends State<Spellbook> {
   }
 
   Widget _buildSpellSlotsList() {
-    Map<int, int> slots =
-        getSpellSlotsForLevel(widget.table, widget.character['level'] ?? 1);
-    final expendedSlots =
-        Map<String, int>.from(widget.character['expended_spell_slots'] ?? {});
+    final Map<int, int> slots = getSpellSlotsForLevel(
+      widget.table,
+      widget.character['level'] as int? ?? 1,
+    );
+    final expendedSlots = Map<String, int>.from(
+      widget.character['expended_spell_slots'] as Map<dynamic, dynamic>? ?? {},
+    );
 
-    List<Padding> texts = [];
-    for (var entry in slots.entries) {
-      texts.add(Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Card.filled(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('${getOrdinal(entry.key)} Level',
-                    style: Theme.of(context).textTheme.titleMedium),
-                const SizedBox(height: 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('Total: ${entry.value}',
-                        style: Theme.of(context).textTheme.bodyMedium),
-                    if (expendedSlots.containsKey(entry.key.toString()))
-                      Text('Used: ${expendedSlots[entry.key.toString()]}',
-                          style: Theme.of(context).textTheme.bodyMedium),
-                  ],
-                ),
-              ],
+    final List<Padding> texts = [];
+    for (final entry in slots.entries) {
+      texts.add(
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Card.filled(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '${getOrdinal(entry.key)} Level',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Total: ${entry.value}',
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                      if (expendedSlots.containsKey(entry.key.toString()))
+                        Text(
+                          'Used: ${expendedSlots[entry.key.toString()]}',
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         ),
-      ));
+      );
     }
     return Padding(
       padding: const EdgeInsets.all(8.0),
@@ -176,8 +199,13 @@ class SpellbookState extends State<Spellbook> {
   }
 
   void _editSpellSlots(
-      BuildContext context, Map<String, int> expended, Map<int, int> total) {
-    Map<int, int> slots = Map<int, int>.from(expended);
+    BuildContext context,
+    Map<String, int> expended,
+    Map<int, int> total,
+  ) {
+    final Map<int, int> slots = Map<int, int>.from(
+      expended.map((key, value) => MapEntry(int.parse(key), value)),
+    );
 
     showDialog(
       context: context,
@@ -212,8 +240,10 @@ class SpellbookState extends State<Spellbook> {
                             icon: const Icon(Icons.remove_circle_outline),
                           ),
                         ),
-                        Text('$curr/$max',
-                            style: Theme.of(context).textTheme.displaySmall),
+                        Text(
+                          '$curr/$max',
+                          style: Theme.of(context).textTheme.displaySmall,
+                        ),
                         Padding(
                           padding: const EdgeInsets.only(left: 6),
                           child: IconButton(
@@ -246,7 +276,7 @@ class SpellbookState extends State<Spellbook> {
             TextButton(
               onPressed: () {
                 final expendedNew = Map<String, int>.from(expended);
-                for (var entry in slots.entries) {
+                for (final entry in slots.entries) {
                   expendedNew[entry.key.toString()] =
                       total[entry.key]! - entry.value;
                 }

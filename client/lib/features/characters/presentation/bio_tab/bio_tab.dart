@@ -4,14 +4,14 @@ import 'package:dnd5e_dm_tools/features/characters/presentation/bio_tab/widgets/
 import 'package:flutter/material.dart';
 
 class BioTab extends StatelessWidget {
-  final Map<String, dynamic> character;
-  final String slug;
 
   const BioTab({
     super.key,
     required this.character,
     required this.slug,
   });
+  final Map<String, dynamic> character;
+  final String slug;
 
   @override
   Widget build(BuildContext context) {
@@ -39,12 +39,12 @@ class BioTab extends StatelessWidget {
           ),
           Padding(
             padding: EdgeInsets.symmetric(
-                vertical: 4, horizontal: screenWidth * 0.08),
+                vertical: 4, horizontal: screenWidth * 0.08,),
             child: const Divider(),
           ),
           Padding(
             padding: EdgeInsets.symmetric(
-                horizontal: screenWidth * 0.08, vertical: 8),
+                horizontal: screenWidth * 0.08, vertical: 8,),
             child: ProficiencyList(
               character: character,
               slug: slug,
@@ -52,7 +52,7 @@ class BioTab extends StatelessWidget {
           ),
           Padding(
             padding: EdgeInsets.symmetric(
-                horizontal: screenWidth * 0.08, vertical: 8),
+                horizontal: screenWidth * 0.08, vertical: 8,),
             child: FeatsList(
               character: character,
               slug: slug,
@@ -69,7 +69,6 @@ class BioTab extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Flexible(
-          flex: 1,
           child: Padding(
             padding: const EdgeInsets.all(8.0),
             child: AspectRatio(
@@ -82,13 +81,12 @@ class BioTab extends StatelessWidget {
           ),
         ),
         Flexible(
-          flex: 1,
           child: SingleChildScrollView(
             child: Column(
               children: [
                 Padding(
                   padding: EdgeInsets.symmetric(
-                      horizontal: screenWidth * 0.02, vertical: 8),
+                      horizontal: screenWidth * 0.02, vertical: 8,),
                   child: ProficiencyList(
                     character: character,
                     slug: slug,
@@ -96,7 +94,7 @@ class BioTab extends StatelessWidget {
                 ),
                 Padding(
                   padding: EdgeInsets.symmetric(
-                      horizontal: screenWidth * 0.02, vertical: 8),
+                      horizontal: screenWidth * 0.02, vertical: 8,),
                   child: FeatsList(
                     character: character,
                     slug: slug,

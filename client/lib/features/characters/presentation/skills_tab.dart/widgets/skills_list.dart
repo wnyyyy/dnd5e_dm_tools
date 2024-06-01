@@ -30,14 +30,14 @@ class _SkillListState extends State<SkillList> {
   @override
   void initState() {
     super.initState();
-    var profSkills = widget.character['prof_skills'];
+    final profSkills = widget.character['prof_skills'];
     if (profSkills != null && profSkills is List) {
       skillProf = List<String>.from(profSkills);
     } else {
       skillProf = [];
     }
 
-    var expSkills = widget.character['expertise_skills'];
+    final expSkills = widget.character['expertise_skills'];
     if (expSkills != null && expSkills is List) {
       expertiseSkills = List<String>.from(expSkills);
     } else {
@@ -48,31 +48,31 @@ class _SkillListState extends State<SkillList> {
   @override
   Widget build(BuildContext context) {
     final editMode = Provider.of<SettingsCubit>(context).state.isEditMode;
-    final profBonus = getProfBonus(widget.character['level']);
+    final profBonus = getProfBonus(widget.character['level'] as int? ?? 1);
 
     VoidCallback editSkill() {
       showDialog(
         context: context,
         builder: (BuildContext context) {
-          List<String> skills = [
-            "Acrobatics",
-            "Animal Handling",
-            "Arcana",
-            "Athletics",
-            "Deception",
-            "History",
-            "Insight",
-            "Intimidation",
-            "Investigation",
-            "Medicine",
-            "Nature",
-            "Perception",
-            "Performance",
-            "Persuasion",
-            "Religion",
-            "Sleight of Hand",
-            "Stealth",
-            "Survival"
+          final List<String> skills = [
+            'Acrobatics',
+            'Animal Handling',
+            'Arcana',
+            'Athletics',
+            'Deception',
+            'History',
+            'Insight',
+            'Intimidation',
+            'Investigation',
+            'Medicine',
+            'Nature',
+            'Perception',
+            'Performance',
+            'Persuasion',
+            'Religion',
+            'Sleight of Hand',
+            'Stealth',
+            'Survival',
           ];
 
           return StatefulBuilder(
@@ -103,9 +103,11 @@ class _SkillListState extends State<SkillList> {
                                       }
                                     } else {
                                       skillProf.removeWhere(
-                                          (element) => element == skillSlug);
+                                        (element) => element == skillSlug,
+                                      );
                                       expertiseSkills.removeWhere(
-                                          (element) => element == skillSlug);
+                                        (element) => element == skillSlug,
+                                      );
                                     }
                                   });
                                 }
@@ -131,7 +133,8 @@ class _SkillListState extends State<SkillList> {
                                         }
                                       } else {
                                         expertiseSkills.removeWhere(
-                                            (element) => element == skillSlug);
+                                          (element) => element == skillSlug,
+                                        );
                                       }
                                     });
                                   }
@@ -156,13 +159,17 @@ class _SkillListState extends State<SkillList> {
                     onPressed: () {
                       widget.character['prof_skills'] = skillProf;
                       widget.character['expertise_skills'] = expertiseSkills;
-                      context.read<CharacterBloc>().add(CharacterUpdate(
-                            character: widget.character,
-                            slug: widget.slug,
-                            offline:
-                                context.read<SettingsCubit>().state.offlineMode,
-                            persistData: true,
-                          ));
+                      context.read<CharacterBloc>().add(
+                            CharacterUpdate(
+                              character: widget.character,
+                              slug: widget.slug,
+                              offline: context
+                                  .read<SettingsCubit>()
+                                  .state
+                                  .offlineMode,
+                              persistData: true,
+                            ),
+                          );
                       Navigator.of(context).pop();
                     },
                   ),
@@ -201,13 +208,16 @@ class _SkillListState extends State<SkillList> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
-                            Text('Strength',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .labelMedium!
-                                    .copyWith(
-                                        color: Theme.of(context).strengthColor,
-                                        fontWeight: FontWeight.bold)),
+                            Text(
+                              'Strength',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .labelMedium!
+                                  .copyWith(
+                                    color: Theme.of(context).strengthColor,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                            ),
                             const SizedBox(height: 2),
                             Skill(
                               skillName: 'Athletics',
@@ -228,13 +238,16 @@ class _SkillListState extends State<SkillList> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
-                            Text('Dexterity',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .labelMedium!
-                                    .copyWith(
-                                        color: Theme.of(context).dexterityColor,
-                                        fontWeight: FontWeight.bold)),
+                            Text(
+                              'Dexterity',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .labelMedium!
+                                  .copyWith(
+                                    color: Theme.of(context).dexterityColor,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                            ),
                             const SizedBox(height: 2),
                             Skill(
                               skillName: 'Acrobatics',
@@ -276,14 +289,16 @@ class _SkillListState extends State<SkillList> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
-                            Text('Intelligence',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .labelMedium!
-                                    .copyWith(
-                                        color:
-                                            Theme.of(context).intelligenceColor,
-                                        fontWeight: FontWeight.bold)),
+                            Text(
+                              'Intelligence',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .labelMedium!
+                                  .copyWith(
+                                    color: Theme.of(context).intelligenceColor,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                            ),
                             const SizedBox(height: 2),
                             Skill(
                               skillName: 'Arcana',
@@ -349,13 +364,16 @@ class _SkillListState extends State<SkillList> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
-                            Text('Wisdom',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .labelMedium!
-                                    .copyWith(
-                                        color: Theme.of(context).wisdomColor,
-                                        fontWeight: FontWeight.bold)),
+                            Text(
+                              'Wisdom',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .labelMedium!
+                                  .copyWith(
+                                    color: Theme.of(context).wisdomColor,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                            ),
                             const SizedBox(height: 2),
                             Skill(
                               skillName: 'Animal Handling',
@@ -417,13 +435,16 @@ class _SkillListState extends State<SkillList> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
-                            Text('Charisma',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .labelMedium!
-                                    .copyWith(
-                                        color: Theme.of(context).charismaColor,
-                                        fontWeight: FontWeight.bold)),
+                            Text(
+                              'Charisma',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .labelMedium!
+                                  .copyWith(
+                                    color: Theme.of(context).charismaColor,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                            ),
                             const SizedBox(height: 2),
                             Skill(
                               skillName: 'Deception',

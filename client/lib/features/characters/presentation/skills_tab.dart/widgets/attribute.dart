@@ -3,11 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AttributeCard extends StatelessWidget {
-  final String attributeName;
-  final int attributeValue;
-  final Color color;
-  final VoidCallback? onTap;
-  final VoidCallback? onLongPress;
 
   const AttributeCard({
     super.key,
@@ -17,10 +12,15 @@ class AttributeCard extends StatelessWidget {
     this.onTap,
     this.onLongPress,
   });
+  final String attributeName;
+  final int attributeValue;
+  final Color color;
+  final VoidCallback? onTap;
+  final VoidCallback? onLongPress;
 
   @override
   Widget build(BuildContext context) {
-    var mod = getModifier(attributeValue) >= 0
+    final mod = getModifier(attributeValue) >= 0
         ? '+${getModifier(attributeValue)}'
         : getModifier(attributeValue).toString();
     const minWidth = 120.0;
@@ -42,13 +42,12 @@ class AttributeCard extends StatelessWidget {
                 child: Text(attributeName,
                     style: Theme.of(context).textTheme.titleSmall!.copyWith(
                           color: color,
-                        )),
+                        ),),
               ),
               Padding(
                 padding: const EdgeInsets.only(bottom: 6),
                 child: Flex(
                   direction: Axis.horizontal,
-                  mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     SizedBox(
                       width: minWidth - 60,

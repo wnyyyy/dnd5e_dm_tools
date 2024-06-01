@@ -16,7 +16,7 @@ class Inspiration extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final int inspiration = character['inspiration'] ?? 0;
+    final int inspiration = character['inspiration'] as int? ?? 0;
     final color = inspiration > 0 ? Colors.green : null;
 
     void updateInspiration(int newInspiration) {
@@ -44,8 +44,10 @@ class Inspiration extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('Inspiration',
-                    style: Theme.of(context).textTheme.titleSmall),
+                Text(
+                  'Inspiration',
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
                 Column(
                   children: [
                     if (inspiration > 0)
@@ -58,11 +60,12 @@ class Inspiration extends StatelessWidget {
                         },
                         icon: const Icon(Icons.remove_circle_outline),
                       ),
-                    Text('$inspiration',
-                        style:
-                            Theme.of(context).textTheme.displaySmall!.copyWith(
-                                  color: color,
-                                )),
+                    Text(
+                      '$inspiration',
+                      style: Theme.of(context).textTheme.displaySmall!.copyWith(
+                            color: color,
+                          ),
+                    ),
                     IconButton(
                       iconSize: 32,
                       onPressed: () {

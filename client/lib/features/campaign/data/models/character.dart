@@ -2,12 +2,6 @@ import 'package:dnd5e_dm_tools/features/campaign/data/models/bullet_point.dart';
 import 'package:equatable/equatable.dart';
 
 class Character extends Equatable {
-  final List<BulletPoint> entries;
-  final String name;
-  final String imageUrl;
-  final bool isHidden;
-  final bool isImageHidden;
-
   const Character({
     required this.entries,
     required this.imageUrl,
@@ -15,6 +9,50 @@ class Character extends Equatable {
     this.isHidden = false,
     this.isImageHidden = false,
   });
+
+  factory Character.fromJson(Map<String, dynamic> json, String name) {
+    final bulletPoints = <BulletPoint>[];
+    if (json['entries'] is List) {
+      for (var i = 0; i < (json['entries'] as List).length; i++) {
+        final entry = (json['entries'] as List)[i];
+        if (entry is Map<String, dynamic>) {
+          bulletPoints.add(
+            BulletPoint(
+              id: i.toString(),
+              content: entry['content'] as String,
+              timestamp: entry['timestamp'] as int,
+            ),
+          );
+        }
+      }
+    } else if (json['entries'] is Map) {
+      final entriesMap = json['entries'] as Map<String, dynamic>;
+      for (final entry in entriesMap.entries) {
+        if (entry.value is Map<String, dynamic>) {
+          bulletPoints.add(
+            BulletPoint(
+              id: entry.key,
+              content: (entry.value as Map)['content'] as String,
+              timestamp: (entry.value as Map)['timestamp'] as int,
+            ),
+          );
+        }
+      }
+    }
+    return Character(
+      entries: bulletPoints,
+      name: name,
+      imageUrl: json['url'] as String,
+      isHidden: json['isHidden'] as bool? ?? false,
+      isImageHidden: json['isImageHidden'] as bool? ?? false,
+    );
+  }
+
+  final List<BulletPoint> entries;
+  final String name;
+  final String imageUrl;
+  final bool isHidden;
+  final bool isImageHidden;
 
   Character copyWith({
     List<BulletPoint>? entries,
@@ -40,42 +78,4 @@ class Character extends Equatable {
         isHidden,
         isImageHidden,
       ];
-
-  factory Character.fromJson(Map<String, dynamic> json, String name) {
-    final bulletPoints = <BulletPoint>[];
-    if (json['entries'] is List) {
-      for (var i = 0; i < json['entries'].length; i++) {
-        if (json['entries'][i] is String) {
-          final entry = json['entries'][i];
-          bulletPoints.add(
-            BulletPoint(
-              id: i.toString(),
-              content: entry['content'] as String,
-              timestamp: entry['timestamp'] as int,
-            ),
-          );
-        }
-      }
-    }
-    if (json['entries'] is Map) {
-      for (final entry in json['entries'].entries) {
-        if (entry.value is String) {
-          bulletPoints.add(
-            BulletPoint(
-              id: entry.key,
-              content: entry.value as String,
-              timestamp: entry.value['timestamp'] as int,
-            ),
-          );
-        }
-      }
-    }
-    return Character(
-      entries: bulletPoints,
-      name: name,
-      imageUrl: json['url'],
-      isHidden: json['isHidden'] ?? false,
-      isImageHidden: json['isImageHidden'] ?? false,
-    );
-  }
 }
