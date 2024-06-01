@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'package:dnd5e_dm_tools/features/campaign/data/models/bullet_point.dart';
 import 'package:equatable/equatable.dart';
 
@@ -10,35 +11,35 @@ class Adventure extends Equatable {
     final bulletPoints = <BulletPoint>[];
     if (json is List) {
       for (var i = 0; i < json.length; i++) {
-        final entry = json[i] as Map<String, dynamic>? ?? {};
-        if (json[i] is String) {
-          bulletPoints.add(
-            BulletPoint(
-              id: i.toString(),
-              content: entry['content']?.toString() ?? '',
-              timestamp: entry['timestamp'] as int? ?? 0,
-            ),
-          );
-        }
+        final entry = Map<String, dynamic>.from(json[i] as LinkedHashMap);
+        bulletPoints.add(
+          BulletPoint(
+            id: i.toString(),
+            content: entry['content']?.toString() ?? '',
+            timestamp: entry['timestamp'] as int? ?? 0,
+          ),
+        );
       }
-    }
-    if (json is Map) {
+    } else if (json is LinkedHashMap) {
       for (final entry in json.entries) {
-        if (entry.value is String) {
-          bulletPoints.add(
-            BulletPoint(
-              id: entry.key as String,
-              content: (entry.value as Map)['content'] as String,
-              timestamp: (entry.value as Map)['timestamp'] as int,
-            ),
-          );
-        }
+        final value = Map<String, dynamic>.from(entry.value as LinkedHashMap);
+        bulletPoints.add(
+          BulletPoint(
+            id: entry.key.toString(),
+            content: value['content']?.toString() ?? '',
+            timestamp: value['timestamp'] as int? ?? 0,
+          ),
+        );
       }
     }
+
+    bulletPoints.sort((a, b) => a.timestamp.compareTo(b.timestamp));
+
     return Adventure(
       entries: bulletPoints,
     );
   }
+
   final List<BulletPoint> entries;
 
   Adventure copyWith({

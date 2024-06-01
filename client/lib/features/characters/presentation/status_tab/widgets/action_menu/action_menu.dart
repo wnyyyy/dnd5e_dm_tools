@@ -247,10 +247,8 @@ class _ActionMenuState extends State<ActionMenu> {
         if (spell != null) {
           final level = spell['level_int'] as int? ?? 0;
           if (level > 0) {
-            final expendedSlotsMap =
-                widget.character['expended_spell_slots'] as Map? ?? {};
-            final expendedSlots =
-                expendedSlotsMap[level.toString()] as int? ?? 0;
+            final expendedSlotsMap = getExpendedSlots(widget.character);
+            final expendedSlots = expendedSlotsMap[level.toString()] ?? 0;
             expendedSlotsMap[level.toString()] = expendedSlots + 1;
             widget.character['expended_spell_slots'] = expendedSlotsMap;
           }

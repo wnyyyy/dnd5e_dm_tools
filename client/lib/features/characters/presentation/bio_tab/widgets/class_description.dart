@@ -38,31 +38,40 @@ class _ClassDescriptionState extends State<ClassDescription> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final dialogWidth = screenWidth > 900
+        ? 810.0
+        : (screenWidth * 0.9) < 450.0
+            ? 450.0
+            : screenWidth * 0.9;
     return Dialog(
       child: DefaultTabController(
         initialIndex: 1,
         length: 3,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            TabBar(
-              tabs: const [
-                Tab(text: 'Archetype'),
-                Tab(text: 'Class'),
-                Tab(text: 'Table'),
-              ],
-              labelStyle: Theme.of(context).textTheme.bodySmall,
-            ),
-            Expanded(
-              child: TabBarView(
-                children: [
-                  _buildArchetypeTab(),
-                  _buildClassTab(),
-                  _buildTableTab(),
+        child: SizedBox(
+          width: dialogWidth,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              TabBar(
+                tabs: const [
+                  Tab(text: 'Archetype'),
+                  Tab(text: 'Class'),
+                  Tab(text: 'Table'),
                 ],
+                labelStyle: Theme.of(context).textTheme.bodySmall,
               ),
-            ),
-          ],
+              Expanded(
+                child: TabBarView(
+                  children: [
+                    _buildArchetypeTab(),
+                    _buildClassTab(),
+                    _buildTableTab(),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

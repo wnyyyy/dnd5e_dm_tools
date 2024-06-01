@@ -226,9 +226,7 @@ class ActionItemState extends State<ActionItem> {
               table,
               widget.character['level'] as int? ?? 1,
             );
-            final expendedSlotsMap = Map<String, int>.from(
-              widget.character['expended_spell_slots'] as Map<int, int>? ?? {},
-            );
+            final expendedSlotsMap = getExpendedSlots(widget.character);
             final levelInt = spell['level_int'] ?? 1;
             final expendedSpellSlots = expendedSlotsMap[levelInt] ?? 0;
             final totalSlots = totalSlotsMap[levelInt] ?? 0;

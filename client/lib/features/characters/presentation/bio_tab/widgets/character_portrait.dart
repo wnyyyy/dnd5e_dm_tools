@@ -53,31 +53,40 @@ class CharacterPortrait extends StatelessWidget {
         if (data == null) return Container();
         final Map<String, dynamic> racialTraits =
             getRacialFeatures(data['traits']?.toString() ?? '');
+        final screenWidth = MediaQuery.of(context).size.width;
+        final dialogWidth = screenWidth > 900
+            ? 810.0
+            : (screenWidth * 0.9) < 450.0
+                ? 450.0
+                : screenWidth * 0.9;
         return AlertDialog(
           title: Text(data['name'] as String? ?? 'Error'),
           content: SingleChildScrollView(
-            child: Column(
-              children: [
-                for (final trait in racialTraits.entries)
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        trait.key,
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        child: DescriptionText(
-                          inputText: trait.value?.toString() ?? '',
-                          baseStyle: Theme.of(context).textTheme.bodySmall!,
+            child: SizedBox(
+              width: dialogWidth,
+              child: Column(
+                children: [
+                  for (final trait in racialTraits.entries)
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          trait.key,
+                          style: Theme.of(context).textTheme.titleMedium,
                         ),
-                      ),
-                      const Divider(),
-                      const SizedBox(height: 8),
-                    ],
-                  ),
-              ],
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          child: DescriptionText(
+                            inputText: trait.value?.toString() ?? '',
+                            baseStyle: Theme.of(context).textTheme.bodySmall!,
+                          ),
+                        ),
+                        const Divider(),
+                        const SizedBox(height: 8),
+                      ],
+                    ),
+                ],
+              ),
             ),
           ),
           actions: [

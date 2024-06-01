@@ -18,33 +18,33 @@ class CharactersTab extends StatelessWidget {
           final List<Character> sortedCharacters =
               List<Character>.from(state.characters);
           sortedCharacters.sort((a, b) => a.name.compareTo(b.name));
+          final nonHidden = sortedCharacters.where((c) => !c.isHidden).toList();
 
           return Padding(
             padding: const EdgeInsets.all(24.0),
             child: Wrap(
               spacing: 8.0,
               runSpacing: 4.0,
-              children: sortedCharacters
-                  .map((character) => Visibility(
-                        visible: !character.isHidden,
-                        child: ChoiceChip(
-                          label: Text(character.name),
-                          selected: false,
-                          onSelected: (_) {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => BlocProvider.value(
-                                  value:
-                                      BlocProvider.of<CampaignCubit>(context),
-                                  child: CharacterDetailsScreen(
-                                      character: character,),
-                                ),
+              children: nonHidden
+                  .map(
+                    (character) => ChoiceChip(
+                      label: Text(character.name),
+                      selected: false,
+                      onSelected: (_) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => BlocProvider.value(
+                              value: BlocProvider.of<CampaignCubit>(context),
+                              child: CharacterDetailsScreen(
+                                character: character,
                               ),
-                            );
-                          },
-                        ),
-                      ),)
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  )
                   .toList(),
             ),
           );

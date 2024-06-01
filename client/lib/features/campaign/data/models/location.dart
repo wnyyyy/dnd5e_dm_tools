@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'package:dnd5e_dm_tools/features/campaign/data/models/bullet_point.dart';
 import 'package:equatable/equatable.dart';
 
@@ -15,7 +16,7 @@ class Location extends Equatable {
     if (json['entries'] is List) {
       for (var i = 0; i < (json['entries'] as List).length; i++) {
         final entry = (json['entries'] as List)[i];
-        if (entry is Map<String, dynamic>) {
+        if (entry is LinkedHashMap) {
           bulletPoints.add(
             BulletPoint(
               id: i.toString(),
@@ -26,12 +27,12 @@ class Location extends Equatable {
         }
       }
     } else if (json['entries'] is Map) {
-      final entriesMap = json['entries'] as Map<String, dynamic>;
+      final entriesMap = json['entries'] as LinkedHashMap;
       for (final entry in entriesMap.entries) {
         if (entry.value is Map<String, dynamic>) {
           bulletPoints.add(
             BulletPoint(
-              id: entry.key,
+              id: entry.key.toString(),
               content: (entry.value as Map)['content'] as String,
               timestamp: (entry.value as Map)['timestamp'] as int,
             ),

@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dnd5e_dm_tools/features/campaign/cubit/campaign_cubit.dart';
 import 'package:dnd5e_dm_tools/features/campaign/cubit/campaign_states.dart';
 import 'package:dnd5e_dm_tools/features/campaign/data/models/location.dart';
@@ -7,7 +8,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:photo_view/photo_view.dart';
 
 class LocationDetailsScreen extends StatefulWidget {
-
   const LocationDetailsScreen({super.key, required this.location});
   final Location location;
 
@@ -190,7 +190,7 @@ class LocationDetailsScreenState extends State<LocationDetailsScreen> {
         child: PhotoView(
           backgroundDecoration:
               BoxDecoration(color: Theme.of(context).canvasColor),
-          imageProvider: NetworkImage(updatedLocation.imageUrl),
+          imageProvider: CachedNetworkImageProvider(updatedLocation.imageUrl),
         ),
       ),
     );

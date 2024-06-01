@@ -8,7 +8,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 enum CampaignTab { locations, characters, adventure }
 
 class CampaignCubit extends Cubit<CampaignState> {
-
   CampaignCubit({
     required this.campaignRepository,
   }) : super(CampaignInitial());
@@ -36,50 +35,62 @@ class CampaignCubit extends Cubit<CampaignState> {
     _charactersSubscription?.cancel();
     _adventureSubscription?.cancel();
 
-    _locationsSubscription =
-        campaignRepository.getLocationsStream().listen((locations) {
-      if (state is CampaignLoaded) {
-        emit((state as CampaignLoaded).copyWith(locations: locations));
-      } else if (state is CampaignLoading) {
-        emit(CampaignLoaded(
-          locations: locations,
-          characters: const [],
-          adventure: const Adventure(entries: []),
-        ),);
-      }
-    }, onError: (error) {
-      emit(CampaignError(message: error.toString()));
-    },);
+    _locationsSubscription = campaignRepository.getLocationsStream().listen(
+      (locations) {
+        if (state is CampaignLoaded) {
+          emit((state as CampaignLoaded).copyWith(locations: locations));
+        } else if (state is CampaignLoading) {
+          emit(
+            CampaignLoaded(
+              locations: locations,
+              characters: const [],
+              adventure: const Adventure(entries: []),
+            ),
+          );
+        }
+      },
+      onError: (error) {
+        emit(CampaignError(message: error.toString()));
+      },
+    );
 
-    _charactersSubscription =
-        campaignRepository.getCharactersStream().listen((characters) {
-      if (state is CampaignLoaded) {
-        emit((state as CampaignLoaded).copyWith(characters: characters));
-      } else if (state is CampaignLoading) {
-        emit(CampaignLoaded(
-          locations: const [],
-          characters: characters,
-          adventure: const Adventure(entries: []),
-        ),);
-      }
-    }, onError: (error) {
-      emit(CampaignError(message: error.toString()));
-    },);
+    _charactersSubscription = campaignRepository.getCharactersStream().listen(
+      (characters) {
+        if (state is CampaignLoaded) {
+          emit((state as CampaignLoaded).copyWith(characters: characters));
+        } else if (state is CampaignLoading) {
+          emit(
+            CampaignLoaded(
+              locations: const [],
+              characters: characters,
+              adventure: const Adventure(entries: []),
+            ),
+          );
+        }
+      },
+      onError: (error) {
+        emit(CampaignError(message: error.toString()));
+      },
+    );
 
-    _adventureSubscription =
-        campaignRepository.getAdventureStream().listen((adventure) {
-      if (state is CampaignLoaded) {
-        emit((state as CampaignLoaded).copyWith(adventure: adventure));
-      } else if (state is CampaignLoading) {
-        emit(CampaignLoaded(
-          locations: const [],
-          characters: const [],
-          adventure: adventure,
-        ),);
-      }
-    }, onError: (error) {
-      emit(CampaignError(message: error.toString()));
-    },);
+    _adventureSubscription = campaignRepository.getAdventureStream().listen(
+      (adventure) {
+        if (state is CampaignLoaded) {
+          emit((state as CampaignLoaded).copyWith(adventure: adventure));
+        } else if (state is CampaignLoading) {
+          emit(
+            CampaignLoaded(
+              locations: const [],
+              characters: const [],
+              adventure: adventure,
+            ),
+          );
+        }
+      },
+      onError: (error) {
+        emit(CampaignError(message: error.toString()));
+      },
+    );
   }
 
   Future<void> updateEntry({
@@ -108,13 +119,14 @@ class CampaignCubit extends Cubit<CampaignState> {
     required CampaignTab type,
   }) async {
     try {
+      final timestamp = DateTime.now().millisecondsSinceEpoch;
       switch (type) {
         case CampaignTab.locations:
-          await campaignRepository.addLocationEntry(name, content);
+          await campaignRepository.addLocationEntry(name, content, timestamp);
         case CampaignTab.characters:
-          await campaignRepository.addCharacterEntry(name, content);
+          await campaignRepository.addCharacterEntry(name, content, timestamp);
         case CampaignTab.adventure:
-          await campaignRepository.addAdventureEntry(content);
+          await campaignRepository.addAdventureEntry(content, timestamp);
       }
     } catch (e) {
       emit(CampaignError(message: e.toString()));

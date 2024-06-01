@@ -145,9 +145,7 @@ class SpellbookState extends State<Spellbook> {
       widget.table,
       widget.character['level'] as int? ?? 1,
     );
-    final expendedSlots = Map<String, int>.from(
-      widget.character['expended_spell_slots'] as Map<dynamic, dynamic>? ?? {},
-    );
+    final expendedSlots = getExpendedSlots(widget.character);
 
     final List<Padding> texts = [];
     for (final entry in slots.entries) {

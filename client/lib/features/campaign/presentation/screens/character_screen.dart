@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dnd5e_dm_tools/features/campaign/cubit/campaign_cubit.dart';
 import 'package:dnd5e_dm_tools/features/campaign/cubit/campaign_states.dart';
 import 'package:dnd5e_dm_tools/features/campaign/data/models/character.dart';
@@ -7,7 +8,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:photo_view/photo_view.dart';
 
 class CharacterDetailsScreen extends StatefulWidget {
-
   const CharacterDetailsScreen({super.key, required this.character});
   final Character character;
 
@@ -191,7 +191,7 @@ class CharacterDetailsScreenState extends State<CharacterDetailsScreen> {
         child: PhotoView(
           backgroundDecoration:
               BoxDecoration(color: Theme.of(context).canvasColor),
-          imageProvider: NetworkImage(updatedCharacter.imageUrl),
+          imageProvider: CachedNetworkImageProvider(updatedCharacter.imageUrl),
         ),
       ),
     );

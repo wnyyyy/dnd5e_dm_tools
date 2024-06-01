@@ -171,27 +171,26 @@ Map<String, dynamic> getArchetypeFeatures(
 
   String currentFeatureKey = '';
   List<String> currentFeatureDescription = [];
-  Map<String, dynamic> currentFeature = {};
+
   for (final line in lines) {
     if (line.startsWith('##### ')) {
-      currentFeature =
-          features[currentFeatureKey] as Map<String, dynamic>? ?? {};
       if (currentFeatureKey.isNotEmpty) {
-        currentFeature['description'] = currentFeatureDescription.join('\n');
+        features[currentFeatureKey] = {
+          'description': currentFeatureDescription.join('\n'),
+        };
       }
       currentFeatureKey = line.substring(6).trim();
       currentFeatureDescription = [];
-      features[currentFeatureKey] = {};
     } else {
       currentFeatureDescription.add(line.trim());
     }
   }
 
   if (currentFeatureKey.isNotEmpty) {
-    currentFeature['description'] = currentFeatureDescription.join('\n');
+    features[currentFeatureKey] = {
+      'description': currentFeatureDescription.join('\n'),  
+    };
   }
-
-  features[currentFeatureKey] = currentFeature;
 
   if (table.isNotEmpty) {
     final Map<String, dynamic> filteredFeatures = <String, dynamic>{};
@@ -426,6 +425,14 @@ Map<String, int> getAsi(Map<String, dynamic> character) {
         'charisma': 10,
       };
   return asi;
+}
+
+Map<String, int> getExpendedSlots(Map<String, dynamic> character) {
+  final expendedSlotsMap =
+      (character['expended_spell_slots'] as Map<dynamic, dynamic>?)
+              ?.map((key, value) => MapEntry(key.toString(), value as int)) ??
+          {};
+  return expendedSlotsMap;
 }
 
 Icon? itemToIcon(Map<String, dynamic> item) {

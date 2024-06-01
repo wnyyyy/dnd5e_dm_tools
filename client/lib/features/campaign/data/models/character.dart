@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'package:dnd5e_dm_tools/features/campaign/data/models/bullet_point.dart';
 import 'package:equatable/equatable.dart';
 
@@ -14,26 +15,26 @@ class Character extends Equatable {
     final bulletPoints = <BulletPoint>[];
     if (json['entries'] is List) {
       for (var i = 0; i < (json['entries'] as List).length; i++) {
-        final entry = (json['entries'] as List)[i];
-        if (entry is Map<String, dynamic>) {
-          bulletPoints.add(
-            BulletPoint(
-              id: i.toString(),
-              content: entry['content'] as String,
-              timestamp: entry['timestamp'] as int,
-            ),
-          );
-        }
+        final entry = Map<String, dynamic>.from(
+          (json['entries'] as List)[i] as LinkedHashMap,
+        );
+        bulletPoints.add(
+          BulletPoint(
+            id: i.toString(),
+            content: entry['content'] as String,
+            timestamp: entry['timestamp'] as int,
+          ),
+        );
       }
     } else if (json['entries'] is Map) {
-      final entriesMap = json['entries'] as Map<String, dynamic>;
+      final entriesMap = json['entries'] as LinkedHashMap;
       for (final entry in entriesMap.entries) {
-        if (entry.value is Map<String, dynamic>) {
+        if (entry.value is LinkedHashMap) {
           bulletPoints.add(
             BulletPoint(
-              id: entry.key,
-              content: (entry.value as Map)['content'] as String,
-              timestamp: (entry.value as Map)['timestamp'] as int,
+              id: entry.key.toString(),
+              content: (entry.value as LinkedHashMap)['content'] as String,
+              timestamp: (entry.value as LinkedHashMap)['timestamp'] as int,
             ),
           );
         }
