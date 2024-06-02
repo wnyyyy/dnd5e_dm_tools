@@ -417,50 +417,45 @@ class DescriptionText extends StatelessWidget {
   List<TextSpan> _processCompoundWords(List<TextSpan> spans) {
     final List<TextSpan> processedSpans = [];
     final compoundRegex = RegExp(
-      r'\b\w+-(\w*(feet|foot|ft|hour|minutes|minute|hours)\b(?:-\w+)?)',
+      r'\b(\d+-\w*(feet|foot|ft|hour|minute|minutes|hours)\b(?:-\w+)?)',
       caseSensitive: false,
     );
 
-    // Concatenate all texts from the spans
-    final String concatenatedText = spans.map((span) => span.text).join();
+    for (final span in spans) {
+      final text = span.text ?? '';
+      final matches = compoundRegex.allMatches(text);
+      if (matches.isEmpty) {
+        processedSpans.add(span);
+        continue;
+      }
 
-    // Find all matches in the concatenated text
-    final matches = compoundRegex.allMatches(concatenatedText);
-
-    // If there are no matches, return the original spans
-    if (matches.isEmpty) {
-      return spans;
-    }
-
-    int lastEnd = 0;
-    for (final match in matches) {
-      // Add the text before the match
-      if (match.start > lastEnd) {
+      int lastEnd = 0;
+      for (final match in matches) {
+        if (match.start > lastEnd) {
+          processedSpans.add(
+            TextSpan(
+              text: text.substring(lastEnd, match.start),
+              style: span.style,
+            ),
+          );
+        }
         processedSpans.add(
           TextSpan(
-            text: concatenatedText.substring(lastEnd, match.start),
-            style: spans[0].style, // Use the style of the first span as default
+            text: match.group(0),
+            style: span.style?.copyWith(fontWeight: FontWeight.bold),
+          ),
+        );
+        lastEnd = match.end;
+      }
+
+      if (lastEnd < text.length) {
+        processedSpans.add(
+          TextSpan(
+            text: text.substring(lastEnd),
+            style: span.style,
           ),
         );
       }
-      // Add the matched text with bold style
-      processedSpans.add(
-        TextSpan(
-          text: match.group(0),
-          style: spans[0].style?.copyWith(fontWeight: FontWeight.bold),
-        ),
-      );
-      lastEnd = match.end;
-    }
-
-    // Add the remaining text after the last match
-    if (lastEnd < concatenatedText.length) {
-      processedSpans.add(
-        TextSpan(
-          text: concatenatedText.substring(lastEnd),
-          style: spans[0].style,
-        ),
-      );
     }
 
     return processedSpans;
