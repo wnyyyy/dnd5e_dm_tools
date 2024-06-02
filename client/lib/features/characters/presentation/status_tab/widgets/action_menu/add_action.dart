@@ -209,7 +209,6 @@ class _AddActionDialogState extends State<_AddActionDialog> {
                 : screenWidth > 600
                     ? screenWidth * 0.75
                     : screenWidth * 0.9,
-            minWidth: 400,
             maxHeight: screenHeight * 0.9,
             minHeight: screenHeight * 0.9,
           ),
@@ -419,9 +418,18 @@ class _AddActionDialogState extends State<_AddActionDialog> {
                               ?.toString()
                               .isNotEmpty ??
                           false) {
-                        _descriptionController.text =
-                            ((entry.value as Map?)?['desc'] as List<String>? ??
-                                [])[0];
+                        if ((entry.value as Map?)?['desc'] is List) {
+                          final val =
+                              (entry.value as Map?)?['desc'] as List? ?? [];
+                          if (val.isNotEmpty) {
+                            _descriptionController.text = val.join('\n');
+                          } else {
+                            _descriptionController.text = '';
+                          }
+                        } else {
+                          _descriptionController.text =
+                              (entry.value as Map?)?['desc']?.toString() ?? '';
+                        }
                       }
                     }
 
@@ -458,12 +466,16 @@ class _AddActionDialogState extends State<_AddActionDialog> {
 
   Widget _buildAddItem() {
     final screenWidth = MediaQuery.of(context).size.width;
-    return Row(
+    return Flex(
+      direction: screenWidth > 600 ? Axis.horizontal : Axis.vertical,
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        Column(
-          mainAxisAlignment: MainAxisAlignment.end,
+        Flex(
+          direction: screenWidth > 600 ? Axis.vertical : Axis.horizontal,
+          mainAxisAlignment: screenWidth > 600
+              ? MainAxisAlignment.end
+              : MainAxisAlignment.center,
           children: [
             Text(
               'Requires\nequipped\nitem',
@@ -484,8 +496,11 @@ class _AddActionDialogState extends State<_AddActionDialog> {
           ],
         ),
         SizedBox(width: screenWidth > 600 ? 48 : 24),
-        Column(
-          mainAxisAlignment: MainAxisAlignment.end,
+        Flex(
+          direction: screenWidth > 600 ? Axis.vertical : Axis.horizontal,
+          mainAxisAlignment: screenWidth > 600
+              ? MainAxisAlignment.end
+              : MainAxisAlignment.center,
           children: [
             Text('Expendable', style: Theme.of(context).textTheme.bodyMedium),
             Checkbox(
@@ -501,12 +516,21 @@ class _AddActionDialogState extends State<_AddActionDialog> {
           ],
         ),
         SizedBox(width: screenWidth > 600 ? 48 : 24),
-        Column(
-          mainAxisAlignment: MainAxisAlignment.end,
+        Flex(
+          direction: screenWidth > 600 ? Axis.vertical : Axis.horizontal,
+          mainAxisAlignment: screenWidth > 600
+              ? MainAxisAlignment.end
+              : MainAxisAlignment.center,
           children: [
-            Text(
-              'Requires Ammo',
-              style: Theme.of(context).textTheme.bodyMedium,
+            Padding(
+              padding: screenWidth > 600
+                  ? EdgeInsets.zero
+                  : const EdgeInsets.only(right: 16),
+              child: Text(
+                'Requires\nAmmo',
+                style: Theme.of(context).textTheme.bodyMedium,
+                textAlign: TextAlign.center,
+              ),
             ),
             DropdownButton<String>(
               value: _ammo,

@@ -25,3 +25,5 @@ ls
 
 # Enable flutter web
 ./flutter/bin/flutter config --enable-web
+
+echo $base64_icon | base64 --decode > client/assets/appicon.png 

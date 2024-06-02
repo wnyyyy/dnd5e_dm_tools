@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:collection';
 import 'dart:math';
 
 import 'package:dnd5e_dm_tools/core/util/enum.dart';
@@ -219,8 +220,7 @@ class _BackpackWidgetState extends State<BackpackWidget> {
                   (a.value['cost'] as Map?)?['quantity']?.toString() ?? '0',
                 ) ??
                 0,
-            (num.tryParse(a.value['quantity']?.toString() ?? '0') ?? 0.0)
-                .toDouble(),
+            int.tryParse(a.value['quantity']?.toString() ?? '0') ?? 0,
           ).compareTo(
             getCostTotal(
               (b.value['cost'] as Map?)?['unit']?.toString() ?? 'none',
@@ -228,8 +228,7 @@ class _BackpackWidgetState extends State<BackpackWidget> {
                     (b.value['cost'] as Map?)?['quantity']?.toString() ?? '0',
                   ) ??
                   0,
-              (num.tryParse(b.value['quantity']?.toString() ?? '0') ?? 0.0)
-                  .toDouble(),
+              int.tryParse(b.value['quantity']?.toString() ?? '0') ?? 0,
             ),
           ),
         );
@@ -277,12 +276,12 @@ class _BackpackWidgetState extends State<BackpackWidget> {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final bool isWide = constraints.maxWidth > 1200;
+        final bool isWide = constraints.maxWidth > 900;
         final double horizontalPadding = isWide ? screenWidth * 0.1 : 16;
 
         return Column(
           children: [
-            _buildFilters(horizontalPadding),
+            _buildFilters(horizontalPadding, isWide),
             Expanded(
               child: Card(
                 margin: EdgeInsets.symmetric(
@@ -300,15 +299,18 @@ class _BackpackWidgetState extends State<BackpackWidget> {
     );
   }
 
-  Widget _buildFilters(double horizontalPadding) {
+  Widget _buildFilters(double horizontalPadding, bool wide) {
     return Padding(
       padding: EdgeInsets.only(
         right: horizontalPadding,
         left: horizontalPadding,
         top: 8,
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: Flex(
+        direction: wide ? Axis.horizontal : Axis.vertical,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment:
+            wide ? MainAxisAlignment.spaceBetween : MainAxisAlignment.start,
         children: [
           Wrap(
             spacing: 8.0,
@@ -351,17 +353,20 @@ class _BackpackWidgetState extends State<BackpackWidget> {
               ),
             ],
           ),
-          DropdownButton<EquipSort>(
-            value: sortCriteria,
-            items: dropdownItems,
-            onChanged: (EquipSort? value) {
-              setState(() {
-                sortCriteria = value ?? EquipSort.name;
-                context
-                    .read<SettingsCubit>()
-                    .toggleEquipSort(value ?? EquipSort.name);
-              });
-            },
+          Padding(
+            padding: const EdgeInsets.only(left: 8.0),
+            child: DropdownButton<EquipSort>(
+              value: sortCriteria,
+              items: dropdownItems,
+              onChanged: (EquipSort? value) {
+                setState(() {
+                  sortCriteria = value ?? EquipSort.name;
+                  context
+                      .read<SettingsCubit>()
+                      .toggleEquipSort(value ?? EquipSort.name);
+                });
+              },
+            ),
           ),
         ],
       ),
@@ -474,6 +479,7 @@ class _BackpackWidgetState extends State<BackpackWidget> {
               } else {
                 (items[backpackItem.key] as Map?)?['quantity'] = quantity;
               }
+              (widget.character['backpack'] as LinkedHashMap)['items'] = items;
               context.read<CharacterBloc>().add(
                     CharacterUpdate(
                       character: widget.character,

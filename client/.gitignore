@@ -61,3 +61,5 @@ macos/Runner/Assets.xcassets/AppIcon.appiconset/*.png
 web/favicon.png
 web/icons/
 windows/runner/resources/app_icon.ico
+
+.env

@@ -19,10 +19,13 @@ class ProficiencyList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final proficiencies = Map<String, Map>.from(
-        character['proficiencies'] as LinkedHashMap? ?? {},);
+      character['proficiencies'] as LinkedHashMap? ?? {},
+    );
     final offline = context.read<SettingsCubit>().state.offlineMode;
+
     void onItemsChanged(Map<String, dynamic> newProficiencies) {
-      character['proficiencies'] = newProficiencies;
+      final map = LinkedHashMap<String, dynamic>.from(newProficiencies);
+      character['proficiencies'] = map;
       context.read<CharacterBloc>().add(
             CharacterUpdate(
               character: character,
@@ -99,10 +102,11 @@ class ProficiencyList extends StatelessWidget {
                           .trim()
                           .replaceAll(' ', '_');
                       final newProf = proficiencies;
-                      newProf[slug] = {
+                      newProf[slug] = LinkedHashMap<String, dynamic>.from({
                         'title': titleController.text,
                         'description': descriptionController.text,
-                      };
+                      });
+
                       onItemsChanged(newProf);
                       Navigator.of(context).pop();
                     }

@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:crypto/crypto.dart';
 import 'package:dnd5e_dm_tools/core/config/app_colors.dart';
 import 'package:dnd5e_dm_tools/core/widgets/trait_description.dart';
 import 'package:dnd5e_dm_tools/features/rules/rules_cubit.dart';
@@ -20,16 +23,32 @@ class DescriptionText extends StatelessWidget {
   final bool addTabSpace;
   final TextAlign textAlign;
 
+  static final Map<String, List<TextSpan>> _cache = {};
+
   @override
   Widget build(BuildContext context) {
     var preProcess = inputText.replaceAll('**_', '**');
     preProcess = preProcess.replaceAll('_**', '**');
     preProcess = preProcess.replaceAll('_', '**');
 
+    final inputHash = md5.convert(utf8.encode(preProcess)).toString();
+
+    if (_cache.containsKey(inputHash)) {
+      return RichText(
+        textAlign: textAlign,
+        text: TextSpan(
+          children: _cache[inputHash],
+        ),
+      );
+    }
+
+    final processedSpans = _postProcess(_processText(preProcess, context));
+    _cache[inputHash] = processedSpans;
+
     return RichText(
       textAlign: textAlign,
       text: TextSpan(
-        children: _postProcess(_processText(preProcess, context)),
+        children: processedSpans,
       ),
     );
   }

@@ -141,10 +141,44 @@ class SpellbookState extends State<Spellbook> {
   }
 
   Widget _buildSpellSlotsList() {
-    final Map<int, int> slots = getSpellSlotsForLevel(
-      widget.table,
-      widget.character['level'] as int? ?? 1,
-    );
+    final Map<int, int> slots;
+    if (widget.character['subclass'] == 'arcane-trickster') {
+      switch (widget.character['level']) {
+        case 3:
+          slots = {1: 2};
+        case 4:
+        case 5:
+        case 6:
+          slots = {1: 3};
+        case 7:
+        case 8:
+        case 9:
+          slots = {1: 4, 2: 2};
+        case 10:
+        case 11:
+        case 12:
+          slots = {1: 4, 2: 3};
+        case 13:
+        case 14:
+        case 15:
+          slots = {1: 4, 2: 3, 3: 2};
+        case 16:
+        case 17:
+        case 18:
+          slots = {1: 4, 2: 3, 3: 3};
+        case 19:
+        case 20:
+          slots = {1: 4, 2: 3, 3: 3, 4: 1};
+        default:
+          slots = {1: 2};
+      }
+    } else {
+      slots = getSpellSlotsForLevel(
+        widget.table,
+        widget.character['level'] as int? ?? 1,
+      );
+    }
+
     final expendedSlots = getExpendedSlots(widget.character);
 
     final List<Padding> texts = [];
@@ -318,8 +352,8 @@ class SpellbookState extends State<Spellbook> {
     final screenHeight = MediaQuery.of(context).size.height;
     return ConstrainedBox(
       constraints: BoxConstraints(
-        maxWidth: screenWidth * 0.7,
-        maxHeight: screenHeight * 0.7,
+        maxWidth: screenWidth * 0.75,
+        maxHeight: screenHeight * 0.75,
         minWidth: screenWidth * 0.5,
         minHeight: screenHeight * 0.5,
       ),
@@ -373,7 +407,9 @@ class SpellbookState extends State<Spellbook> {
                     ),
                     child: ConstrainedBox(
                       constraints: BoxConstraints(
-                        maxWidth: screenWidth * 0.5,
+                        maxWidth: screenWidth > 600
+                            ? screenWidth * 0.5
+                            : screenWidth * 0.9,
                         minWidth: screenWidth * 0.5,
                       ),
                       child: searchResults.isEmpty
@@ -399,7 +435,9 @@ class SpellbookState extends State<Spellbook> {
                         Expanded(
                           child: ConstrainedBox(
                             constraints: BoxConstraints(
-                              maxWidth: screenWidth * 0.5,
+                              maxWidth: screenWidth > 600
+                                  ? screenWidth * 0.5
+                                  : screenWidth * 0.9,
                               minWidth: screenWidth * 0.5,
                             ),
                             child: ListView(

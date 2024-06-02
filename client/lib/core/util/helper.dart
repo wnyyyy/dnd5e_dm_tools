@@ -222,15 +222,15 @@ Map<String, dynamic> getBackpackItem(
       character['backpack'] as Map<String, dynamic>? ?? {};
   final Map<String, dynamic> backpackItems =
       backpack['items'] as Map<String, dynamic>? ?? {};
-  final Map<String, dynamic> backpackItem = backpackItems.entries
+  final Map<String, dynamic> backpackItem = (backpackItems.entries
       .firstWhere(
         (element) => element.key == item,
-        orElse: () => MapEntry<String, dynamic>(
+        orElse: () => MapEntry<String, Map<String, dynamic>>(
           item,
           {'isEquipped': false, 'quantity': 0},
         ),
       )
-      .value as Map<String, dynamic>;
+      .value) as Map<String, dynamic>;
 
   return backpackItem;
 }
@@ -239,7 +239,7 @@ bool isEquipable(Map<String, dynamic> item) {
   return item['armor_class'] != null || item['damage'] != null;
 }
 
-double getCostTotal(String costUnit, num costValue, double quantity) {
+double getCostTotal(String costUnit, num costValue, num quantity) {
   switch (costUnit) {
     case 'cp':
       return costValue.toDouble() / 100.0 * quantity;
@@ -394,7 +394,7 @@ num getTotalWeight(Map<String, dynamic> backpack, Map<String, dynamic> items) {
         (itemBackpack.value as Map?)?['quantity'] == null) {
       continue;
     }
-    final quantity = (itemBackpack.value as Map)['quantity'] as double? ?? 0.0;
+    final quantity = (itemBackpack.value as Map)['quantity'] as int? ?? 0;
     final costMap = item['cost'] as Map;
     final cost = num.tryParse(costMap['quantity'].toString()) ?? 0;
     final costTotal = getCostTotal(
@@ -441,7 +441,14 @@ Icon? itemToIcon(Map<String, dynamic> item) {
   if (item['index']?.toString().isEmpty ?? true) {
     return null;
   }
-  if (item['index']?.toString().contains('bow') ?? false) {
+  final bows = [
+    'crossbow-light',
+    'crossbow-heavy',
+    'crossbow-hand',
+    'longbow',
+    'shortbow',
+  ];
+  if (bows.contains(item['index']?.toString() ?? '')) {
     return const Icon(RpgAwesome.crossbow);
   }
   if (item['index']?.toString().contains('dagger') ?? false) {

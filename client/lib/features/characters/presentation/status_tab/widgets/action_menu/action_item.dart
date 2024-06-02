@@ -438,7 +438,7 @@ class ActionItemState extends State<ActionItem> {
       return LayoutBuilder(
         builder: (context, constraints) {
           final int crossAxisCount =
-              4 + ((constraints.maxWidth - 300) / 100).floor();
+              3 + ((constraints.maxWidth - 300) / 80).floor();
           if (constraints.maxWidth > 900) {
             return Wrap(
               children: List.generate(children.length, (index) {
@@ -475,6 +475,12 @@ class ActionItemState extends State<ActionItem> {
     }
 
     final screenWidth = MediaQuery.of(context).size.width;
+    final TextStyle? baseTitleTheme;
+    if (screenWidth < 1200 && widget.action['title'].toString().length > 16) {
+      baseTitleTheme = Theme.of(context).textTheme.titleMedium;
+    } else {
+      baseTitleTheme = Theme.of(context).textTheme.titleLarge;
+    }
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: GestureDetector(
@@ -498,9 +504,9 @@ class ActionItemState extends State<ActionItem> {
                       padding: const EdgeInsets.only(top: 12, left: 24),
                       child: Text(
                         widget.action['title'] as String? ?? '',
-                        style: Theme.of(context).textTheme.titleLarge!.copyWith(
-                              fontFamily: GoogleFonts.montserrat().fontFamily,
-                            ),
+                        style: baseTitleTheme!.copyWith(
+                          fontFamily: GoogleFonts.montserrat().fontFamily,
+                        ),
                       ),
                     ),
                   ),
@@ -514,7 +520,9 @@ class ActionItemState extends State<ActionItem> {
                 ],
               ),
             ),
-            SizedBox(width: screenWidth * 0.8, child: const Divider()),
+            Align(
+              child: SizedBox(width: screenWidth * 0.8, child: const Divider()),
+            ),
             Padding(
               padding: const EdgeInsets.only(left: 6, right: 6),
               child: buildSubtitle(),
@@ -524,7 +532,12 @@ class ActionItemState extends State<ActionItem> {
               secondChild: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  SizedBox(width: screenWidth * 0.8, child: const Divider()),
+                  Align(
+                    child: SizedBox(
+                      width: screenWidth * 0.8,
+                      child: const Divider(),
+                    ),
+                  ),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Column(

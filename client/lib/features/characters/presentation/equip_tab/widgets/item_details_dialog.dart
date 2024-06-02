@@ -2,7 +2,6 @@ import 'package:dnd5e_dm_tools/features/characters/presentation/equip_tab/widget
 import 'package:flutter/material.dart';
 
 class ItemDetailsDialog extends StatelessWidget {
-
   const ItemDetailsDialog({
     super.key,
     required this.item,
@@ -74,13 +73,15 @@ class ItemDetailsDialog extends StatelessWidget {
               onPressed: () => Navigator.of(context).pop(),
             ),
             TextButton(
-                child: const Icon(Icons.done),
-                onPressed: () {
-                  final delQuantity = int.tryParse(inputController.text) ?? 0;
-                  final newQuantity = quantity! - delQuantity;
-                  onQuantityChange?.call(newQuantity);
-                  Navigator.of(context).pop();
-                },),
+              child: const Icon(Icons.done),
+              onPressed: () {
+                final delQuantity = int.tryParse(inputController.text) ?? 0;
+                final newQuantity = quantity! - delQuantity;
+                onQuantityChange?.call(newQuantity);
+                Navigator.of(context).pop();
+                Navigator.of(context).pop();
+              },
+            ),
           ],
         );
       },

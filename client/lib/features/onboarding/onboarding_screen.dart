@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'dart:math';
 
 import 'package:cached_network_image/cached_network_image.dart';
@@ -199,10 +200,14 @@ class OnboardingScreenState extends State<OnboardingScreen> {
               });
             },
             itemBuilder: (context, index) {
-              final characterPaged = characters.values
-                  .elementAt(index % characters.length) as Map<String, dynamic>;
+              final characterPaged = (index == 1000)
+                  ? characters.values.elementAt(currentPage % characters.length)
+                  : characters.values.elementAt(index % characters.length);
+
               return CachedNetworkImage(
-                imageUrl: characterPaged['image_url']?.toString() ?? '',
+                imageUrl: (characterPaged as LinkedHashMap)['image_url']
+                        ?.toString() ??
+                    '',
                 fit: BoxFit.cover,
                 placeholder: (context, url) => const Center(
                   child: CircularProgressIndicator(),
@@ -340,10 +345,14 @@ class OnboardingScreenState extends State<OnboardingScreen> {
               });
             },
             itemBuilder: (context, index) {
-              final characterPaged =
-                  characters.values.elementAt(index % characters.length) as Map;
+              final characterPaged = (index == 1000)
+                  ? characters.values.elementAt(currentPage % characters.length)
+                  : characters.values.elementAt(index % characters.length);
+
               return CachedNetworkImage(
-                imageUrl: characterPaged['image_url']?.toString() ?? '',
+                imageUrl: (characterPaged as LinkedHashMap)['image_url']
+                        ?.toString() ??
+                    '',
                 fit: BoxFit.cover,
                 placeholder: (context, url) => const Center(
                   child: CircularProgressIndicator(),
