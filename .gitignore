@@ -10,8 +10,7 @@ custom_db2.json
 client/assets/appicon.png
 client/android/app/src/main/res/mipmap-*
 client/ios/Runner/Assets.xcassets/AppIcon.appiconset/*.png
-client/macos/Runner/Assets.xcassets/AppIcon.appiconset/
+client/macos/Runner/Assets.xcassets/AppIcon.appiconset/*.png
 client/web/favicon.png
 client/web/icons/
 client/windows/runner/resources/app_icon.ico
-client/ios/Runner/Assets.xcassets/
