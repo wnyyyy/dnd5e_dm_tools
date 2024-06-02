@@ -113,6 +113,17 @@ class ActionItemState extends State<ActionItem> {
             (widget.action['ammo']?.toString() != 'none')) {
           usable = true;
         }
+      case ActionMenuMode.spells:
+        final spellSlug = widget.action['spell'] as String?;
+        if (spellSlug != null) {
+          final spell = context.read<RulesCubit>().getSpell(spellSlug);
+          if (spell != null) {
+            final level = spell['level_int'] as num? ?? 0;
+            if (level > 0) {
+              usable = true;
+            }
+          }
+        }
       default:
         canUse = true;
     }
@@ -232,7 +243,8 @@ class ActionItemState extends State<ActionItem> {
             );
             final expendedSlotsMap = getExpendedSlots(widget.character);
             final levelInt = spell['level_int'] ?? 1;
-            final expendedSpellSlots = expendedSlotsMap[levelInt] ?? 0;
+            final expendedSpellSlots =
+                expendedSlotsMap[levelInt.toString()] ?? 0;
             final totalSlots = totalSlotsMap[levelInt] ?? 0;
             final availableSlots = totalSlots - expendedSpellSlots;
             children.add(

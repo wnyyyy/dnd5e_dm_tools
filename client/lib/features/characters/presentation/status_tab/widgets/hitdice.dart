@@ -193,9 +193,15 @@ class HitDice extends StatelessWidget {
                     child: const Icon(Icons.check),
                     onPressed: () {
                       Navigator.of(context).pop();
-                      final characterActions =
-                          character['actions'] as List<Map<String, dynamic>>? ??
-                              [];
+                      final characterActions = (character['actions']
+                                  as Map<String, dynamic>?)
+                              ?.values
+                              .map(
+                                (action) =>
+                                    Map<String, dynamic>.from(action as Map),
+                              )
+                              .toList() ??
+                          [];
                       if (isShort) {
                         if (currHitDieInput > 0) {
                           character['hd_curr'] = currHitDie - currHitDieInput;
@@ -218,6 +224,7 @@ class HitDice extends StatelessWidget {
                                       .read<SettingsCubit>()
                                       .state
                                       .offlineMode,
+                                  persistData: true,
                                 ),
                               );
                         }
@@ -242,6 +249,7 @@ class HitDice extends StatelessWidget {
                                     .read<SettingsCubit>()
                                     .state
                                     .offlineMode,
+                                persistData: true,
                               ),
                             );
                       }

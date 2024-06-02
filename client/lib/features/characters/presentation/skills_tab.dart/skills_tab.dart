@@ -141,6 +141,7 @@ class SkillsTab extends StatelessWidget {
                       newValue != currentValue &&
                       newValue >= 0) {
                     asi[attributeName.toLowerCase()] = newValue;
+                    character['asi'] = asi;
                     context.read<CharacterBloc>().add(
                           CharacterUpdate(
                             character: character,
