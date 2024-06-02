@@ -53,3 +53,11 @@ node_modules/
 package-lock.json
 .vercel
 vercel.json
+
+assets/appicon.png
+android/app/src/main/res/mipmap-*
+ios/Runner/Assets.xcassets/AppIcon.appiconset/*.png
+macos/Runner/Assets.xcassets/AppIcon.appiconset/*.png
+web/favicon.png
+web/icons/
+windows/runner/resources/app_icon.ico
