@@ -14,6 +14,7 @@ class DescriptionText extends StatelessWidget {
     this.addTabSpace = false,
     this.textAlign = TextAlign.left,
   });
+
   final String inputText;
   final TextStyle baseStyle;
   final bool addTabSpace;
@@ -95,7 +96,7 @@ class DescriptionText extends StatelessWidget {
     };
 
     final regex = RegExp(
-      r'(\d+\s?(ft|feet|foot|radius|minutes|minute|hours|hour))|\b(successful|success|failure|fail|fails|succeed)\b|(\d+d\d+)( \w+)?',
+      r'(\d+\s?(ft|feet|foot|radius|minutes|minute|hours|hour))|\b(successful|success|failure|fail|fails|succeed)\b|(\d+d\d+|d\d+)( \w+)?',
       caseSensitive: false,
     );
 

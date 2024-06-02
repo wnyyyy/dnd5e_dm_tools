@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:dnd5e_dm_tools/core/util/enum.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttericon/font_awesome5_icons.dart';
@@ -64,7 +66,7 @@ Map<String, dynamic> getClassFeatures(
   int level = 20,
   List<Map<String, dynamic>> table = const [],
 }) {
-  final Map<String, dynamic> features = <String, dynamic>{};
+  final features = <String, dynamic>{};
   List<String> lines = desc.split('\n');
   lines = lines
       .map((line) => line.trim())
@@ -75,26 +77,25 @@ Map<String, dynamic> getClassFeatures(
   String currentSubFeatureKey = '';
   List<String> currentFeatureDescription = [];
   List<String> currentSubFeatureDescription = [];
-  Map<String, dynamic> currentFeature = {};
 
   for (final line in lines) {
     if (line.startsWith('### ')) {
-      currentFeature =
-          features[currentFeatureKey] as Map<String, dynamic>? ?? {};
       if (currentFeatureKey.isNotEmpty) {
         if (currentSubFeatureKey.isNotEmpty) {
-          currentFeature[currentSubFeatureKey] =
+          (features[currentFeatureKey] as LinkedHashMap)[currentSubFeatureKey] =
               currentSubFeatureDescription.join('\n');
           currentSubFeatureKey = '';
           currentSubFeatureDescription = [];
         }
-        currentFeature['description'] = currentFeatureDescription.join('\n');
+        (features[currentFeatureKey] as LinkedHashMap)['description'] =
+            currentFeatureDescription.join('\n');
       }
       currentFeatureKey = line.substring(4).trim();
       currentFeatureDescription = [];
+      features[currentFeatureKey] = {};
     } else if (line.startsWith('#### ')) {
       if (currentSubFeatureKey.isNotEmpty) {
-        currentFeature[currentSubFeatureKey] =
+        (features[currentFeatureKey] as LinkedHashMap)[currentSubFeatureKey] =
             currentSubFeatureDescription.join('\n');
       }
       currentSubFeatureKey = line.substring(5).trim();
@@ -110,17 +111,18 @@ Map<String, dynamic> getClassFeatures(
 
   if (currentFeatureKey.isNotEmpty) {
     if (currentSubFeatureKey.isNotEmpty) {
-      currentFeature[currentSubFeatureKey] =
+      (features[currentFeatureKey] as LinkedHashMap)[currentSubFeatureKey] =
           currentSubFeatureDescription.join('\n');
     }
-    currentFeature['description'] = currentFeatureDescription.join('\n');
+    (features[currentFeatureKey] as LinkedHashMap)['description'] =
+        currentFeatureDescription.join('\n');
   }
 
   if (table.isNotEmpty) {
-    final Map<String, dynamic> filteredFeatures = <String, dynamic>{};
+    final filteredFeatures = <String, dynamic>{};
     for (final feature in features.keys) {
       for (final entry in table) {
-        final int levelEntry = fromOrdinal(entry['Level'] as String);
+        final levelEntry = fromOrdinal(entry['Level']?.toString() ?? '');
         if ((entry['Features'] ?? '')
                 .toString()
                 .toLowerCase()
@@ -581,7 +583,14 @@ List<Map<String, dynamic>> parseTable(String table) {
       .where((e) => e.isNotEmpty)
       .toList();
 
-  for (var i = 1; i < rows.length; i++) {
+  final int startIndex;
+  if (rows.length == 22) {
+    startIndex = 2;
+  } else {
+    startIndex = 1;
+  }
+
+  for (var i = startIndex; i < rows.length; i++) {
     final List<String> rowValues = rows[i]
         .split('|')
         .map((e) => e.trim())
@@ -625,6 +634,7 @@ String parseFormula(
     final modifier = getModifier(entry.value);
     values[prefix] = modifier;
   }
+
   final RegExp regExp = RegExp(r'\b(?:str|dex|con|int|wis|cha|prof|level)\b');
 
   String processed = description.replaceAllMapped(regExp, (match) {
@@ -632,7 +642,30 @@ String parseFormula(
   });
 
   processed = processed.replaceAll('+-', '-');
+
+  final diceRegex = RegExp(r'\d+d\d+');
+  final dicePlaceholders = <String>[];
+  int diceIndex = 0;
+
+  processed = processed.replaceAllMapped(diceRegex, (match) {
+    final placeholder = '__DICE__${diceIndex}__';
+    dicePlaceholders.add(match.group(0)!);
+    diceIndex++;
+    return placeholder;
+  });
+
   processed = _processFormula(processed);
+
+  processed = processed.splitMapJoin(
+    RegExp(r'([+\-*/])'),
+    onMatch: (m) => ' ${m.group(0)} ',
+    onNonMatch: (n) => n,
+  );
+
+  for (int i = 0; i < dicePlaceholders.length; i++) {
+    processed = processed.replaceAll('__DICE__${i}__', dicePlaceholders[i]);
+  }
+
   return processed;
 }
 

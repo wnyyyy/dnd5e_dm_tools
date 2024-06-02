@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:dnd5e_dm_tools/core/widgets/item_list.dart';
 import 'package:dnd5e_dm_tools/features/characters/bloc/character_bloc.dart';
 import 'package:dnd5e_dm_tools/features/characters/bloc/character_events.dart';
@@ -17,7 +19,7 @@ class ProficiencyList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final proficiencies = Map<String, Map>.from(
-        character['proficiencies'] as Map<String, Map>? ?? {},);
+        character['proficiencies'] as LinkedHashMap? ?? {},);
     final offline = context.read<SettingsCubit>().state.offlineMode;
     void onItemsChanged(Map<String, dynamic> newProficiencies) {
       character['proficiencies'] = newProficiencies;

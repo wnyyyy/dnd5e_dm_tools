@@ -99,6 +99,9 @@ class ActionItemState extends State<ActionItem> {
         );
         if (mustEquip) {
           canUse = backpackItem['isEquipped'] as bool? ?? false;
+          if (canUse) {
+            usable = false;
+          }
         } else {
           canUse = true;
         }
@@ -106,7 +109,8 @@ class ActionItemState extends State<ActionItem> {
         if (widget.action['expendable'] as bool? ?? false) {
           usable = true;
         }
-        if (widget.action['ammo']?.toString().isNotEmpty ?? false) {
+        if ((widget.action['ammo']?.toString().isNotEmpty ?? false) &&
+            (widget.action['ammo']?.toString() != 'none')) {
           usable = true;
         }
       default:

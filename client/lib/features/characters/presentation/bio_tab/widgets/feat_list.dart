@@ -62,14 +62,21 @@ class FeatsListState extends State<FeatsList> {
           final racialFeats =
               getRacialFeatures(race['traits']?.toString() ?? '');
           final classFeats = <String, dynamic>{};
-          classFeats.addAll(getClassFeatures(classs['desc']?.toString() ?? ''));
+          final classsTable = parseTable(classs['table']?.toString() ?? '');
+          classFeats.addAll(
+            getClassFeatures(
+              classs['desc']?.toString() ?? '',
+              level: widget.character['level'] as int,
+              table: classsTable,
+            ),
+          );
 
           final archetype = widget.character['subclass'];
           if (archetype != null) {
             final archetypes = getArchetypes(classs);
             final archetypeClass = archetypes
                     .where(
-                      (element) => element['name'] == archetype,
+                      (element) => element['slug'] == archetype,
                     )
                     .firstOrNull ??
                 {};
@@ -90,6 +97,14 @@ class FeatsListState extends State<FeatsList> {
               List<DropdownMenuItem<String>> getDropdownItems(
                 Map<String, dynamic> feats,
               ) {
+                if (feats.isEmpty) {
+                  return const [
+                    DropdownMenuItem(
+                      value: 'none',
+                      child: Text('None'),
+                    ),
+                  ];
+                }
                 final bool isString = feats.values.first is String;
                 return [
                   const DropdownMenuItem(
