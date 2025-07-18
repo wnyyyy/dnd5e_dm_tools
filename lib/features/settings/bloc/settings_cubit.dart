@@ -59,13 +59,6 @@ class SettingsCubit extends Cubit<SettingsState> {
     emit((state as SettingsLoaded).copyWith(classOnlySpells: classOnly));
   }
 
-  Future<void> togglecachedOnlyMode() async {
-    if (state is! SettingsLoaded) return;
-    final cachedOnlyMode = !state.cachedOnlyMode;
-    await saveConfig('cached_only_mode', cachedOnlyMode.toString());
-    emit((state as SettingsLoaded).copyWith(cachedOnlyMode: cachedOnlyMode));
-  }
-
   Future<void> toggleActionFilter(ActionMenuMode selected) async {
     if (state is! SettingsLoaded) return;
     await saveConfig('selected_action_filter', selected.name);
@@ -90,7 +83,6 @@ class SettingsCubit extends Cubit<SettingsState> {
       final name = await readConfig('char_name') ?? '';
       final isCaster = await readConfig('is_caster') ?? 'false';
       final classOnly = await readConfig('class_only_spells') ?? 'false';
-      final cachedOnlyMode = await readConfig('cached_only_mode') ?? 'false';
       final themeColorName =
           await readConfig('theme_color') ?? ThemeColor.chestnutBrown.name;
       final isDarkMode = await readConfig('is_dark_mode') ?? 'false';
@@ -127,7 +119,6 @@ class SettingsCubit extends Cubit<SettingsState> {
           isEditMode: false,
           themeColor: themeColor,
           isDarkMode: isDarkMode == 'true',
-          cachedOnlyMode: cachedOnlyMode == 'true',
           isOnboardingComplete: isOnboardingComplete,
           selectedActionFilter: selectedActionFilter,
           selectedEquipFilter: selectedEquipFilter,

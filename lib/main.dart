@@ -4,6 +4,7 @@ import 'package:dnd5e_dm_tools/core/data/db/database_provider.dart';
 import 'package:dnd5e_dm_tools/core/data/repositories/characters_repository.dart';
 import 'package:dnd5e_dm_tools/core/util/const.dart';
 import 'package:dnd5e_dm_tools/core/util/logger.dart';
+import 'package:dnd5e_dm_tools/features/characters/bloc/character_bloc.dart';
 import 'package:dnd5e_dm_tools/features/main_screen/bloc/main_screen_cubit.dart';
 import 'package:dnd5e_dm_tools/features/main_screen/main_screen.dart';
 import 'package:dnd5e_dm_tools/features/onboarding/bloc/onboarding_cubit.dart';
@@ -142,7 +143,12 @@ class Dnd5eDmTools extends StatelessWidget {
               charactersRepository: context.read<CharactersRepository>(),
             ),
           ),
-          BlocProvider(create: (_) => MainScreenCubit()),
+          BlocProvider<CharacterBloc>(
+            create: (context) => CharacterBloc(
+              charactersRepository: context.read<CharactersRepository>(),
+            ),
+          ),
+          BlocProvider<MainScreenCubit>(create: (context) => MainScreenCubit()),
         ],
         child: const MainScreen(),
       ),

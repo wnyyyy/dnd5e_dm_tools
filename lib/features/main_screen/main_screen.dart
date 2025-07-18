@@ -1,4 +1,5 @@
 import 'package:dnd5e_dm_tools/core/config/app_themes.dart';
+import 'package:dnd5e_dm_tools/core/widgets/app_drawer.dart';
 import 'package:dnd5e_dm_tools/core/widgets/error_handler.dart';
 import 'package:dnd5e_dm_tools/core/widgets/header.dart';
 import 'package:dnd5e_dm_tools/features/main_screen/bloc/main_screen_cubit.dart';
@@ -6,6 +7,7 @@ import 'package:dnd5e_dm_tools/features/main_screen/bloc/main_screen_state.dart'
 import 'package:dnd5e_dm_tools/features/onboarding/onboarding_screen.dart';
 import 'package:dnd5e_dm_tools/features/settings/bloc/settings_cubit.dart';
 import 'package:dnd5e_dm_tools/features/settings/bloc/settings_states.dart';
+import 'package:dnd5e_dm_tools/features/settings/settings_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -36,6 +38,7 @@ class MainScreen extends StatelessWidget {
               theme: appTheme,
               home: Scaffold(
                 appBar: const Header(),
+                drawer: const AppDrawer(),
                 body: PopScope(
                   child: Builder(
                     builder: (context) {
@@ -69,7 +72,7 @@ class MainScreen extends StatelessWidget {
       return const Center(child: Center());
     }
     if (state is MainScreenStateSettings) {
-      return const Center(child: Center());
+      return SettingsScreen();
     }
     if (state is MainScreenStateDatabase) {
       return const Center(child: Center());

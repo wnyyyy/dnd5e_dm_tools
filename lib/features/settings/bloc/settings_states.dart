@@ -32,7 +32,6 @@ class SettingsLoaded extends SettingsState {
     required bool classOnlySpells,
     required bool isDarkMode,
     required ThemeColor themeColor,
-    required bool cachedOnlyMode,
     required bool isOnboardingComplete,
     required ActionMenuMode selectedActionFilter,
     required EquipFilter selectedEquipFilter,
@@ -44,7 +43,6 @@ class SettingsLoaded extends SettingsState {
     this.classOnlySpells = classOnlySpells;
     this.isDarkMode = isDarkMode;
     this.themeColor = themeColor;
-    this.cachedOnlyMode = cachedOnlyMode;
     this.isOnboardingComplete = isOnboardingComplete;
     this.selectedActionFilter = selectedActionFilter;
     this.selectedEquipFilter = selectedEquipFilter;
@@ -58,7 +56,6 @@ class SettingsLoaded extends SettingsState {
     bool? classOnlySpells,
     bool? isDarkMode,
     ThemeColor? themeColor,
-    bool? cachedOnlyMode,
     bool? isOnboardingComplete,
     ActionMenuMode? selectedActionFilter,
     EquipFilter? selectedEquipFilter,
@@ -71,7 +68,6 @@ class SettingsLoaded extends SettingsState {
       classOnlySpells: classOnlySpells ?? this.classOnlySpells,
       isDarkMode: isDarkMode ?? this.isDarkMode,
       themeColor: themeColor ?? this.themeColor,
-      cachedOnlyMode: cachedOnlyMode ?? this.cachedOnlyMode,
       isOnboardingComplete: isOnboardingComplete ?? this.isOnboardingComplete,
       selectedActionFilter: selectedActionFilter ?? this.selectedActionFilter,
       selectedEquipFilter: selectedEquipFilter ?? this.selectedEquipFilter,
