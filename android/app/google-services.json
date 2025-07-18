@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "934387476513",
+    "firebase_url": "https://dnd5e-gm-tools-default-rtdb.firebaseio.com",
+    "project_id": "dnd5e-gm-tools",
+    "storage_bucket": "dnd5e-gm-tools.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:934387476513:android:917d05d2bee12fc66edb60",
+        "android_client_info": {
+          "package_name": "com.wnyy.dnd5e_dm_tools"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "934387476513-cuffr31hfinjffu1oo8fvi1hluija0qs.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDWDn4lIW5KiAn8S1lzbSH-IB2TP_12x7Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "934387476513-cuffr31hfinjffu1oo8fvi1hluija0qs.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "934387476513-klvu2s2i9ks066qkasolc8fv2n7vbuck.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.wnyy.dnd5eDmTools"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

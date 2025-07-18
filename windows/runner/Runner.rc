@@ -89,11 +89,11 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "com.example" "\0"
+            VALUE "CompanyName", "com.wnyy" "\0"
             VALUE "FileDescription", "dnd5e_dm_tools" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
             VALUE "InternalName", "dnd5e_dm_tools" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2025 com.example. All rights reserved." "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2025 com.wnyy. All rights reserved." "\0"
             VALUE "OriginalFilename", "dnd5e_dm_tools.exe" "\0"
             VALUE "ProductName", "dnd5e_dm_tools" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
