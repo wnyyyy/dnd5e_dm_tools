@@ -159,9 +159,10 @@ class Dnd5eDmTools extends StatelessWidget {
       child: MultiBlocProvider(
         providers: [
           BlocProvider<SettingsCubit>(
+            lazy: false,
             create: (context) => SettingsCubit(
               charactersRepository: context.read<CharactersRepository>(),
-            ),
+            )..init(),
           ),
           BlocProvider<OnboardingCubit>(
             create: (context) => OnboardingCubit(
@@ -172,6 +173,7 @@ class Dnd5eDmTools extends StatelessWidget {
             create: (context) => CharacterBloc(
               charactersRepository: context.read<CharactersRepository>(),
               classesRepository: context.read<ClassesRepository>(),
+              racesRepository: context.read<RacesRepository>(),
             ),
           ),
           BlocProvider<MainScreenCubit>(create: (context) => MainScreenCubit()),

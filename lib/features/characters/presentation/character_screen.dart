@@ -3,6 +3,7 @@ import 'package:dnd5e_dm_tools/core/widgets/error_handler.dart';
 import 'package:dnd5e_dm_tools/features/characters/bloc/character_bloc.dart';
 import 'package:dnd5e_dm_tools/features/characters/bloc/character_event.dart';
 import 'package:dnd5e_dm_tools/features/characters/bloc/character_state.dart';
+import 'package:dnd5e_dm_tools/features/characters/presentation/bio_tab/bio_tab.dart';
 import 'package:dnd5e_dm_tools/features/settings/bloc/settings_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -52,11 +53,11 @@ class CharacterScreen extends StatelessWidget {
         }
         if (state is CharacterLoaded) {
           logUI('Parsing class table for character: ${state.character.slug}');
-          return const DefaultTabController(
+          return DefaultTabController(
             length: 4,
             child: Column(
               children: [
-                TabBar(
+                const TabBar(
                   tabs: [
                     Tab(text: 'Bio'),
                     Tab(text: 'Status'),
@@ -66,9 +67,16 @@ class CharacterScreen extends StatelessWidget {
                 ),
                 Expanded(
                   child: TabBarView(
-                    physics: NoScrollPhysics(),
+                    physics: const NoScrollPhysics(),
                     children: [
-                      // BioTab(character: state.character, slug: state.slug),
+                      BioTab(
+                        character: state.character,
+                        classs: state.classs,
+                        race: state.race,
+                      ),
+                      Container(),
+                      Container(),
+                      Container(),
                       // StatusTab(
                       //   character: state.character,
                       //   slug: state.slug,

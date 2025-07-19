@@ -1,5 +1,6 @@
 import 'package:dnd5e_dm_tools/core/data/models/character.dart';
 import 'package:dnd5e_dm_tools/core/data/models/class.dart';
+import 'package:dnd5e_dm_tools/core/data/models/race.dart';
 import 'package:equatable/equatable.dart';
 
 abstract class CharacterState extends Equatable {
@@ -32,14 +33,20 @@ class CharacterError extends CharacterState {
 }
 
 class CharacterLoaded extends CharacterState {
-  const CharacterLoaded({required this.character, required this.classs});
+  const CharacterLoaded({
+    required this.character,
+    required this.classs,
+    required this.race,
+  });
   final Character character;
   final Class classs;
+  final Race race;
 
-  CharacterLoaded copyWith({Character? character, Class? classs}) {
+  CharacterLoaded copyWith({Character? character, Class? classs, Race? race}) {
     return CharacterLoaded(
       character: character ?? this.character,
       classs: classs ?? this.classs,
+      race: race ?? this.race,
     );
   }
 }

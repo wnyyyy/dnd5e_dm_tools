@@ -141,6 +141,37 @@ class ClassTableRow extends Equatable {
   }
 
   @override
+  String toString() {
+    final headers = [
+      'Level',
+      'Proficiency Bonus',
+      'Features',
+      if (cantripsKnown != null) 'Cantrips Known',
+      if (spellsKnown != null) 'Spells Known',
+      ...classSpecificFeatures?.keys ?? [],
+    ];
+    final List<List<String>> rows = [];
+    for (var i = 0; i < 20; i++) {
+      final row = <String>[
+        level.toString(),
+        proficiencyBonus.toString(),
+        features.join(', '),
+        if (cantripsKnown != null) cantripsKnown.toString(),
+        if (spellsKnown != null) spellsKnown.toString(),
+        ...classSpecificFeatures?.values.map((e) => e.toString()) ?? [],
+      ];
+      rows.add(row);
+    }
+    final buffer = StringBuffer();
+    buffer.writeln(headers.join(' | '));
+    buffer.writeln('...');
+    for (final row in rows) {
+      buffer.writeln(row.join(' | '));
+    }
+    return buffer.toString();
+  }
+
+  @override
   List<Object?> get props => [
     level,
     proficiencyBonus,
