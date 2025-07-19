@@ -2,6 +2,7 @@ import 'package:dnd5e_dm_tools/core/config/app_themes.dart';
 import 'package:dnd5e_dm_tools/core/widgets/app_drawer.dart';
 import 'package:dnd5e_dm_tools/core/widgets/error_handler.dart';
 import 'package:dnd5e_dm_tools/core/widgets/header.dart';
+import 'package:dnd5e_dm_tools/features/characters/presentation/character_screen.dart';
 import 'package:dnd5e_dm_tools/features/main_screen/bloc/main_screen_cubit.dart';
 import 'package:dnd5e_dm_tools/features/main_screen/bloc/main_screen_state.dart';
 import 'package:dnd5e_dm_tools/features/onboarding/onboarding_screen.dart';
@@ -69,7 +70,7 @@ class MainScreen extends StatelessWidget {
 
   Widget _buildMainContent(MainScreenState state) {
     if (state is MainScreenStateCharacter) {
-      return const Center(child: Center());
+      return const CharacterScreen();
     }
     if (state is MainScreenStateSettings) {
       return SettingsScreen();

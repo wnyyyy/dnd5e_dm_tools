@@ -19,7 +19,11 @@ class Feat extends Equatable {
       slug: documentId,
       name: name,
       description: json['description'] as String? ?? '',
-      effectsDesc: json['effects_desc'] as List<String>? ?? [],
+      effectsDesc:
+          (json['effects_desc'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          [],
       prerequisite: json['prerequisite'] as String?,
     );
   }

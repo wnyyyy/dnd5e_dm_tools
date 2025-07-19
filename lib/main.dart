@@ -2,12 +2,19 @@ import 'dart:io';
 
 import 'package:dnd5e_dm_tools/core/data/db/database_provider.dart';
 import 'package:dnd5e_dm_tools/core/data/repositories/characters_repository.dart';
+import 'package:dnd5e_dm_tools/core/data/repositories/classes_repository.dart';
+import 'package:dnd5e_dm_tools/core/data/repositories/conditions_repository.dart';
+import 'package:dnd5e_dm_tools/core/data/repositories/feats_repository.dart';
+import 'package:dnd5e_dm_tools/core/data/repositories/items_repository.dart';
+import 'package:dnd5e_dm_tools/core/data/repositories/races_repository.dart';
+import 'package:dnd5e_dm_tools/core/data/repositories/spells_repository.dart';
 import 'package:dnd5e_dm_tools/core/util/const.dart';
 import 'package:dnd5e_dm_tools/core/util/logger.dart';
 import 'package:dnd5e_dm_tools/features/characters/bloc/character_bloc.dart';
 import 'package:dnd5e_dm_tools/features/main_screen/bloc/main_screen_cubit.dart';
 import 'package:dnd5e_dm_tools/features/main_screen/main_screen.dart';
 import 'package:dnd5e_dm_tools/features/onboarding/bloc/onboarding_cubit.dart';
+import 'package:dnd5e_dm_tools/features/rules/rules_cubit.dart';
 import 'package:dnd5e_dm_tools/features/settings/bloc/settings_cubit.dart';
 import 'package:dnd5e_dm_tools/firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -130,6 +137,24 @@ class Dnd5eDmTools extends StatelessWidget {
         RepositoryProvider<CharactersRepository>(
           create: (_) => CharactersRepository(databaseProvider),
         ),
+        RepositoryProvider<ClassesRepository>(
+          create: (_) => ClassesRepository(databaseProvider),
+        ),
+        RepositoryProvider<ConditionsRepository>(
+          create: (_) => ConditionsRepository(databaseProvider),
+        ),
+        RepositoryProvider<RacesRepository>(
+          create: (_) => RacesRepository(databaseProvider),
+        ),
+        RepositoryProvider<SpellsRepository>(
+          create: (_) => SpellsRepository(databaseProvider),
+        ),
+        RepositoryProvider<ItemsRepository>(
+          create: (_) => ItemsRepository(databaseProvider),
+        ),
+        RepositoryProvider<FeatsRepository>(
+          create: (_) => FeatsRepository(databaseProvider),
+        ),
       ],
       child: MultiBlocProvider(
         providers: [
@@ -146,9 +171,21 @@ class Dnd5eDmTools extends StatelessWidget {
           BlocProvider<CharacterBloc>(
             create: (context) => CharacterBloc(
               charactersRepository: context.read<CharactersRepository>(),
+              classesRepository: context.read<ClassesRepository>(),
             ),
           ),
           BlocProvider<MainScreenCubit>(create: (context) => MainScreenCubit()),
+          BlocProvider<RulesCubit>(
+            lazy: false,
+            create: (context) => RulesCubit(
+              conditionsRepository: context.read<ConditionsRepository>(),
+              itemsRepository: context.read<ItemsRepository>(),
+              spellsRepository: context.read<SpellsRepository>(),
+              featsRepository: context.read<FeatsRepository>(),
+              classesRepository: context.read<ClassesRepository>(),
+              racesRepository: context.read<RacesRepository>(),
+            )..loadRules(),
+          ),
         ],
         child: const MainScreen(),
       ),

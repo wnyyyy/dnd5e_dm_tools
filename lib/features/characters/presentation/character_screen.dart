@@ -1,8 +1,8 @@
+import 'package:dnd5e_dm_tools/core/util/logger.dart';
 import 'package:dnd5e_dm_tools/core/widgets/error_handler.dart';
 import 'package:dnd5e_dm_tools/features/characters/bloc/character_bloc.dart';
 import 'package:dnd5e_dm_tools/features/characters/bloc/character_event.dart';
 import 'package:dnd5e_dm_tools/features/characters/bloc/character_state.dart';
-import 'package:dnd5e_dm_tools/features/rules/rules_cubit.dart';
 import 'package:dnd5e_dm_tools/features/settings/bloc/settings_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -51,18 +51,12 @@ class CharacterScreen extends StatelessWidget {
           );
         }
         if (state is CharacterLoaded) {
-          final classs = context.read<RulesCubit>().getClass(
-            state.character['class'] as String? ?? '',
-          );
-          if (classs == null) {
-            return Container();
-          }
-          final classTable = parseTable(classs['table'] as String? ?? '');
-          return DefaultTabController(
+          logUI('Parsing class table for character: ${state.character.slug}');
+          return const DefaultTabController(
             length: 4,
             child: Column(
               children: [
-                const TabBar(
+                TabBar(
                   tabs: [
                     Tab(text: 'Bio'),
                     Tab(text: 'Status'),
@@ -72,16 +66,16 @@ class CharacterScreen extends StatelessWidget {
                 ),
                 Expanded(
                   child: TabBarView(
-                    physics: const NoScrollPhysics(),
+                    physics: NoScrollPhysics(),
                     children: [
-                      BioTab(character: state.character, slug: state.slug),
-                      StatusTab(
-                        character: state.character,
-                        slug: state.slug,
-                        table: classTable,
-                      ),
-                      SkillsTab(character: state.character, slug: state.slug),
-                      EquipTab(character: state.character, slug: state.slug),
+                      // BioTab(character: state.character, slug: state.slug),
+                      // StatusTab(
+                      //   character: state.character,
+                      //   slug: state.slug,
+                      //   table: classTable,
+                      // ),
+                      // SkillsTab(character: state.character, slug: state.slug),
+                      // EquipTab(character: state.character, slug: state.slug),
                     ],
                   ),
                 ),

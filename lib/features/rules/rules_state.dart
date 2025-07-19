@@ -35,15 +35,11 @@ class RulesStateLoading extends RulesState {
 class RulesStateLoaded extends RulesState {
   const RulesStateLoaded({
     required this.conditions,
-    required this.races,
-    required this.classes,
     required this.feats,
     required this.spells,
     required this.spellLists,
     required this.items,
   });
-  final List<Race> races;
-  final List<Class> classes;
   final List<Condition> conditions;
   final List<Feat> feats;
   final List<Spell> spells;
@@ -60,9 +56,7 @@ class RulesStateLoaded extends RulesState {
     List<Item>? items,
   }) {
     return RulesStateLoaded(
-      classes: classes ?? this.classes,
       conditions: conditions ?? this.conditions,
-      races: races ?? this.races,
       feats: feats ?? this.feats,
       spells: spells ?? this.spells,
       spellLists: spellLists ?? this.spellLists,
@@ -71,13 +65,5 @@ class RulesStateLoaded extends RulesState {
   }
 
   @override
-  List<Object> get props => [
-    conditions,
-    races,
-    classes,
-    feats,
-    spells,
-    spellLists,
-    items,
-  ];
+  List<Object> get props => [conditions, feats, spells, spellLists, items];
 }

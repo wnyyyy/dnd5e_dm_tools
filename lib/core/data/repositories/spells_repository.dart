@@ -11,6 +11,7 @@ class SpellsRepository {
 
   Future<void> init() async {
     await databaseProvider.loadCache(cacheSpellsName);
+    await databaseProvider.loadCache(cacheSpellListsName);
   }
 
   Future<Spell> get(String slug) async {

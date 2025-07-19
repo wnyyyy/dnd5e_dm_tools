@@ -13,3 +13,6 @@ void logBloc(String msg, {Level level = Level.trace}) =>
 
 void logStart(String msg, {Level level = Level.trace}) =>
     logger.log(level, '[Start] $msg');
+
+void logUI(String msg, {Level level = Level.trace}) =>
+    logger.log(level, '[UI] $msg');

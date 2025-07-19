@@ -1,5 +1,7 @@
 import 'package:dnd5e_dm_tools/core/data/models/character.dart';
+import 'package:dnd5e_dm_tools/core/data/models/class.dart';
 import 'package:dnd5e_dm_tools/core/data/repositories/characters_repository.dart';
+import 'package:dnd5e_dm_tools/core/data/repositories/classes_repository.dart';
 import 'package:dnd5e_dm_tools/core/util/logger.dart';
 import 'package:dnd5e_dm_tools/features/characters/bloc/character_event.dart';
 import 'package:dnd5e_dm_tools/features/characters/bloc/character_state.dart';
@@ -7,13 +9,16 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:logger/web.dart';
 
 class CharacterBloc extends Bloc<CharacterEvent, CharacterState> {
-  CharacterBloc({required this.charactersRepository})
-    : super(CharacterInitial()) {
+  CharacterBloc({
+    required this.charactersRepository,
+    required this.classesRepository,
+  }) : super(CharacterInitial()) {
     on<CharacterLoad>(_onCharacterLoad);
     on<CharacterUpdate>(_onCharacterUpdate);
     on<PersistCharacter>(_onPersistCharacter);
   }
   final CharactersRepository charactersRepository;
+  final ClassesRepository classesRepository;
 
   Future<void> _onCharacterLoad(
     CharacterLoad event,
@@ -23,7 +28,9 @@ class CharacterBloc extends Bloc<CharacterEvent, CharacterState> {
     emit(CharacterLoading(slug: event.slug));
     try {
       final Character character = await charactersRepository.get(event.slug);
-      emit(CharacterLoaded(character: character));
+      logBloc('Loading class for character: ${character.slug}');
+      final Class classs = await classesRepository.get(character.classs);
+      emit(CharacterLoaded(character: character, classs: classs));
     } catch (error) {
       logBloc(
         'Error loading character: ${event.slug} - $error',
