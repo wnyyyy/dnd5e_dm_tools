@@ -16,7 +16,11 @@ class SpellList extends Equatable {
     return SpellList(
       slug: documentId,
       name: name,
-      spells: json['spells'] as List<String>? ?? [],
+      spells:
+          (json['spells'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          [],
     );
   }
 

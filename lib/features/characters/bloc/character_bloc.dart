@@ -45,7 +45,7 @@ class CharacterBloc extends Bloc<CharacterEvent, CharacterState> {
       );
       emit(
         CharacterError(
-          error: 'Failed to load character $event.slug',
+          error: 'Failed to load character ${event.slug} - $error',
           slug: event.slug,
         ),
       );
@@ -64,7 +64,6 @@ class CharacterBloc extends Bloc<CharacterEvent, CharacterState> {
       final newState = (state as CharacterLoaded).copyWith(
         character: event.character,
       );
-
       emit(newState);
       if (event.persistData) {
         logBloc('Persisting character: ${event.character.slug}');

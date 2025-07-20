@@ -204,7 +204,7 @@ class ClassDescription extends StatelessWidget {
       );
 
       final ExpansionTile expansionTile = ExpansionTile(
-        title: Text('evel'),
+        title: const Text('evel'),
         expandedAlignment: Alignment.centerLeft,
         children: entries,
       );

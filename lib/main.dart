@@ -11,6 +11,7 @@ import 'package:dnd5e_dm_tools/core/data/repositories/spells_repository.dart';
 import 'package:dnd5e_dm_tools/core/util/const.dart';
 import 'package:dnd5e_dm_tools/core/util/logger.dart';
 import 'package:dnd5e_dm_tools/features/characters/bloc/character_bloc.dart';
+import 'package:dnd5e_dm_tools/features/database_editor/bloc/database_editor_cubit.dart';
 import 'package:dnd5e_dm_tools/features/main_screen/bloc/main_screen_cubit.dart';
 import 'package:dnd5e_dm_tools/features/main_screen/main_screen.dart';
 import 'package:dnd5e_dm_tools/features/onboarding/bloc/onboarding_cubit.dart';
@@ -36,7 +37,7 @@ void main() async {
   if (kIsWeb) {
     await Hive.initFlutter(hiveWebSubdir);
   } else {
-    await Hive.initFlutter();
+    await Hive.initFlutter('hive');
   }
 
   await checkHiveFiles();
@@ -177,6 +178,15 @@ class Dnd5eDmTools extends StatelessWidget {
             ),
           ),
           BlocProvider<MainScreenCubit>(create: (context) => MainScreenCubit()),
+          BlocProvider<DatabaseEditorCubit>(
+            create: (context) => DatabaseEditorCubit(
+              spellsRepository: context.read<SpellsRepository>(),
+              featsRepository: context.read<FeatsRepository>(),
+              classesRepository: context.read<ClassesRepository>(),
+              racesRepository: context.read<RacesRepository>(),
+              itemsRepository: context.read<ItemsRepository>(),
+            ),
+          ),
           BlocProvider<RulesCubit>(
             lazy: false,
             create: (context) => RulesCubit(

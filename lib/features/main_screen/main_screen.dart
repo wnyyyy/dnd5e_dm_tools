@@ -3,6 +3,7 @@ import 'package:dnd5e_dm_tools/core/widgets/app_drawer.dart';
 import 'package:dnd5e_dm_tools/core/widgets/error_handler.dart';
 import 'package:dnd5e_dm_tools/core/widgets/header.dart';
 import 'package:dnd5e_dm_tools/features/characters/presentation/character_screen.dart';
+import 'package:dnd5e_dm_tools/features/database_editor/database_editor_screen.dart';
 import 'package:dnd5e_dm_tools/features/main_screen/bloc/main_screen_cubit.dart';
 import 'package:dnd5e_dm_tools/features/main_screen/bloc/main_screen_state.dart';
 import 'package:dnd5e_dm_tools/features/onboarding/onboarding_screen.dart';
@@ -58,6 +59,11 @@ class MainScreen extends StatelessWidget {
                           },
                         );
                       }
+                      if (rulesState is RulesStatePendingRestart) {
+                        return const Center(
+                          child: Text('Restart pending.'),
+                        );
+                      }
                       return Container();
                     },
                   ),
@@ -84,7 +90,7 @@ class MainScreen extends StatelessWidget {
       return SettingsScreen();
     }
     if (state is MainScreenStateDatabase) {
-      return const Center(child: Center());
+      return const DatabaseEditorScreen();
     }
     return Container();
   }

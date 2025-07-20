@@ -12,10 +12,10 @@ class ClassesRepository {
     await databaseProvider.loadCache(cacheClassesName);
   }
 
-  Future<Class> get(String slug) async {
+  Future<Class> get(String slug, {bool online = false}) async {
     final data = await databaseProvider.getDocument(
       path: '$firebaseClassesPath/$slug',
-      cacheBoxName: cacheClassesName,
+      cacheBoxName: online ? null : cacheClassesName,
     );
     if (data == null) {
       logRep('Class not found: $slug', level: Level.warning);
@@ -25,10 +25,25 @@ class ClassesRepository {
     return classs;
   }
 
-  Future<List<Class>> getAll() async {
+  Future<Map<String, dynamic>> getData(
+    String slug, {
+    bool online = false,
+  }) async {
+    final data = await databaseProvider.getDocument(
+      path: '$firebaseClassesPath/$slug',
+      cacheBoxName: online ? null : cacheClassesName,
+    );
+    if (data == null) {
+      logRep('Class not found: $slug', level: Level.warning);
+      throw Exception('Class not found');
+    }
+    return data;
+  }
+
+  Future<List<Class>> getAll({bool online = false}) async {
     final data = await databaseProvider.getCollection(
       path: firebaseClassesPath,
-      cacheBoxName: cacheClassesName,
+      cacheBoxName: online ? null : cacheClassesName,
     );
     final List<Class> classes = [];
     for (final entry in data.entries) {
@@ -44,8 +59,8 @@ class ClassesRepository {
     return classes;
   }
 
-  Future<void> sync(String slug, Class classs) async {
-    final entry = classs.toJson();
+  Future<void> sync(String slug) async {
+    final entry = await getData(slug, online: true);
     await databaseProvider.setData(
       path: slug,
       data: entry,
@@ -62,5 +77,9 @@ class ClassesRepository {
       offline: offline,
       cacheBoxName: cacheClassesName,
     );
+  }
+
+  Future<void> clearCache() async {
+    await databaseProvider.clearCacheBox(cacheClassesName);
   }
 }

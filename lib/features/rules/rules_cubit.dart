@@ -106,9 +106,39 @@ class RulesCubit extends Cubit<RulesState> {
           itemsRepository.getAll().then((items) {
             emit(currState.copyWith(items: items));
           });
+        case 'classes':
+          classesRepository.getAll().then((classes) {
+            emit(currState.copyWith(classes: classes));
+          });
+        case 'races':
+          racesRepository.getAll().then((races) {
+            emit(currState.copyWith(races: races));
+          });
+        default:
+          logBloc('Unknown rule type: $type', level: Level.warning);
+          emit(RulesStateError('Unknown rule type: $type'));
           return Future.value();
       }
     }
     return Future.value();
+  }
+
+  Future<void> invalidateCache(List<String> types) async {
+    emit(RulesStateLoading());
+    for (final type in types) {
+      switch (type) {
+        case 'feats':
+          await featsRepository.clearCache();
+        case 'races':
+          await racesRepository.clearCache();
+        case 'spells':
+          await spellsRepository.clearCache();
+        case 'classes':
+          await classesRepository.clearCache();
+        case 'items':
+          await itemsRepository.clearCache();
+      }
+    }
+    emit(RulesStatePendingRestart());
   }
 }

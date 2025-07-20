@@ -12,10 +12,10 @@ class FeatsRepository {
     await databaseProvider.loadCache(cacheFeatsName);
   }
 
-  Future<Feat> get(String slug) async {
+  Future<Feat> get(String slug, {bool online = false}) async {
     final data = await databaseProvider.getDocument(
       path: '$firebaseFeatsPath/$slug',
-      cacheBoxName: cacheFeatsName,
+      cacheBoxName: online ? null : cacheFeatsName,
     );
     if (data == null) {
       logRep('Feat not found: $slug', level: Level.warning);
@@ -25,10 +25,25 @@ class FeatsRepository {
     return feat;
   }
 
-  Future<List<Feat>> getAll() async {
+  Future<Map<String, dynamic>> getData(
+    String slug, {
+    bool online = false,
+  }) async {
+    final data = await databaseProvider.getDocument(
+      path: '$firebaseFeatsPath/$slug',
+      cacheBoxName: online ? null : cacheFeatsName,
+    );
+    if (data == null) {
+      logRep('Feat not found: $slug', level: Level.warning);
+      throw Exception('Feat not found');
+    }
+    return data;
+  }
+
+  Future<List<Feat>> getAll({bool online = false}) async {
     final data = await databaseProvider.getCollection(
       path: firebaseFeatsPath,
-      cacheBoxName: cacheFeatsName,
+      cacheBoxName: online ? null : cacheFeatsName,
     );
     final List<Feat> feats = [];
     for (final entry in data.entries) {
@@ -44,8 +59,8 @@ class FeatsRepository {
     return feats;
   }
 
-  Future<void> sync(String slug, Feat feat) async {
-    final entry = feat.toJson();
+  Future<void> sync(String slug) async {
+    final entry = await getData(slug, online: true);
     await databaseProvider.setData(
       path: slug,
       data: entry,
@@ -62,5 +77,9 @@ class FeatsRepository {
       offline: offline,
       cacheBoxName: cacheFeatsName,
     );
+  }
+
+  Future<void> clearCache() async {
+    await databaseProvider.clearCacheBox(cacheFeatsName);
   }
 }

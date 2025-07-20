@@ -27,6 +27,11 @@ class RulesStateError extends RulesState {
   List<Object> get props => [message];
 }
 
+class RulesStatePendingRestart extends RulesState {
+  @override
+  List<Object> get props => [];
+}
+
 class RulesStateLoading extends RulesState {
   @override
   List<Object> get props => [];

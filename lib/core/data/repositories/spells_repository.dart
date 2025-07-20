@@ -14,10 +14,10 @@ class SpellsRepository {
     await databaseProvider.loadCache(cacheSpellListsName);
   }
 
-  Future<Spell> get(String slug) async {
+  Future<Spell> get(String slug, {bool online = false}) async {
     final data = await databaseProvider.getDocument(
       path: '$firebaseSpellsPath/$slug',
-      cacheBoxName: cacheSpellsName,
+      cacheBoxName: online ? null : cacheSpellsName,
     );
     if (data == null) {
       logRep('Spell not found: $slug', level: Level.warning);
@@ -27,10 +27,25 @@ class SpellsRepository {
     return spell;
   }
 
-  Future<List<Spell>> getAll() async {
+  Future<Map<String, dynamic>> getData(
+    String slug, {
+    bool online = false,
+  }) async {
+    final data = await databaseProvider.getDocument(
+      path: '$firebaseSpellsPath/$slug',
+      cacheBoxName: online ? null : cacheSpellsName,
+    );
+    if (data == null) {
+      logRep('Spell not found: $slug', level: Level.warning);
+      throw Exception('Spell not found');
+    }
+    return data;
+  }
+
+  Future<List<Spell>> getAll({bool online = false}) async {
     final data = await databaseProvider.getCollection(
       path: firebaseSpellsPath,
-      cacheBoxName: cacheSpellsName,
+      cacheBoxName: online ? null : cacheSpellsName,
     );
     final List<Spell> spells = [];
     for (final entry in data.entries) {
@@ -65,8 +80,8 @@ class SpellsRepository {
     return spellLists;
   }
 
-  Future<void> sync(String slug, Spell spell) async {
-    final entry = spell.toJson();
+  Future<void> sync(String slug) async {
+    final entry = await getData(slug, online: true);
     await databaseProvider.setData(
       path: slug,
       data: entry,
@@ -83,5 +98,9 @@ class SpellsRepository {
       offline: offline,
       cacheBoxName: cacheSpellsName,
     );
+  }
+
+  Future<void> clearCache() async {
+    await databaseProvider.clearCacheBox(cacheSpellsName);
   }
 }

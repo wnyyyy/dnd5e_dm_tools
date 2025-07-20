@@ -126,4 +126,18 @@ class DatabaseProvider {
       );
     }
   }
+
+  Future<void> clearCacheBox(String cacheBoxName) async {
+    try {
+      if (Hive.isBoxOpen(cacheBoxName)) {
+        await Hive.box<Map>(cacheBoxName).clear();
+      } else {
+        final box = await Hive.openBox(cacheBoxName);
+        await box.clear();
+      }
+      logDB('Cache cleared for $cacheBoxName');
+    } catch (e) {
+      logDB('Error clearing cache for $cacheBoxName: $e', level: Level.error);
+    }
+  }
 }
