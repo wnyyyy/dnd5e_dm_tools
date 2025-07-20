@@ -1,13 +1,34 @@
 import 'package:dnd5e_dm_tools/core/util/enum.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class AppThemes {
-  static ThemeData buildThemeData(ThemeColor color, bool isDarkMode) {
+  static ThemeData buildThemeData(
+    ThemeColor color,
+    bool isDarkMode, {
+    String? fontFamily,
+  }) {
     return ThemeData(
+      fontFamily: GoogleFonts.nunitoSans().fontFamily,
       colorScheme: ColorScheme.fromSeed(
         seedColor: isDarkMode ? color.darkColor : color.lightColor,
         brightness: isDarkMode ? Brightness.dark : Brightness.light,
       ),
+    );
+  }
+
+  static MarkdownStyleSheet markdownStyleSheet(
+    BuildContext context, {
+    String? fontFamily,
+  }) {
+    final theme = Theme.of(context);
+    return MarkdownStyleSheet.fromTheme(theme).copyWith(
+      h2Padding: const EdgeInsets.only(top: 16),
+      h3Padding: const EdgeInsets.only(top: 20),
+      h4Padding: const EdgeInsets.only(top: 22),
+      h5Padding: const EdgeInsets.only(top: 24),
+      blockSpacing: 4.0,
     );
   }
 }
@@ -27,7 +48,7 @@ extension ThemeColorExtension on ThemeColor {
         return const Color(0xFF8A2BE2);
       case ThemeColor.slateGrey:
         return Colors.grey.shade600;
-      }
+    }
   }
 
   Color get darkColor {
@@ -44,7 +65,7 @@ extension ThemeColorExtension on ThemeColor {
         return const Color(0xFF551A8B);
       case ThemeColor.slateGrey:
         return Colors.grey.shade900;
-      }
+    }
   }
 
   String get name {
@@ -61,6 +82,6 @@ extension ThemeColorExtension on ThemeColor {
         return 'Lavender Violet';
       case ThemeColor.slateGrey:
         return 'Slate Grey';
-      }
+    }
   }
 }

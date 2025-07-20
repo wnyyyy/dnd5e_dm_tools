@@ -1,3 +1,4 @@
+import 'package:dnd5e_dm_tools/core/config/app_themes.dart';
 import 'package:dnd5e_dm_tools/core/data/models/archetype.dart';
 import 'package:dnd5e_dm_tools/core/data/models/character.dart';
 import 'package:dnd5e_dm_tools/core/data/models/class.dart';
@@ -179,7 +180,12 @@ class ClassDescription extends StatelessWidget {
             style: Theme.of(context).textTheme.headlineMedium,
           ),
           const SizedBox(height: 8),
-          Expanded(child: Markdown(data: archetype.desc)),
+          Expanded(
+            child: Markdown(
+              data: archetype.desc,
+              styleSheet: AppThemes.markdownStyleSheet(context),
+            ),
+          ),
         ],
       ),
     );
