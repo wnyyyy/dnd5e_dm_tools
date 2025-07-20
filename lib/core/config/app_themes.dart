@@ -10,7 +10,7 @@ class AppThemes {
     String? fontFamily,
   }) {
     return ThemeData(
-      fontFamily: GoogleFonts.nunitoSans().fontFamily,
+      fontFamily: GoogleFonts.raleway().fontFamily,
       colorScheme: ColorScheme.fromSeed(
         seedColor: isDarkMode ? color.darkColor : color.lightColor,
         brightness: isDarkMode ? Brightness.dark : Brightness.light,
@@ -26,7 +26,13 @@ class AppThemes {
     return MarkdownStyleSheet.fromTheme(theme).copyWith(
       h2Padding: const EdgeInsets.only(top: 16),
       h3Padding: const EdgeInsets.only(top: 20),
+      h3: Theme.of(
+        context,
+      ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
       h4Padding: const EdgeInsets.only(top: 22),
+      h4: Theme.of(
+        context,
+      ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
       h5Padding: const EdgeInsets.only(top: 24),
       blockSpacing: 4.0,
     );

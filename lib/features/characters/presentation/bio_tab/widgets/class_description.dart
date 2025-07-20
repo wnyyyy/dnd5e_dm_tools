@@ -2,6 +2,7 @@ import 'package:dnd5e_dm_tools/core/config/app_themes.dart';
 import 'package:dnd5e_dm_tools/core/data/models/archetype.dart';
 import 'package:dnd5e_dm_tools/core/data/models/character.dart';
 import 'package:dnd5e_dm_tools/core/data/models/class.dart';
+import 'package:dnd5e_dm_tools/core/data/models/class_table.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
@@ -123,13 +124,17 @@ class ClassDescription extends StatelessWidget {
                         children: [
                           Text(
                             'Skills\nProficiencies',
-                            style: Theme.of(context).textTheme.titleSmall,
+                            style: Theme.of(context).textTheme.titleSmall
+                                ?.copyWith(fontWeight: FontWeight.bold),
                             textAlign: TextAlign.center,
                           ),
                           const SizedBox(height: 8),
                           Text(
                             classs.profSkills,
-                            style: Theme.of(context).textTheme.bodySmall,
+                            style: classs.profSkills.length > 30
+                                ? Theme.of(context).textTheme.bodySmall
+                                : Theme.of(context).textTheme.bodyMedium,
+                            textAlign: TextAlign.center,
                           ),
                         ],
                       ),
@@ -154,13 +159,17 @@ class ClassDescription extends StatelessWidget {
             children: [
               Text(
                 title,
-                style: Theme.of(context).textTheme.titleSmall,
+                style: Theme.of(
+                  context,
+                ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 8),
               Text(
                 content,
-                style: Theme.of(context).textTheme.bodySmall,
+                style: content.length > 30
+                    ? Theme.of(context).textTheme.bodySmall
+                    : Theme.of(context).textTheme.bodyMedium,
                 textAlign: TextAlign.center,
               ),
             ],
@@ -193,30 +202,63 @@ class ClassDescription extends StatelessWidget {
 
   Widget _buildTableTab(BuildContext context) {
     final List<Widget> levels = [];
-    final bool caster = classs.spellCastingAbility?.isNotEmpty ?? false;
 
     for (var i = 1; i < 21; i++) {
-      final List<Widget> entries = [];
-      entries.add(
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-          width: double.infinity,
-          child: Text(
-            '$key: ',
-            style: Theme.of(context).textTheme.bodySmall,
-            softWrap: true,
-          ),
-        ),
-      );
-
+      final ClassTableRow? entry = classs.table.levelData[i];
+      if (entry == null) continue;
       final ExpansionTile expansionTile = ExpansionTile(
-        title: const Text('evel'),
+        title: Text('Level $i'),
         expandedAlignment: Alignment.centerLeft,
-        children: entries,
+        childrenPadding: const EdgeInsets.only(left: 12, right: 12, bottom: 6),
+        children: [
+          _buildField(
+            context,
+            label: 'Proficiency Bonus:',
+            value: ' +${entry.proficiencyBonus}',
+          ),
+          _buildField(
+            context,
+            label: 'Features: ',
+            value: entry.features.join(', '),
+          ),
+          if (entry.classSpecificFeatures?.isNotEmpty ?? false)
+            ...entry.classSpecificFeatures!.entries.map(
+              (e) => _buildField(
+                context,
+                label: '${e.key}: ',
+                value: e.value.toString(),
+              ),
+            ),
+        ],
       );
       levels.add(expansionTile);
     }
 
     return SingleChildScrollView(child: Column(children: levels));
+  }
+
+  Widget _buildField(
+    BuildContext context, {
+    required String label,
+    required String value,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(4),
+      alignment: Alignment.centerLeft,
+      child: RichText(
+        text: TextSpan(
+          text: label,
+          style: Theme.of(context).textTheme.bodyMedium,
+          children: [
+            TextSpan(
+              text: value,
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium!.copyWith(fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
