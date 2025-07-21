@@ -1,4 +1,5 @@
 import 'package:dnd5e_dm_tools/core/data/models/feat.dart';
+import 'package:dnd5e_dm_tools/core/data/models/proficiency.dart';
 import 'package:equatable/equatable.dart';
 
 class Character extends Equatable {
@@ -11,6 +12,7 @@ class Character extends Equatable {
     required this.race,
     required this.level,
     required this.feats,
+    required this.proficiency,
     this.color,
     this.archetype,
   });
@@ -43,6 +45,10 @@ class Character extends Equatable {
         ) ??
         <String, String>{};
 
+    final proficiency = Proficiency.fromJson(
+      json['proficiency'] as Map<String, dynamic>? ?? {},
+    );
+
     return Character(
       slug: documentId,
       name: name,
@@ -54,6 +60,7 @@ class Character extends Equatable {
       level: json['level'] as int? ?? 1,
       archetype: json['archetype'] as String?,
       feats: feats,
+      proficiency: proficiency,
     );
   }
 
@@ -84,6 +91,7 @@ class Character extends Equatable {
   final int level;
   final String? archetype;
   final Map<String, String?> feats;
+  final Proficiency proficiency;
 
   Map<String, dynamic> toJson() {
     return {
@@ -96,10 +104,15 @@ class Character extends Equatable {
       'level': level,
       'archetype': archetype,
       'feats': feats,
+      'proficiency': proficiency.toJson(),
     };
   }
 
-  Character copyWith({int? level, Map<String, String?>? feats}) {
+  Character copyWith({
+    int? level,
+    Map<String, String?>? feats,
+    Proficiency? proficiency,
+  }) {
     return Character(
       slug: slug,
       name: name,
@@ -111,6 +124,7 @@ class Character extends Equatable {
       level: level ?? this.level,
       archetype: archetype,
       feats: feats ?? this.feats,
+      proficiency: proficiency ?? this.proficiency,
     );
   }
 
@@ -126,6 +140,7 @@ class Character extends Equatable {
     feats,
     color ?? '',
     archetype ?? '',
+    proficiency,
   ];
 
   @override

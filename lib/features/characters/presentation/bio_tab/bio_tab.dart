@@ -3,6 +3,7 @@ import 'package:dnd5e_dm_tools/core/data/models/class.dart';
 import 'package:dnd5e_dm_tools/core/data/models/race.dart';
 import 'package:dnd5e_dm_tools/features/characters/presentation/bio_tab/widgets/character_portrait.dart';
 import 'package:dnd5e_dm_tools/features/characters/presentation/bio_tab/widgets/feat_list.dart';
+import 'package:dnd5e_dm_tools/features/characters/presentation/bio_tab/widgets/proficiency_list.dart';
 import 'package:flutter/material.dart';
 
 class BioTab extends StatelessWidget {
@@ -60,7 +61,7 @@ class BioTab extends StatelessWidget {
               horizontal: screenWidth * 0.08,
               vertical: 8,
             ),
-            child: Container(),
+            child: ProficiencyList(character: character)
           ),
         ],
       ),
@@ -101,7 +102,7 @@ class BioTab extends StatelessWidget {
                     horizontal: screenWidth * 0.02,
                     vertical: 8,
                   ),
-                  child: Container(),
+                  child: ProficiencyList(character: character)
                 ),
               ],
             ),

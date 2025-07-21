@@ -16,7 +16,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 class FeatList extends StatelessWidget {
   const FeatList({super.key, required this.slug});
-
   final String slug;
 
   @override
