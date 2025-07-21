@@ -1,6 +1,7 @@
 import 'package:dnd5e_dm_tools/core/data/models/archetype.dart';
 import 'package:dnd5e_dm_tools/core/data/models/class_table.dart';
 import 'package:dnd5e_dm_tools/core/data/models/feat.dart';
+import 'package:dnd5e_dm_tools/core/util/helper.dart';
 import 'package:equatable/equatable.dart';
 
 class Class extends Equatable {
@@ -122,41 +123,14 @@ class Class extends Equatable {
     );
   }
 
-  List<Feat> getClassFeatures({int level = 20}) {
+  List<Feat> getFeatures({int level = 20}) {
     List<String> lines = desc.split('\n');
     lines = lines
         .map((line) => line.trim())
         .where((line) => line.isNotEmpty)
         .toList();
 
-    final featMap = _buildFeat(lines, '###');
-    final List<Feat> featList = [];
-
-    for (final entry in featMap.entries) {
-      final featName = entry.key;
-      final featDesc = List<String>.from(
-        entry.value['description'] as List? ?? [],
-      );
-      final subfeats = <String>[];
-      final Map subfeatures = entry.value['subfeatures'] as Map? ?? {};
-      for (final subfeature in subfeatures.entries) {
-        final subfeatName = subfeature.key;
-        final subfeatureVal = subfeature.value as Map<String, dynamic>? ?? {};
-        final subfeatDesc = List<String>.from(
-          subfeatureVal['description'] as List? ?? [],
-        );
-        subfeats.add('**$subfeatName**.\n${subfeatDesc.join('\n\n')}');
-      }
-
-      featList.add(
-        Feat(
-          name: featName,
-          description: featDesc.join('\n\n'),
-          slug: featName,
-          effectsDesc: subfeats,
-        ),
-      );
-    }
+    final List<Feat> featList = buildFeatList(lines);
 
     final featNamesLeveled = [];
     for (int i = 1; i <= level; i++) {
@@ -174,52 +148,6 @@ class Class extends Equatable {
         .toList();
 
     return featsLeveled;
-  }
-
-  Map<String, Map<String, dynamic>> _buildFeat(
-    List<String> lines,
-    String prefix,
-  ) {
-    var currFeatKey = '';
-    final currFeatDesc = [];
-    final featMap = <String, Map<String, dynamic>>{};
-    for (int i = 0; i < lines.length; i++) {
-      final line = lines[i];
-      if (line.startsWith('$prefix ')) {
-        if (currFeatKey.isNotEmpty && currFeatDesc.isNotEmpty) {
-          featMap[currFeatKey] ??= {};
-          featMap[currFeatKey]!['description'] = List.from(currFeatDesc);
-          ;
-          currFeatDesc.clear();
-        }
-        final featName = line.substring(prefix.length).trim();
-        currFeatKey = featName;
-        featMap[currFeatKey] = {};
-      } else if (line.startsWith('$prefix# ')) {
-        if (currFeatKey.isNotEmpty && currFeatDesc.isNotEmpty) {
-          featMap[currFeatKey] ??= {};
-          featMap[currFeatKey]!['description'] = List.from(currFeatDesc);
-          ;
-          currFeatDesc.clear();
-        }
-        final subfeatLines = lines
-            .skip(i)
-            .takeWhile((l) => !l.startsWith('$prefix '))
-            .toList();
-        featMap[currFeatKey]!['subfeatures'] = _buildFeat(
-          subfeatLines,
-          '$prefix#',
-        );
-        i += subfeatLines.length - 1;
-      } else {
-        if (currFeatKey.isNotEmpty) {
-          currFeatDesc.add(line.trim());
-          featMap[currFeatKey] ??= {};
-          featMap[currFeatKey]!['description'] = List.from(currFeatDesc);
-        }
-      }
-    }
-    return featMap;
   }
 
   @override

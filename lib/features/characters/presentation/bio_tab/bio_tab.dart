@@ -1,3 +1,4 @@
+import 'package:dnd5e_dm_tools/core/data/models/archetype.dart';
 import 'package:dnd5e_dm_tools/core/data/models/character.dart';
 import 'package:dnd5e_dm_tools/core/data/models/class.dart';
 import 'package:dnd5e_dm_tools/core/data/models/race.dart';
@@ -19,16 +20,19 @@ class BioTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final Archetype? archetype = classs.archetypes
+        .where((element) => element.slug == character.archetype)
+        .firstOrNull;
     return OrientationBuilder(
       builder: (context, orientation) {
         return orientation == Orientation.portrait
-            ? _buildPortraitContent(context)
-            : _buildLandscapeContent(context);
+            ? _buildPortraitContent(context, archetype)
+            : _buildLandscapeContent(context, archetype);
       },
     );
   }
 
-  Widget _buildPortraitContent(BuildContext context) {
+  Widget _buildPortraitContent(BuildContext context, Archetype? archetype) {
     final screenWidth = MediaQuery.of(context).size.width;
     return SingleChildScrollView(
       child: Column(
@@ -54,21 +58,21 @@ class BioTab extends StatelessWidget {
               horizontal: screenWidth * 0.08,
               vertical: 8,
             ),
-            child: FeatList(slug: character.slug),
+            child: ProficiencyList(character: character),
           ),
           Padding(
             padding: EdgeInsets.symmetric(
               horizontal: screenWidth * 0.08,
               vertical: 8,
             ),
-            child: ProficiencyList(character: character)
+            child: FeatList(slug: character.slug, archetype: archetype),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildLandscapeContent(BuildContext context) {
+  Widget _buildLandscapeContent(BuildContext context, Archetype? archetype) {
     final screenWidth = MediaQuery.of(context).size.width;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -95,14 +99,14 @@ class BioTab extends StatelessWidget {
                     horizontal: screenWidth * 0.02,
                     vertical: 8,
                   ),
-                  child: FeatList(slug: character.slug),
+                  child: ProficiencyList(character: character),
                 ),
                 Padding(
                   padding: EdgeInsets.symmetric(
                     horizontal: screenWidth * 0.02,
                     vertical: 8,
                   ),
-                  child: ProficiencyList(character: character)
+                  child: FeatList(slug: character.slug, archetype: archetype),
                 ),
               ],
             ),

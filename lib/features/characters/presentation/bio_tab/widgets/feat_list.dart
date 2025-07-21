@@ -1,3 +1,4 @@
+import 'package:dnd5e_dm_tools/core/data/models/archetype.dart';
 import 'package:dnd5e_dm_tools/core/data/models/character.dart';
 import 'package:dnd5e_dm_tools/core/data/models/class.dart';
 import 'package:dnd5e_dm_tools/core/data/models/feat.dart';
@@ -13,8 +14,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class FeatList extends StatelessWidget {
-  const FeatList({super.key, required this.slug});
+  const FeatList({super.key, required this.slug, this.archetype});
   final String slug;
+  final Archetype? archetype;
 
   @override
   Widget build(BuildContext context) {
@@ -45,8 +47,12 @@ class FeatList extends StatelessWidget {
     void onAddItem() {
       showDialog(
         context: context,
-        builder: (context) =>
-            _AddFeatDialog(character: character, race: race, classs: classs),
+        builder: (context) => _AddFeatDialog(
+          character: character,
+          race: race,
+          classs: classs,
+          archetype: archetype,
+        ),
       );
     }
 
@@ -103,11 +109,13 @@ class _AddFeatDialog extends StatefulWidget {
     required this.character,
     required this.race,
     required this.classs,
+    this.archetype,
   });
 
   final Character character;
   final Race race;
   final Class classs;
+  final Archetype? archetype;
 
   @override
   State<_AddFeatDialog> createState() => _AddFeatDialogState();
@@ -123,9 +131,10 @@ class _AddFeatDialogState extends State<_AddFeatDialog> {
   @override
   Widget build(BuildContext context) {
     final racialFeats = widget.race.getRacialFeatures();
-    final classFeats = widget.classs.getClassFeatures(
-      level: widget.character.level,
-    );
+    final classFeats = widget.classs.getFeatures(level: widget.character.level);
+    if (widget.archetype != null) {
+      classFeats.addAll(widget.archetype!.getFeatures());
+    }
     final allFeats =
         (context.read<RulesCubit>().state as RulesStateLoaded).feats;
     final screenWidth = MediaQuery.of(context).size.width;
