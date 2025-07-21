@@ -1,8 +1,6 @@
-import 'package:dnd5e_dm_tools/core/data/models/class.dart';
 import 'package:dnd5e_dm_tools/core/data/models/condition.dart';
 import 'package:dnd5e_dm_tools/core/data/models/feat.dart';
 import 'package:dnd5e_dm_tools/core/data/models/item.dart';
-import 'package:dnd5e_dm_tools/core/data/models/race.dart';
 import 'package:dnd5e_dm_tools/core/data/models/spell.dart';
 import 'package:dnd5e_dm_tools/core/data/models/spell_list.dart';
 import 'package:equatable/equatable.dart';
@@ -52,8 +50,6 @@ class RulesStateLoaded extends RulesState {
   final List<Item> items;
 
   RulesStateLoaded copyWith({
-    List<Race>? races,
-    List<Class>? classes,
     List<Condition>? conditions,
     List<Feat>? feats,
     List<Spell>? spells,

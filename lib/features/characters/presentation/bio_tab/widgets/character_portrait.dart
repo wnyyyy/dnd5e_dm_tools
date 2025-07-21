@@ -76,6 +76,7 @@ class CharacterPortrait extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final feats = classs.getClassFeatures(level: 3);
     return Column(
       children: [
         ClipRRect(
@@ -140,7 +141,6 @@ class CharacterPortrait extends StatelessWidget {
                         return ClassDescription(
                           classs: classs,
                           character: character,
-                          
                         );
                       },
                     ),

@@ -106,14 +106,6 @@ class RulesCubit extends Cubit<RulesState> {
           itemsRepository.getAll().then((items) {
             emit(currState.copyWith(items: items));
           });
-        case 'classes':
-          classesRepository.getAll().then((classes) {
-            emit(currState.copyWith(classes: classes));
-          });
-        case 'races':
-          racesRepository.getAll().then((races) {
-            emit(currState.copyWith(races: races));
-          });
         default:
           logBloc('Unknown rule type: $type', level: Level.warning);
           emit(RulesStateError('Unknown rule type: $type'));

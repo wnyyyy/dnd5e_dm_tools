@@ -12,28 +12,6 @@ Future<void> saveConfig(String key, String value) async {
   logDB('Config saved: $key = $value');
 }
 
-Map<String, dynamic> getRacialFeatures(String desc) {
-  final features = <String, dynamic>{};
-  final rawFeatures = desc.split('***');
-
-  for (var i = 1; i < rawFeatures.length; i += 2) {
-    var name = rawFeatures[i].trim();
-    final description = (i + 1 < rawFeatures.length)
-        ? rawFeatures[i + 1].trim()
-        : '';
-
-    if (name.endsWith('.')) {
-      name = name.substring(0, name.length - 1);
-    }
-
-    if (name.isNotEmpty && description.isNotEmpty) {
-      features[name] = description;
-    }
-  }
-
-  return features;
-}
-
 String getOrdinal(int number) {
   final int lastDigit = number % 10;
   final int lastTwoDigits = number % 100;

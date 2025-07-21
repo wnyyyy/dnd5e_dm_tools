@@ -1,3 +1,4 @@
+import 'package:dnd5e_dm_tools/core/data/models/feat.dart';
 import 'package:equatable/equatable.dart';
 
 class Race extends Equatable {
@@ -23,6 +24,35 @@ class Race extends Equatable {
 
   Race copyWith() {
     return Race(slug: slug, name: name, traits: traits);
+  }
+
+  List<Feat> getRacialFeatures() {
+    final features = <Feat>[];
+    final rawFeatures = traits.split('**');
+
+    for (var i = 1; i < rawFeatures.length; i += 2) {
+      var name = rawFeatures[i].trim();
+      final description = (i + 1 < rawFeatures.length)
+          ? rawFeatures[i + 1].trim()
+          : '';
+
+      if (name.endsWith('.')) {
+        name = name.substring(0, name.length - 1);
+      }
+
+      if (name.isNotEmpty && description.isNotEmpty) {
+        features.add(
+          Feat(
+            name: name,
+            description: description,
+            slug: name.trim().replaceAll(' ', '_'),
+            effectsDesc: const [],
+          ),
+        );
+      }
+    }
+
+    return features;
   }
 
   @override

@@ -1,5 +1,6 @@
 import 'package:dnd5e_dm_tools/core/data/models/archetype.dart';
 import 'package:dnd5e_dm_tools/core/data/models/class_table.dart';
+import 'package:dnd5e_dm_tools/core/data/models/feat.dart';
 import 'package:equatable/equatable.dart';
 
 class Class extends Equatable {
@@ -13,6 +14,7 @@ class Class extends Equatable {
     required this.profTools,
     required this.profArmor,
     required this.profSkills,
+    required this.desc,
     this.spellCastingAbility,
     this.archetypes = const [],
   });
@@ -42,6 +44,7 @@ class Class extends Equatable {
     final profArmor = json['prof_armor'] as String? ?? '';
     final profSkills = json['prof_skills'] as String? ?? '';
     final spellCastingAbility = json['spellcasting_ability'] as String?;
+    final desc = json['desc'] as String? ?? '';
 
     final List<Archetype> archetypes;
     try {
@@ -69,11 +72,13 @@ class Class extends Equatable {
       profArmor: profArmor,
       profSkills: profSkills,
       spellCastingAbility: spellCastingAbility,
+      desc: desc,
     );
   }
 
   final String slug;
   final String name;
+  final String desc;
   final ClassTable table;
   final List<Archetype> archetypes;
   final String hitDice;
@@ -88,6 +93,7 @@ class Class extends Equatable {
     return {
       'name': name,
       'table': table.toString(),
+      'desc': desc,
       'archetypes': archetypes.map((e) => e.toJson()).toList(),
       'hit_dice': hitDice,
       'prof_saving_throws': profSavingThrows,
@@ -104,6 +110,7 @@ class Class extends Equatable {
       slug: slug,
       name: name,
       table: table,
+      desc: desc,
       archetypes: archetypes,
       hitDice: hitDice,
       profSavingThrows: profSavingThrows,
@@ -113,6 +120,99 @@ class Class extends Equatable {
       profSkills: profSkills,
       spellCastingAbility: spellCastingAbility,
     );
+  }
+
+  List<Feat> getClassFeatures({int level = 20}) {
+    List<String> lines = desc.split('\n');
+    lines = lines
+        .map((line) => line.trim())
+        .where((line) => line.isNotEmpty)
+        .toList();
+
+    final featMap = _buildFeat(lines, '###');
+    final List<Feat> featList = [];
+
+    for (final entry in featMap.entries) {
+      final featName = entry.key;
+      final featDesc = entry.value['description'] as String? ?? '';
+      final subfeats = <String>[];
+      final Map subfeatures = entry.value['subfeatures'] as Map? ?? {};
+      for (final subfeature in subfeatures.entries) {
+        final subfeatName = subfeature.key;
+        final subfeatureVal = subfeature.value as Map<String, dynamic>? ?? {};
+        final subfeatDesc = subfeatureVal['description'] as String? ?? '';
+        subfeats.add('**$subfeatName**.\n$subfeatDesc');
+      }
+      featList.add(
+        Feat(
+          name: featName,
+          description: featDesc,
+          slug: featName.trim().toLowerCase().replaceAll(' ', '_'),
+          effectsDesc: subfeats,
+        ),
+      );
+    }
+
+    final featNamesLeveled = [];
+    for (int i = 1; i <= level; i++) {
+      final levelEntry = table.levelData[i];
+      if (levelEntry != null) {
+        featNamesLeveled.addAll(levelEntry.features);
+      }
+    }
+
+    final featsLeveled = featList
+        .where(
+          (feat) =>
+              feat.name.isNotEmpty && featNamesLeveled.contains(feat.name),
+        )
+        .toList();
+
+    return featsLeveled;
+  }
+
+  Map<String, Map<String, dynamic>> _buildFeat(
+    List<String> lines,
+    String prefix,
+  ) {
+    var currFeatKey = '';
+    var currFeatDesc = '';
+    final featMap = <String, Map<String, dynamic>>{};
+    for (int i = 0; i < lines.length; i++) {
+      final line = lines[i];
+      if (line.startsWith('$prefix ')) {
+        if (currFeatKey.isNotEmpty && currFeatDesc.isNotEmpty) {
+          featMap[currFeatKey] ??= {};
+          featMap[currFeatKey]!['description'] = currFeatDesc;
+          currFeatDesc = '';
+        }
+        final featName = line.substring(prefix.length).trim();
+        currFeatKey = featName;
+        featMap[currFeatKey] = {};
+      } else if (line.startsWith('$prefix# ')) {
+        if (currFeatKey.isNotEmpty && currFeatDesc.isNotEmpty) {
+          featMap[currFeatKey] ??= {};
+          featMap[currFeatKey]!['description'] = currFeatDesc;
+          currFeatDesc = '';
+        }
+        final subfeatLines = lines
+            .skip(i)
+            .takeWhile((l) => !l.startsWith('$prefix '))
+            .toList();
+        featMap[currFeatKey]!['subfeatures'] = _buildFeat(
+          subfeatLines,
+          '$prefix#',
+        );
+        i += subfeatLines.length - 1;
+      } else {
+        if (currFeatKey.isNotEmpty) {
+          currFeatDesc += line.trim();
+          featMap[currFeatKey] ??= {};
+          featMap[currFeatKey]!['description'] = currFeatDesc;
+        }
+      }
+    }
+    return featMap;
   }
 
   @override
