@@ -134,20 +134,25 @@ class Class extends Equatable {
 
     for (final entry in featMap.entries) {
       final featName = entry.key;
-      final featDesc = entry.value['description'] as String? ?? '';
+      final featDesc = List<String>.from(
+        entry.value['description'] as List? ?? [],
+      );
       final subfeats = <String>[];
       final Map subfeatures = entry.value['subfeatures'] as Map? ?? {};
       for (final subfeature in subfeatures.entries) {
         final subfeatName = subfeature.key;
         final subfeatureVal = subfeature.value as Map<String, dynamic>? ?? {};
-        final subfeatDesc = subfeatureVal['description'] as String? ?? '';
-        subfeats.add('**$subfeatName**.\n$subfeatDesc');
+        final subfeatDesc = List<String>.from(
+          subfeatureVal['description'] as List? ?? [],
+        );
+        subfeats.add('**$subfeatName**.\n${subfeatDesc.join('\n\n')}');
       }
+
       featList.add(
         Feat(
           name: featName,
-          description: featDesc,
-          slug: featName.trim().toLowerCase().replaceAll(' ', '_'),
+          description: featDesc.join('\n\n'),
+          slug: featName,
           effectsDesc: subfeats,
         ),
       );
@@ -176,15 +181,16 @@ class Class extends Equatable {
     String prefix,
   ) {
     var currFeatKey = '';
-    var currFeatDesc = '';
+    final currFeatDesc = [];
     final featMap = <String, Map<String, dynamic>>{};
     for (int i = 0; i < lines.length; i++) {
       final line = lines[i];
       if (line.startsWith('$prefix ')) {
         if (currFeatKey.isNotEmpty && currFeatDesc.isNotEmpty) {
           featMap[currFeatKey] ??= {};
-          featMap[currFeatKey]!['description'] = currFeatDesc;
-          currFeatDesc = '';
+          featMap[currFeatKey]!['description'] = List.from(currFeatDesc);
+          ;
+          currFeatDesc.clear();
         }
         final featName = line.substring(prefix.length).trim();
         currFeatKey = featName;
@@ -192,8 +198,9 @@ class Class extends Equatable {
       } else if (line.startsWith('$prefix# ')) {
         if (currFeatKey.isNotEmpty && currFeatDesc.isNotEmpty) {
           featMap[currFeatKey] ??= {};
-          featMap[currFeatKey]!['description'] = currFeatDesc;
-          currFeatDesc = '';
+          featMap[currFeatKey]!['description'] = List.from(currFeatDesc);
+          ;
+          currFeatDesc.clear();
         }
         final subfeatLines = lines
             .skip(i)
@@ -206,9 +213,9 @@ class Class extends Equatable {
         i += subfeatLines.length - 1;
       } else {
         if (currFeatKey.isNotEmpty) {
-          currFeatDesc += line.trim();
+          currFeatDesc.add(line.trim());
           featMap[currFeatKey] ??= {};
-          featMap[currFeatKey]!['description'] = currFeatDesc;
+          featMap[currFeatKey]!['description'] = List.from(currFeatDesc);
         }
       }
     }

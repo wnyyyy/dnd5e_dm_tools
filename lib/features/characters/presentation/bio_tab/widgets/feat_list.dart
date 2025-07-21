@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:dnd5e_dm_tools/core/data/models/character.dart';
 import 'package:dnd5e_dm_tools/core/data/models/class.dart';
 import 'package:dnd5e_dm_tools/core/data/models/feat.dart';
@@ -182,7 +180,11 @@ class _AddFeatDialogState extends State<_AddFeatDialog> {
                   effectsDesc: [],
                 ),
               );
-              defaultFeatDesc = feat.fullDescription;
+              if (selectedFilter == 'Character') {
+                defaultFeatDesc = feat.fullDescription;
+              } else {
+                defaultFeatDesc = '';
+              }
               updateTextFields(feat.name, feat.fullDescription);
             } else {
               titleController.clear();
@@ -218,6 +220,7 @@ class _AddFeatDialogState extends State<_AddFeatDialog> {
                     ),
                     selected: selectedFilter == 'Character',
                     onSelected: (selected) {
+                      selectedFeat = 'none';
                       setState(() => selectedFilter = 'Character');
                     },
                   ),
@@ -228,6 +231,7 @@ class _AddFeatDialogState extends State<_AddFeatDialog> {
                     ),
                     selected: selectedFilter == 'Racial',
                     onSelected: (selected) {
+                      selectedFeat = 'none';
                       setState(() => selectedFilter = 'Racial');
                     },
                   ),
@@ -238,6 +242,7 @@ class _AddFeatDialogState extends State<_AddFeatDialog> {
                     ),
                     selected: selectedFilter == 'Class',
                     onSelected: (selected) {
+                      selectedFeat = 'none';
                       setState(() => selectedFilter = 'Class');
                     },
                   ),

@@ -95,7 +95,7 @@ class CharacterPortrait extends StatelessWidget {
             decoration: BoxDecoration(
               border: Border.all(
                 color:
-                    _parseColor(character.color) ??
+                    _parseColor(character.color)?.withAlpha(128) ??
                     Theme.of(context).colorScheme.outline,
                 width: 3,
               ),

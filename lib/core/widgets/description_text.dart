@@ -70,29 +70,74 @@ class DescriptionText extends StatelessWidget {
     'foot',
     'ft',
     'hour',
-    'minute',
     'minutes',
+    'minute',
     'hours',
     'saves',
-    'action',
-    'bonus action',
     'reaction',
     'radius',
-    'success',
-    'fail',
     'successful',
     'failed',
     'failure',
+    'fail',
+    'success',
   ];
 
   String _highlightKeywords(String text, Map<String, Color> keywordColors) {
     var result = text;
-    keywordColors.forEach((keyword, color) {
+    final Set<String> allKeywords = {...keywordColors.keys, ...boldWords};
+
+    final List<String> placeholders = [];
+    for (final keyword in boldWords) {
+      result = result.replaceAllMapped(
+        RegExp(
+          r'(\b\d+\s+)(' + RegExp.escape(keyword) + r')\b',
+          caseSensitive: false,
+        ),
+        (match) {
+          final placeholder = '<<${placeholders.length}>>';
+          placeholders.add('[[${match[1]}${match[2]}]]');
+          return placeholder;
+        },
+      );
+    }
+
+    result = result.replaceAllMapped(
+      RegExp(r'\b(\d*d\d+)\b', caseSensitive: false),
+      (match) {
+        final start = match.start;
+        final end = match.end;
+        if (start >= 2 &&
+            result.substring(start - 2, start) == '[[' &&
+            end + 2 <= result.length &&
+            result.substring(end, end + 2) == ']]') {
+          return match[0]!;
+        }
+        return '[[${match[0]}]]';
+      },
+    );
+
+    for (final keyword in allKeywords) {
       result = result.replaceAllMapped(
         RegExp(r'\b' + RegExp.escape(keyword) + r'\b', caseSensitive: false),
-        (match) => '[[${match[0]}]]',
+        (match) {
+          final start = match.start;
+          final end = match.end;
+          if (start >= 2 &&
+              result.substring(start - 2, start) == '[[' &&
+              end + 2 <= result.length &&
+              result.substring(end, end + 2) == ']]') {
+            return match[0]!;
+          }
+          return '[[${match[0]}]]';
+        },
       );
-    });
+    }
+
+    for (var i = 0; i < placeholders.length; i++) {
+      result = result.replaceAll('<<$i>>', placeholders[i]);
+    }
+
     return result;
   }
 
@@ -140,7 +185,7 @@ class DescriptionText extends StatelessWidget {
 }
 
 class KeywordSyntax extends md.InlineSyntax {
-  KeywordSyntax() : super(r'\[\[([a-zA-Z ]+)\]\]');
+  KeywordSyntax() : super(r'\[\[([a-zA-Z0-9\s]+)\]\]');
 
   @override
   bool onMatch(md.InlineParser parser, Match match) {
@@ -160,12 +205,16 @@ class KeywordBuilder extends MarkdownElementBuilder {
   Widget visitElementAfter(md.Element element, TextStyle? preferredStyle) {
     final keyword = element.textContent.toLowerCase();
     final color = keywordColors[keyword] ?? baseStyle.color;
-    final isBold = boldWords.contains(keyword);
-    return Text(
-      element.textContent,
-      style: baseStyle.copyWith(
-        color: color,
-        fontWeight: isBold ? FontWeight.bold : baseStyle.fontWeight,
+    final isBold =
+        boldWords.any((word) => keyword.toLowerCase().contains(word)) ||
+        RegExp(r'^\d*d\d+$').hasMatch(keyword);
+    return RichText(
+      text: TextSpan(
+        text: element.textContent,
+        style: baseStyle.copyWith(
+          color: color,
+          fontWeight: isBold ? FontWeight.bold : baseStyle.fontWeight,
+        ),
       ),
     );
   }
