@@ -1,3 +1,4 @@
+import 'package:dnd5e_dm_tools/core/data/models/feat.dart';
 import 'package:equatable/equatable.dart';
 
 class Character extends Equatable {
@@ -9,6 +10,7 @@ class Character extends Equatable {
     required this.classs,
     required this.race,
     required this.level,
+    required this.feats,
     this.color,
     this.archetype,
   });
@@ -32,6 +34,12 @@ class Character extends Equatable {
     final knownSpells =
         (json['known_spells'] as List<String>?)?.map((e) => e).toList() ?? [];
 
+    final feats =
+        (json['feats'] as Map<String, dynamic>?)?.map(
+          (key, value) => MapEntry(key, value as String?),
+        ) ??
+        <String, String>{};
+
     return Character(
       slug: documentId,
       name: name,
@@ -42,7 +50,25 @@ class Character extends Equatable {
       race: race,
       level: json['level'] as int? ?? 1,
       archetype: json['archetype'] as String?,
+      feats: feats,
     );
+  }
+
+  List<Feat> getFeatList(List<Feat> allFeats) {
+    final charFeats = <Feat>[];
+    feats.forEach((key, value) {
+      final feat = allFeats.firstWhere(
+        (f) => f.slug == key,
+        orElse: () => Feat(
+          slug: key.toLowerCase().trim().replaceAll(' ', '_'),
+          name: key,
+          description: value ?? '',
+          effectsDesc: const [],
+        ),
+      );
+      charFeats.add(feat.copyWith(descOverride: value));
+    });
+    return charFeats;
   }
 
   final String slug;
@@ -54,6 +80,7 @@ class Character extends Equatable {
   final String race;
   final int level;
   final String? archetype;
+  final Map<String, String?> feats;
 
   Map<String, dynamic> toJson() {
     return {
@@ -65,6 +92,7 @@ class Character extends Equatable {
       'race': race,
       'level': level,
       'archetype': archetype,
+      'feats': feats,
     };
   }
 
@@ -79,6 +107,7 @@ class Character extends Equatable {
       race: race,
       level: level ?? this.level,
       archetype: archetype,
+      feats: feats,
     );
   }
 
@@ -91,6 +120,7 @@ class Character extends Equatable {
     classs,
     level,
     race,
+    feats,
     color ?? '',
     archetype ?? '',
   ];

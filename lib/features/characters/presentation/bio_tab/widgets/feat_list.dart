@@ -1,19 +1,19 @@
 import 'package:dnd5e_dm_tools/core/data/models/character.dart';
 import 'package:dnd5e_dm_tools/core/data/models/class.dart';
+import 'package:dnd5e_dm_tools/core/data/models/feat.dart';
 import 'package:dnd5e_dm_tools/core/data/models/race.dart';
-import 'package:dnd5e_dm_tools/core/util/helper.dart';
 import 'package:dnd5e_dm_tools/core/widgets/description_text.dart';
+import 'package:dnd5e_dm_tools/core/widgets/generic_list.dart';
 import 'package:dnd5e_dm_tools/features/characters/bloc/character_bloc.dart';
 import 'package:dnd5e_dm_tools/features/characters/bloc/character_event.dart';
 import 'package:dnd5e_dm_tools/features/characters/bloc/character_state.dart';
 import 'package:dnd5e_dm_tools/features/rules/rules_cubit.dart';
 import 'package:dnd5e_dm_tools/features/rules/rules_state.dart';
-import 'package:dnd5e_dm_tools/features/settings/bloc/settings_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class FeatsList extends StatelessWidget {
-  const FeatsList({super.key, required this.slug});
+class FeatList extends StatelessWidget {
+  const FeatList({super.key, required this.slug});
 
   final String slug;
 
@@ -27,7 +27,8 @@ class FeatsList extends StatelessWidget {
     final race = characterState.race;
     final classs = characterState.classs;
     final character = characterState.character;
-    final feats = rulesState.feats;
+    final allFeats = rulesState.feats;
+    final charFeats = character.getFeatList(allFeats);
 
     void onItemsChanged(Map<String, dynamic> newFeats) {
       //character['feats'] = newFeats;
@@ -50,11 +51,12 @@ class FeatsList extends StatelessWidget {
     //   );
     // }
 
-    void onFeatSelected(MapEntry<String, dynamic> feat) {
+    void onFeatSelected(Feat feat) {
       showDialog(
         context: context,
         builder: (context) {
           final screenWidth = MediaQuery.of(context).size.width;
+          final screenHeight = MediaQuery.of(context).size.height;
           return ConstrainedBox(
             constraints: BoxConstraints(
               maxWidth: screenWidth > 900
@@ -62,17 +64,20 @@ class FeatsList extends StatelessWidget {
                   : screenWidth > 600
                   ? screenWidth * 0.75
                   : screenWidth * 0.9,
+              maxHeight: screenHeight * 0.8,
             ),
             child: AlertDialog(
-              title: Text(feat.value['name']?.toString() ?? 'Error'),
-              content: DescriptionText(
-                inputText: feat.value['desc']?.toString() ?? '',
-                baseStyle: Theme.of(context).textTheme.bodySmall!,
+              title: Text(feat.name),
+              content: SingleChildScrollView(
+                child: DescriptionText(
+                  inputText: feat.descOverride ?? feat.description,
+                  baseStyle: Theme.of(context).textTheme.bodyMedium!,
+                ),
               ),
               actions: [
                 TextButton(
-                  child: const Icon(Icons.close),
-                  onPressed: () => Navigator.pop(context),
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('Close'),
                 ),
               ],
             ),
@@ -81,17 +86,16 @@ class FeatsList extends StatelessWidget {
       );
     }
 
-    return Container();
-
-    // return ItemList(
-    //   items: feats,
-    //   onItemsChanged: onItemsChanged,
-    //   onAddItem: onAddItem,
-    //   tableName: 'Feats',
-    //   displayKey: 'name',
-    //   onSelectItem: onFeatSelected,
-    //   emptyMessage: 'None',
-    // );
+    return GenericList(
+      items: charFeats,
+      onItemsChanged: (newList) {},
+      onAddItem: () {},
+      tableName: 'Feats',
+      onSelectItem: (feat) => onFeatSelected(feat),
+      emptyMessage: 'None',
+      displayKeyGetter: (feat) => feat.name,
+      descriptionGetter: (feat) => feat.description,
+    );
   }
 }
 

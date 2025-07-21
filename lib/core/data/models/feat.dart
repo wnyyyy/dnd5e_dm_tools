@@ -7,6 +7,7 @@ class Feat extends Equatable {
     required this.description,
     required this.effectsDesc,
     this.prerequisite,
+    this.descOverride,
   });
 
   factory Feat.fromJson(Map<String, dynamic> json, String documentId) {
@@ -33,6 +34,7 @@ class Feat extends Equatable {
   final String description;
   final List<String> effectsDesc;
   final String? prerequisite;
+  final String? descOverride;
 
   Map<String, dynamic> toJson() {
     return {
@@ -43,13 +45,14 @@ class Feat extends Equatable {
     };
   }
 
-  Feat copyWith() {
+  Feat copyWith({String? descOverride}) {
     return Feat(
       slug: slug,
       name: name,
       description: description,
       effectsDesc: effectsDesc,
       prerequisite: prerequisite,
+      descOverride: descOverride ?? this.descOverride,
     );
   }
 
@@ -60,6 +63,7 @@ class Feat extends Equatable {
     description,
     effectsDesc,
     prerequisite ?? '',
+    descOverride ?? '',
   ];
 
   @override
