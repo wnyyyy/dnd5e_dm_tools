@@ -23,9 +23,10 @@ class DatabaseProvider {
       return;
     }
     final cacheBox = Hive.box<Map>(cacheBoxName);
-    logDB('Setting data for $path');
-    await cacheBox.put(path, data);
-    logDB('Data set for $path');
+    logDB('Setting cache data for $path');
+    final slug = path.split('/').last;
+    await cacheBox.put(slug, data);
+    logDB('Data set for $slug in $cacheBoxName');
   }
 
   Future<Map<String, dynamic>?> getDocument({
@@ -33,23 +34,25 @@ class DatabaseProvider {
     String? cacheBoxName,
   }) async {
     logDB('Getting document: $path');
+    final slug = path.split('/').last;
     if (cacheBoxName != null) {
       final cacheBox = Hive.box<Map>(cacheBoxName);
-      final cachedData = cacheBox.get(path);
+      final cachedData = cacheBox.get(slug);
       if (cachedData != null) {
         final casted = Map<String, dynamic>.from(cachedData);
-        logDB('Found cache data for $path');
+        logDB('Found cache data for $slug in $cacheBoxName');
         return casted;
       }
     }
 
-    logDB('No cache data found for $path // fetching from Firestore...');
+    logDB('No cache data found for $slug // fetching from Firestore...');
     final reference = _firebaseDB.doc(path);
     final snapshot = await reference.get();
     if (snapshot.exists) {
       if (cacheBoxName != null) {
         final cacheBox = Hive.box<Map>(cacheBoxName);
-        await cacheBox.put(path, snapshot.data()!);
+        await cacheBox.put(slug, snapshot.data()!);
+        logDB('Cache updated for $slug in $cacheBoxName');
       }
       logDB('Fetched $path from Firestore');
       return snapshot.data();
@@ -62,7 +65,6 @@ class DatabaseProvider {
     String? cacheBoxName,
   }) async {
     final Map<String, Map<String, dynamic>> data = {};
-
     logDB('Getting collection: $path');
     if (cacheBoxName != null) {
       final cacheBox = Hive.box<Map>(cacheBoxName);
