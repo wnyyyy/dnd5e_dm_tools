@@ -88,12 +88,12 @@ class RulesCubit extends Cubit<RulesState> {
           });
           return Future.value();
         case 'spells':
-          spellsRepository.getAll().then((spells) {
+          spellsRepository.getAll(online: true).then((spells) {
             emit(currState.copyWith(spells: spells));
           });
           return Future.value();
         case 'feats':
-          featsRepository.getAll().then((feats) {
+          featsRepository.getAll(online: true).then((feats) {
             emit(currState.copyWith(feats: feats));
           });
           return Future.value();
@@ -103,7 +103,7 @@ class RulesCubit extends Cubit<RulesState> {
           });
           return Future.value();
         case 'items':
-          itemsRepository.getAll().then((items) {
+          itemsRepository.getAll(online: true).then((items) {
             emit(currState.copyWith(items: items));
           });
         default:
