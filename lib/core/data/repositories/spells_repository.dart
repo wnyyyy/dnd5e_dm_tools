@@ -83,7 +83,7 @@ class SpellsRepository {
   Future<void> sync(String slug) async {
     final entry = await getData(slug, online: true);
     await databaseProvider.setData(
-      path: slug,
+      path: '$firebaseSpellsPath/$slug',
       data: entry,
       offline: true,
       cacheBoxName: cacheSpellsName,

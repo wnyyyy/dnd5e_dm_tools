@@ -62,7 +62,7 @@ class FeatsRepository {
   Future<void> sync(String slug) async {
     final entry = await getData(slug, online: true);
     await databaseProvider.setData(
-      path: slug,
+      path: '$firebaseFeatsPath/$slug',
       data: entry,
       offline: true,
       cacheBoxName: cacheFeatsName,

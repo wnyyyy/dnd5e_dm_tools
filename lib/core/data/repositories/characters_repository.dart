@@ -46,7 +46,7 @@ class CharactersRepository {
     _debounceTimer = Timer(_debounceDuration, () async {
       logRep('Timer expired. Updating character...');
       await databaseProvider.setData(
-        path: '$path$character.slug',
+        path: '$path/${character.slug}',
         data: character.toJson(),
         offline: false,
       );
