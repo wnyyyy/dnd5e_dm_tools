@@ -1,8 +1,12 @@
 import 'dart:convert';
 
+import 'package:dnd5e_dm_tools/core/data/models/character.dart';
+import 'package:dnd5e_dm_tools/features/characters/bloc/character_bloc.dart';
+import 'package:dnd5e_dm_tools/features/characters/bloc/character_event.dart';
 import 'package:dnd5e_dm_tools/features/database_editor/bloc/database_editor_cubit.dart';
 import 'package:dnd5e_dm_tools/features/database_editor/bloc/database_editor_state.dart';
 import 'package:dnd5e_dm_tools/features/rules/rules_cubit.dart';
+import 'package:dnd5e_dm_tools/features/settings/bloc/settings_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -66,6 +70,11 @@ class DatabaseEditorScreen extends StatelessWidget {
                               ? () {
                                   cubit.sync(type, state.slug);
                                   context.read<RulesCubit>().reloadRule(type);
+                                  context.read<CharacterBloc>().add(
+                                    CharacterLoad(
+                                      context.read<SettingsCubit>().state.name,
+                                    ),
+                                  );
                                 }
                               : null,
                         ),
