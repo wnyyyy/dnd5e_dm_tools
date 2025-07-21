@@ -49,4 +49,7 @@ class CharacterLoaded extends CharacterState {
       race: race ?? this.race,
     );
   }
+
+  @override
+  List<Object> get props => [character, classs, race];
 }

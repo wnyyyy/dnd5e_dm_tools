@@ -19,7 +19,7 @@ class Feat extends Equatable {
     return Feat(
       slug: documentId,
       name: name,
-      description: json['description'] as String? ?? '',
+      description: json['desc'] as String? ?? '',
       effectsDesc:
           (json['effects_desc'] as List<dynamic>?)
               ?.map((e) => e as String)
@@ -36,6 +36,24 @@ class Feat extends Equatable {
   final String? prerequisite;
   final String? descOverride;
 
+  String get fullDescription {
+    if (descOverride != null && descOverride!.isNotEmpty) {
+      return descOverride!;
+    }
+    final StringBuffer builder = StringBuffer();
+    builder.write(description);
+    if (effectsDesc.isNotEmpty) {
+      builder.writeln();
+    }
+    for (final effect in effectsDesc) {
+      if (effect.isNotEmpty) {
+        builder.writeln();
+        builder.writeln('- $effect');
+      }
+    }
+    return builder.toString().trim();
+  }
+
   Map<String, dynamic> toJson() {
     return {
       'name': name,
@@ -45,11 +63,11 @@ class Feat extends Equatable {
     };
   }
 
-  Feat copyWith({String? descOverride}) {
+  Feat copyWith({String? name, String? description, String? descOverride}) {
     return Feat(
       slug: slug,
-      name: name,
-      description: description,
+      name: name ?? this.name,
+      description: description ?? this.description,
       effectsDesc: effectsDesc,
       prerequisite: prerequisite,
       descOverride: descOverride ?? this.descOverride,

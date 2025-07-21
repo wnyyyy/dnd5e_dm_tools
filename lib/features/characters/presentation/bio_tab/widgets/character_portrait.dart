@@ -74,6 +74,18 @@ class CharacterPortrait extends StatelessWidget {
     );
   }
 
+  Color? _parseColor(String? hex) {
+    if (hex == null || hex.isEmpty) return null;
+    try {
+      var hexColor = hex.replaceAll('#', '');
+      if (hexColor.length == 6) hexColor = 'FF$hexColor';
+      if (hexColor.length == 8) {
+        return Color(int.parse('0x$hexColor'));
+      }
+    } catch (_) {}
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -82,7 +94,9 @@ class CharacterPortrait extends StatelessWidget {
           child: Container(
             decoration: BoxDecoration(
               border: Border.all(
-                color: Theme.of(context).colorScheme.outline,
+                color:
+                    _parseColor(character.color) ??
+                    Theme.of(context).colorScheme.outline,
                 width: 3,
               ),
             ),

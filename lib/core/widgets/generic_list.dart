@@ -1,3 +1,4 @@
+import 'package:dnd5e_dm_tools/core/data/models/feat.dart';
 import 'package:flutter/material.dart';
 
 class GenericList<T> extends StatefulWidget {
@@ -80,6 +81,19 @@ class _GenericListState<T> extends State<GenericList<T>> {
                     updated['description'] = descriptionController.text;
                     setState(() {
                       widget.items[index] = updated as T;
+                      widget.onItemsChanged(widget.items);
+                    });
+                  }
+                  if (item is Feat) {
+                    final newFeat = Feat(
+                      slug: titleController.text,
+                      name: titleController.text,
+                      description: '',
+                      effectsDesc: const [],
+                      descOverride: descriptionController.text,
+                    );
+                    setState(() {
+                      widget.items[index] = newFeat as T;
                       widget.onItemsChanged(widget.items);
                     });
                   }

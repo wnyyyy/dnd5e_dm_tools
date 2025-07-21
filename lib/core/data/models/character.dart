@@ -32,7 +32,10 @@ class Character extends Equatable {
     final imageUrl = json['image_url'] as String? ?? '';
     final color = json['color'] as String?;
     final knownSpells =
-        (json['known_spells'] as List<String>?)?.map((e) => e).toList() ?? [];
+        (json['known_spells'] as List<dynamic>?)
+            ?.map((e) => e as String)
+            .toList() ??
+        [];
 
     final feats =
         (json['feats'] as Map<String, dynamic>?)?.map(
@@ -96,7 +99,7 @@ class Character extends Equatable {
     };
   }
 
-  Character copyWith({int? level}) {
+  Character copyWith({int? level, Map<String, String?>? feats}) {
     return Character(
       slug: slug,
       name: name,
@@ -107,7 +110,7 @@ class Character extends Equatable {
       race: race,
       level: level ?? this.level,
       archetype: archetype,
-      feats: feats,
+      feats: feats ?? this.feats,
     );
   }
 

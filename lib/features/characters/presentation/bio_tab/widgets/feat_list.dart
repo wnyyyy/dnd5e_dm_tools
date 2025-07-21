@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:dnd5e_dm_tools/core/data/models/character.dart';
 import 'package:dnd5e_dm_tools/core/data/models/class.dart';
 import 'package:dnd5e_dm_tools/core/data/models/feat.dart';
@@ -30,26 +32,26 @@ class FeatList extends StatelessWidget {
     final allFeats = rulesState.feats;
     final charFeats = character.getFeatList(allFeats);
 
-    void onItemsChanged(Map<String, dynamic> newFeats) {
-      //character['feats'] = newFeats;
+    void onItemsChanged(List<Feat> newFeats) {
+      final featsSlug = newFeats.fold<Map<String, String>>({}, (map, feat) {
+        map[feat.slug] = feat.descOverride ?? '';
+        return map;
+      });
       context.read<CharacterBloc>().add(
-        CharacterUpdate(character: character, persistData: true),
+        CharacterUpdate(
+          character: character.copyWith(feats: featsSlug),
+          persistData: true,
+        ),
       );
     }
 
-    // void onAddItem() {
-    //   if (classs == null || race == null) return;
-    //   showDialog(
-    //     context: context,
-    //     builder: (context) => _AddFeatDialog(
-    //       character: character,
-    //       onAdd: (feat) {
-    //         feats[feat['name'] ?? ''] = feat;
-    //         onItemsChanged(feats);
-    //       },
-    //     ),
-    //   );
-    // }
+    void onAddItem() {
+      showDialog(
+        context: context,
+        builder: (context) =>
+            _AddFeatDialog(character: character, race: race, classs: classs),
+      );
+    }
 
     void onFeatSelected(Feat feat) {
       showDialog(
@@ -70,14 +72,14 @@ class FeatList extends StatelessWidget {
               title: Text(feat.name),
               content: SingleChildScrollView(
                 child: DescriptionText(
-                  inputText: feat.descOverride ?? feat.description,
+                  inputText: feat.fullDescription,
                   baseStyle: Theme.of(context).textTheme.bodyMedium!,
                 ),
               ),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('Close'),
+                  child: const Icon(Icons.close),
                 ),
               ],
             ),
@@ -88,26 +90,24 @@ class FeatList extends StatelessWidget {
 
     return GenericList(
       items: charFeats,
-      onItemsChanged: (newList) {},
-      onAddItem: () {},
+      onItemsChanged: (newList) => onItemsChanged(newList),
+      onAddItem: () => onAddItem(),
       tableName: 'Feats',
       onSelectItem: (feat) => onFeatSelected(feat),
       emptyMessage: 'None',
       displayKeyGetter: (feat) => feat.name,
-      descriptionGetter: (feat) => feat.description,
+      descriptionGetter: (feat) => feat.fullDescription,
     );
   }
 }
 
 class _AddFeatDialog extends StatefulWidget {
   const _AddFeatDialog({
-    required this.onAdd,
     required this.character,
     required this.race,
     required this.classs,
   });
 
-  final ValueChanged<Map<String, dynamic>> onAdd;
   final Character character;
   final Race race;
   final Class classs;
@@ -119,65 +119,79 @@ class _AddFeatDialog extends StatefulWidget {
 class _AddFeatDialogState extends State<_AddFeatDialog> {
   String selectedFilter = 'Character';
   String selectedFeat = 'none';
+  String defaultFeatDesc = '';
   final TextEditingController titleController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     final racialFeats = widget.race.getRacialFeatures();
-    final classFeats = widget.classs.getClassFeatures();
-    // final classsTable = parseTable(classs?['table']?.toString() ?? '');
-    // classFeats.addAll(
-    //   getClassFeatures(
-    //     classs?['desc']?.toString() ?? '',
-    //     level: widget.character['level'] as int? ?? 1,
-    //     table: classsTable,
-    //   ),
-    // );
-
-    // final archetype = widget.character['subclass'];
-    // if (archetype != null) {
-    //   final archetypes = getArchetypes(classs ?? {});
-    //   final archetypeClass =
-    //       archetypes
-    //           .where((element) => element['slug'] == archetype)
-    //           .firstOrNull ??
-    //       {};
-    //   final archetypeDesc = archetypeClass['desc']?.toString() ?? '';
-    //   classFeats.addAll(getArchetypeFeatures(archetypeDesc));
-    // }
-
-    // final uniqueClassFeats = <String, dynamic>{...classFeats};
+    final classFeats = widget.classs.getClassFeatures(
+      level: widget.character.level,
+    );
+    final allFeats =
+        (context.read<RulesCubit>().state as RulesStateLoaded).feats;
     final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
 
     void updateTextFields(String title, String desc) {
       titleController.text = title;
       descriptionController.text = desc;
     }
 
-    List<DropdownMenuItem<String>> getDropdownItems(
-      Map<String, dynamic> feats,
-    ) {
+    List<DropdownMenuItem<String>> getDropdownItems(List<Feat> feats) {
       if (feats.isEmpty) {
         return const [DropdownMenuItem(value: 'none', child: Text('None'))];
       }
-      final bool isString = feats.values.first is String;
       return [
         const DropdownMenuItem(value: 'none', child: Text('None')),
-        ...feats.entries.map(
+        ...feats.map(
           (entry) => DropdownMenuItem(
-            value: entry.key,
-            child: isString
-                ? Text(entry.key, style: Theme.of(context).textTheme.bodySmall)
-                : (entry.value as Map)['name'] != null
-                ? Text(
-                    (entry.value as Map)['name']?.toString() ?? '',
-                    style: Theme.of(context).textTheme.bodySmall,
-                  )
-                : Text(entry.key, style: Theme.of(context).textTheme.bodySmall),
+            value: entry.slug,
+            child: Text(
+              entry.name,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
           ),
         ),
       ];
+    }
+
+    Widget buildDropdown(String label, List<Feat> feats) {
+      final items = getDropdownItems(feats);
+      return DropdownButtonFormField<String>(
+        decoration: InputDecoration(
+          labelText: label,
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8.0)),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 12,
+            vertical: 8,
+          ),
+        ),
+        items: items,
+        value: selectedFeat,
+        onChanged: (value) {
+          setState(() {
+            selectedFeat = value ?? 'none';
+            if (value != null && value != 'none') {
+              final feat = feats.firstWhere(
+                (f) => f.slug == value,
+                orElse: () => const Feat(
+                  slug: 'none',
+                  name: '',
+                  description: '',
+                  effectsDesc: [],
+                ),
+              );
+              defaultFeatDesc = feat.fullDescription;
+              updateTextFields(feat.name, feat.fullDescription);
+            } else {
+              titleController.clear();
+              descriptionController.clear();
+            }
+          });
+        },
+      );
     }
 
     return ConstrainedBox(
@@ -187,6 +201,7 @@ class _AddFeatDialogState extends State<_AddFeatDialog> {
             : screenWidth > 600
             ? screenWidth * 0.75
             : screenWidth * 0.9,
+        maxHeight: screenHeight * 0.8,
       ),
       child: AlertDialog(
         title: const Text('Select a Feat'),
@@ -229,64 +244,13 @@ class _AddFeatDialogState extends State<_AddFeatDialog> {
                   ),
                 ],
               ),
-              Visibility(
-                visible: selectedFilter == 'Racial',
-                child: DropdownButtonFormField<String>(
-                  items: getDropdownItems({}),
-                  onChanged: (value) {
-                    setState(() {
-                      if (value != 'none') {
-                        final title = value!;
-                        //final desc = racialFeats[value]?.toString() ?? '';
-                        updateTextFields(title, 'desc');
-                      } else {
-                        titleController.clear();
-                        descriptionController.clear();
-                      }
-                    });
-                  },
-                ),
-              ),
-              Visibility(
-                visible: selectedFilter == 'Class',
-                child: DropdownButtonFormField<String>(
-                  items: getDropdownItems({}),
-                  onChanged: (value) {
-                    setState(() {
-                      if (value != 'none') {
-                        final title = value!;
-                        // final desc =
-                        //     (uniqueClassFeats[value] as Map?)?['description']
-                        //         ?.toString() ??
-                        //     '';
-                        updateTextFields(title, 'desc');
-                      } else {
-                        titleController.clear();
-                        descriptionController.clear();
-                      }
-                    });
-                  },
-                ),
-              ),
-              Visibility(
-                visible: selectedFilter == 'Character',
-                child: DropdownButtonFormField<String>(
-                  items: getDropdownItems({}),
-                  onChanged: (value) {
-                    setState(() {
-                      if (value != 'none') {
-                        // final feat = feats[value] as Map? ?? {};
-                        // final title = feat['name']?.toString() ?? '';
-                        // final desc = feat['desc']?.toString() ?? '';
-                        updateTextFields('title', 'desc');
-                      } else {
-                        titleController.clear();
-                        descriptionController.clear();
-                      }
-                    });
-                  },
-                ),
-              ),
+              const SizedBox(height: 16),
+              if (selectedFilter == 'Racial')
+                buildDropdown('Racial Feat', racialFeats),
+              if (selectedFilter == 'Class')
+                buildDropdown('Class Feat', classFeats),
+              if (selectedFilter == 'Character')
+                buildDropdown('Character Feat', allFeats),
               const SizedBox(height: 24),
               TextField(
                 decoration: const InputDecoration(labelText: 'Title'),
@@ -309,11 +273,18 @@ class _AddFeatDialogState extends State<_AddFeatDialog> {
           ),
           TextButton(
             onPressed: () {
-              final newFeat = {
-                'name': titleController.text,
-                'desc': descriptionController.text,
-              };
-              widget.onAdd(newFeat);
+              final newFeats = Map<String, String>.from(widget.character.feats);
+              if (defaultFeatDesc.trim() == descriptionController.text.trim()) {
+                newFeats[selectedFeat] = '';
+              } else {
+                newFeats[selectedFeat] = descriptionController.text.trim();
+              }
+              context.read<CharacterBloc>().add(
+                CharacterUpdate(
+                  character: widget.character.copyWith(feats: newFeats),
+                  persistData: true,
+                ),
+              );
               Navigator.of(context).pop();
             },
             child: const Icon(Icons.add),
