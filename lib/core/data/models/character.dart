@@ -1,3 +1,6 @@
+
+import 'package:dnd5e_dm_tools/core/data/models/asi.dart';
+import 'package:dnd5e_dm_tools/core/data/models/character_stats.dart';
 import 'package:dnd5e_dm_tools/core/data/models/feat.dart';
 import 'package:dnd5e_dm_tools/core/data/models/proficiency.dart';
 import 'package:equatable/equatable.dart';
@@ -13,6 +16,8 @@ class Character extends Equatable {
     required this.level,
     required this.feats,
     required this.proficiency,
+    required this.asi,
+    required this.characterStats,
     this.color,
     this.archetype,
   });
@@ -49,6 +54,10 @@ class Character extends Equatable {
       json['proficiency'] as Map<String, dynamic>? ?? {},
     );
 
+    final characterStats = CharacterStats.fromJson(
+      json['character_stats'] as Map<String, dynamic>? ?? {},
+    );
+
     return Character(
       slug: documentId,
       name: name,
@@ -61,6 +70,8 @@ class Character extends Equatable {
       archetype: json['archetype'] as String?,
       feats: feats,
       proficiency: proficiency,
+      asi: ASI.fromJson(json['asi'] as Map<String, dynamic>? ?? {}),
+      characterStats: characterStats,
     );
   }
 
@@ -92,6 +103,8 @@ class Character extends Equatable {
   final String? archetype;
   final Map<String, String?> feats;
   final Proficiency proficiency;
+  final ASI asi;
+  final CharacterStats characterStats;
 
   Map<String, dynamic> toJson() {
     return {
@@ -105,6 +118,8 @@ class Character extends Equatable {
       'archetype': archetype,
       'feats': feats,
       'proficiency': proficiency.toJson(),
+      'asi': asi.toJson(),
+      'character_stats': characterStats.toJson(),
     };
   }
 
@@ -112,6 +127,8 @@ class Character extends Equatable {
     int? level,
     Map<String, String?>? feats,
     Proficiency? proficiency,
+    ASI? asi,
+    CharacterStats? characterStats,
   }) {
     return Character(
       slug: slug,
@@ -125,6 +142,8 @@ class Character extends Equatable {
       archetype: archetype,
       feats: feats ?? this.feats,
       proficiency: proficiency ?? this.proficiency,
+      asi: asi ?? this.asi,
+      characterStats: characterStats ?? this.characterStats,
     );
   }
 
@@ -141,6 +160,8 @@ class Character extends Equatable {
     color ?? '',
     archetype ?? '',
     proficiency,
+    asi,
+    characterStats,
   ];
 
   @override

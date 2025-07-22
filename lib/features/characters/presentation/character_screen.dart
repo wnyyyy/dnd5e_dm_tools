@@ -4,6 +4,7 @@ import 'package:dnd5e_dm_tools/features/characters/bloc/character_bloc.dart';
 import 'package:dnd5e_dm_tools/features/characters/bloc/character_event.dart';
 import 'package:dnd5e_dm_tools/features/characters/bloc/character_state.dart';
 import 'package:dnd5e_dm_tools/features/characters/presentation/bio_tab/bio_tab.dart';
+import 'package:dnd5e_dm_tools/features/characters/presentation/skills_tab/skills_tab.dart';
 import 'package:dnd5e_dm_tools/features/settings/bloc/settings_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -75,7 +76,10 @@ class CharacterScreen extends StatelessWidget {
                         race: state.race,
                       ),
                       Container(),
-                      Container(),
+                      SkillsTab(
+                        character: state.character,
+                        classs: state.classs,
+                      ),
                       Container(),
                       // StatusTab(
                       //   character: state.character,

@@ -41,3 +41,35 @@ enum EquipFilter { all, equipped, canEquip }
 enum EquipSort { name, value, canEquip }
 
 enum ResourceType { item, shortRest, longRest, spell, none }
+
+enum Attribute {
+  strength,
+  dexterity,
+  constitution,
+  intelligence,
+  wisdom,
+  charisma,
+}
+
+enum Skill {
+  acrobatics,
+  animalHandling,
+  arcana,
+  athletics,
+  deception,
+  history,
+  insight,
+  intimidation,
+  investigation,
+  medicine,
+  nature,
+  perception,
+  performance,
+  persuasion,
+  religion,
+  sleightOfHand,
+  stealth,
+  survival,
+}
+
+enum ProficiencyLevel { proficient, expert, none }

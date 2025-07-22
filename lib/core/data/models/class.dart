@@ -1,6 +1,8 @@
 import 'package:dnd5e_dm_tools/core/data/models/archetype.dart';
 import 'package:dnd5e_dm_tools/core/data/models/class_table.dart';
 import 'package:dnd5e_dm_tools/core/data/models/feat.dart';
+import 'package:dnd5e_dm_tools/core/data/models/proficiency.dart';
+import 'package:dnd5e_dm_tools/core/util/enum.dart';
 import 'package:dnd5e_dm_tools/core/util/helper.dart';
 import 'package:equatable/equatable.dart';
 
@@ -120,6 +122,24 @@ class Class extends Equatable {
       profArmor: profArmor,
       profSkills: profSkills,
       spellCastingAbility: spellCastingAbility,
+    );
+  }
+
+  Proficiency get proficiency {
+    return Proficiency(
+      languages: profSkills,
+      weapons: profWeapons,
+      armor: profArmor,
+      tools: profTools,
+      savingThrows: profSavingThrows
+          .split(',')
+          .map(
+            (e) => Attribute.values.firstWhere(
+              (attr) => attr.name.toLowerCase() == e.trim().toLowerCase(),
+            ),
+          )
+          .toList(),
+      skills: const {},
     );
   }
 
