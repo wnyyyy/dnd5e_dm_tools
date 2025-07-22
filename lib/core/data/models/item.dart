@@ -3,13 +3,13 @@ import 'package:equatable/equatable.dart';
 class Item extends Equatable {
   const Item({required this.slug, required this.name});
 
-  factory Item.fromJson(Map<String, dynamic> json, String documentId) {
+  factory Item.fromJson(Map<String, dynamic> json) {
     final name = json['name'] as String?;
     if (name == null || name.isEmpty) {
       throw ArgumentError('Required field "name" is missing or empty');
     }
 
-    return Item(slug: documentId, name: name);
+    return Item(slug: 'documentId', name: name);
   }
 
   final String slug;

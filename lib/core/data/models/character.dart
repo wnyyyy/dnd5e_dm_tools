@@ -1,4 +1,5 @@
 import 'package:dnd5e_dm_tools/core/data/models/asi.dart';
+import 'package:dnd5e_dm_tools/core/data/models/backpack.dart';
 import 'package:dnd5e_dm_tools/core/data/models/character_stats.dart';
 import 'package:dnd5e_dm_tools/core/data/models/feat.dart';
 import 'package:dnd5e_dm_tools/core/data/models/proficiency.dart';
@@ -18,6 +19,7 @@ class Character extends Equatable {
     required this.proficiency,
     required this.asi,
     required this.stats,
+    required this.backpack,
     this.color,
     this.archetype,
   });
@@ -61,6 +63,10 @@ class Character extends Equatable {
       10 + getModifier(asi.dexterity),
     );
 
+    final backpack = Backpack.fromJson(
+      (json['backpack'] as Map<String, dynamic>?) ?? {},
+    );
+
     return Character(
       slug: documentId,
       name: name,
@@ -75,6 +81,7 @@ class Character extends Equatable {
       proficiency: proficiency,
       asi: asi,
       stats: characterStats,
+      backpack: backpack,
     );
   }
 
@@ -108,6 +115,7 @@ class Character extends Equatable {
   final Proficiency proficiency;
   final ASI asi;
   final CharacterStats stats;
+  final Backpack backpack;
 
   Map<String, dynamic> toJson() {
     return {
@@ -123,6 +131,7 @@ class Character extends Equatable {
       'proficiency': proficiency.toJson(),
       'asi': asi.toJson(),
       'character_stats': stats.toJson(),
+      'backpack': {},
     };
   }
 
@@ -132,6 +141,7 @@ class Character extends Equatable {
     Proficiency? proficiency,
     ASI? asi,
     CharacterStats? stats,
+    Backpack? backpack,
   }) {
     return Character(
       slug: slug,
@@ -147,6 +157,7 @@ class Character extends Equatable {
       proficiency: proficiency ?? this.proficiency,
       asi: asi ?? this.asi,
       stats: stats ?? this.stats,
+      backpack: backpack ?? this.backpack,
     );
   }
 
@@ -165,6 +176,7 @@ class Character extends Equatable {
     proficiency,
     asi,
     stats,
+    backpack,
   ];
 
   @override

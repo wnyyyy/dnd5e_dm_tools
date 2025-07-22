@@ -72,6 +72,12 @@ extension AttributeName on Attribute {
 
 enum ProficiencyLevel { proficient, expert, none }
 
+enum CoinType {
+  copper,
+  silver,
+  gold,
+}
+
 enum Skill {
   acrobatics,
   animalHandling,

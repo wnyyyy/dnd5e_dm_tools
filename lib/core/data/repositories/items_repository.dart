@@ -21,7 +21,7 @@ class ItemsRepository {
       logRep('Item not found: $slug', level: Level.warning);
       throw Exception('Item not found');
     }
-    final item = Item.fromJson(data, slug);
+    final item = Item.fromJson(data);
     return item;
   }
 
@@ -50,7 +50,7 @@ class ItemsRepository {
       final slug = entry.key;
       final itemData = entry.value;
       try {
-        final item = Item.fromJson(itemData, slug);
+        final item = Item.fromJson(itemData);
         items.add(item);
       } catch (e) {
         logRep('Error parsing Item $slug: $e', level: Level.error);

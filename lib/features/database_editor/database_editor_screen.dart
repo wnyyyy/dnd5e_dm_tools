@@ -1,8 +1,8 @@
 import 'dart:convert';
 
 import 'package:dnd5e_dm_tools/core/data/models/character.dart';
-import 'package:dnd5e_dm_tools/features/characters/bloc/character_bloc.dart';
-import 'package:dnd5e_dm_tools/features/characters/bloc/character_event.dart';
+import 'package:dnd5e_dm_tools/features/characters/bloc/character/character_bloc.dart';
+import 'package:dnd5e_dm_tools/features/characters/bloc/character/character_event.dart';
 import 'package:dnd5e_dm_tools/features/database_editor/bloc/database_editor_cubit.dart';
 import 'package:dnd5e_dm_tools/features/database_editor/bloc/database_editor_state.dart';
 import 'package:dnd5e_dm_tools/features/rules/rules_cubit.dart';

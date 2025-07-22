@@ -158,11 +158,7 @@ class DatabaseEditorCubit extends Cubit<DatabaseEditorState> {
             false,
           );
         case 'items':
-          await itemsRepository.save(
-            slug,
-            Item.fromJson(editedEntry, slug),
-            false,
-          );
+          await itemsRepository.save(slug, Item.fromJson(editedEntry), false);
         default:
           emit(DatabaseEditorError(selectedIndex: state.selectedIndex));
           return;

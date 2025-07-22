@@ -1,9 +1,10 @@
 import 'package:dnd5e_dm_tools/core/util/logger.dart';
 import 'package:dnd5e_dm_tools/core/widgets/error_handler.dart';
-import 'package:dnd5e_dm_tools/features/characters/bloc/character_bloc.dart';
-import 'package:dnd5e_dm_tools/features/characters/bloc/character_event.dart';
-import 'package:dnd5e_dm_tools/features/characters/bloc/character_state.dart';
+import 'package:dnd5e_dm_tools/features/characters/bloc/character/character_bloc.dart';
+import 'package:dnd5e_dm_tools/features/characters/bloc/character/character_event.dart';
+import 'package:dnd5e_dm_tools/features/characters/bloc/character/character_state.dart';
 import 'package:dnd5e_dm_tools/features/characters/presentation/bio_tab/bio_tab.dart';
+import 'package:dnd5e_dm_tools/features/characters/presentation/equip_tab/equip_tab.dart';
 import 'package:dnd5e_dm_tools/features/characters/presentation/skills_tab/skills_tab.dart';
 import 'package:dnd5e_dm_tools/features/settings/bloc/settings_cubit.dart';
 import 'package:flutter/material.dart';
@@ -80,7 +81,7 @@ class CharacterScreen extends StatelessWidget {
                         character: state.character,
                         classs: state.classs,
                       ),
-                      Container(),
+                      EquipTab(character: state.character),
                       // StatusTab(
                       //   character: state.character,
                       //   slug: state.slug,

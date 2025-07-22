@@ -1,5 +1,5 @@
-import 'package:dnd5e_dm_tools/features/characters/bloc/character_bloc.dart';
-import 'package:dnd5e_dm_tools/features/characters/bloc/character_event.dart';
+import 'package:dnd5e_dm_tools/features/characters/bloc/character/character_bloc.dart';
+import 'package:dnd5e_dm_tools/features/characters/bloc/character/character_event.dart';
 import 'package:dnd5e_dm_tools/features/settings/bloc/settings_cubit.dart';
 import 'package:dnd5e_dm_tools/features/settings/bloc/settings_states.dart';
 import 'package:flutter/material.dart';

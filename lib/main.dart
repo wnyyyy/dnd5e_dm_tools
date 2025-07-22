@@ -10,7 +10,8 @@ import 'package:dnd5e_dm_tools/core/data/repositories/races_repository.dart';
 import 'package:dnd5e_dm_tools/core/data/repositories/spells_repository.dart';
 import 'package:dnd5e_dm_tools/core/util/const.dart';
 import 'package:dnd5e_dm_tools/core/util/logger.dart';
-import 'package:dnd5e_dm_tools/features/characters/bloc/character_bloc.dart';
+import 'package:dnd5e_dm_tools/features/characters/bloc/character/character_bloc.dart';
+import 'package:dnd5e_dm_tools/features/characters/bloc/equipment/equipment_bloc.dart';
 import 'package:dnd5e_dm_tools/features/database_editor/bloc/database_editor_cubit.dart';
 import 'package:dnd5e_dm_tools/features/main_screen/bloc/main_screen_cubit.dart';
 import 'package:dnd5e_dm_tools/features/main_screen/main_screen.dart';
@@ -175,6 +176,12 @@ class Dnd5eDmTools extends StatelessWidget {
               charactersRepository: context.read<CharactersRepository>(),
               classesRepository: context.read<ClassesRepository>(),
               racesRepository: context.read<RacesRepository>(),
+            ),
+          ),
+          BlocProvider<EquipmentBloc>(
+            create: (context) => EquipmentBloc(
+              charactersRepository: context.read<CharactersRepository>(),
+              itemsRepository: context.read<ItemsRepository>(),
             ),
           ),
           BlocProvider<MainScreenCubit>(create: (context) => MainScreenCubit()),

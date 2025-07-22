@@ -1,7 +1,7 @@
 import 'package:dnd5e_dm_tools/core/data/models/character.dart';
 import 'package:dnd5e_dm_tools/core/data/models/proficiency.dart';
-import 'package:dnd5e_dm_tools/features/characters/bloc/character_bloc.dart';
-import 'package:dnd5e_dm_tools/features/characters/bloc/character_event.dart';
+import 'package:dnd5e_dm_tools/features/characters/bloc/character/character_bloc.dart';
+import 'package:dnd5e_dm_tools/features/characters/bloc/character/character_event.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
