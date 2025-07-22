@@ -28,7 +28,9 @@ class Proficiency extends Equatable {
     final skills =
         (json['skills'] as Map<String, dynamic>?)?.map(
           (key, value) => MapEntry(
-            Skill.values.firstWhere((e) => e.toString() == 'Skill.$key'),
+            Skill.values.firstWhere(
+              (e) => e.name.toLowerCase() == key.toLowerCase(),
+            ),
             ProficiencyLevel.values.firstWhere(
               (e) => e.toString() == 'ProficiencyLevel.$value',
             ),
@@ -59,8 +61,11 @@ class Proficiency extends Equatable {
       'weapons': weapons,
       'armor': armor,
       'tools': tools,
-      'saving_throws': savingThrows.map((e) => e.name).toList(),
-      'skills': skills.map((key, value) => MapEntry(key.name, value.name)),
+      'saving_throws': savingThrows.map((e) => e.name.toLowerCase()).toList(),
+      'skills': skills.map(
+        (key, value) =>
+            MapEntry(key.name.toLowerCase(), value.name.toLowerCase()),
+      ),
     };
   }
 

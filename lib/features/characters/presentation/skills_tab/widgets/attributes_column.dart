@@ -1,5 +1,6 @@
 import 'package:dnd5e_dm_tools/core/config/app_colors.dart';
 import 'package:dnd5e_dm_tools/core/data/models/character.dart';
+import 'package:dnd5e_dm_tools/core/util/enum.dart';
 import 'package:dnd5e_dm_tools/features/characters/bloc/character_bloc.dart';
 import 'package:dnd5e_dm_tools/features/characters/bloc/character_event.dart';
 import 'package:dnd5e_dm_tools/features/characters/presentation/skills_tab/widgets/attribute_card.dart';
@@ -66,32 +67,32 @@ class AttributesColumn extends StatelessWidget {
     final theme = Theme.of(context);
     final attrs = [
       {
-        'name': 'Strength',
+        'name': Attribute.strength.name,
         'value': character.asi.strength,
         'color': theme.strengthColor,
       },
       {
-        'name': 'Dexterity',
+        'name': Attribute.dexterity.name,
         'value': character.asi.dexterity,
         'color': theme.dexterityColor,
       },
       {
-        'name': 'Constitution',
+        'name': Attribute.constitution.name,
         'value': character.asi.constitution,
         'color': theme.constitutionColor,
       },
       {
-        'name': 'Intelligence',
+        'name': Attribute.intelligence.name,
         'value': character.asi.intelligence,
         'color': theme.intelligenceColor,
       },
       {
-        'name': 'Wisdom',
+        'name': Attribute.wisdom.name,
         'value': character.asi.wisdom,
         'color': theme.wisdomColor,
       },
       {
-        'name': 'Charisma',
+        'name': Attribute.charisma.name,
         'value': character.asi.charisma,
         'color': theme.charismaColor,
       },

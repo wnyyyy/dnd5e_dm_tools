@@ -13,12 +13,14 @@ class ASI extends Equatable {
 
   factory ASI.fromJson(Map<String, dynamic> json) {
     return ASI(
-      strength: json[Attribute.strength.name] as int? ?? 10,
-      dexterity: json[Attribute.dexterity.name] as int? ?? 10,
-      constitution: json[Attribute.constitution.name] as int? ?? 10,
-      intelligence: json[Attribute.intelligence.name] as int? ?? 10,
-      wisdom: json[Attribute.wisdom.name] as int? ?? 10,
-      charisma: json[Attribute.charisma.name] as int? ?? 10,
+      strength: json[Attribute.strength.name.toLowerCase()] as int? ?? 10,
+      dexterity: json[Attribute.dexterity.name.toLowerCase()] as int? ?? 10,
+      constitution:
+          json[Attribute.constitution.name.toLowerCase()] as int? ?? 10,
+      intelligence:
+          json[Attribute.intelligence.name.toLowerCase()] as int? ?? 10,
+      wisdom: json[Attribute.wisdom.name.toLowerCase()] as int? ?? 10,
+      charisma: json[Attribute.charisma.name.toLowerCase()] as int? ?? 10,
     );
   }
 
@@ -41,12 +43,12 @@ class ASI extends Equatable {
 
   Map<String, dynamic> toJson() {
     return {
-      Attribute.strength.name: strength,
-      Attribute.dexterity.name: dexterity,
-      Attribute.constitution.name: constitution,
-      Attribute.intelligence.name: intelligence,
-      Attribute.wisdom.name: wisdom,
-      Attribute.charisma.name: charisma,
+      Attribute.strength.name.toLowerCase(): strength,
+      Attribute.dexterity.name.toLowerCase(): dexterity,
+      Attribute.constitution.name.toLowerCase(): constitution,
+      Attribute.intelligence.name.toLowerCase(): intelligence,
+      Attribute.wisdom.name.toLowerCase(): wisdom,
+      Attribute.charisma.name.toLowerCase(): charisma,
     };
   }
 

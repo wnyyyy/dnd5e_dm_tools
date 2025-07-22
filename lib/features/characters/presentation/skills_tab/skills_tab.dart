@@ -4,6 +4,7 @@ import 'package:dnd5e_dm_tools/features/characters/presentation/skills_tab/widge
 import 'package:dnd5e_dm_tools/features/characters/presentation/skills_tab/widgets/passive_perception_card.dart';
 import 'package:dnd5e_dm_tools/features/characters/presentation/skills_tab/widgets/proficiency_bonus_card.dart';
 import 'package:dnd5e_dm_tools/features/characters/presentation/skills_tab/widgets/saving_throw_list.dart';
+import 'package:dnd5e_dm_tools/features/characters/presentation/skills_tab/widgets/skill_list.dart';
 import 'package:flutter/material.dart';
 
 class SkillsTab extends StatelessWidget {
@@ -65,28 +66,6 @@ class SkillsTab extends StatelessWidget {
           ),
         );
       },
-    );
-  }
-}
-
-class SkillList extends StatelessWidget {
-  const SkillList({required this.character, required this.classs});
-
-  final Character character;
-  final Class classs;
-
-  @override
-  Widget build(BuildContext context) {
-    // Implement your skill list widget here
-    // This is a placeholder for the actual implementation
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Text(
-          'Skills List for ${character.name}',
-          style: Theme.of(context).textTheme.titleMedium,
-        ),
-      ),
     );
   }
 }
