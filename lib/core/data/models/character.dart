@@ -1,4 +1,3 @@
-
 import 'package:dnd5e_dm_tools/core/data/models/asi.dart';
 import 'package:dnd5e_dm_tools/core/data/models/character_stats.dart';
 import 'package:dnd5e_dm_tools/core/data/models/feat.dart';
@@ -17,7 +16,7 @@ class Character extends Equatable {
     required this.feats,
     required this.proficiency,
     required this.asi,
-    required this.characterStats,
+    required this.stats,
     this.color,
     this.archetype,
   });
@@ -71,7 +70,7 @@ class Character extends Equatable {
       feats: feats,
       proficiency: proficiency,
       asi: ASI.fromJson(json['asi'] as Map<String, dynamic>? ?? {}),
-      characterStats: characterStats,
+      stats: characterStats,
     );
   }
 
@@ -104,7 +103,7 @@ class Character extends Equatable {
   final Map<String, String?> feats;
   final Proficiency proficiency;
   final ASI asi;
-  final CharacterStats characterStats;
+  final CharacterStats stats;
 
   Map<String, dynamic> toJson() {
     return {
@@ -119,7 +118,7 @@ class Character extends Equatable {
       'feats': feats,
       'proficiency': proficiency.toJson(),
       'asi': asi.toJson(),
-      'character_stats': characterStats.toJson(),
+      'character_stats': stats.toJson(),
     };
   }
 
@@ -128,7 +127,7 @@ class Character extends Equatable {
     Map<String, String?>? feats,
     Proficiency? proficiency,
     ASI? asi,
-    CharacterStats? characterStats,
+    CharacterStats? stats,
   }) {
     return Character(
       slug: slug,
@@ -143,7 +142,7 @@ class Character extends Equatable {
       feats: feats ?? this.feats,
       proficiency: proficiency ?? this.proficiency,
       asi: asi ?? this.asi,
-      characterStats: characterStats ?? this.characterStats,
+      stats: stats ?? this.stats,
     );
   }
 
@@ -161,7 +160,7 @@ class Character extends Equatable {
     archetype ?? '',
     proficiency,
     asi,
-    characterStats,
+    stats,
   ];
 
   @override

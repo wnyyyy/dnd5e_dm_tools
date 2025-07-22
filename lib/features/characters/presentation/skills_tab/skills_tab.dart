@@ -1,6 +1,8 @@
 import 'package:dnd5e_dm_tools/core/data/models/character.dart';
 import 'package:dnd5e_dm_tools/core/data/models/class.dart';
 import 'package:dnd5e_dm_tools/features/characters/presentation/skills_tab/widgets/attributes_column.dart';
+import 'package:dnd5e_dm_tools/features/characters/presentation/skills_tab/widgets/passive_perception_card.dart';
+import 'package:dnd5e_dm_tools/features/characters/presentation/skills_tab/widgets/proficiency_bonus_card.dart';
 import 'package:dnd5e_dm_tools/features/characters/presentation/skills_tab/widgets/saving_throw_list.dart';
 import 'package:flutter/material.dart';
 
@@ -26,9 +28,9 @@ class SkillsTab extends StatelessWidget {
                       const SizedBox(width: 8),
                       Column(
                         children: [
-                          _ProficiencyBonus(character: character),
+                          ProficiencyBonusCard(character: character),
                           SavingThrowList(character: character, classs: classs),
-                          _PassivePerception(character: character),
+                          PassivePerceptionCard(character: character),
                         ],
                       ),
                       const SizedBox(width: 8),
@@ -47,12 +49,12 @@ class SkillsTab extends StatelessWidget {
                           const SizedBox(width: 8),
                           Column(
                             children: [
-                              _ProficiencyBonus(character: character),
+                              ProficiencyBonusCard(character: character),
                               SavingThrowList(
                                 character: character,
                                 classs: classs,
                               ),
-                              _PassivePerception(character: character),
+                              PassivePerceptionCard(character: character),
                             ],
                           ),
                         ],
@@ -82,44 +84,6 @@ class SkillList extends StatelessWidget {
         padding: const EdgeInsets.all(8.0),
         child: Text(
           'Skills List for ${character.name}',
-          style: Theme.of(context).textTheme.titleMedium,
-        ),
-      ),
-    );
-  }
-}
-
-class _ProficiencyBonus extends StatelessWidget {
-  const _ProficiencyBonus({required this.character});
-  final Character character;
-
-  @override
-  Widget build(BuildContext context) {
-    // Replace with your actual proficiency bonus logic if needed
-    final bonus = ((character.level - 1) ~/ 4) + 2;
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Text(
-          'Proficiency Bonus: +$bonus',
-          style: Theme.of(context).textTheme.titleMedium,
-        ),
-      ),
-    );
-  }
-}
-
-class _PassivePerception extends StatelessWidget {
-  const _PassivePerception({required this.character});
-  final Character character;
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Text(
-          'Passive Perception: ${character.characterStats.passivePerception}',
           style: Theme.of(context).textTheme.titleMedium,
         ),
       ),
