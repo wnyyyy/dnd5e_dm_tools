@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:dnd5e_dm_tools/core/config/app_colors.dart';
 import 'package:dnd5e_dm_tools/core/data/models/backpack.dart';
 import 'package:dnd5e_dm_tools/core/data/models/character.dart';
+import 'package:dnd5e_dm_tools/core/util/enum.dart';
 import 'package:dnd5e_dm_tools/features/characters/bloc/character/character_bloc.dart';
 import 'package:dnd5e_dm_tools/features/characters/bloc/character/character_event.dart';
 import 'package:dnd5e_dm_tools/features/characters/bloc/character/character_state.dart';
@@ -45,7 +46,7 @@ class CoinsWidget extends StatelessWidget {
                         padding: const EdgeInsets.only(right: 8),
                         child: Icon(
                           FontAwesome5.coins,
-                          color: Theme.of(context).copperColor,
+                          color: CoinType.copper.color,
                           size: 15,
                         ),
                       ),
@@ -63,7 +64,7 @@ class CoinsWidget extends StatelessWidget {
                         padding: const EdgeInsets.only(right: 8),
                         child: Icon(
                           FontAwesome5.coins,
-                          color: Theme.of(context).silverColor,
+                          color: CoinType.silver.color,
                           size: 15,
                         ),
                       ),
@@ -81,7 +82,7 @@ class CoinsWidget extends StatelessWidget {
                         padding: const EdgeInsets.only(right: 8),
                         child: Icon(
                           FontAwesome5.coins,
-                          color: Theme.of(context).goldColor,
+                          color: CoinType.gold.color,
                           size: 15,
                         ),
                       ),
@@ -175,10 +176,10 @@ class CoinsWidget extends StatelessWidget {
                             Icon(
                               FontAwesome5.coins,
                               color: type == 'cp'
-                                  ? Theme.of(context).copperColor
+                                  ? CoinType.copper.color
                                   : type == 'sp'
-                                  ? Theme.of(context).silverColor
-                                  : Theme.of(context).goldColor,
+                                  ? CoinType.silver.color
+                                  : CoinType.gold.color,
                               size: 20,
                             ),
                             const SizedBox(width: 12),

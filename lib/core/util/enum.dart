@@ -1,3 +1,4 @@
+import 'package:dnd5e_dm_tools/core/config/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttericon/font_awesome5_icons.dart';
 import 'package:fluttericon/font_awesome_icons.dart';
@@ -230,6 +231,25 @@ extension RarityName on Rarity {
   }
 }
 
+extension RarityColor on Rarity {
+  Color? get color {
+    switch (this) {
+      case Rarity.common:
+        return null;
+      case Rarity.uncommon:
+        return Colors.green;
+      case Rarity.rare:
+        return Colors.blue;
+      case Rarity.veryRare:
+        return Colors.purple;
+      case Rarity.legendary:
+        return Colors.orange;
+      case Rarity.artifact:
+        return Colors.red;
+    }
+  }
+}
+
 enum ActionMenuMode { all, abilities, items, spells }
 
 enum EquipFilter { all, equipped, canEquip }
@@ -290,6 +310,17 @@ extension CoinTypeName on CoinType {
         return 'sp';
       case CoinType.gold:
         return 'gp';
+    }
+  }
+
+  Color get color {
+    switch (this) {
+      case CoinType.copper:
+        return Colors.brown[500]!;
+      case CoinType.silver:
+        return Colors.grey[500]!;
+      case CoinType.gold:
+        return Colors.yellow[700]!;
     }
   }
 }

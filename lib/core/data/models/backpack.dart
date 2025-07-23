@@ -36,6 +36,13 @@ class Backpack extends Equatable {
   final int silver;
   final int gold;
 
+  Backpack removeBySlug(String itemSlug) {
+    final updatedItems = items
+        .where((item) => item.itemSlug != itemSlug)
+        .toList();
+    return copyWith(items: updatedItems);
+  }
+
   Backpack copyWith({
     List<BackpackItem>? items,
     int? copper,

@@ -179,10 +179,8 @@ class Dnd5eDmTools extends StatelessWidget {
             ),
           ),
           BlocProvider<EquipmentBloc>(
-            create: (context) => EquipmentBloc(
-              charactersRepository: context.read<CharactersRepository>(),
-              itemsRepository: context.read<ItemsRepository>(),
-            ),
+            create: (context) =>
+                EquipmentBloc(itemsRepository: context.read<ItemsRepository>()),
           ),
           BlocProvider<MainScreenCubit>(create: (context) => MainScreenCubit()),
           BlocProvider<DatabaseEditorCubit>(

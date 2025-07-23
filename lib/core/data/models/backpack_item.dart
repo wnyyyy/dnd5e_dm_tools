@@ -24,6 +24,26 @@ class BackpackItem extends Equatable {
     };
   }
 
+  num get weight {
+    if (item == null) return 0;
+    final double itemWeight = item!.weight.toDouble();
+    return itemWeight * quantity;
+  }
+
+  BackpackItem copyWith({
+    String? itemSlug,
+    int? quantity,
+    bool? isEquipped,
+    Item? item,
+  }) {
+    return BackpackItem(
+      itemSlug: itemSlug ?? this.itemSlug,
+      quantity: quantity ?? this.quantity,
+      isEquipped: isEquipped ?? this.isEquipped,
+      item: item ?? this.item,
+    );
+  }
+
   final String itemSlug;
   final Item? item;
   final int quantity;

@@ -9,14 +9,20 @@ import 'package:dnd5e_dm_tools/features/characters/bloc/equipment/equipment_bloc
 import 'package:dnd5e_dm_tools/features/characters/bloc/equipment/equipment_event.dart';
 import 'package:dnd5e_dm_tools/features/characters/bloc/equipment/equipment_state.dart';
 import 'package:dnd5e_dm_tools/features/characters/presentation/equip_tab/widgets/coins_widget.dart';
+import 'package:dnd5e_dm_tools/features/characters/presentation/equip_tab/widgets/item_widget.dart';
 import 'package:dnd5e_dm_tools/features/settings/bloc/settings_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:logger/logger.dart';
 
 class BackpackWidget extends StatefulWidget {
-  const BackpackWidget({super.key, required this.backpack});
+  const BackpackWidget({
+    super.key,
+    required this.backpack,
+    required this.onBackpackUpdated,
+  });
   final Backpack backpack;
+  final ValueChanged<Backpack> onBackpackUpdated;
 
   @override
   State<BackpackWidget> createState() => _BackpackWidgetState();
@@ -54,21 +60,9 @@ class _BackpackWidgetState extends State<BackpackWidget> {
         corrupt = true;
         break;
       }
-
-      final item = backpackItem.item!;
-      // if (applyFilter(backpackItem, filterCriteria)) {
-      //   items[backpackItem.key] = typedItem;
-      //   items[backpackItem.key]?['quantity'] =
-      //       backpackItem.value['quantity'] ?? 0;
-      //   items[backpackItem.key]?['isEquipped'] =
-      //       backpackItem.value['isEquipped'] ?? false;
-      // }
-
-      // final sortedItems = sortItems(items, sortCriteria);
     }
     if (corrupt) {
       final character = charState.character;
-
       context.read<EquipmentBloc>().add(
         BuildBackpack(
           character: character.copyWith(
@@ -81,6 +75,11 @@ class _BackpackWidgetState extends State<BackpackWidget> {
       return const Center(child: CircularProgressIndicator());
     }
 
+    final filteredItems = items
+        .where((item) => applyFilter(item, filterCriteria))
+        .toList();
+    final sortedItems = sortItems(filteredItems, sortCriteria);
+
     return LayoutBuilder(
       builder: (context, constraints) {
         final bool isWide = constraints.maxWidth > 900;
@@ -88,14 +87,16 @@ class _BackpackWidgetState extends State<BackpackWidget> {
 
         return Column(
           children: [
-            //_buildFilters(horizontalPadding, isWide),
+            _buildFilters(horizontalPadding, isWide),
             Expanded(
               child: Card(
                 margin: EdgeInsets.symmetric(
                   horizontal: horizontalPadding,
                   vertical: 8,
                 ),
-                child: isWide ? _buildWideLayout() : _buildNarrowLayout(),
+                child: isWide
+                    ? _buildWideLayout(sortedItems)
+                    : _buildNarrowLayout(sortedItems),
               ),
             ),
           ],
@@ -104,16 +105,16 @@ class _BackpackWidgetState extends State<BackpackWidget> {
     );
   }
 
-  // List<DropdownMenuItem<EquipSort>> get dropdownItems {
-  //   return [
-  //     const DropdownMenuItem(value: EquipSort.name, child: Text('Name')),
-  //     const DropdownMenuItem(value: EquipSort.value, child: Text('Value')),
-  //     const DropdownMenuItem(
-  //       value: EquipSort.canEquip,
-  //       child: Text('Can Equip'),
-  //     ),
-  //   ];
-  // }
+  List<DropdownMenuItem<EquipSort>> get dropdownItems {
+    return [
+      const DropdownMenuItem(value: EquipSort.name, child: Text('Name')),
+      const DropdownMenuItem(value: EquipSort.value, child: Text('Value')),
+      const DropdownMenuItem(
+        value: EquipSort.canEquip,
+        child: Text('Can Equip'),
+      ),
+    ];
+  }
 
   Widget buildAddItemButton() {
     // return AddItemButton(
@@ -252,130 +253,114 @@ class _BackpackWidgetState extends State<BackpackWidget> {
     }
   }
 
-  // Map<String, Map<String, dynamic>> sortItems(
-  //   Map<String, Map<String, dynamic>> items,
-  //   EquipSort criteria,
-  // ) {
-  //   final sortedEntries = items.entries.toList();
+  List<BackpackItem> sortItems(
+    List<BackpackItem> backpackItems,
+    EquipSort criteria,
+  ) {
+    final sorted = List<BackpackItem>.from(backpackItems);
+    switch (criteria) {
+      case EquipSort.name:
+        sorted.sort(
+          (a, b) => (a.item?.name ?? '').toLowerCase().compareTo(
+            (b.item?.name ?? '').toLowerCase(),
+          ),
+        );
+      case EquipSort.value:
+        sorted.sort(
+          (b, a) =>
+              a.item?.cost.costCP.compareTo(b.item?.cost.costCP ?? 0) ?? 0,
+        );
+      case EquipSort.canEquip:
+        sorted.sort((a, b) {
+          final aEquip = a.item is Equipable;
+          final bEquip = b.item is Equipable;
+          if (aEquip && !bEquip) return -1;
+          if (!aEquip && bEquip) return 1;
+          return 0;
+        });
+    }
+    return sorted;
+  }
 
-  //   switch (criteria) {
-  //     case EquipSort.name:
-  //       sortedEntries.sort(
-  //         (a, b) => (a.value['name']?.toString() ?? '').compareTo(
-  //           b.value['name']?.toString() ?? '',
-  //         ),
-  //       );
-  //     case EquipSort.value:
-  //       sortedEntries.sort(
-  //         (b, a) =>
-  //             getCostTotal(
-  //               (a.value['cost'] as Map?)?['unit']?.toString() ?? 'none',
-  //               num.tryParse(
-  //                     (a.value['cost'] as Map?)?['quantity']?.toString() ?? '0',
-  //                   ) ??
-  //                   0,
-  //               int.tryParse(a.value['quantity']?.toString() ?? '0') ?? 0,
-  //             ).compareTo(
-  //               getCostTotal(
-  //                 (b.value['cost'] as Map?)?['unit']?.toString() ?? 'none',
-  //                 num.tryParse(
-  //                       (b.value['cost'] as Map?)?['quantity']?.toString() ??
-  //                           '0',
-  //                     ) ??
-  //                     0,
-  //                 int.tryParse(b.value['quantity']?.toString() ?? '0') ?? 0,
-  //               ),
-  //             ),
-  //       );
-  //     case EquipSort.canEquip:
-  //       sortedEntries.sort((a, b) {
-  //         if (isEquipable(a.value) && !isEquipable(b.value)) return -1;
-  //         if (!isEquipable(a.value) && isEquipable(b.value)) return 1;
-  //         return 0;
-  //       });
-  //   }
-  //   return Map.fromEntries(sortedEntries);
-  // }
+  Widget _buildFilters(double horizontalPadding, bool wide) {
+    return Padding(
+      padding: EdgeInsets.only(
+        right: horizontalPadding,
+        left: horizontalPadding,
+        top: 8,
+      ),
+      child: Flex(
+        direction: wide ? Axis.horizontal : Axis.vertical,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: wide
+            ? MainAxisAlignment.spaceBetween
+            : MainAxisAlignment.start,
+        children: [
+          Wrap(
+            spacing: 8.0,
+            children: [
+              ChoiceChip(
+                label: const Text('All Items'),
+                selected: filterCriteria == EquipFilter.all,
+                onSelected: (bool selected) {
+                  setState(() {
+                    filterCriteria = EquipFilter.all;
+                  });
+                  context.read<SettingsCubit>().toggleEquipFilter(
+                    EquipFilter.all,
+                  );
+                },
+              ),
+              ChoiceChip(
+                label: const Text('Equipped'),
+                selected: filterCriteria == EquipFilter.equipped,
+                onSelected: (bool selected) {
+                  setState(() {
+                    filterCriteria = EquipFilter.equipped;
+                  });
+                  context.read<SettingsCubit>().toggleEquipFilter(
+                    EquipFilter.equipped,
+                  );
+                },
+              ),
+              ChoiceChip(
+                label: const Text('Can Equip'),
+                selected: filterCriteria == EquipFilter.canEquip,
+                onSelected: (bool selected) {
+                  setState(() {
+                    filterCriteria = EquipFilter.canEquip;
+                    context.read<SettingsCubit>().toggleEquipFilter(
+                      EquipFilter.canEquip,
+                    );
+                  });
+                },
+              ),
+            ],
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 8.0),
+            child: DropdownButton<EquipSort>(
+              value: sortCriteria,
+              items: dropdownItems,
+              onChanged: (EquipSort? value) {
+                setState(() {
+                  sortCriteria = value ?? EquipSort.name;
+                  context.read<SettingsCubit>().toggleEquipSort(
+                    value ?? EquipSort.name,
+                  );
+                });
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
-  // Widget _buildFilters(double horizontalPadding, bool wide) {
-  //   return Padding(
-  //     padding: EdgeInsets.only(
-  //       right: horizontalPadding,
-  //       left: horizontalPadding,
-  //       top: 8,
-  //     ),
-  //     child: Flex(
-  //       direction: wide ? Axis.horizontal : Axis.vertical,
-  //       crossAxisAlignment: CrossAxisAlignment.start,
-  //       mainAxisAlignment: wide
-  //           ? MainAxisAlignment.spaceBetween
-  //           : MainAxisAlignment.start,
-  //       children: [
-  //         Wrap(
-  //           spacing: 8.0,
-  //           children: [
-  //             ChoiceChip(
-  //               label: const Text('All Items'),
-  //               selected: filterCriteria == EquipFilter.all,
-  //               onSelected: (bool selected) {
-  //                 setState(() {
-  //                   filterCriteria = EquipFilter.all;
-  //                 });
-  //                 context.read<SettingsCubit>().toggleEquipFilter(
-  //                   EquipFilter.all,
-  //                 );
-  //               },
-  //             ),
-  //             ChoiceChip(
-  //               label: const Text('Equipped'),
-  //               selected: filterCriteria == EquipFilter.equipped,
-  //               onSelected: (bool selected) {
-  //                 setState(() {
-  //                   filterCriteria = EquipFilter.equipped;
-  //                 });
-  //                 context.read<SettingsCubit>().toggleEquipFilter(
-  //                   EquipFilter.equipped,
-  //                 );
-  //               },
-  //             ),
-  //             ChoiceChip(
-  //               label: const Text('Can Equip'),
-  //               selected: filterCriteria == EquipFilter.canEquip,
-  //               onSelected: (bool selected) {
-  //                 setState(() {
-  //                   filterCriteria = EquipFilter.canEquip;
-  //                   context.read<SettingsCubit>().toggleEquipFilter(
-  //                     EquipFilter.canEquip,
-  //                   );
-  //                 });
-  //               },
-  //             ),
-  //           ],
-  //         ),
-  //         Padding(
-  //           padding: const EdgeInsets.only(left: 8.0),
-  //           child: DropdownButton<EquipSort>(
-  //             value: sortCriteria,
-  //             items: dropdownItems,
-  //             onChanged: (EquipSort? value) {
-  //               setState(() {
-  //                 sortCriteria = value ?? EquipSort.name;
-  //                 context.read<SettingsCubit>().toggleEquipSort(
-  //                   value ?? EquipSort.name,
-  //                 );
-  //               });
-  //             },
-  //           ),
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
-
-  Widget _buildWideLayout() {
+  Widget _buildWideLayout(List<BackpackItem> sortedItems) {
     return Row(
       children: [
-        //Expanded(flex: 3, child: _buildItemList(sortedItems)),
+        Expanded(flex: 3, child: _buildItemList(sortedItems)),
         const VerticalDivider(),
         SizedBox(
           width: 200,
@@ -386,17 +371,18 @@ class _BackpackWidgetState extends State<BackpackWidget> {
                 child: CoinsWidget(),
               ),
               buildAddItemButton(),
-              Padding(
-                padding: const EdgeInsets.only(
-                  left: 16.0,
-                  top: 8.0,
-                  bottom: 8.0,
+              if (widget.backpack.totalWeight > 0)
+                Padding(
+                  padding: const EdgeInsets.only(
+                    left: 16.0,
+                    top: 8.0,
+                    bottom: 8.0,
+                  ),
+                  child: Text(
+                    'Total Weight: ${widget.backpack.totalWeight.toStringAsFixed(1)} lbs',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
                 ),
-                child: Text(
-                  'Total Weight: ${widget.backpack.totalWeight.toStringAsFixed(1)} lbs',
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-              ),
             ],
           ),
         ),
@@ -404,10 +390,10 @@ class _BackpackWidgetState extends State<BackpackWidget> {
     );
   }
 
-  Widget _buildNarrowLayout() {
+  Widget _buildNarrowLayout(List<BackpackItem> sortedItems) {
     return Column(
       children: [
-        //Expanded(child: _buildItemList(sortedItems)),
+        Expanded(child: _buildItemList(sortedItems)),
         const SizedBox(
           height: 8,
           child: Padding(
@@ -427,82 +413,76 @@ class _BackpackWidgetState extends State<BackpackWidget> {
             ),
           ],
         ),
-        Row(
-          children: [
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.only(
-                  left: 16.0,
-                  top: 8.0,
-                  bottom: 8.0,
-                ),
-                child: Text(
-                  'Total Weight: ${widget.backpack.totalWeight.toStringAsFixed(1)} lbs',
-                  style: Theme.of(context).textTheme.bodySmall,
+        if (widget.backpack.totalWeight > 0)
+          Row(
+            children: [
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.only(
+                    left: 16.0,
+                    top: 8.0,
+                    bottom: 8.0,
+                  ),
+                  child: Text(
+                    'Total Weight: ${widget.backpack.totalWeight.toStringAsFixed(1)} lbs',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
                 ),
               ),
-            ),
-          ],
-        ),
+            ],
+          ),
       ],
     );
   }
 
-  // ListView _buildItemList(Map<String, Map<String, dynamic>> sortedItems) {
-  //   return ListView.separated(
-  //     itemCount: sortedItems.length,
-  //     itemBuilder: (context, index) {
-  //       final backpackItem = sortedItems.entries.elementAt(index);
-  //       if (backpackItem.value.isEmpty || backpackItem.value['quantity'] == 0) {
-  //         return const SizedBox.shrink();
-  //       }
-  //       final item = Map<String, dynamic>.from(items[backpackItem.key] ?? {});
-  //       if (item.isEmpty) {
-  //         return const SizedBox.shrink();
-  //       }
-  //       return Padding(
-  //         padding: const EdgeInsets.symmetric(vertical: 8),
-  //         child: ItemWidget(
-  //           item: item,
-  //           quantity:
-  //               int.tryParse(
-  //                 backpackItem.value['quantity']?.toString() ?? '0',
-  //               ) ??
-  //               0,
-  //           onQuantityChange: (quantity) {
-  //             if (quantity == 0) {
-  //               items.remove(backpackItem.key);
-  //             } else {
-  //               (items[backpackItem.key] as Map?)?['quantity'] = quantity;
-  //             }
-  //             (widget.character['backpack'] as LinkedHashMap)['items'] = items;
-  //             context.read<CharacterBloc>().add(
-  //               CharacterUpdate(
-  //                 character: widget.character,
-  //                 slug: widget.slug,
-  //                 persistData: true,
-  //                 offline: context.read<SettingsCubit>().state.offlineMode,
-  //               ),
-  //             );
-  //           },
-  //           isEquipped: backpackItem.value['isEquipped'] as bool? ?? false,
-  //           onEquip: (itemKey, isEquipped) {
-  //             items[itemKey]?['isEquipped'] = isEquipped;
-  //             (widget.character['backpack'] as Map)['items'] = items;
-  //             context.read<CharacterBloc>().add(
-  //               CharacterUpdate(
-  //                 character: widget.character,
-  //                 slug: widget.slug,
-  //                 persistData: true,
-  //                 offline: context.read<SettingsCubit>().state.offlineMode,
-  //               ),
-  //             );
-  //           },
-  //         ),
-  //       );
-  //     },
-  //     separatorBuilder: (context, index) =>
-  //         const SizedBox(child: Divider(height: 0)),
-  //   );
-  // }
+  ListView _buildItemList(List<BackpackItem> sortedItems) {
+    return ListView.separated(
+      itemCount: sortedItems.length,
+      itemBuilder: (context, index) {
+        final backpackItem = sortedItems.elementAt(index);
+        if (backpackItem.item == null || backpackItem.quantity == 0) {
+          return const SizedBox.shrink();
+        }
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: ItemWidget(
+            backpackItem: backpackItem,
+            onQuantityChange: (quantity) {
+              if (quantity == 0) {
+                final updatedBackpack = widget.backpack.removeBySlug(
+                  backpackItem.itemSlug,
+                );
+                widget.onBackpackUpdated(updatedBackpack);
+              } else {
+                final updatedItems = widget.backpack.items.map((item) {
+                  if (item.itemSlug == backpackItem.itemSlug) {
+                    return item.copyWith(quantity: quantity);
+                  }
+                  return item;
+                }).toList();
+                final updatedBackpack = widget.backpack.copyWith(
+                  items: updatedItems,
+                );
+                widget.onBackpackUpdated(updatedBackpack);
+              }
+            },
+            onEquip: (itemSlug, isEquipped) {
+              final updatedItems = widget.backpack.items.map((item) {
+                if (item.itemSlug == itemSlug) {
+                  return item.copyWith(isEquipped: isEquipped);
+                }
+                return item;
+              }).toList();
+              final updatedBackpack = widget.backpack.copyWith(
+                items: updatedItems,
+              );
+              widget.onBackpackUpdated(updatedBackpack);
+            },
+          ),
+        );
+      },
+      separatorBuilder: (context, index) =>
+          const SizedBox(child: Divider(height: 0)),
+    );
+  }
 }

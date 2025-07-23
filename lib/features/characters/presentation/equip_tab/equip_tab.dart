@@ -1,5 +1,6 @@
 import 'package:dnd5e_dm_tools/core/data/models/character.dart';
 import 'package:dnd5e_dm_tools/features/characters/bloc/character/character_bloc.dart';
+import 'package:dnd5e_dm_tools/features/characters/bloc/character/character_event.dart';
 import 'package:dnd5e_dm_tools/features/characters/bloc/character/character_state.dart';
 import 'package:dnd5e_dm_tools/features/characters/bloc/equipment/equipment_bloc.dart';
 import 'package:dnd5e_dm_tools/features/characters/bloc/equipment/equipment_event.dart';
@@ -14,38 +15,64 @@ class EquipTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    const double minHeight = 500;
+    final double maxHeight = MediaQuery.of(context).size.height * 0.8;
+    final double height = maxHeight < 300 ? minHeight : maxHeight;
+
     return SingleChildScrollView(
-      child: Flex(
-        direction: Axis.vertical,
+      child: Column(
         children: [
           SizedBox(
-            height: MediaQuery.of(context).size.height * 0.75 < 300
-                ? 500
-                : MediaQuery.of(context).size.height * 0.8,
+            height: height,
             child: BlocBuilder<EquipmentBloc, EquipmentState>(
               builder: (context, state) {
                 if (state is EquipmentLoading) {
                   return const Center(child: CircularProgressIndicator());
-                } else if (state is EquipmentLoaded) {
+                }
+
+                if (state is EquipmentLoaded) {
                   final characterBlocState = context
                       .read<CharacterBloc>()
                       .state;
-                  if (characterBlocState is CharacterLoaded &&
-                      characterBlocState.character.slug ==
-                          state.characterSlug) {
-                    return BackpackWidget(backpack: state.backpack);
+                  final isSameCharacter =
+                      characterBlocState is CharacterLoaded &&
+                      characterBlocState.character.slug == state.characterSlug;
+
+                  if (isSameCharacter) {
+                    return BackpackWidget(
+                      backpack: state.backpack,
+                      onBackpackUpdated: (backpack) {
+                        final updatedCharacter = character.copyWith(
+                          backpack: backpack,
+                        );
+                        context.read<CharacterBloc>().add(
+                          CharacterUpdate(
+                            character: updatedCharacter,
+                            persistData: true,
+                          ),
+                        );
+                        context.read<EquipmentBloc>().add(
+                          BuildBackpack(character: updatedCharacter),
+                        );
+                      },
+                    );
                   } else {
                     context.read<EquipmentBloc>().add(
                       BuildBackpack(character: character),
                     );
                   }
-                } else if (state is EquipmentError) {
+                }
+
+                if (state is EquipmentError) {
                   return Center(child: Text(state.error));
-                } else if (state is EquipmentInitial) {
+                }
+
+                if (state is EquipmentInitial) {
                   context.read<EquipmentBloc>().add(
                     BuildBackpack(character: character),
                   );
                 }
+
                 return const SizedBox.shrink();
               },
             ),

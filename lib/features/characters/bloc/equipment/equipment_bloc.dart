@@ -1,7 +1,6 @@
 import 'package:dnd5e_dm_tools/core/data/models/backpack_item.dart';
 import 'package:dnd5e_dm_tools/core/data/models/character.dart';
 import 'package:dnd5e_dm_tools/core/data/models/item.dart';
-import 'package:dnd5e_dm_tools/core/data/repositories/characters_repository.dart';
 import 'package:dnd5e_dm_tools/core/data/repositories/items_repository.dart';
 import 'package:dnd5e_dm_tools/core/util/logger.dart';
 import 'package:dnd5e_dm_tools/features/characters/bloc/equipment/equipment_event.dart';
@@ -10,13 +9,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:logger/logger.dart';
 
 class EquipmentBloc extends Bloc<EquipmentEvent, EquipmentState> {
-  EquipmentBloc({
-    required this.charactersRepository,
-    required this.itemsRepository,
-  }) : super(EquipmentInitial()) {
+  EquipmentBloc({required this.itemsRepository}) : super(EquipmentInitial()) {
     on<BuildBackpack>(_onBuildBackpack);
   }
-  final CharactersRepository charactersRepository;
   final ItemsRepository itemsRepository;
 
   Future<void> _onBuildBackpack(

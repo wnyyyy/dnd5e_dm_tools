@@ -19,7 +19,4 @@ extension AppColors on ThemeData {
   Color get charismaColor => brightness == Brightness.dark
       ? Colors.purpleAccent
       : Colors.purpleAccent.shade400;
-  Color get copperColor => Colors.brown[500]!;
-  Color get silverColor => Colors.grey[500]!;
-  Color get goldColor => Colors.yellow[700]!;
 }
