@@ -5,6 +5,7 @@ class BackpackItem extends Equatable {
   const BackpackItem({
     required this.itemSlug,
     required this.quantity,
+    this.isEquipped = false,
     this.item,
   });
 
@@ -12,17 +13,22 @@ class BackpackItem extends Equatable {
     return BackpackItem(
       itemSlug: documentId,
       quantity: json['quantity'] as int? ?? 1,
+      isEquipped: json['is_equipped'] as bool? ?? false,
     );
   }
 
   Map<String, dynamic> toJson() {
-    return {'quantity': quantity};
+    return {
+      'quantity': quantity,
+      'is_equipped': Item is Equipable ? isEquipped : null,
+    };
   }
 
   final String itemSlug;
   final Item? item;
   final int quantity;
+  final bool isEquipped;
 
   @override
-  List<Object> get props => [itemSlug, quantity];
+  List<Object> get props => [itemSlug, quantity, isEquipped];
 }

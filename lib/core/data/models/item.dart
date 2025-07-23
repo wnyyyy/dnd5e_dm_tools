@@ -157,6 +157,38 @@ abstract class Item extends Equatable {
     };
   }
 
+  String get descriptor {
+    switch (itemType) {
+      case EquipmentType.armor:
+        return 'Armor';
+      case EquipmentType.shield:
+        return 'Shield';
+      case EquipmentType.meleeWeapons:
+      case EquipmentType.rangedWeapons:
+        return 'Weapon';
+      case EquipmentType.magic:
+        return 'Magic Item';
+      case EquipmentType.profession:
+        return 'Tool';
+      case EquipmentType.adventure:
+        return 'Adventuring Gear';
+      case EquipmentType.mount:
+        return 'Mount';
+      case EquipmentType.music:
+        return 'Musical Instrument';
+      case EquipmentType.special:
+        return 'Special Item';
+      case EquipmentType.potion:
+        return 'Consumable';
+      case EquipmentType.accessories:
+        return 'Accessory';
+      case EquipmentType.scroll:
+        return 'Scroll';
+      default:
+        return 'Misc';
+    }
+  }
+
   Item copyWith({
     String? slug,
     String? name,

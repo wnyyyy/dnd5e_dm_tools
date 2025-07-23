@@ -1,6 +1,4 @@
 import 'package:dnd5e_dm_tools/core/data/models/feat.dart';
-import 'package:dnd5e_dm_tools/core/data/models/item.dart';
-import 'package:dnd5e_dm_tools/core/util/enum.dart';
 import 'package:dnd5e_dm_tools/core/util/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -112,7 +110,6 @@ Map<String, Map<String, dynamic>> _buildFeatMap(
       if (currFeatKey.isNotEmpty && currFeatDesc.isNotEmpty) {
         featMap[currFeatKey] ??= {};
         featMap[currFeatKey]!['description'] = List.from(currFeatDesc);
-        ;
         currFeatDesc.clear();
       }
       final featName = line.substring(prefix.length).trim();
@@ -122,7 +119,6 @@ Map<String, Map<String, dynamic>> _buildFeatMap(
       if (currFeatKey.isNotEmpty && currFeatDesc.isNotEmpty) {
         featMap[currFeatKey] ??= {};
         featMap[currFeatKey]!['description'] = List.from(currFeatDesc);
-        ;
         currFeatDesc.clear();
       }
       final subfeatLines = lines

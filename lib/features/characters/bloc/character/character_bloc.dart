@@ -1,11 +1,8 @@
-import 'package:dnd5e_dm_tools/core/data/models/backpack_item.dart';
 import 'package:dnd5e_dm_tools/core/data/models/character.dart';
 import 'package:dnd5e_dm_tools/core/data/models/class.dart';
-import 'package:dnd5e_dm_tools/core/data/models/item.dart';
 import 'package:dnd5e_dm_tools/core/data/models/race.dart';
 import 'package:dnd5e_dm_tools/core/data/repositories/characters_repository.dart';
 import 'package:dnd5e_dm_tools/core/data/repositories/classes_repository.dart';
-import 'package:dnd5e_dm_tools/core/data/repositories/items_repository.dart';
 import 'package:dnd5e_dm_tools/core/data/repositories/races_repository.dart';
 import 'package:dnd5e_dm_tools/core/util/logger.dart';
 import 'package:dnd5e_dm_tools/features/characters/bloc/character/character_event.dart';
@@ -84,68 +81,6 @@ class CharacterBloc extends Bloc<CharacterEvent, CharacterState> {
       );
     }
   }
-
-  // Future<void> _onCharacterUpdateBackpack(
-  //   CharacterUpdateBackpack event,
-  //   Emitter<CharacterState> emit,
-  // ) async {
-  //   if (this.state is! CharacterLoaded) {
-  //     return;
-  //   }
-  //   final state = this.state as CharacterLoaded;
-  //   final character = event.character;
-  //   final newItemList = await _buildBackpackItems(character);
-  //   try {
-  //     final updatedCharacter = state.character.copyWith(
-  //       backpack: event.backpack.copyWith(items: newItemList),
-  //     );
-  //     emit(
-  //       CharacterLoaded(
-  //         character: updatedCharacter,
-  //         classs: state.classs,
-  //         race: state.race,
-  //       ),
-  //     );
-  //   } catch (error) {
-  //     logBloc(
-  //       'Error updating backpack for character: ${state.character.slug} - $error',
-  //       level: Level.error,
-  //     );
-  //     emit(
-  //       CharacterError(
-  //         error: 'Failed to update backpack',
-  //         slug: state.character.slug,
-  //       ),
-  //     );
-  //   }
-  // }
-
-  // Future<List<BackpackItem>> _buildBackpackItems(Character character) async {
-  //   final newItemList = <BackpackItem>[];
-  //   for (final backpackItem in character.backpack.items) {
-  //     if (backpackItem.itemSlug.isEmpty) {
-  //       continue;
-  //     }
-  //     final Item item;
-  //     try {
-  //       item = await itemsRepository.get(backpackItem.itemSlug);
-  //     } catch (e) {
-  //       logBloc(
-  //         'Failed to load item: ${backpackItem.itemSlug} for character: ${character.slug} - $e',
-  //         level: Level.error,
-  //       );
-  //       continue;
-  //     }
-  //     newItemList.add(
-  //       BackpackItem(
-  //         itemSlug: backpackItem.itemSlug,
-  //         quantity: backpackItem.quantity,
-  //         item: item,
-  //       ),
-  //     );
-  //   }
-  //   return newItemList;
-  // }
 
   Future<void> _onPersistCharacter(
     PersistCharacter event,

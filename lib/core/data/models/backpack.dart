@@ -1,9 +1,14 @@
 import 'package:dnd5e_dm_tools/core/data/models/backpack_item.dart';
-import 'package:dnd5e_dm_tools/core/data/models/item.dart';
+import 'package:dnd5e_dm_tools/core/util/enum.dart';
 import 'package:equatable/equatable.dart';
 
 class Backpack extends Equatable {
-  const Backpack({required this.items});
+  const Backpack({
+    required this.items,
+    required this.copper,
+    required this.silver,
+    required this.gold,
+  });
 
   factory Backpack.fromJson(Map<String, dynamic> json) {
     final items =
@@ -18,13 +23,46 @@ class Backpack extends Equatable {
             .toList() ??
         [];
 
-    return Backpack(items: items);
+    final coinsMap = (json['coins'] as Map?)?.cast<String, int>() ?? {};
+    final copper = coinsMap[CoinType.copper.symbol] ?? 0;
+    final silver = coinsMap[CoinType.silver.symbol] ?? 0;
+    final gold = coinsMap[CoinType.gold.symbol] ?? 0;
+
+    return Backpack(items: items, copper: copper, silver: silver, gold: gold);
   }
 
   final List<BackpackItem> items;
+  final int copper;
+  final int silver;
+  final int gold;
 
-  Backpack copyWith({List<BackpackItem>? items}) {
-    return Backpack(items: items ?? this.items);
+  Backpack copyWith({
+    List<BackpackItem>? items,
+    int? copper,
+    int? silver,
+    int? gold,
+  }) {
+    return Backpack(
+      items: items ?? this.items,
+      copper: copper ?? this.copper,
+      silver: silver ?? this.silver,
+      gold: gold ?? this.gold,
+    );
+  }
+
+  num get totalWeight {
+    num totalWeight = 0;
+    if (items.isEmpty) {
+      return totalWeight;
+    }
+    for (final itemBackpack in items) {
+      final item = itemBackpack.item;
+      if (item == null) {
+        continue;
+      }
+      totalWeight += item.weight * itemBackpack.quantity;
+    }
+    return totalWeight;
   }
 
   @override
