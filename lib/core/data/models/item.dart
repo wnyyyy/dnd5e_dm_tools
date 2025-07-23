@@ -58,6 +58,10 @@ abstract class Item extends Equatable {
               (k, v) => MapEntry(k.toString(), v),
             ) ??
             {};
+        final armorCategory = ArmorCategory.values.firstWhere(
+          (e) => e.name == (json['armor_category'] as String? ?? ''),
+          orElse: () => ArmorCategory.light,
+        );
         return Armor(
           slug: slug,
           name: name,
@@ -66,6 +70,8 @@ abstract class Item extends Equatable {
           cost: cost,
           weight: weight,
           armorClass: ArmorClass.fromJson(armorClass),
+          armorCategory: armorCategory,
+          stealthDisadvantage: json['stealth_disadvantage'] as bool? ?? false,
         );
       case EquipmentType.meleeWeapons:
       case EquipmentType.rangedWeapons:
@@ -186,6 +192,8 @@ abstract class Item extends Equatable {
     int? range,
     int? longRange,
     bool? expendable,
+    ArmorCategory? armorCategory,
+    bool? stealthDisadvantage,
   }) {
     switch (itemType ?? this.itemType) {
       case EquipmentType.armor:
@@ -202,6 +210,11 @@ abstract class Item extends Equatable {
                     armorClass: (this is Armor)
                         ? (this as Armor).armorClass
                         : ArmorClass.fromJson({}),
+                    armorCategory:
+                        armorCategory ?? (this as Armor).armorCategory,
+                    stealthDisadvantage:
+                        stealthDisadvantage ??
+                        (this as Armor).stealthDisadvantage,
                   ))
             .copyWithArmor(
               slug: slug,
@@ -242,7 +255,6 @@ abstract class Item extends Equatable {
             variant: variant,
           );
         } else {
-          // fallback
           return WeaponTemplate(
             slug: slug ?? this.slug,
             name: name ?? this.name,
@@ -294,14 +306,20 @@ class Armor extends Equipable {
     required super.cost,
     required super.weight,
     required this.armorClass,
+    required this.armorCategory,
+    this.stealthDisadvantage = false,
   });
 
   final ArmorClass armorClass;
+  final bool stealthDisadvantage;
+  final ArmorCategory armorCategory;
 
   @override
   Map<String, dynamic> toJson() {
     final json = super.toJson();
     json['armor_class'] = armorClass;
+    json['stealth_disadvantage'] = stealthDisadvantage;
+    json['armor_category'] = armorCategory.name;
     return json;
   }
 
@@ -495,6 +513,8 @@ extension ArmorCopyWith on Armor {
     Cost? cost,
     int? weight,
     ArmorClass? armorClass,
+    ArmorCategory? armorCategory,
+    bool? stealthDisadvantage,
   }) {
     return Armor(
       slug: slug ?? this.slug,
@@ -504,6 +524,8 @@ extension ArmorCopyWith on Armor {
       cost: cost ?? this.cost,
       weight: weight ?? this.weight,
       armorClass: armorClass ?? this.armorClass,
+      armorCategory: armorCategory ?? this.armorCategory,
+      stealthDisadvantage: stealthDisadvantage ?? this.stealthDisadvantage,
     );
   }
 }

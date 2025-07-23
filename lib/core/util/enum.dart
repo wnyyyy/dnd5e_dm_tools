@@ -192,6 +192,23 @@ extension WeaponCategoryName on WeaponCategory {
   }
 }
 
+enum ArmorCategory { light, medium, heavy, shield }
+
+extension ArmorCategoryName on ArmorCategory {
+  String get name {
+    switch (this) {
+      case ArmorCategory.light:
+        return 'Light';
+      case ArmorCategory.medium:
+        return 'Medium';
+      case ArmorCategory.heavy:
+        return 'Heavy';
+      case ArmorCategory.shield:
+        return 'Shield';
+    }
+  }
+}
+
 enum Rarity { common, uncommon, rare, veryRare, legendary, artifact }
 
 extension RarityName on Rarity {
