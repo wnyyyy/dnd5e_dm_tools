@@ -2,6 +2,7 @@ import 'package:dnd5e_dm_tools/core/data/models/item.dart';
 import 'package:dnd5e_dm_tools/core/util/enum.dart';
 import 'package:dnd5e_dm_tools/features/characters/bloc/character/character_bloc.dart';
 import 'package:dnd5e_dm_tools/features/characters/bloc/character/character_state.dart';
+import 'package:dnd5e_dm_tools/features/characters/presentation/equip_tab/widgets/custom_item_button.dart';
 import 'package:dnd5e_dm_tools/features/rules/rules_cubit.dart';
 import 'package:dnd5e_dm_tools/features/rules/rules_state.dart';
 import 'package:flutter/material.dart';
@@ -143,6 +144,17 @@ class _AddItemButtonState extends State<AddItemButton> {
                               ),
                             ),
                           ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
+                          child: CustomItemButton(
+                            onAdd: (item) {
+                              widget.onAdd(item);
+                            },
+                          ),
+                        ),
                       ],
                     ),
                   );

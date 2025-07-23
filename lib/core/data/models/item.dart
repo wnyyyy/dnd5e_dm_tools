@@ -214,6 +214,12 @@ abstract class Item extends Equatable {
         return const Icon(RpgAwesome.crossbow);
       }
     }
+    if (expressions.contains('clothes')) {
+      return const Icon(FontAwesome5.tshirt);
+    }
+    if (expressions.contains('ring')) {
+      return const Icon(FontAwesome5.ring);
+    }
     if (expressions.contains('dagger')) {
       return const Icon(RpgAwesome.plain_dagger);
     }

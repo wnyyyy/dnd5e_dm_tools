@@ -408,6 +408,10 @@ class _BackpackWidgetState extends State<BackpackWidget> {
     BuildContext context,
     List<BackpackItem> sortedItems,
   ) {
+    final weightIsInt = widget.backpack.totalWeight % 1 == 0;
+    final weightStr = weightIsInt
+        ? widget.backpack.totalWeight.toStringAsFixed(0)
+        : widget.backpack.totalWeight.toStringAsFixed(1);
     return Column(
       children: [
         Expanded(child: _buildItemList(sortedItems)),
@@ -444,7 +448,7 @@ class _BackpackWidgetState extends State<BackpackWidget> {
                     bottom: 8.0,
                   ),
                   child: Text(
-                    'Total Weight: ${widget.backpack.totalWeight.toStringAsFixed(1)} lbs',
+                    'Total Weight: $weightStr lbs',
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                 ),
