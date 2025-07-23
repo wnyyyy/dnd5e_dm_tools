@@ -8,7 +8,8 @@ class Damage {
     if (dice.isEmpty) {
       throw ArgumentError('Required field "damage_dice" is missing or empty');
     }
-    final typeMap = json['damage_type'] as Map<String, dynamic>? ?? {};
+    final typeMap =
+        (json['damage_type'] as Map?)?.cast<String, dynamic>() ?? {};
     final typeIndex = typeMap['index'] as String? ?? '';
     if (typeIndex.isEmpty) {
       throw ArgumentError('Required field "damage_type" is missing or empty');

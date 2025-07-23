@@ -41,30 +41,56 @@ class RulesStateLoaded extends RulesState {
     required this.feats,
     required this.spells,
     required this.spellLists,
-    required this.items,
+    required this.genericItems,
+    required this.weaponTemplates,
+    required this.armors,
+    required this.weapons,
+    required this.allItems,
   });
   final List<Condition> conditions;
   final List<Feat> feats;
   final List<Spell> spells;
   final List<SpellList> spellLists;
-  final List<Item> items;
+  final List<GenericItem> genericItems;
+  final List<WeaponTemplate> weaponTemplates;
+  final List<Armor> armors;
+  final List<Weapon> weapons;
+  final List<Item> allItems;
 
   RulesStateLoaded copyWith({
     List<Condition>? conditions,
     List<Feat>? feats,
     List<Spell>? spells,
     List<SpellList>? spellLists,
-    List<Item>? items,
+    List<WeaponTemplate>? weaponTemplates,
+    List<Armor>? armors,
+    List<Weapon>? weapons,
+    List<GenericItem>? genericItems,
+    List<Item>? allItems,
   }) {
     return RulesStateLoaded(
       conditions: conditions ?? this.conditions,
       feats: feats ?? this.feats,
       spells: spells ?? this.spells,
       spellLists: spellLists ?? this.spellLists,
-      items: items ?? this.items,
+      genericItems: genericItems ?? this.genericItems,
+      weaponTemplates: weaponTemplates ?? this.weaponTemplates,
+      armors: armors ?? this.armors,
+      weapons: weapons ?? this.weapons,
+      allItems: allItems ?? this.allItems,
     );
   }
 
   @override
-  List<Object> get props => [conditions, feats, spells, spellLists, items];
+  List<Object> get props => [
+    conditions,
+    feats,
+    spells,
+    spellLists,
+    genericItems,
+    weaponTemplates,
+    armors,
+    weapons,
+    allItems,
+  ];
 }

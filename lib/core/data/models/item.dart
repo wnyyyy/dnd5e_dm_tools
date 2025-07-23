@@ -1,3 +1,4 @@
+import 'package:dnd5e_dm_tools/core/data/models/armor_class.dart';
 import 'package:dnd5e_dm_tools/core/data/models/cost.dart';
 import 'package:dnd5e_dm_tools/core/data/models/damage.dart';
 import 'package:dnd5e_dm_tools/core/util/enum.dart';
@@ -20,20 +21,27 @@ abstract class Item extends Equatable {
     }
     final name = json['name'] as String? ?? '';
     final desc = json['desc'] as List<dynamic>? ?? [];
-    final cost = Cost.fromJson(json['cost'] as Map<String, dynamic>? ?? {});
+    final cost = Cost.fromJson(
+      (json['cost'] as Map?)?.map((k, v) => MapEntry(k.toString(), v)) ?? {},
+    );
 
     final equipmentCategoryMap =
-        json['equipment_category'] as Map<String, dynamic>? ?? {};
+        (json['equipment_category'] as Map?)?.map(
+          (k, v) => MapEntry(k.toString(), v),
+        ) ??
+        {};
     final equipmentCategory = equipmentCategoryMap['index'] as String? ?? '';
     if (equipmentCategory.isEmpty) {
       throw ArgumentError(
         'Required field "equipment_category" is missing or empty',
       );
     }
-    final gearCategoryMap = json['gear_category'] as Map<String, dynamic>?;
+    final gearCategoryMap = (json['gear_category'] as Map?)?.map(
+      (k, v) => MapEntry(k.toString(), v),
+    );
     final gearCategory = gearCategoryMap?['index'] as String?;
     final toolCategory = json['tool_category'] as String?;
-    final weight = json['weight'] as int? ?? 0;
+    final weight = json['weight'] as num? ?? 0;
 
     final itemType = _inferType(
       slug: slug,
@@ -45,6 +53,11 @@ abstract class Item extends Equatable {
     switch (itemType) {
       case EquipmentType.armor:
       case EquipmentType.shield:
+        final armorClass =
+            (json['armor_class'] as Map?)?.map(
+              (k, v) => MapEntry(k.toString(), v),
+            ) ??
+            {};
         return Armor(
           slug: slug,
           name: name,
@@ -52,10 +65,47 @@ abstract class Item extends Equatable {
           desc: List<String>.from(desc),
           cost: cost,
           weight: weight,
-          armorClass: json['armor_class'] as int? ?? 0,
+          armorClass: ArmorClass.fromJson(armorClass),
         );
       case EquipmentType.meleeWeapons:
       case EquipmentType.rangedWeapons:
+        final damage =
+            (json['damage'] as Map?)?.map(
+              (k, v) => MapEntry(k.toString(), v),
+            ) ??
+            {};
+        if (damage.isEmpty) {
+          return WeaponTemplate(
+            slug: slug,
+            name: name,
+            itemType: itemType,
+            desc: List<String>.from(desc),
+            cost: cost,
+            weight: weight,
+          );
+        }
+        final properties =
+            (json['properties'] as List<dynamic>?)
+                ?.map(
+                  (e) => WeaponProperty.values.firstWhere(
+                    (p) =>
+                        p.name.toLowerCase() ==
+                        Map.castFrom(e as Map)['name'].toString().toLowerCase(),
+                  ),
+                )
+                .toList() ??
+            [];
+        final categoryRange = json['category_range'] as String? ?? '';
+        final WeaponCategory? weaponCategory;
+        if (categoryRange.isEmpty) {
+          weaponCategory = null;
+        } else {
+          weaponCategory = WeaponCategory.values.firstWhere(
+            (e) => e.name == categoryRange,
+          );
+        }
+        final range = (json['range'] as Map?)?['normal'] as int? ?? 5;
+        final longRange = (json['range'] as Map?)?['long'] as int?;
         return Weapon(
           slug: slug,
           name: name,
@@ -63,9 +113,11 @@ abstract class Item extends Equatable {
           desc: List<String>.from(desc),
           cost: cost,
           weight: weight,
-          damage: Damage.fromJson(
-            json['damage'] as Map<String, dynamic>? ?? {},
-          ),
+          damage: Damage.fromJson(damage),
+          weaponCategory: weaponCategory ?? WeaponCategory.simpleMelee,
+          properties: properties,
+          range: range,
+          longRange: longRange,
         );
       default:
         return GenericItem(
@@ -81,7 +133,7 @@ abstract class Item extends Equatable {
 
   final String slug;
   final String name;
-  final int weight;
+  final num weight;
   final List<String> desc;
   final Cost cost;
   final EquipmentType itemType;
@@ -99,6 +151,25 @@ abstract class Item extends Equatable {
     };
   }
 
+  Item copyWithBase({
+    String? slug,
+    String? name,
+    EquipmentType? itemType,
+    List<String>? desc,
+    Cost? cost,
+    int? weight,
+  }) {
+    return GenericItem(
+      slug: slug ?? this.slug,
+      name: name ?? this.name,
+      itemType: itemType ?? this.itemType,
+      desc: desc ?? this.desc,
+      cost: cost ?? this.cost,
+      weight: weight ?? this.weight,
+      expendable: (this is GenericItem) && (this as GenericItem).expendable,
+    );
+  }
+
   Item copyWith({
     String? slug,
     String? name,
@@ -107,31 +178,82 @@ abstract class Item extends Equatable {
     Cost? cost,
     int? weight,
     Damage? damage,
-    int? armorClass,
+    ArmorClass? armorClass,
+    Rarity? rarity,
+    bool? variant,
+    WeaponCategory? weaponCategory,
+    List<WeaponProperty>? properties,
+    int? range,
+    int? longRange,
+    bool? expendable,
   }) {
-    switch (itemType) {
+    switch (itemType ?? this.itemType) {
       case EquipmentType.armor:
       case EquipmentType.shield:
-        return Armor(
-          slug: slug ?? this.slug,
-          name: name ?? this.name,
-          itemType: itemType ?? this.itemType,
-          desc: desc ?? this.desc,
-          cost: cost ?? this.cost,
-          weight: weight ?? this.weight,
-          armorClass: armorClass ?? (this as Armor).armorClass,
-        );
+        return (this is Armor
+                ? (this as Armor)
+                : Armor(
+                    slug: slug ?? this.slug,
+                    name: name ?? this.name,
+                    itemType: itemType ?? this.itemType,
+                    desc: desc ?? this.desc,
+                    cost: cost ?? this.cost,
+                    weight: weight ?? this.weight,
+                    armorClass: (this is Armor)
+                        ? (this as Armor).armorClass
+                        : ArmorClass.fromJson({}),
+                  ))
+            .copyWithArmor(
+              slug: slug,
+              name: name,
+              itemType: itemType,
+              desc: desc,
+              cost: cost,
+              weight: weight,
+              armorClass: armorClass,
+            );
       case EquipmentType.meleeWeapons:
       case EquipmentType.rangedWeapons:
-        return Weapon(
-          slug: slug ?? this.slug,
-          name: name ?? this.name,
-          itemType: itemType ?? this.itemType,
-          desc: desc ?? this.desc,
-          cost: cost ?? this.cost,
-          weight: weight ?? this.weight,
-          damage: damage ?? (this as Weapon).damage,
-        );
+        if (this is Weapon) {
+          return (this as Weapon).copyWithWeapon(
+            slug: slug,
+            name: name,
+            itemType: itemType,
+            desc: desc,
+            cost: cost,
+            weight: weight,
+            damage: damage,
+            weaponCategory: weaponCategory,
+            properties: properties,
+            range: range,
+            longRange: longRange,
+            rarity: rarity,
+            variant: variant,
+          );
+        } else if (this is WeaponTemplate) {
+          return (this as WeaponTemplate).copyWithWeaponTemplate(
+            slug: slug,
+            name: name,
+            itemType: itemType,
+            desc: desc,
+            cost: cost,
+            weight: weight,
+            rarity: rarity,
+            variant: variant,
+          );
+        } else {
+          // fallback
+          return WeaponTemplate(
+            slug: slug ?? this.slug,
+            name: name ?? this.name,
+            itemType: itemType ?? this.itemType,
+            desc: desc ?? this.desc,
+            cost: cost ?? this.cost,
+            weight: weight ?? this.weight,
+            rarity: rarity ?? Rarity.common,
+            variant: variant ?? false,
+          );
+        }
       default:
         return GenericItem(
           slug: slug ?? this.slug,
@@ -140,7 +262,7 @@ abstract class Item extends Equatable {
           desc: desc ?? this.desc,
           cost: cost ?? this.cost,
           weight: weight ?? this.weight,
-          expendable: (this as GenericItem).expendable,
+          expendable: (this is GenericItem) && (this as GenericItem).expendable,
         );
     }
   }
@@ -174,7 +296,7 @@ class Armor extends Equipable {
     required this.armorClass,
   });
 
-  final int armorClass;
+  final ArmorClass armorClass;
 
   @override
   Map<String, dynamic> toJson() {
@@ -187,7 +309,31 @@ class Armor extends Equipable {
   List<Object> get props => super.props..add(armorClass);
 }
 
-class Weapon extends Equipable {
+class WeaponTemplate extends Equipable {
+  const WeaponTemplate({
+    required super.slug,
+    required super.name,
+    required super.itemType,
+    required super.desc,
+    required super.cost,
+    required super.weight,
+    this.rarity = Rarity.common,
+    this.variant = false,
+  });
+
+  final Rarity rarity;
+  final bool variant;
+
+  @override
+  Map<String, dynamic> toJson() {
+    final json = super.toJson();
+    json['rarity'] = {'name': rarity.name};
+    json['variant'] = variant;
+    return json;
+  }
+}
+
+class Weapon extends WeaponTemplate {
   const Weapon({
     required super.slug,
     required super.name,
@@ -196,14 +342,36 @@ class Weapon extends Equipable {
     required super.cost,
     required super.weight,
     required this.damage,
+    required this.weaponCategory,
+    required this.properties,
+    required this.range,
+    this.longRange,
   });
 
   final Damage damage;
+  final int? longRange;
+  final int range;
+  final WeaponCategory weaponCategory;
+  final List<WeaponProperty> properties;
 
   @override
   Map<String, dynamic> toJson() {
     final json = super.toJson();
     json['damage'] = damage.toJson();
+    json['category_range'] = weaponCategory.name;
+    json['properties'] = properties
+        .map(
+          (e) => {
+            'index': e.name
+                .toLowerCase()
+                .replaceAll(' ', '-')
+                .replaceAll("'", ''),
+            'name': e.name,
+          },
+        )
+        .toList();
+    json['variant'] = null;
+    json['range'] = {'normal': range, 'long': longRange};
     return json;
   }
 
@@ -315,5 +483,83 @@ EquipmentType _getItemType(String item) {
       return EquipmentType.scroll;
     default:
       return EquipmentType.unknown;
+  }
+}
+
+extension ArmorCopyWith on Armor {
+  Armor copyWithArmor({
+    String? slug,
+    String? name,
+    EquipmentType? itemType,
+    List<String>? desc,
+    Cost? cost,
+    int? weight,
+    ArmorClass? armorClass,
+  }) {
+    return Armor(
+      slug: slug ?? this.slug,
+      name: name ?? this.name,
+      itemType: itemType ?? this.itemType,
+      desc: desc ?? this.desc,
+      cost: cost ?? this.cost,
+      weight: weight ?? this.weight,
+      armorClass: armorClass ?? this.armorClass,
+    );
+  }
+}
+
+extension WeaponTemplateCopyWith on WeaponTemplate {
+  WeaponTemplate copyWithWeaponTemplate({
+    String? slug,
+    String? name,
+    EquipmentType? itemType,
+    List<String>? desc,
+    Cost? cost,
+    int? weight,
+    Rarity? rarity,
+    bool? variant,
+  }) {
+    return WeaponTemplate(
+      slug: slug ?? this.slug,
+      name: name ?? this.name,
+      itemType: itemType ?? this.itemType,
+      desc: desc ?? this.desc,
+      cost: cost ?? this.cost,
+      weight: weight ?? this.weight,
+      rarity: rarity ?? this.rarity,
+      variant: variant ?? this.variant,
+    );
+  }
+}
+
+extension WeaponCopyWith on Weapon {
+  Weapon copyWithWeapon({
+    String? slug,
+    String? name,
+    EquipmentType? itemType,
+    List<String>? desc,
+    Cost? cost,
+    int? weight,
+    Damage? damage,
+    WeaponCategory? weaponCategory,
+    List<WeaponProperty>? properties,
+    int? range,
+    int? longRange,
+    Rarity? rarity,
+    bool? variant,
+  }) {
+    return Weapon(
+      slug: slug ?? this.slug,
+      name: name ?? this.name,
+      itemType: itemType ?? this.itemType,
+      desc: desc ?? this.desc,
+      cost: cost ?? this.cost,
+      weight: weight ?? this.weight,
+      damage: damage ?? this.damage,
+      weaponCategory: weaponCategory ?? this.weaponCategory,
+      properties: properties ?? this.properties,
+      range: range ?? this.range,
+      longRange: longRange ?? this.longRange,
+    );
   }
 }

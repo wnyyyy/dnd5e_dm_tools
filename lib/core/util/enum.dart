@@ -132,7 +132,86 @@ enum ThemeColor {
   slateGrey,
 }
 
+enum WeaponProperty {
+  thrown,
+  versatile,
+  finesse,
+  light,
+  heavy,
+  twoHanded,
+  monk,
+  loading,
+  reach,
+  ammunition,
+  special,
+}
+
+extension WeaponPropertyName on WeaponProperty {
+  String get name {
+    switch (this) {
+      case WeaponProperty.thrown:
+        return 'Thrown';
+      case WeaponProperty.versatile:
+        return 'Versatile';
+      case WeaponProperty.finesse:
+        return 'Finesse';
+      case WeaponProperty.light:
+        return 'Light';
+      case WeaponProperty.heavy:
+        return 'Heavy';
+      case WeaponProperty.twoHanded:
+        return 'Two-Handed';
+      case WeaponProperty.loading:
+        return 'Loading';
+      case WeaponProperty.ammunition:
+        return 'Ammunition';
+      case WeaponProperty.reach:
+        return 'Reach';
+      case WeaponProperty.special:
+        return 'Special';
+      case WeaponProperty.monk:
+        return 'Monk';
+    }
+  }
+}
+
+enum WeaponCategory { simpleMelee, simpleRanged, martialMelee, martialRanged }
+
+extension WeaponCategoryName on WeaponCategory {
+  String get name {
+    switch (this) {
+      case WeaponCategory.simpleMelee:
+        return 'Simple Melee';
+      case WeaponCategory.simpleRanged:
+        return 'Simple Ranged';
+      case WeaponCategory.martialMelee:
+        return 'Martial Melee';
+      case WeaponCategory.martialRanged:
+        return 'Martial Ranged';
+    }
+  }
+}
+
 enum Rarity { common, uncommon, rare, veryRare, legendary, artifact }
+
+extension RarityName on Rarity {
+  String get name {
+    switch (this) {
+      case Rarity.common:
+        return 'Common';
+      case Rarity.uncommon:
+        return 'Uncommon';
+      case Rarity.rare:
+        return 'Rare';
+      case Rarity.veryRare:
+        return 'Very Rare';
+      case Rarity.legendary:
+        return 'Legendary';
+      case Rarity.artifact:
+        return 'Artifact';
+    }
+  }
+}
 
 enum ActionMenuMode { all, abilities, items, spells }
 

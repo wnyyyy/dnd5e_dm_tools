@@ -59,6 +59,11 @@ class RulesCubit extends Cubit<RulesState> {
       logBloc('Error loading rules: $e', level: Level.error);
       emit(RulesStateError(e.toString()));
     }
+    final itemList = results[4] as List<Item>;
+    final weapons = itemList.whereType<Weapon>().toList();
+    final armors = itemList.whereType<Armor>().toList();
+    final weaponTemplates = itemList.whereType<WeaponTemplate>().toList();
+    final genericItems = itemList.whereType<GenericItem>().toList();
 
     try {
       logBloc('Rules loaded successfully');
@@ -68,7 +73,11 @@ class RulesCubit extends Cubit<RulesState> {
           spells: results[1] as List<Spell>,
           feats: results[2] as List<Feat>,
           spellLists: results[3] as List<SpellList>,
-          items: results[4] as List<Item>,
+          genericItems: genericItems,
+          weaponTemplates: weaponTemplates,
+          armors: armors,
+          weapons: weapons,
+          allItems: itemList,
         ),
       );
     } catch (e) {
@@ -104,7 +113,19 @@ class RulesCubit extends Cubit<RulesState> {
           return Future.value();
         case 'items':
           itemsRepository.getAll(online: true).then((items) {
-            emit(currState.copyWith(items: items));
+            final weapons = items.whereType<Weapon>().toList();
+            final armors = items.whereType<Armor>().toList();
+            final weaponTemplates = items.whereType<WeaponTemplate>().toList();
+            final genericItems = items.whereType<GenericItem>().toList();
+            emit(
+              currState.copyWith(
+                weapons: weapons,
+                armors: armors,
+                weaponTemplates: weaponTemplates,
+                genericItems: genericItems,
+                allItems: items,
+              ),
+            );
           });
         default:
           logBloc('Unknown rule type: $type', level: Level.warning);
