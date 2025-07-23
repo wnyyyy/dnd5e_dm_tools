@@ -56,6 +56,14 @@ abstract class Item extends Equatable {
       orElse: () => Rarity.common,
     );
 
+    final variant = json['variant'] as bool? ?? false;
+    final variants =
+        (json['variants'] as List<dynamic>?)?.map((e) {
+          final itemJson = e as Map<String, dynamic>;
+          return itemJson['index']?.toString() ?? '';
+        }).toList() ??
+        [];
+
     final itemType = _inferType(
       slug: slug,
       equipmentCategory: equipmentCategory,
@@ -72,7 +80,6 @@ abstract class Item extends Equatable {
             ) ??
             {};
         if (armorClass.isEmpty) {
-          final variant = json['variant'] as bool? ?? false;
           return ArmorTemplate(
             slug: slug,
             name: name,
@@ -82,6 +89,7 @@ abstract class Item extends Equatable {
             weight: weight,
             rarity: rarity,
             variant: variant,
+            variants: variants,
           );
         }
         final armorCategory = ArmorCategory.values.firstWhere(
@@ -108,7 +116,6 @@ abstract class Item extends Equatable {
             ) ??
             {};
         if (damage.isEmpty) {
-          final variant = json['variant'] as bool? ?? false;
           return WeaponTemplate(
             slug: slug,
             name: name,
@@ -165,6 +172,18 @@ abstract class Item extends Equatable {
           rarity: rarity,
         );
       default:
+        if (!variant && variants.isNotEmpty) {
+          return GenericTemplate(
+            slug: slug,
+            name: name,
+            itemType: itemType,
+            desc: List<String>.from(desc),
+            cost: cost,
+            weight: weight,
+            rarity: rarity,
+            variant: variant,
+          );
+        }
         return GenericItem(
           slug: slug,
           name: name,
@@ -331,6 +350,7 @@ abstract class Item extends Equatable {
     bool? expendable,
     ArmorCategory? armorCategory,
     bool? stealthDisadvantage,
+    List<String>? variants,
   }) {
     if (this is Armor) {
       final armor = this as Armor;
@@ -357,6 +377,7 @@ abstract class Item extends Equatable {
         weight: weight ?? template.weight,
         rarity: rarity ?? template.rarity,
         variant: variant ?? template.variant,
+        variants: variants ?? template.variants,
       );
     } else if (this is Weapon) {
       final weapon = this as Weapon;
@@ -385,6 +406,20 @@ abstract class Item extends Equatable {
         weight: weight ?? template.weight,
         rarity: rarity ?? template.rarity,
         variant: variant ?? template.variant,
+        variants: variants ?? template.variants,
+      );
+    } else if (this is GenericTemplate) {
+      final generic = this as GenericTemplate;
+      return GenericTemplate(
+        slug: slug ?? generic.slug,
+        name: name ?? generic.name,
+        itemType: itemType ?? generic.itemType,
+        desc: desc ?? generic.desc,
+        cost: cost ?? generic.cost,
+        weight: weight ?? generic.weight,
+        rarity: rarity ?? generic.rarity,
+        variant: variant ?? generic.variant,
+        variants: variants ?? generic.variants,
       );
     } else if (this is GenericItem) {
       final generic = this as GenericItem;
@@ -420,7 +455,51 @@ abstract class Item extends Equatable {
   String toString() => '$runtimeType $slug(name: $name, type: $itemType)';
 }
 
-abstract class Equipable extends Item {
+abstract class Template extends Item {
+  const Template({
+    required super.slug,
+    required super.name,
+    required super.itemType,
+    required super.desc,
+    required super.cost,
+    required super.weight,
+    required super.rarity,
+    this.variant = false,
+    this.variants = const [],
+  });
+
+  final bool variant;
+  final List<String> variants;
+
+  @override
+  Map<String, dynamic> toJson() {
+    final json = super.toJson();
+    json['variant'] = variant;
+    json['variants'] = variants.map((e) => {'index': e}).toList();
+    return json;
+  }
+
+  @override
+  List<Object> get props => super.props
+    ..add(variant)
+    ..addAll(variants);
+}
+
+class GenericTemplate extends Template {
+  const GenericTemplate({
+    required super.slug,
+    required super.name,
+    required super.itemType,
+    required super.desc,
+    required super.cost,
+    required super.weight,
+    required super.rarity,
+    super.variant,
+    super.variants,
+  });
+}
+
+abstract class Equipable extends Template {
   const Equipable({
     required super.slug,
     required super.name,
@@ -429,6 +508,8 @@ abstract class Equipable extends Item {
     required super.cost,
     required super.weight,
     required super.rarity,
+    super.variants,
+    super.variant,
   });
 }
 
@@ -441,20 +522,9 @@ class ArmorTemplate extends Equipable {
     required super.cost,
     required super.weight,
     required super.rarity,
-    this.variant = false,
+    super.variants,
+    super.variant,
   });
-
-  final bool variant;
-
-  @override
-  Map<String, dynamic> toJson() {
-    final json = super.toJson();
-    json['variant'] = variant;
-    return json;
-  }
-
-  @override
-  List<Object> get props => super.props..add(rarity);
 }
 
 class Armor extends ArmorTemplate {
@@ -481,7 +551,8 @@ class Armor extends ArmorTemplate {
     json['armor_class'] = armorClass;
     json['stealth_disadvantage'] = stealthDisadvantage;
     json['armor_category'] = armorCategory.name;
-    json['variant'] = null;
+    json['variant'] = false;
+    json['variants'] = [];
     return json;
   }
 
@@ -498,17 +569,9 @@ class WeaponTemplate extends Equipable {
     required super.cost,
     required super.weight,
     required super.rarity,
-    this.variant = false,
+    super.variant,
+    super.variants,
   });
-
-  final bool variant;
-
-  @override
-  Map<String, dynamic> toJson() {
-    final json = super.toJson();
-    json['variant'] = variant;
-    return json;
-  }
 }
 
 class Weapon extends WeaponTemplate {
@@ -554,8 +617,9 @@ class Weapon extends WeaponTemplate {
           },
         )
         .toList();
-    json['variant'] = null;
     json['range'] = {'normal': range, 'long': longRange};
+    json['variant'] = false;
+    json['variants'] = [];
     return json;
   }
 
@@ -563,7 +627,7 @@ class Weapon extends WeaponTemplate {
   List<Object> get props => super.props..add(damage);
 }
 
-class GenericItem extends Item {
+class GenericItem extends GenericTemplate {
   const GenericItem({
     required super.slug,
     required super.name,
@@ -576,6 +640,14 @@ class GenericItem extends Item {
   });
 
   final bool expendable;
+
+  @override
+  Map<String, dynamic> toJson() {
+    final json = super.toJson();
+    json['variant'] = false;
+    json['variants'] = [];
+    return json;
+  }
 
   @override
   List<Object> get props => super.props..add(expendable);

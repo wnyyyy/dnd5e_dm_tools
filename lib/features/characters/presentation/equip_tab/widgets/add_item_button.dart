@@ -1,4 +1,7 @@
 import 'package:dnd5e_dm_tools/core/data/models/item.dart';
+import 'package:dnd5e_dm_tools/core/util/enum.dart';
+import 'package:dnd5e_dm_tools/features/characters/bloc/character/character_bloc.dart';
+import 'package:dnd5e_dm_tools/features/characters/bloc/character/character_state.dart';
 import 'package:dnd5e_dm_tools/features/rules/rules_cubit.dart';
 import 'package:dnd5e_dm_tools/features/rules/rules_state.dart';
 import 'package:flutter/material.dart';
@@ -6,7 +9,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 class AddItemButton extends StatefulWidget {
   const AddItemButton({super.key, required this.onAdd});
-
   final void Function(Item) onAdd;
 
   @override
@@ -19,21 +21,33 @@ class _AddItemButtonState extends State<AddItemButton> {
   List<Item> _filterItems(List<Item> items, String searchText) {
     if (searchText.isEmpty) return [];
     final lower = searchText.toLowerCase();
+    final charState = context.watch<CharacterBloc>().state;
+    final int level;
+    if (charState is CharacterLoaded) {
+      level = charState.character.level + 5;
+    } else {
+      level = 1;
+    }
     return items.where((item) {
       final name = item.name.toLowerCase();
-      final bool isCommon;
-      if (item is GenericItem) {
-        isCommon = true;
-      } else if (item is WeaponTemplate) {
-        isCommon = item.rarity.name == 'common';
-      } else if (item is Weapon) {
-        isCommon = item.rarity.name == 'common';
-        // } else if (item is Armor) {
-        //   isCommon = (item.rarity?.name ?? 'common') == 'common';
+      final List<Rarity> allowedRarities;
+      if (level < 5) {
+        allowedRarities = [Rarity.common];
+      } else if (level < 9) {
+        allowedRarities = [Rarity.common, Rarity.uncommon];
+      } else if (level < 15) {
+        allowedRarities = [Rarity.common, Rarity.uncommon, Rarity.rare];
       } else {
-        isCommon = false;
+        allowedRarities = [
+          Rarity.common,
+          Rarity.uncommon,
+          Rarity.rare,
+          Rarity.veryRare,
+        ];
       }
-      return name.contains(lower) && isCommon;
+      final rarityAllowed = allowedRarities.contains(item.rarity);
+      final isTemplate = (item is Template) && (item.variants.isNotEmpty);
+      return name.contains(lower) && rarityAllowed && !isTemplate;
     }).toList();
   }
 
@@ -123,7 +137,7 @@ class _AddItemButtonState extends State<AddItemButton> {
                                             },
                                           );
                                         },
-                                        separatorBuilder: (_, __) =>
+                                        separatorBuilder: (_, _) =>
                                             const Divider(),
                                       ),
                               ),

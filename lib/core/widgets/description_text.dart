@@ -117,6 +117,21 @@ class DescriptionText extends StatelessWidget {
       },
     );
 
+    result = result.replaceAllMapped(
+      RegExp(r'([+-]\s*\d+)', caseSensitive: false),
+      (match) {
+        final start = match.start;
+        final end = match.end;
+        if (start >= 2 &&
+            result.substring(start - 2, start) == '[[' &&
+            end + 2 <= result.length &&
+            result.substring(end, end + 2) == ']]') {
+          return match[0]!;
+        }
+        return '[[${match[0]}]]';
+      },
+    );
+
     for (final keyword in allKeywords) {
       result = result.replaceAllMapped(
         RegExp(r'\b' + RegExp.escape(keyword) + r'\b', caseSensitive: false),
@@ -185,7 +200,7 @@ class DescriptionText extends StatelessWidget {
 }
 
 class KeywordSyntax extends md.InlineSyntax {
-  KeywordSyntax() : super(r'\[\[([a-zA-Z0-9\s]+)\]\]');
+  KeywordSyntax() : super(r'\[\[(.+?)\]\]');
 
   @override
   bool onMatch(md.InlineParser parser, Match match) {
@@ -205,16 +220,10 @@ class KeywordBuilder extends MarkdownElementBuilder {
   Widget visitElementAfter(md.Element element, TextStyle? preferredStyle) {
     final keyword = element.textContent.toLowerCase();
     final color = keywordColors[keyword] ?? baseStyle.color;
-    final isBold =
-        boldWords.any((word) => keyword.toLowerCase().contains(word)) ||
-        RegExp(r'^\d*d\d+$').hasMatch(keyword);
     return RichText(
       text: TextSpan(
         text: element.textContent,
-        style: baseStyle.copyWith(
-          color: color,
-          fontWeight: isBold ? FontWeight.bold : baseStyle.fontWeight,
-        ),
+        style: baseStyle.copyWith(color: color, fontWeight: FontWeight.bold),
       ),
     );
   }

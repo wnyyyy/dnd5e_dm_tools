@@ -131,7 +131,7 @@ class Character extends Equatable {
       'proficiency': proficiency.toJson(),
       'asi': asi.toJson(),
       'character_stats': stats.toJson(),
-      'backpack': {},
+      'backpack': backpack.toJson(),
     };
   }
 

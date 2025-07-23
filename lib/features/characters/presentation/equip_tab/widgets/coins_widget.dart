@@ -1,12 +1,10 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:dnd5e_dm_tools/core/config/app_colors.dart';
 import 'package:dnd5e_dm_tools/core/data/models/backpack.dart';
 import 'package:dnd5e_dm_tools/core/data/models/character.dart';
 import 'package:dnd5e_dm_tools/core/util/enum.dart';
 import 'package:dnd5e_dm_tools/features/characters/bloc/character/character_bloc.dart';
-import 'package:dnd5e_dm_tools/features/characters/bloc/character/character_event.dart';
 import 'package:dnd5e_dm_tools/features/characters/bloc/character/character_state.dart';
 import 'package:dnd5e_dm_tools/features/characters/bloc/equipment/equipment_bloc.dart';
 import 'package:dnd5e_dm_tools/features/characters/bloc/equipment/equipment_state.dart';
@@ -16,6 +14,10 @@ import 'package:fluttericon/font_awesome5_icons.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class CoinsWidget extends StatelessWidget {
+  const CoinsWidget({super.key, required this.onBackpackUpdated});
+
+  final ValueChanged<Backpack> onBackpackUpdated;
+
   @override
   Widget build(BuildContext context) {
     final state = context.watch<EquipmentBloc>().state;
@@ -110,7 +112,7 @@ class CoinsWidget extends StatelessWidget {
     BuildContext context,
     Character character,
     Backpack backpack,
-  ) async {
+  ) {
     int cp = backpack.copper;
     int sp = backpack.silver;
     int gp = backpack.gold;
@@ -259,14 +261,7 @@ class CoinsWidget extends StatelessWidget {
                       silver: sp,
                       gold: gp,
                     );
-                    context.read<CharacterBloc>().add(
-                      CharacterUpdate(
-                        character: character.copyWith(
-                          backpack: updatedBackpack,
-                        ),
-                        persistData: true,
-                      ),
-                    );
+                    onBackpackUpdated(updatedBackpack);
                     Navigator.pop(context);
                   },
                 ),

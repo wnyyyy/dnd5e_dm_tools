@@ -31,6 +31,22 @@ class Backpack extends Equatable {
     return Backpack(items: items, copper: copper, silver: silver, gold: gold);
   }
 
+  Map<String, dynamic> toJson() {
+    final itemsJson = <String, dynamic>{};
+    for (final item in items) {
+      itemsJson[item.itemSlug] = item.toJson();
+    }
+
+    return {
+      'items': itemsJson,
+      'coins': {
+        CoinType.copper.symbol: copper,
+        CoinType.silver.symbol: silver,
+        CoinType.gold.symbol: gold,
+      },
+    };
+  }
+
   final List<BackpackItem> items;
   final int copper;
   final int silver;

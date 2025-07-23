@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:math';
+
 import 'package:dnd5e_dm_tools/core/data/models/backpack.dart';
 import 'package:dnd5e_dm_tools/core/data/models/backpack_item.dart';
 import 'package:dnd5e_dm_tools/core/data/models/item.dart';
@@ -8,6 +11,7 @@ import 'package:dnd5e_dm_tools/features/characters/bloc/character/character_stat
 import 'package:dnd5e_dm_tools/features/characters/bloc/equipment/equipment_bloc.dart';
 import 'package:dnd5e_dm_tools/features/characters/bloc/equipment/equipment_event.dart';
 import 'package:dnd5e_dm_tools/features/characters/bloc/equipment/equipment_state.dart';
+import 'package:dnd5e_dm_tools/features/characters/presentation/equip_tab/widgets/add_item_button.dart';
 import 'package:dnd5e_dm_tools/features/characters/presentation/equip_tab/widgets/coins_widget.dart';
 import 'package:dnd5e_dm_tools/features/characters/presentation/equip_tab/widgets/item_widget.dart';
 import 'package:dnd5e_dm_tools/features/settings/bloc/settings_cubit.dart';
@@ -95,8 +99,8 @@ class _BackpackWidgetState extends State<BackpackWidget> {
                   vertical: 8,
                 ),
                 child: isWide
-                    ? _buildWideLayout(sortedItems)
-                    : _buildNarrowLayout(sortedItems),
+                    ? _buildWideLayout(context, sortedItems)
+                    : _buildNarrowLayout(context, sortedItems),
               ),
             ),
           ],
@@ -116,131 +120,138 @@ class _BackpackWidgetState extends State<BackpackWidget> {
     ];
   }
 
-  Widget buildAddItemButton() {
-    // return AddItemButton(
-    //   onAdd: (itemSlug, isMagic) {
-    //     if (!isMagic) {
-    //       showDialog(
-    //         context: context,
-    //         builder: (BuildContext context) {
-    //           return _buildQuantityDialog(context, itemSlug);
-    //         },
-    //       );
-    //     } else {
-    //       _addItemToBackpack(itemSlug, 1);
-    //       Navigator.pop(context);
-    //     }
-    //   },
-    // );
-    return Container();
+  Widget buildAddItemButton(BuildContext context) {
+    return AddItemButton(
+      onAdd: (item) {
+        if (item is GenericItem) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!mounted) return;
+            showDialog(
+              context: context,
+              builder: (BuildContext contextNew) {
+                return _buildQuantityDialog(contextNew, item);
+              },
+            );
+          });
+        } else {
+          _addItemToBackpack(context, item, 1);
+          Navigator.pop(context);
+        }
+      },
+    );
   }
 
-  // AlertDialog _buildQuantityDialog(BuildContext context, String itemSlug) {
-  //   int quantity = 1;
-  //   Timer? timer;
-  //   final TextEditingController controller = TextEditingController();
-  //   controller.text = quantity.toString();
+  AlertDialog _buildQuantityDialog(BuildContext context, Item item) {
+    int quantity = 1;
+    Timer? timer;
+    final TextEditingController controller = TextEditingController();
+    controller.text = quantity.toString();
 
-  //   void incrementQuantity() {
-  //     setState(() {
-  //       quantity++;
-  //       controller.text = quantity.toString();
-  //     });
-  //   }
+    void incrementQuantity() {
+      setState(() {
+        quantity++;
+        controller.text = quantity.toString();
+      });
+    }
 
-  //   void decrementQuantity() {
-  //     setState(() {
-  //       quantity = max(1, quantity - 1);
-  //       controller.text = quantity.toString();
-  //     });
-  //   }
+    void decrementQuantity() {
+      setState(() {
+        quantity = max(1, quantity - 1);
+        controller.text = quantity.toString();
+      });
+    }
 
-  //   return AlertDialog(
-  //     title: const Text('Quantity'),
-  //     content: Row(
-  //       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-  //       children: <Widget>[
-  //         GestureDetector(
-  //           onTap: decrementQuantity,
-  //           onLongPressStart: (details) {
-  //             timer = Timer.periodic(const Duration(milliseconds: 100), (t) {
-  //               decrementQuantity();
-  //             });
-  //           },
-  //           onLongPressEnd: (details) {
-  //             timer?.cancel();
-  //           },
-  //           child: const Icon(Icons.remove_circle_outline),
-  //         ),
-  //         SizedBox(
-  //           width: 100,
-  //           child: TextField(
-  //             textAlign: TextAlign.center,
-  //             decoration: const InputDecoration(border: OutlineInputBorder()),
-  //             controller: controller,
-  //             keyboardType: TextInputType.number,
-  //             onChanged: (value) {
-  //               final int newQuantity = int.tryParse(value) ?? 1;
-  //               setState(() {
-  //                 quantity = max(1, newQuantity);
-  //               });
-  //             },
-  //           ),
-  //         ),
-  //         GestureDetector(
-  //           onTap: incrementQuantity,
-  //           onLongPressStart: (details) {
-  //             timer = Timer.periodic(const Duration(milliseconds: 100), (t) {
-  //               incrementQuantity();
-  //             });
-  //           },
-  //           onLongPressEnd: (details) {
-  //             timer?.cancel();
-  //           },
-  //           child: const Icon(Icons.add_circle_outline),
-  //         ),
-  //       ],
-  //     ),
-  //     actionsAlignment: MainAxisAlignment.spaceBetween,
-  //     actions: <Widget>[
-  //       TextButton(
-  //         child: const Icon(Icons.close),
-  //         onPressed: () {
-  //           Navigator.pop(context);
-  //         },
-  //       ),
-  //       TextButton(
-  //         child: const Icon(Icons.done),
-  //         onPressed: () {
-  //           _addItemToBackpack(itemSlug, quantity);
-  //           Navigator.pop(context);
-  //         },
-  //       ),
-  //     ],
-  //   );
-  // }
+    return AlertDialog(
+      title: const Text('Quantity'),
+      content: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: <Widget>[
+          GestureDetector(
+            onTap: decrementQuantity,
+            onLongPressStart: (details) {
+              timer = Timer.periodic(const Duration(milliseconds: 100), (t) {
+                decrementQuantity();
+              });
+            },
+            onLongPressEnd: (details) {
+              timer?.cancel();
+            },
+            child: const Icon(Icons.remove_circle_outline),
+          ),
+          SizedBox(
+            width: 100,
+            child: TextField(
+              textAlign: TextAlign.center,
+              decoration: const InputDecoration(border: OutlineInputBorder()),
+              controller: controller,
+              keyboardType: TextInputType.number,
+              onChanged: (value) {
+                final int newQuantity = int.tryParse(value) ?? 1;
+                setState(() {
+                  quantity = max(1, newQuantity);
+                });
+              },
+            ),
+          ),
+          GestureDetector(
+            onTap: incrementQuantity,
+            onLongPressStart: (details) {
+              timer = Timer.periodic(const Duration(milliseconds: 100), (t) {
+                incrementQuantity();
+              });
+            },
+            onLongPressEnd: (details) {
+              timer?.cancel();
+            },
+            child: const Icon(Icons.add_circle_outline),
+          ),
+        ],
+      ),
+      actionsAlignment: MainAxisAlignment.spaceBetween,
+      actions: <Widget>[
+        TextButton(
+          child: const Icon(Icons.close),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+        TextButton(
+          child: const Icon(Icons.done),
+          onPressed: () {
+            _addItemToBackpack(context, item, quantity);
+            Navigator.pop(context);
+          },
+        ),
+      ],
+    );
+  }
 
-  // void _addItemToBackpack(
-  //   String itemSlug,
-  //   int quantity, {
-  //   bool isEquipped = false,
-  // }) {
-  //   // final items =
-  //   //     (widget.character['backpack'] as Map?)?['items']
-  //   //         as Map<String, dynamic>? ??
-  //   //     {};
-  //   // final currQuantity =
-  //   //     (items[itemSlug] != null
-  //   //         ? int.tryParse(
-  //   //             (items[itemSlug] as Map)['quantity']?.toString() ?? '0',
-  //   //           )
-  //   //         : 0) ??
-  //   //     0;
-  //   // items[itemSlug] = {
-  //   //   'quantity': currQuantity + quantity,
-  //   //   'isEquipped': isEquipped,
-  //   //};
-  // }
+  void _addItemToBackpack(
+    BuildContext context,
+    Item item,
+    int quantity, {
+    bool isEquipped = false,
+  }) {
+    final backpackItems = widget.backpack.items;
+    var currBackpackItem = backpackItems.firstWhere(
+      (currItem) => currItem.itemSlug == item.slug,
+      orElse: () {
+        final backpackItem = BackpackItem(
+          itemSlug: item.slug,
+          item: item,
+          quantity: quantity,
+          isEquipped: isEquipped,
+        );
+        backpackItems.add(backpackItem);
+        return backpackItem;
+      },
+    );
+    currBackpackItem = currBackpackItem.copyWith(
+      quantity: currBackpackItem.quantity + quantity,
+      isEquipped: isEquipped,
+    );
+    widget.onBackpackUpdated(widget.backpack.copyWith(items: backpackItems));
+  }
 
   bool applyFilter(BackpackItem backpackItem, EquipFilter filter) {
     switch (filter) {
@@ -357,7 +368,10 @@ class _BackpackWidgetState extends State<BackpackWidget> {
     );
   }
 
-  Widget _buildWideLayout(List<BackpackItem> sortedItems) {
+  Widget _buildWideLayout(
+    BuildContext context,
+    List<BackpackItem> sortedItems,
+  ) {
     return Row(
       children: [
         Expanded(flex: 3, child: _buildItemList(sortedItems)),
@@ -368,9 +382,9 @@ class _BackpackWidgetState extends State<BackpackWidget> {
             children: [
               Padding(
                 padding: const EdgeInsets.only(right: 16.0),
-                child: CoinsWidget(),
+                child: CoinsWidget(onBackpackUpdated: widget.onBackpackUpdated),
               ),
-              buildAddItemButton(),
+              buildAddItemButton(context),
               if (widget.backpack.totalWeight > 0)
                 Padding(
                   padding: const EdgeInsets.only(
@@ -390,7 +404,10 @@ class _BackpackWidgetState extends State<BackpackWidget> {
     );
   }
 
-  Widget _buildNarrowLayout(List<BackpackItem> sortedItems) {
+  Widget _buildNarrowLayout(
+    BuildContext context,
+    List<BackpackItem> sortedItems,
+  ) {
     return Column(
       children: [
         Expanded(child: _buildItemList(sortedItems)),
@@ -403,12 +420,15 @@ class _BackpackWidgetState extends State<BackpackWidget> {
         ),
         Row(
           children: [
-            Expanded(flex: 3, child: CoinsWidget()),
+            Expanded(
+              flex: 3,
+              child: CoinsWidget(onBackpackUpdated: widget.onBackpackUpdated),
+            ),
             const SizedBox(width: 8, height: 80, child: VerticalDivider()),
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.only(right: 16.0),
-                child: buildAddItemButton(),
+                child: buildAddItemButton(context),
               ),
             ),
           ],

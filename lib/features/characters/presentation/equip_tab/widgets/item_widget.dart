@@ -1,8 +1,6 @@
-import 'package:dnd5e_dm_tools/core/config/app_colors.dart';
 import 'package:dnd5e_dm_tools/core/data/models/backpack_item.dart';
 import 'package:dnd5e_dm_tools/core/data/models/item.dart';
 import 'package:dnd5e_dm_tools/core/util/enum.dart';
-import 'package:dnd5e_dm_tools/core/util/helper.dart';
 import 'package:dnd5e_dm_tools/features/characters/presentation/equip_tab/widgets/item_details_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttericon/font_awesome5_icons.dart';
