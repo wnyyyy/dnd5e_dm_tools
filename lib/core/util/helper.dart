@@ -1,4 +1,6 @@
 import 'package:dnd5e_dm_tools/core/data/models/feat.dart';
+import 'package:dnd5e_dm_tools/core/data/models/item.dart';
+import 'package:dnd5e_dm_tools/core/util/enum.dart';
 import 'package:dnd5e_dm_tools/core/util/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 

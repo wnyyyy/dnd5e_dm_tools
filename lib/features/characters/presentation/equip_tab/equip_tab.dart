@@ -1,5 +1,11 @@
 import 'package:dnd5e_dm_tools/core/data/models/character.dart';
+import 'package:dnd5e_dm_tools/features/characters/bloc/character/character_bloc.dart';
+import 'package:dnd5e_dm_tools/features/characters/bloc/character/character_state.dart';
+import 'package:dnd5e_dm_tools/features/characters/bloc/equipment/equipment_bloc.dart';
+import 'package:dnd5e_dm_tools/features/characters/bloc/equipment/equipment_event.dart';
+import 'package:dnd5e_dm_tools/features/characters/bloc/equipment/equipment_state.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class EquipTab extends StatelessWidget {
   const EquipTab({super.key, required this.character});
@@ -15,11 +21,32 @@ class EquipTab extends StatelessWidget {
             height: MediaQuery.of(context).size.height * 0.75 < 300
                 ? 500
                 : MediaQuery.of(context).size.height * 0.8,
-            child: Container(),
-            // child: BackpackWidget(
-            //   character: character,
-            //   slug: slug,
-            // ),
+            child: BlocBuilder<EquipmentBloc, EquipmentState>(
+              builder: (context, state) {
+                if (state is EquipmentLoading) {
+                  return const Center(child: CircularProgressIndicator());
+                } else if (state is EquipmentLoaded) {
+                  final characterBlocState = context
+                      .read<CharacterBloc>()
+                      .state;
+                  if (characterBlocState is CharacterLoaded &&
+                      characterBlocState.character.slug ==
+                          state.characterSlug) {
+                    return BackpackWidget(
+                      backpack: backpack,
+                      characterSlug: characterSlug,
+                    );
+                  } else {
+                    context.read<EquipmentBloc>().add(
+                      BuildBackpack(character: character),
+                    );
+                  }
+                } else if (state is EquipmentError) {
+                  return Center(child: Text(state.error));
+                }
+                return const SizedBox.shrink();
+              },
+            ),
           ),
         ],
       ),

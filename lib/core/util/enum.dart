@@ -1,3 +1,10 @@
+import 'package:flutter/material.dart';
+import 'package:fluttericon/font_awesome5_icons.dart';
+import 'package:fluttericon/font_awesome_icons.dart';
+import 'package:fluttericon/maki_icons.dart';
+import 'package:fluttericon/octicons_icons.dart';
+import 'package:fluttericon/rpg_awesome_icons.dart';
+
 enum EquipmentType {
   ammunition,
   adventure,
@@ -21,6 +28,63 @@ enum EquipmentType {
   bedroll,
   clothes,
   unknown,
+}
+
+extension EquipmentTypeIndex on EquipmentType {
+  String get index {
+    
+  }
+}
+
+extension EquipmentTypeIcon on EquipmentType {
+  Icon get icon {
+    switch (this) {
+      case EquipmentType.backpack:
+        return const Icon(Maki.shop);
+      case EquipmentType.bedroll:
+        return const Icon(FontAwesome5.bed);
+      case EquipmentType.clothes:
+        return const Icon(FontAwesome5.tshirt);
+      case EquipmentType.food:
+        return const Icon(FontAwesome.food);
+      case EquipmentType.waterskin:
+        return const Icon(RpgAwesome.round_bottom_flask);
+      case EquipmentType.ammunition:
+        return const Icon(RpgAwesome.arrow_cluster);
+      case EquipmentType.adventure:
+        return const Icon(Icons.backpack);
+      case EquipmentType.magic:
+        return const Icon(RpgAwesome.fairy_wand);
+      case EquipmentType.armor:
+        return const Icon(RpgAwesome.vest);
+      case EquipmentType.profession:
+        return const Icon(Icons.star);
+      case EquipmentType.music:
+        return const Icon(Icons.music_note);
+      case EquipmentType.misc:
+        return const Icon(FontAwesome5.tools);
+      case EquipmentType.mount:
+        return const Icon(FontAwesome5.horse);
+      case EquipmentType.rangedWeapons:
+        return const Icon(RpgAwesome.crossbow);
+      case EquipmentType.meleeWeapons:
+        return const Icon(RpgAwesome.broadsword);
+      case EquipmentType.special:
+        return const Icon(Octicons.north_star);
+      case EquipmentType.consumable:
+        return const Icon(FontAwesome5.flask);
+      case EquipmentType.accessories:
+        return const Icon(FontAwesome5.ring);
+      case EquipmentType.shield:
+        return const Icon(Octicons.shield);
+      case EquipmentType.scroll:
+        return const Icon(RpgAwesome.book);
+      case EquipmentType.torch:
+        return const Icon(RpgAwesome.torch);
+      case EquipmentType.unknown:
+        return const Icon(RpgAwesome.torch);
+    }
+  }
 }
 
 enum ThemeColor {
@@ -72,10 +136,30 @@ extension AttributeName on Attribute {
 
 enum ProficiencyLevel { proficient, expert, none }
 
-enum CoinType {
-  copper,
-  silver,
-  gold,
+enum CoinType { copper, silver, gold }
+
+extension CoinTypeName on CoinType {
+  String get name {
+    switch (this) {
+      case CoinType.copper:
+        return 'Copper';
+      case CoinType.silver:
+        return 'Silver';
+      case CoinType.gold:
+        return 'Gold';
+    }
+  }
+
+  String get symbol {
+    switch (this) {
+      case CoinType.copper:
+        return 'cp';
+      case CoinType.silver:
+        return 'sp';
+      case CoinType.gold:
+        return 'gp';
+    }
+  }
 }
 
 enum Skill {
