@@ -157,25 +157,6 @@ abstract class Item extends Equatable {
     };
   }
 
-  Item copyWithBase({
-    String? slug,
-    String? name,
-    EquipmentType? itemType,
-    List<String>? desc,
-    Cost? cost,
-    int? weight,
-  }) {
-    return GenericItem(
-      slug: slug ?? this.slug,
-      name: name ?? this.name,
-      itemType: itemType ?? this.itemType,
-      desc: desc ?? this.desc,
-      cost: cost ?? this.cost,
-      weight: weight ?? this.weight,
-      expendable: (this is GenericItem) && (this as GenericItem).expendable,
-    );
-  }
-
   Item copyWith({
     String? slug,
     String? name,
@@ -195,87 +176,68 @@ abstract class Item extends Equatable {
     ArmorCategory? armorCategory,
     bool? stealthDisadvantage,
   }) {
-    switch (itemType ?? this.itemType) {
-      case EquipmentType.armor:
-      case EquipmentType.shield:
-        return (this is Armor
-                ? (this as Armor)
-                : Armor(
-                    slug: slug ?? this.slug,
-                    name: name ?? this.name,
-                    itemType: itemType ?? this.itemType,
-                    desc: desc ?? this.desc,
-                    cost: cost ?? this.cost,
-                    weight: weight ?? this.weight,
-                    armorClass: (this is Armor)
-                        ? (this as Armor).armorClass
-                        : ArmorClass.fromJson({}),
-                    armorCategory:
-                        armorCategory ?? (this as Armor).armorCategory,
-                    stealthDisadvantage:
-                        stealthDisadvantage ??
-                        (this as Armor).stealthDisadvantage,
-                  ))
-            .copyWithArmor(
-              slug: slug,
-              name: name,
-              itemType: itemType,
-              desc: desc,
-              cost: cost,
-              weight: weight,
-              armorClass: armorClass,
-            );
-      case EquipmentType.meleeWeapons:
-      case EquipmentType.rangedWeapons:
-        if (this is Weapon) {
-          return (this as Weapon).copyWithWeapon(
-            slug: slug,
-            name: name,
-            itemType: itemType,
-            desc: desc,
-            cost: cost,
-            weight: weight,
-            damage: damage,
-            weaponCategory: weaponCategory,
-            properties: properties,
-            range: range,
-            longRange: longRange,
-            rarity: rarity,
-            variant: variant,
-          );
-        } else if (this is WeaponTemplate) {
-          return (this as WeaponTemplate).copyWithWeaponTemplate(
-            slug: slug,
-            name: name,
-            itemType: itemType,
-            desc: desc,
-            cost: cost,
-            weight: weight,
-            rarity: rarity,
-            variant: variant,
-          );
-        } else {
-          return WeaponTemplate(
-            slug: slug ?? this.slug,
-            name: name ?? this.name,
-            itemType: itemType ?? this.itemType,
-            desc: desc ?? this.desc,
-            cost: cost ?? this.cost,
-            weight: weight ?? this.weight,
-            rarity: rarity ?? Rarity.common,
-            variant: variant ?? false,
-          );
-        }
-      default:
-        return GenericItem(
-          slug: slug ?? this.slug,
-          name: name ?? this.name,
-          itemType: itemType ?? this.itemType,
-          desc: desc ?? this.desc,
-          cost: cost ?? this.cost,
-          weight: weight ?? this.weight,
-          expendable: (this is GenericItem) && (this as GenericItem).expendable,
-        );
+    if (this is Armor) {
+      final armor = this as Armor;
+      return Armor(
+        slug: slug ?? armor.slug,
+        name: name ?? armor.name,
+        itemType: itemType ?? armor.itemType,
+        desc: desc ?? armor.desc,
+        cost: cost ?? armor.cost,
+        weight: weight ?? armor.weight,
+        armorClass: armorClass ?? armor.armorClass,
+        armorCategory: armorCategory ?? armor.armorCategory,
+        stealthDisadvantage: stealthDisadvantage ?? armor.stealthDisadvantage,
+      );
+    } else if (this is Weapon) {
+      final weapon = this as Weapon;
+      return Weapon(
+        slug: slug ?? weapon.slug,
+        name: name ?? weapon.name,
+        itemType: itemType ?? weapon.itemType,
+        desc: desc ?? weapon.desc,
+        cost: cost ?? weapon.cost,
+        weight: weight ?? weapon.weight,
+        damage: damage ?? weapon.damage,
+        weaponCategory: weaponCategory ?? weapon.weaponCategory,
+        properties: properties ?? weapon.properties,
+        range: range ?? weapon.range,
+        longRange: longRange ?? weapon.longRange,
+      );
+    } else if (this is WeaponTemplate) {
+      final template = this as WeaponTemplate;
+      return WeaponTemplate(
+        slug: slug ?? template.slug,
+        name: name ?? template.name,
+        itemType: itemType ?? template.itemType,
+        desc: desc ?? template.desc,
+        cost: cost ?? template.cost,
+        weight: weight ?? template.weight,
+        rarity: rarity ?? template.rarity,
+        variant: variant ?? template.variant,
+      );
+    } else if (this is GenericItem) {
+      final generic = this as GenericItem;
+      return GenericItem(
+        slug: slug ?? generic.slug,
+        name: name ?? generic.name,
+        itemType: itemType ?? generic.itemType,
+        desc: desc ?? generic.desc,
+        cost: cost ?? generic.cost,
+        weight: weight ?? generic.weight,
+        expendable: expendable ?? generic.expendable,
+      );
+    } else {
+      // fallback for unknown Item types
+      return GenericItem(
+        slug: slug ?? this.slug,
+        name: name ?? this.name,
+        itemType: itemType ?? this.itemType,
+        desc: desc ?? this.desc,
+        cost: cost ?? this.cost,
+        weight: weight ?? this.weight,
+        expendable: expendable ?? false,
+      );
     }
   }
 
@@ -501,87 +463,5 @@ EquipmentType _getItemType(String item) {
       return EquipmentType.scroll;
     default:
       return EquipmentType.unknown;
-  }
-}
-
-extension ArmorCopyWith on Armor {
-  Armor copyWithArmor({
-    String? slug,
-    String? name,
-    EquipmentType? itemType,
-    List<String>? desc,
-    Cost? cost,
-    int? weight,
-    ArmorClass? armorClass,
-    ArmorCategory? armorCategory,
-    bool? stealthDisadvantage,
-  }) {
-    return Armor(
-      slug: slug ?? this.slug,
-      name: name ?? this.name,
-      itemType: itemType ?? this.itemType,
-      desc: desc ?? this.desc,
-      cost: cost ?? this.cost,
-      weight: weight ?? this.weight,
-      armorClass: armorClass ?? this.armorClass,
-      armorCategory: armorCategory ?? this.armorCategory,
-      stealthDisadvantage: stealthDisadvantage ?? this.stealthDisadvantage,
-    );
-  }
-}
-
-extension WeaponTemplateCopyWith on WeaponTemplate {
-  WeaponTemplate copyWithWeaponTemplate({
-    String? slug,
-    String? name,
-    EquipmentType? itemType,
-    List<String>? desc,
-    Cost? cost,
-    int? weight,
-    Rarity? rarity,
-    bool? variant,
-  }) {
-    return WeaponTemplate(
-      slug: slug ?? this.slug,
-      name: name ?? this.name,
-      itemType: itemType ?? this.itemType,
-      desc: desc ?? this.desc,
-      cost: cost ?? this.cost,
-      weight: weight ?? this.weight,
-      rarity: rarity ?? this.rarity,
-      variant: variant ?? this.variant,
-    );
-  }
-}
-
-extension WeaponCopyWith on Weapon {
-  Weapon copyWithWeapon({
-    String? slug,
-    String? name,
-    EquipmentType? itemType,
-    List<String>? desc,
-    Cost? cost,
-    int? weight,
-    Damage? damage,
-    WeaponCategory? weaponCategory,
-    List<WeaponProperty>? properties,
-    int? range,
-    int? longRange,
-    Rarity? rarity,
-    bool? variant,
-  }) {
-    return Weapon(
-      slug: slug ?? this.slug,
-      name: name ?? this.name,
-      itemType: itemType ?? this.itemType,
-      desc: desc ?? this.desc,
-      cost: cost ?? this.cost,
-      weight: weight ?? this.weight,
-      damage: damage ?? this.damage,
-      weaponCategory: weaponCategory ?? this.weaponCategory,
-      properties: properties ?? this.properties,
-      range: range ?? this.range,
-      longRange: longRange ?? this.longRange,
-    );
   }
 }
