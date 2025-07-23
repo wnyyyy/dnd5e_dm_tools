@@ -23,27 +23,27 @@ class EquipTab extends StatelessWidget {
                 : MediaQuery.of(context).size.height * 0.8,
             child: BlocBuilder<EquipmentBloc, EquipmentState>(
               builder: (context, state) {
-                if (state is EquipmentLoading) {
-                  return const Center(child: CircularProgressIndicator());
-                } else if (state is EquipmentLoaded) {
-                  final characterBlocState = context
-                      .read<CharacterBloc>()
-                      .state;
-                  if (characterBlocState is CharacterLoaded &&
-                      characterBlocState.character.slug ==
-                          state.characterSlug) {
-                    return BackpackWidget(
-                      backpack: backpack,
-                      characterSlug: characterSlug,
-                    );
-                  } else {
-                    context.read<EquipmentBloc>().add(
-                      BuildBackpack(character: character),
-                    );
-                  }
-                } else if (state is EquipmentError) {
-                  return Center(child: Text(state.error));
-                }
+                // if (state is EquipmentLoading) {
+                //   return const Center(child: CircularProgressIndicator());
+                // } else if (state is EquipmentLoaded) {
+                //   final characterBlocState = context
+                //       .read<CharacterBloc>()
+                //       .state;
+                //   if (characterBlocState is CharacterLoaded &&
+                //       characterBlocState.character.slug ==
+                //           state.characterSlug) {
+                //     return BackpackWidget(
+                //       backpack: backpack,
+                //       characterSlug: characterSlug,
+                //     );
+                //   } else {
+                //     context.read<EquipmentBloc>().add(
+                //       BuildBackpack(character: character),
+                //     );
+                //   }
+                // } else if (state is EquipmentError) {
+                //   return Center(child: Text(state.error));
+                // }
                 return const SizedBox.shrink();
               },
             ),

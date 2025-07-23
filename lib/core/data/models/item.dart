@@ -1,4 +1,5 @@
 import 'package:dnd5e_dm_tools/core/data/models/cost.dart';
+import 'package:dnd5e_dm_tools/core/data/models/damage.dart';
 import 'package:dnd5e_dm_tools/core/util/enum.dart';
 import 'package:equatable/equatable.dart';
 
@@ -9,6 +10,7 @@ abstract class Item extends Equatable {
     required this.itemType,
     required this.desc,
     required this.cost,
+    this.weight = 0,
   });
 
   factory Item.fromJson(Map<String, dynamic> json) {
@@ -30,8 +32,8 @@ abstract class Item extends Equatable {
     }
     final gearCategoryMap = json['gear_category'] as Map<String, dynamic>?;
     final gearCategory = gearCategoryMap?['index'] as String?;
-    final toolCategoryMap = json['toolCategory'] as Map<String, dynamic>?;
-    final toolCategory = toolCategoryMap?['index'] as String?;
+    final toolCategory = json['tool_category'] as String?;
+    final weight = json['weight'] as int? ?? 0;
 
     final itemType = _inferType(
       slug: slug,
@@ -46,37 +48,108 @@ abstract class Item extends Equatable {
         return Armor(
           slug: slug,
           name: name,
-          armorClass: json['armorClass'] as int? ?? 0,
+          itemType: itemType,
+          desc: List<String>.from(desc),
+          cost: cost,
+          weight: weight,
+          armorClass: json['armor_class'] as int? ?? 0,
         );
       case EquipmentType.meleeWeapons:
       case EquipmentType.rangedWeapons:
         return Weapon(
           slug: slug,
           name: name,
-          damage: json['damage'] as String? ?? '',
+          itemType: itemType,
+          desc: List<String>.from(desc),
+          cost: cost,
+          weight: weight,
+          damage: Damage.fromJson(
+            json['damage'] as Map<String, dynamic>? ?? {},
+          ),
         );
       default:
-        return Generic(slug: slug, name: name);
+        return GenericItem(
+          slug: slug,
+          name: name,
+          itemType: itemType,
+          desc: List<String>.from(desc),
+          cost: cost,
+          weight: weight,
+        );
     }
   }
 
   final String slug;
   final String name;
+  final int weight;
   final List<String> desc;
   final Cost cost;
   final EquipmentType itemType;
 
   Map<String, dynamic> toJson() {
-    return {'index': slug, 'name': name, 'desc': desc, 'cost': cost.toJson()};
+    return {
+      'index': slug,
+      'name': name,
+      'desc': desc,
+      'cost': cost.toJson(),
+      'tool_category': itemType.toolCategory,
+      'gear_category': itemType.gearCategory,
+      'equipment_category': itemType.equipmentCategory,
+      'weight': weight,
+    };
   }
 
-  Item copyWith();
+  Item copyWith({
+    String? slug,
+    String? name,
+    EquipmentType? itemType,
+    List<String>? desc,
+    Cost? cost,
+    int? weight,
+    Damage? damage,
+    int? armorClass,
+  }) {
+    switch (itemType) {
+      case EquipmentType.armor:
+      case EquipmentType.shield:
+        return Armor(
+          slug: slug ?? this.slug,
+          name: name ?? this.name,
+          itemType: itemType ?? this.itemType,
+          desc: desc ?? this.desc,
+          cost: cost ?? this.cost,
+          weight: weight ?? this.weight,
+          armorClass: armorClass ?? (this as Armor).armorClass,
+        );
+      case EquipmentType.meleeWeapons:
+      case EquipmentType.rangedWeapons:
+        return Weapon(
+          slug: slug ?? this.slug,
+          name: name ?? this.name,
+          itemType: itemType ?? this.itemType,
+          desc: desc ?? this.desc,
+          cost: cost ?? this.cost,
+          weight: weight ?? this.weight,
+          damage: damage ?? (this as Weapon).damage,
+        );
+      default:
+        return GenericItem(
+          slug: slug ?? this.slug,
+          name: name ?? this.name,
+          itemType: itemType ?? this.itemType,
+          desc: desc ?? this.desc,
+          cost: cost ?? this.cost,
+          weight: weight ?? this.weight,
+          expendable: (this as GenericItem).expendable,
+        );
+    }
+  }
 
   @override
-  List<Object> get props => [slug, name, cost, itemType, desc];
+  List<Object> get props => [slug, name, cost, itemType, desc, weight];
 
   @override
-  String toString() => '$runtimeType $slug(name: $name)';
+  String toString() => '$runtimeType $slug(name: $name, type: $itemType)';
 }
 
 abstract class Equipable extends Item {
@@ -86,6 +159,7 @@ abstract class Equipable extends Item {
     required super.itemType,
     required super.desc,
     required super.cost,
+    required super.weight,
   });
 }
 
@@ -96,6 +170,7 @@ class Armor extends Equipable {
     required super.itemType,
     required super.desc,
     required super.cost,
+    required super.weight,
     required this.armorClass,
   });
 
@@ -109,15 +184,6 @@ class Armor extends Equipable {
   }
 
   @override
-  Armor copyWith({String? slug, String? name, int? armorClass}) {
-    return Armor(
-      slug: slug ?? this.slug,
-      name: name ?? this.name,
-      armorClass: armorClass ?? this.armorClass,
-    );
-  }
-
-  @override
   List<Object> get props => super.props..add(armorClass);
 }
 
@@ -125,85 +191,41 @@ class Weapon extends Equipable {
   const Weapon({
     required super.slug,
     required super.name,
+    required super.itemType,
+    required super.desc,
+    required super.cost,
+    required super.weight,
     required this.damage,
   });
 
-  final String damage;
+  final Damage damage;
 
   @override
-  Map<String, dynamic> toJson() => {
-    'slug': slug,
-    'name': name,
-    'damage': damage,
-    'type': 'weapon',
-  };
-
-  @override
-  Weapon copyWith({String? slug, String? name, String? damage}) {
-    return Weapon(
-      slug: slug ?? this.slug,
-      name: name ?? this.name,
-      damage: damage ?? this.damage,
-    );
+  Map<String, dynamic> toJson() {
+    final json = super.toJson();
+    json['damage'] = damage.toJson();
+    return json;
   }
 
   @override
   List<Object> get props => super.props..add(damage);
 }
 
-class Generic extends Item {
-  const Generic({
+class GenericItem extends Item {
+  const GenericItem({
     required super.slug,
     required super.name,
-    this.expandable = false,
+    required super.itemType,
+    required super.desc,
+    required super.cost,
+    required super.weight,
+    this.expendable = false,
   });
 
-  final bool expandable;
+  final bool expendable;
 
   @override
-  Map<String, dynamic> toJson() => {
-    'slug': slug,
-    'name': name,
-    'expandable': expandable,
-    'type': 'generic',
-  };
-
-  @override
-  Generic copyWith({String? slug, String? name, bool? expandable}) {
-    return Generic(
-      slug: slug ?? this.slug,
-      name: name ?? this.name,
-      expandable: expandable ?? this.expandable,
-    );
-  }
-
-  @override
-  List<Object> get props => super.props..add(expandable);
-}
-
-Item fromJson(Map<String, dynamic> json) {
-  final equipmentCategory = json['type'] as String?;
-  switch (type) {
-    case 'armor':
-      return Armor(
-        slug: json['slug'] as String,
-        name: json['name'] as String,
-        armorClass: json['armorClass'] as int,
-      );
-    case 'weapon':
-      return Weapon(
-        slug: json['slug'] as String,
-        name: json['name'] as String,
-        damage: json['damage'] as String,
-      );
-    case 'generic':
-    default:
-      return Generic(
-        slug: json['slug'] as String,
-        name: json['name'] as String,
-        expandable: json['expandable'] as bool? ?? false,
-      );
-  }
+  List<Object> get props => super.props..add(expendable);
 }
 
 EquipmentType _inferType({
@@ -284,7 +306,7 @@ EquipmentType _getItemType(String item) {
     case 'wondrous-items':
       return EquipmentType.special;
     case 'potion':
-      return EquipmentType.consumable;
+      return EquipmentType.potion;
     case 'rings':
       return EquipmentType.accessories;
     case 'shield':

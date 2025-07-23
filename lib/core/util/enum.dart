@@ -16,7 +16,7 @@ enum EquipmentType {
   rangedWeapons,
   meleeWeapons,
   special,
-  consumable,
+  potion,
   accessories,
   shield,
   scroll,
@@ -30,9 +30,45 @@ enum EquipmentType {
   unknown,
 }
 
-extension EquipmentTypeIndex on EquipmentType {
-  String get index {
-    
+extension Categories on EquipmentType {
+  Map<String, dynamic> get equipmentCategory {
+    switch (this) {
+      case EquipmentType.meleeWeapons:
+      case EquipmentType.rangedWeapons:
+        return {'index': 'weapon', 'name': 'Weapon'};
+      case EquipmentType.armor:
+        return {'index': 'armor', 'name': 'Armor'};
+      case EquipmentType.ammunition:
+        return {'index': 'ammunition', 'name': 'Ammunition'};
+      case EquipmentType.potion:
+        return {'index': 'potion', 'name': 'Potion'};
+      case EquipmentType.special:
+        return {'index': 'wondrous-items', 'name': 'Wondrous Items'};
+      default:
+        return {'index': 'adventuring-gear', 'name': 'Adventuring Gear'};
+    }
+  }
+
+  Map<String, dynamic>? get gearCategory {
+    switch (this) {
+      case EquipmentType.adventure:
+      case EquipmentType.torch:
+      case EquipmentType.misc:
+        return {'index': 'standard-gear', 'name': 'Standard Gear'};
+      default:
+        return null;
+    }
+  }
+
+  String? get toolCategory {
+    switch (this) {
+      case EquipmentType.music:
+        return 'Musical Instrument';
+      case EquipmentType.profession:
+        return "Artisan's Tools";
+      default:
+        return null;
+    }
   }
 }
 
@@ -71,7 +107,7 @@ extension EquipmentTypeIcon on EquipmentType {
         return const Icon(RpgAwesome.broadsword);
       case EquipmentType.special:
         return const Icon(Octicons.north_star);
-      case EquipmentType.consumable:
+      case EquipmentType.potion:
         return const Icon(FontAwesome5.flask);
       case EquipmentType.accessories:
         return const Icon(FontAwesome5.ring);
@@ -252,6 +288,86 @@ extension SkillAttribute on Skill {
       case Skill.performance:
       case Skill.persuasion:
         return Attribute.charisma;
+    }
+  }
+}
+
+enum DamageType {
+  acid,
+  bludgeoning,
+  cold,
+  fire,
+  force,
+  lightning,
+  necrotic,
+  piercing,
+  poison,
+  psychic,
+  radiant,
+  slashing,
+  thunder,
+}
+
+extension DamageTypeName on DamageType {
+  String get name {
+    switch (this) {
+      case DamageType.acid:
+        return 'Acid';
+      case DamageType.bludgeoning:
+        return 'Bludgeoning';
+      case DamageType.cold:
+        return 'Cold';
+      case DamageType.fire:
+        return 'Fire';
+      case DamageType.force:
+        return 'Force';
+      case DamageType.lightning:
+        return 'Lightning';
+      case DamageType.necrotic:
+        return 'Necrotic';
+      case DamageType.piercing:
+        return 'Piercing';
+      case DamageType.poison:
+        return 'Poison';
+      case DamageType.psychic:
+        return 'Psychic';
+      case DamageType.radiant:
+        return 'Radiant';
+      case DamageType.slashing:
+        return 'Slashing';
+      case DamageType.thunder:
+        return 'Thunder';
+    }
+  }
+
+  String get slug {
+    switch (this) {
+      case DamageType.acid:
+        return 'acid';
+      case DamageType.bludgeoning:
+        return 'bludgeoning';
+      case DamageType.cold:
+        return 'cold';
+      case DamageType.fire:
+        return 'fire';
+      case DamageType.force:
+        return 'force';
+      case DamageType.lightning:
+        return 'lightning';
+      case DamageType.necrotic:
+        return 'necrotic';
+      case DamageType.piercing:
+        return 'piercing';
+      case DamageType.poison:
+        return 'poison';
+      case DamageType.psychic:
+        return 'psychic';
+      case DamageType.radiant:
+        return 'radiant';
+      case DamageType.slashing:
+        return 'slashing';
+      case DamageType.thunder:
+        return 'thunder';
     }
   }
 }
