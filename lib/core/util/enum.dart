@@ -219,21 +219,21 @@ extension SpellSchoolName on SpellSchool {
   Color get color {
     switch (this) {
       case SpellSchool.abjuration:
-        return Colors.blue;
+        return Colors.blueAccent;
       case SpellSchool.conjuration:
-        return Colors.deepPurple;
+        return Colors.deepPurpleAccent;
       case SpellSchool.divination:
         return Colors.yellow[700]!;
       case SpellSchool.enchantment:
         return Colors.green[800]!;
       case SpellSchool.evocation:
-        return Colors.red;
+        return Colors.redAccent;
       case SpellSchool.illusion:
-        return Colors.pink;
+        return Colors.pinkAccent;
       case SpellSchool.necromancy:
         return Colors.blueGrey[700]!;
       case SpellSchool.transmutation:
-        return Colors.orange;
+        return Colors.orangeAccent;
     }
   }
 }

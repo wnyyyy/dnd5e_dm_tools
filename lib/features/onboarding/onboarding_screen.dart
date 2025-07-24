@@ -279,7 +279,7 @@ class OnboardingScreenState extends State<OnboardingScreen> {
       child: ElevatedButton(
         onPressed: () {
           var caster = false;
-          if (character.knownSpells.isNotEmpty) {
+          if (character.spellbook.knownSpells.isNotEmpty) {
             caster = true;
           }
           context.read<SettingsCubit>().changeName(

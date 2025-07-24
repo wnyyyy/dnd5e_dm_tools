@@ -112,7 +112,7 @@ class Spell extends Equatable {
     if (level == 0) {
       return 'Cantrip';
     } else if (level == 1) {
-      return '1st-level';
+      return '1st-Level';
     } else {
       return '$level${level == 1
           ? 'st'
@@ -120,7 +120,7 @@ class Spell extends Equatable {
           ? 'nd'
           : level == 3
           ? 'rd'
-          : 'th'}-level';
+          : 'th'}-Level';
     }
   }
 

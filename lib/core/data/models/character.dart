@@ -11,7 +11,6 @@ class Character extends Equatable {
     required this.slug,
     required this.name,
     required this.imageUrl,
-    required this.knownSpells,
     required this.classs,
     required this.race,
     required this.level,
@@ -41,11 +40,6 @@ class Character extends Equatable {
 
     final imageUrl = json['image_url'] as String? ?? '';
     final color = json['color'] as String?;
-    final knownSpells =
-        (json['known_spells'] as List<dynamic>?)
-            ?.map((e) => e as String)
-            .toList() ??
-        [];
 
     final feats =
         (json['feats'] as Map<String, dynamic>?)?.map(
@@ -79,7 +73,6 @@ class Character extends Equatable {
       name: name,
       imageUrl: imageUrl,
       color: color,
-      knownSpells: knownSpells,
       classs: classs,
       race: race,
       level: json['level'] as int? ?? 1,
@@ -114,7 +107,6 @@ class Character extends Equatable {
   final String name;
   final String imageUrl;
   final String? color;
-  final List<String> knownSpells;
   final String classs;
   final String race;
   final int level;
@@ -131,7 +123,6 @@ class Character extends Equatable {
       'name': name,
       'image_url': imageUrl,
       'color': color,
-      'known_spells': knownSpells,
       'class': classs,
       'race': race,
       'level': level,
@@ -159,7 +150,6 @@ class Character extends Equatable {
       name: name,
       imageUrl: imageUrl,
       color: color,
-      knownSpells: knownSpells,
       classs: classs,
       race: race,
       level: level ?? this.level,
@@ -178,7 +168,6 @@ class Character extends Equatable {
     slug,
     name,
     imageUrl,
-    knownSpells,
     classs,
     level,
     race,
@@ -194,5 +183,5 @@ class Character extends Equatable {
 
   @override
   String toString() =>
-      'Character $slug(name: $name, class: $classs, color: $color, level: $level, knownSpells: $knownSpells)';
+      'Character $slug(name: $name, class: $classs, color: $color, level: $level)';
 }

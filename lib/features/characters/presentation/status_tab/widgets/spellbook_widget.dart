@@ -1,8 +1,10 @@
 import 'package:dnd5e_dm_tools/core/data/models/character.dart';
 import 'package:dnd5e_dm_tools/core/data/models/class.dart';
 import 'package:dnd5e_dm_tools/core/data/models/spell.dart';
+import 'package:dnd5e_dm_tools/core/util/enum.dart';
 import 'package:dnd5e_dm_tools/core/util/helper.dart';
 import 'package:dnd5e_dm_tools/core/util/logger.dart';
+import 'package:dnd5e_dm_tools/features/characters/presentation/status_tab/widgets/spell_info.dart';
 import 'package:dnd5e_dm_tools/features/rules/rules_cubit.dart';
 import 'package:dnd5e_dm_tools/features/rules/rules_state.dart';
 import 'package:flutter/material.dart';
@@ -62,7 +64,18 @@ class SpellbookWidgetState extends State<SpellbookWidget> {
     final List<Spell> matchingEntries = [];
     for (final entry in spellList) {
       if (entry.name.toLowerCase().contains(searchText.toLowerCase())) {
-        matchingEntries.add(entry);
+        final duplicates = matchingEntries.where((e) => e.name == entry.name);
+        if (duplicates.isEmpty) {
+          matchingEntries.add(entry);
+        } else {
+          final toRemove = duplicates.reduce(
+            (a, b) => a.slug.length < b.slug.length ? a : b,
+          );
+          matchingEntries.remove(toRemove);
+          if (toRemove.slug.length < entry.slug.length) {
+            matchingEntries.add(entry);
+          }
+        }
       }
     }
 
@@ -94,7 +107,7 @@ class SpellbookWidgetState extends State<SpellbookWidget> {
   }
 
   Widget _buildSpellList(int level, Map<int, List<Spell>> spellMap) {
-    final List<dynamic> spellSlugs = widget.character.knownSpells;
+    final List<String> spellSlugs = widget.character.spellbook.knownSpells;
     if (spellSlugs.isEmpty) {
       return Container();
     }
@@ -105,7 +118,6 @@ class SpellbookWidgetState extends State<SpellbookWidget> {
       try {
         spell = spellsLvl.firstWhere((s) => s.slug == spellSlug);
       } catch (e) {
-        logUI('Spell not found: $spellSlug', level: Level.warning);
         continue;
       }
       spells.add(spell);
@@ -126,7 +138,13 @@ class SpellbookWidgetState extends State<SpellbookWidget> {
           for (final entry in spells)
             ListTile(
               title: Text(entry.name),
-              subtitle: Text(entry.school.name),
+              subtitle: Text(
+                entry.school.name,
+                style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: entry.school.color,
+                ),
+              ),
               onTap: () {
                 _showSpellDialog(entry);
               },
@@ -308,24 +326,17 @@ class SpellbookWidgetState extends State<SpellbookWidget> {
   }
 
   void _showSpellDialog(Spell spell) {
-    // showDialog(
-    //   context: context,
-    //   builder: (BuildContext context) {
-    //     return SpellInfoDialog(
-    //       spellSlug: spellSlug,
-    //       spells: widget.spells,
-    //       knownSpells: knownSpells,
-    //       preparedSpells: preparedSpells,
-    //       updateCharacter: () {
-    //         setState(() {
-    //           widget.character['known_spells'] = knownSpells;
-    //           widget.character['prepared_spells'] = preparedSpells;
-    //         });
-    //         widget.updateCharacter?.call();
-    //       },
-    //     );
-    //   },
-    // );
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return SpellInfo(
+          spell: spell,
+          character: widget.character,
+          classPreparesSpells: classPreparesSpells(widget.classs.slug),
+          onCharacterUpdated: widget.onCharacterUpdated,
+        );
+      },
+    );
   }
 
   @override
@@ -350,6 +361,11 @@ class SpellbookWidgetState extends State<SpellbookWidget> {
     final searchResults = _buildSearchResults(highestSpellSlotLevel);
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
+    final List<Widget> spellLists = List.generate(
+      10,
+      (i) => _buildSpellList(i, spellsMapByLevel),
+      growable: false,
+    );
     return ConstrainedBox(
       constraints: BoxConstraints(
         maxWidth: screenWidth * 0.75,
@@ -397,18 +413,15 @@ class SpellbookWidgetState extends State<SpellbookWidget> {
             ),
           ),
           Expanded(
-            child: searchText.isNotEmpty
-                ? Container(
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Theme.of(context).dividerColor),
-                      borderRadius: BorderRadius.circular(8.0),
-                    ),
-                    child: ConstrainedBox(
-                      constraints: BoxConstraints(
-                        maxWidth: screenWidth > 600
-                            ? screenWidth * 0.5
-                            : screenWidth * 0.9,
-                        minWidth: screenWidth * 0.5,
+            child: SizedBox(
+              width: screenWidth * 0.85 > 400 ? 400 : screenWidth * 0.85,
+              child: searchText.isNotEmpty
+                  ? Container(
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: Theme.of(context).dividerColor,
+                        ),
+                        borderRadius: BorderRadius.circular(8.0),
                       ),
                       child: searchResults.isEmpty
                           ? const Center(child: Text('No spells found'))
@@ -425,30 +438,25 @@ class SpellbookWidgetState extends State<SpellbookWidget> {
                                     child: Divider(),
                                   ),
                             ),
-                    ),
-                  )
-                : Column(
-                    children: [
-                      if (knownSpells.isNotEmpty)
-                        Expanded(
-                          child: ConstrainedBox(
-                            constraints: BoxConstraints(
-                              maxWidth: screenWidth > 600
-                                  ? screenWidth * 0.5
-                                  : screenWidth * 0.9,
-                              minWidth: screenWidth * 0.5,
-                            ),
-                            child: ListView(
-                              children: [
-                                for (int i = 0; i < 10; i++)
-                                  _buildSpellList(i, spellsMapByLevel),
-                              ],
+                    )
+                  : Column(
+                      children: [
+                        if (knownSpells.isNotEmpty)
+                          Expanded(
+                            child: ConstrainedBox(
+                              constraints: BoxConstraints(
+                                maxWidth: screenWidth > 600
+                                    ? screenWidth * 0.5
+                                    : screenWidth * 0.9,
+                                minWidth: screenWidth * 0.5,
+                              ),
+                              child: ListView(children: spellLists),
                             ),
                           ),
-                        ),
-                      _buildSpellSlotsList(),
-                    ],
-                  ),
+                        _buildSpellSlotsList(),
+                      ],
+                    ),
+            ),
           ),
         ],
       ),
