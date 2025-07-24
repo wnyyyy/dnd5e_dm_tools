@@ -2,6 +2,7 @@ import 'package:dnd5e_dm_tools/core/data/models/backpack_item.dart';
 import 'package:dnd5e_dm_tools/core/data/models/item.dart';
 import 'package:dnd5e_dm_tools/core/util/enum.dart';
 import 'package:dnd5e_dm_tools/core/widgets/description_text.dart';
+import 'package:dnd5e_dm_tools/features/characters/presentation/equip_tab/widgets/item_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttericon/font_awesome5_icons.dart';
 
@@ -31,86 +32,126 @@ class ItemDetailsDialogContent extends StatelessWidget {
 
     final bool isWeapon = item is Weapon;
     final bool isArmor = item is Armor;
+    final bool hasContents = item.contents.isNotEmpty;
     final double screenWidth = MediaQuery.of(context).size.width;
+    final double screenHeight = MediaQuery.of(context).size.height;
 
     return ConstrainedBox(
       constraints: BoxConstraints(
         maxWidth: screenWidth > 800 ? 720 : screenWidth * 0.9,
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          RichText(
-            text: TextSpan(
-              children: [
-                WidgetSpan(
-                  child: Padding(
-                    padding: const EdgeInsets.only(right: 12.0),
-                    child: Icon(
-                      item.icon.icon,
-                      size: 26,
-                      color: Theme.of(context).colorScheme.onSurface,
+      child: Scrollbar(
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              RichText(
+                text: TextSpan(
+                  children: [
+                    WidgetSpan(
+                      child: Padding(
+                        padding: const EdgeInsets.only(right: 12.0),
+                        child: Icon(
+                          item.icon.icon,
+                          size: 26,
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
+                      ),
                     ),
-                  ),
+                    TextSpan(
+                      text: item.name,
+                      style: item.name.length > 20
+                          ? Theme.of(context).textTheme.titleLarge
+                          : Theme.of(context).textTheme.headlineSmall,
+                    ),
+                    if (backpackItem.quantity > 1)
+                      TextSpan(
+                        text: ' (x${backpackItem.quantity})',
+                        style: Theme.of(context).textTheme.headlineSmall,
+                      ),
+                  ],
                 ),
-                TextSpan(
-                  text: item.name,
-                  style: item.name.length > 20
-                      ? Theme.of(context).textTheme.titleLarge
-                      : Theme.of(context).textTheme.headlineSmall,
+              ),
+              const SizedBox(height: 4),
+              SizedBox(
+                width: double.infinity,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    if (item.rarity != Rarity.common)
+                      Text(
+                        item.rarity.name,
+                        style: Theme.of(context).textTheme.labelLarge!.copyWith(
+                          color: item.rarity.color,
+                        ),
+                      ),
+                    const SizedBox(height: 4),
+                    Text(
+                      item.descriptor,
+                      style: Theme.of(context).textTheme.labelLarge,
+                    ),
+                  ],
                 ),
-                if (backpackItem.quantity > 1)
-                  TextSpan(
-                    text: ' (x${backpackItem.quantity})',
-                    style: Theme.of(context).textTheme.headlineSmall,
-                  ),
-              ],
-            ),
+              ),
+              const SizedBox(height: 8),
+              DescriptionText(
+                inputText: descStr,
+                baseStyle: Theme.of(context).textTheme.bodyMedium!,
+              ),
+              if (item.desc.isNotEmpty)
+                const SizedBox(height: 32, child: Divider()),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                spacing: 16,
+                children: [_getItemValue(context), _getItemWeight(context)],
+              ),
+              if (isWeapon) _getWeaponInfo(context),
+              if (isArmor) _getArmorInfo(context),
+              if (hasContents) _getItemContents(context),
+            ],
           ),
-          const SizedBox(height: 4),
-          SizedBox(
-            width: double.infinity,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                if (item.rarity != Rarity.common)
-                  Text(
-                    item.rarity.name,
-                    style: Theme.of(
-                      context,
-                    ).textTheme.labelLarge!.copyWith(color: item.rarity.color),
-                  ),
-                const SizedBox(height: 4),
-                Text(
-                  item.descriptor,
-                  style: Theme.of(context).textTheme.labelLarge,
-                ),
-              ],
-            ),
-          ),
+        ),
+      ),
+    );
+  }
 
-          const SizedBox(height: 8),
-          SingleChildScrollView(
-            child: ListBody(
-              children: [
-                DescriptionText(
-                  inputText: descStr,
-                  baseStyle: Theme.of(context).textTheme.bodyMedium!,
-                ),
-
-                if (item.desc.isNotEmpty)
-                  const SizedBox(height: 32, child: Divider()),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [_getItemValue(context), _getItemWeight(context)],
-                ),
-                if (isWeapon) _getWeaponInfo(context),
-                if (isArmor) _getArmorInfo(context),
-              ],
-            ),
-          ),
-        ],
+  Widget _getItemContents(BuildContext context) {
+    if (backpackItem.item == null || backpackItem.item!.contents.isEmpty) {
+      return const SizedBox();
+    }
+    final contents = backpackItem.item!.contents;
+    return Padding(
+      padding: const EdgeInsets.only(top: 8.0),
+      child: Card.outlined(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            for (int index = 0; index < contents.length; index++) ...[
+              if (index != 0) const Divider(height: 0),
+              Builder(
+                builder: (context) {
+                  final content = contents[index];
+                  if (content.item == null || content.quantity == 0) {
+                    return const SizedBox.shrink();
+                  }
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 2),
+                    child: ItemWidget(
+                      backpackItem: BackpackItem(
+                        itemSlug: content.slug,
+                        quantity: content.quantity,
+                        item: content.item,
+                      ),
+                      onQuantityChange: (quantity) {},
+                      onEquip: (itemSlug, isEquipped) {},
+                    ),
+                  );
+                },
+              ),
+            ],
+          ],
+        ),
       ),
     );
   }
@@ -122,11 +163,12 @@ class ItemDetailsDialogContent extends StatelessWidget {
     final Weapon weapon = backpackItem.item! as Weapon;
     var rangeStr = weapon.range.toString();
     if (weapon.longRange != null) {
-      rangeStr += '/${weapon.longRange}';
+      rangeStr += ' ft | ${weapon.longRange}';
     }
     final versatile = weapon.properties.any(
       (prop) => prop == WeaponProperty.versatile,
     );
+    final screenHeight = MediaQuery.of(context).size.height;
 
     return Container(
       padding: const EdgeInsets.all(8.0),
@@ -168,25 +210,29 @@ class ItemDetailsDialogContent extends StatelessWidget {
                   children: [
                     Column(
                       children: [
-                        Text(
-                          'Damage: ${weapon.damage.dice} ${weapon.damage.type.name}',
-                          style: Theme.of(context).textTheme.bodyMedium,
+                        DescriptionText(
+                          inputText:
+                              'Damage: ${weapon.damage.dice} ${weapon.damage.type.name}',
+                          baseStyle: Theme.of(context).textTheme.bodyMedium!,
                         ),
                         if (versatile && weapon.twoHandedDamage != null)
                           Padding(
                             padding: const EdgeInsets.symmetric(vertical: 4.0),
-                            child: Text(
-                              'Two-Handed: ${weapon.twoHandedDamage?.dice}',
-                              style: Theme.of(context).textTheme.labelMedium,
+                            child: DescriptionText(
+                              inputText:
+                                  'Two-Handed: ${weapon.twoHandedDamage?.dice}',
+                              baseStyle: Theme.of(
+                                context,
+                              ).textTheme.labelMedium!,
                             ),
                           ),
                       ],
                     ),
                     Padding(
                       padding: const EdgeInsets.symmetric(vertical: 6),
-                      child: Text(
-                        'Range: $rangeStr ft',
-                        style: Theme.of(context).textTheme.bodyMedium,
+                      child: DescriptionText(
+                        inputText: 'Range: $rangeStr ft',
+                        baseStyle: Theme.of(context).textTheme.bodyMedium!,
                       ),
                     ),
                   ],

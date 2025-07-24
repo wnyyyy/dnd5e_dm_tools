@@ -49,11 +49,16 @@ class EquipmentBloc extends Bloc<EquipmentEvent, EquipmentState> {
         );
         continue;
       }
+      final loadedContents = <ItemContent>[];
+      for (final content in item.contents) {
+        final contentItem = await itemsRepository.get(content.slug);
+        loadedContents.add(content.copyWith(item: contentItem));
+      }
       newItemList.add(
         BackpackItem(
           itemSlug: backpackItem.itemSlug,
           quantity: backpackItem.quantity,
-          item: item,
+          item: item.copyWith(contents: loadedContents),
           isEquipped: backpackItem.isEquipped,
         ),
       );

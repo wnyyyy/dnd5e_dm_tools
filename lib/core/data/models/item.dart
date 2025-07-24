@@ -19,7 +19,8 @@ abstract class Item extends Equatable {
     required this.cost,
     required this.rarity,
     this.weight = 0,
-  });
+    List<ItemContent>? contents,
+  }) : contents = contents ?? const [];
 
   factory Item.fromJson(Map<String, dynamic> json) {
     final slug = json['index'] as String?;
@@ -70,6 +71,16 @@ abstract class Item extends Equatable {
       gearCategory: gearCategory,
       toolCategory: toolCategory,
     );
+
+    final contents =
+        (json['contents'] as List<dynamic>?)
+            ?.map(
+              (e) => ItemContent.fromJson(
+                Map<String, dynamic>.from(e as Map? ?? {}),
+              ),
+            )
+            .toList() ??
+        [];
 
     switch (itemType) {
       case EquipmentType.armor:
@@ -182,6 +193,7 @@ abstract class Item extends Equatable {
             weight: weight,
             rarity: rarity,
             variant: variant,
+            contents: contents,
           );
         }
         return GenericItem(
@@ -192,6 +204,7 @@ abstract class Item extends Equatable {
           cost: cost,
           weight: weight,
           rarity: rarity,
+          contents: contents,
         );
     }
   }
@@ -218,6 +231,17 @@ abstract class Item extends Equatable {
         (expressions.contains('pedigree') ||
             expressions.contains('pedrigree'))) {
       return const Icon(FontAwesome5.scroll);
+    }
+    if (expressions.contains('set') &&
+        (expressions.contains('chess') ||
+            expressions.contains('dragonchess'))) {
+      return const Icon(FontAwesome5.chess);
+    }
+    if (expressions.contains('set') && (expressions.contains('dice'))) {
+      return const Icon(RpgAwesome.perspective_dice_six);
+    }
+    if (expressions.contains('set') && (expressions.contains('card'))) {
+      return const Icon(RpgAwesome.spades_card);
     }
     if (expressions.contains('clothes')) {
       return const Icon(FontAwesome5.tshirt);
@@ -247,6 +271,18 @@ abstract class Item extends Equatable {
         ((this as Armor).armorCategory == ArmorCategory.medium ||
             (this as Armor).armorCategory == ArmorCategory.heavy)) {
       return const Icon(RpgAwesome.vest);
+    }
+    if (expressions.contains('calligraphers')) {
+      return const Icon(FontAwesome5.map);
+    }
+    if (expressions.contains('alchemists')) {
+      return const Icon(RpgAwesome.bubbling_potion);
+    }
+    if (expressions.contains('cooks')) {
+      return const Icon(FontAwesome.food);
+    }
+    if (expressions.contains('woodcarvers')) {
+      return const Icon(RpgAwesome.hand_saw);
     }
     switch (itemType) {
       case EquipmentType.backpack:
@@ -303,6 +339,7 @@ abstract class Item extends Equatable {
   final Cost cost;
   final EquipmentType itemType;
   final Rarity rarity;
+  final List<ItemContent> contents;
 
   Map<String, dynamic> toJson() {
     return {
@@ -315,6 +352,7 @@ abstract class Item extends Equatable {
       'equipment_category': itemType.equipmentCategory,
       'weight': weight,
       'rarity': {'name': rarity.name},
+      'contents': contents.map((item) => item.toJson()).toList(),
     };
   }
 
@@ -369,6 +407,7 @@ abstract class Item extends Equatable {
     Cost? cost,
     int? weight,
     Damage? damage,
+    Damage? twoHandedDamage,
     ArmorClass? armorClass,
     Rarity? rarity,
     bool? variant,
@@ -380,6 +419,7 @@ abstract class Item extends Equatable {
     ArmorCategory? armorCategory,
     bool? stealthDisadvantage,
     List<String>? variants,
+    List<ItemContent>? contents,
   }) {
     if (this is Armor) {
       final armor = this as Armor;
@@ -418,6 +458,7 @@ abstract class Item extends Equatable {
         cost: cost ?? weapon.cost,
         weight: weight ?? weapon.weight,
         damage: damage ?? weapon.damage,
+        twoHandedDamage: twoHandedDamage ?? weapon.twoHandedDamage,
         weaponCategory: weaponCategory ?? weapon.weaponCategory,
         properties: properties ?? weapon.properties,
         range: range ?? weapon.range,
@@ -449,6 +490,7 @@ abstract class Item extends Equatable {
         rarity: rarity ?? generic.rarity,
         variant: variant ?? generic.variant,
         variants: variants ?? generic.variants,
+        contents: contents ?? generic.contents,
       );
     } else if (this is GenericItem) {
       final generic = this as GenericItem;
@@ -461,6 +503,7 @@ abstract class Item extends Equatable {
         weight: weight ?? generic.weight,
         expendable: expendable ?? generic.expendable,
         rarity: rarity ?? generic.rarity,
+        contents: contents ?? generic.contents,
       );
     } else {
       // fallback for unknown Item types
@@ -473,6 +516,7 @@ abstract class Item extends Equatable {
         weight: weight ?? this.weight,
         expendable: expendable ?? false,
         rarity: rarity ?? this.rarity,
+        contents: contents ?? this.contents,
       );
     }
   }
@@ -484,6 +528,39 @@ abstract class Item extends Equatable {
   String toString() => '$runtimeType $slug(name: $name, type: $itemType)';
 }
 
+class ItemContent extends Equatable {
+  const ItemContent({required this.slug, required this.quantity, this.item});
+
+  factory ItemContent.fromJson(Map<String, dynamic> json) {
+    return ItemContent(
+      slug: (json['item'] as Map?)?['index'] as String? ?? '',
+      quantity: json['quantity'] as int? ?? 1,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'item': {'index': slug},
+      'quantity': quantity,
+    };
+  }
+
+  ItemContent copyWith({String? slug, int? quantity, Item? item}) {
+    return ItemContent(
+      slug: slug ?? this.slug,
+      quantity: quantity ?? this.quantity,
+      item: item ?? this.item,
+    );
+  }
+
+  final String slug;
+  final int quantity;
+  final Item? item;
+
+  @override
+  List<Object> get props => [slug, quantity];
+}
+
 abstract class Template extends Item {
   const Template({
     required super.slug,
@@ -493,6 +570,7 @@ abstract class Template extends Item {
     required super.cost,
     required super.weight,
     required super.rarity,
+    super.contents,
     this.variant = false,
     this.variants = const [],
   });
@@ -525,6 +603,7 @@ class GenericTemplate extends Template {
     required super.rarity,
     super.variant,
     super.variants,
+    super.contents,
   });
 }
 
@@ -665,6 +744,7 @@ class GenericItem extends GenericTemplate {
     required super.cost,
     required super.weight,
     required super.rarity,
+    super.contents,
     this.expendable = false,
   });
 
