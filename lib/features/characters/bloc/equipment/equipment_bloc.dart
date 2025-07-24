@@ -54,6 +54,7 @@ class EquipmentBloc extends Bloc<EquipmentEvent, EquipmentState> {
           itemSlug: backpackItem.itemSlug,
           quantity: backpackItem.quantity,
           item: item,
+          isEquipped: backpackItem.isEquipped,
         ),
       );
     }

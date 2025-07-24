@@ -18,10 +18,7 @@ class BackpackItem extends Equatable {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'quantity': quantity,
-      'is_equipped': Item is Equipable ? isEquipped : null,
-    };
+    return {'quantity': quantity, 'is_equipped': isEquipped};
   }
 
   num get weight {
