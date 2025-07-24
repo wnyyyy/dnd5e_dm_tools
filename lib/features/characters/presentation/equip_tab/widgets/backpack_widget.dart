@@ -304,12 +304,12 @@ class _BackpackWidgetState extends State<BackpackWidget> {
         });
       case EquipSort.type:
         sorted.sort((a, b) {
-          final aType = a.item?.itemType;
-          final bType = b.item?.itemType;
+          final aType = a.item?.itemType.order;
+          final bType = b.item?.itemType.order;
           if (aType == bType) return 0;
           if (aType == null) return 1;
           if (bType == null) return -1;
-          return aType.name.compareTo(bType.name);
+          return aType.compareTo(bType);
         });
     }
     return sorted;

@@ -17,7 +17,7 @@ enum EquipmentType {
   potion,
   adventure,
   profession,
-  misc,
+  clothes,
   mount,
   special,
   music,
@@ -26,8 +26,59 @@ enum EquipmentType {
   waterskin,
   food,
   bedroll,
-  clothes,
+  misc,
   unknown,
+}
+
+extension EquipmentTypeOrder on EquipmentType {
+  int get order {
+    switch (this) {
+      case EquipmentType.armor:
+        return 0;
+      case EquipmentType.shield:
+        return 1;
+      case EquipmentType.accessories:
+        return 2;
+      case EquipmentType.rangedWeapons:
+        return 3;
+      case EquipmentType.meleeWeapons:
+        return 4;
+      case EquipmentType.ammunition:
+        return 5;
+      case EquipmentType.scroll:
+        return 6;
+      case EquipmentType.magic:
+        return 7;
+      case EquipmentType.potion:
+        return 8;
+      case EquipmentType.adventure:
+        return 10;
+      case EquipmentType.profession:
+        return 9;
+      case EquipmentType.clothes:
+        return 11;
+      case EquipmentType.mount:
+        return 12;
+      case EquipmentType.special:
+        return 13;
+      case EquipmentType.music:
+        return 14;
+      case EquipmentType.torch:
+        return 15;
+      case EquipmentType.backpack:
+        return 16;
+      case EquipmentType.waterskin:
+        return 17;
+      case EquipmentType.food:
+        return 18;
+      case EquipmentType.bedroll:
+        return 19;
+      case EquipmentType.misc:
+        return 20;
+      case EquipmentType.unknown:
+        return 21;
+    }
+  }
 }
 
 extension Categories on EquipmentType {

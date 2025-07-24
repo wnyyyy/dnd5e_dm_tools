@@ -208,6 +208,12 @@ abstract class Item extends Equatable {
     if (expressions.contains('case') && expressions.contains('bolt')) {
       return const Icon(RpgAwesome.arrow_cluster);
     }
+    if (expressions.contains('book')) {
+      return const Icon(RpgAwesome.book);
+    }
+    if (expressions.contains('backpack')) {
+      return const Icon(Octicons.briefcase);
+    }
     if (expressions.contains('scroll') &&
         (expressions.contains('pedigree') ||
             expressions.contains('pedrigree'))) {
@@ -320,7 +326,6 @@ abstract class Item extends Equatable {
       case EquipmentType.torch:
       case EquipmentType.waterskin:
         return 'Adventuring Gear';
-
       case EquipmentType.armor:
         return 'Armor';
       case EquipmentType.shield:
@@ -346,8 +351,9 @@ abstract class Item extends Equatable {
         return 'Scroll';
       case EquipmentType.ammunition:
         return 'Ammunition';
-      case EquipmentType.misc:
       case EquipmentType.clothes:
+        return 'Clothes';
+      case EquipmentType.misc:
       case EquipmentType.unknown:
         return 'Misc';
       case EquipmentType.food:
@@ -687,6 +693,14 @@ EquipmentType _inferType({
   if (type != EquipmentType.unknown) {
     return type;
   }
+  for (final expression in slugStr.split('-')) {
+    if (expression.length > 3) {
+      type = _getItemType(expression);
+      if (type != EquipmentType.unknown) {
+        return type;
+      }
+    }
+  }
   type = _getItemType(toolCategory ?? '');
   if (type != EquipmentType.unknown) {
     return type;
@@ -724,6 +738,9 @@ EquipmentType _getItemType(String item) {
     case 'medium-armor':
     case 'light-armor':
       return EquipmentType.armor;
+    case 'backpack':
+    case 'bag-of-holding':
+      return EquipmentType.backpack;
     case 'artisans-tools':
     case 'kits':
     case 'tools':
@@ -761,6 +778,10 @@ EquipmentType _getItemType(String item) {
       return EquipmentType.shield;
     case 'scroll':
       return EquipmentType.scroll;
+    case 'clothes':
+      return EquipmentType.clothes;
+    case 'food':
+      return EquipmentType.food;
     default:
       return EquipmentType.unknown;
   }
