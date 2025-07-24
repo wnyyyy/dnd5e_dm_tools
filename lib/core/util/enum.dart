@@ -183,6 +183,61 @@ enum ThemeColor {
   slateGrey,
 }
 
+enum SpellSchool {
+  abjuration,
+  conjuration,
+  divination,
+  enchantment,
+  evocation,
+  illusion,
+  necromancy,
+  transmutation,
+}
+
+extension SpellSchoolName on SpellSchool {
+  String get name {
+    switch (this) {
+      case SpellSchool.abjuration:
+        return 'Abjuration';
+      case SpellSchool.conjuration:
+        return 'Conjuration';
+      case SpellSchool.divination:
+        return 'Divination';
+      case SpellSchool.enchantment:
+        return 'Enchantment';
+      case SpellSchool.evocation:
+        return 'Evocation';
+      case SpellSchool.illusion:
+        return 'Illusion';
+      case SpellSchool.necromancy:
+        return 'Necromancy';
+      case SpellSchool.transmutation:
+        return 'Transmutation';
+    }
+  }
+
+  Color get color {
+    switch (this) {
+      case SpellSchool.abjuration:
+        return Colors.blue;
+      case SpellSchool.conjuration:
+        return Colors.deepPurple;
+      case SpellSchool.divination:
+        return Colors.yellow[700]!;
+      case SpellSchool.enchantment:
+        return Colors.green[800]!;
+      case SpellSchool.evocation:
+        return Colors.red;
+      case SpellSchool.illusion:
+        return Colors.pink;
+      case SpellSchool.necromancy:
+        return Colors.blueGrey[700]!;
+      case SpellSchool.transmutation:
+        return Colors.orange;
+    }
+  }
+}
+
 enum WeaponProperty {
   thrown,
   versatile,

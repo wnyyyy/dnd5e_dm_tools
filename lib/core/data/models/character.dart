@@ -3,6 +3,7 @@ import 'package:dnd5e_dm_tools/core/data/models/backpack.dart';
 import 'package:dnd5e_dm_tools/core/data/models/character_stats.dart';
 import 'package:dnd5e_dm_tools/core/data/models/feat.dart';
 import 'package:dnd5e_dm_tools/core/data/models/proficiency.dart';
+import 'package:dnd5e_dm_tools/core/data/models/spellbook.dart';
 import 'package:equatable/equatable.dart';
 
 class Character extends Equatable {
@@ -19,6 +20,7 @@ class Character extends Equatable {
     required this.asi,
     required this.stats,
     required this.backpack,
+    required this.spellbook,
     this.color,
     this.archetype,
   });
@@ -68,6 +70,10 @@ class Character extends Equatable {
       (json['backpack'] as Map<String, dynamic>?) ?? {},
     );
 
+    final spellbook = Spellbook.fromJson(
+      (json['spellbook'] as Map<String, dynamic>?) ?? {},
+    );
+
     return Character(
       slug: documentId,
       name: name,
@@ -83,6 +89,7 @@ class Character extends Equatable {
       asi: asi,
       stats: characterStats,
       backpack: backpack,
+      spellbook: spellbook,
     );
   }
 
@@ -117,6 +124,7 @@ class Character extends Equatable {
   final ASI asi;
   final CharacterStats stats;
   final Backpack backpack;
+  final Spellbook spellbook;
 
   Map<String, dynamic> toJson() {
     return {
@@ -133,6 +141,7 @@ class Character extends Equatable {
       'asi': asi.toJson(),
       'character_stats': stats.toJson(),
       'backpack': backpack.toJson(),
+      'spellbook': spellbook.toJson(),
     };
   }
 
@@ -143,6 +152,7 @@ class Character extends Equatable {
     ASI? asi,
     CharacterStats? stats,
     Backpack? backpack,
+    Spellbook? spellbook,
   }) {
     return Character(
       slug: slug,
@@ -159,6 +169,7 @@ class Character extends Equatable {
       asi: asi ?? this.asi,
       stats: stats ?? this.stats,
       backpack: backpack ?? this.backpack,
+      spellbook: spellbook ?? this.spellbook,
     );
   }
 
@@ -178,6 +189,7 @@ class Character extends Equatable {
     asi,
     stats,
     backpack,
+    spellbook,
   ];
 
   @override

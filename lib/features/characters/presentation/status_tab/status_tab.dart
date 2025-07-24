@@ -1,5 +1,7 @@
 import 'package:dnd5e_dm_tools/core/data/models/character.dart';
 import 'package:dnd5e_dm_tools/core/data/models/class.dart';
+import 'package:dnd5e_dm_tools/core/data/models/spell.dart';
+import 'package:dnd5e_dm_tools/core/data/models/spellbook.dart';
 import 'package:dnd5e_dm_tools/core/util/const.dart';
 import 'package:dnd5e_dm_tools/core/util/enum.dart';
 import 'package:dnd5e_dm_tools/core/util/helper.dart';
@@ -8,10 +10,14 @@ import 'package:dnd5e_dm_tools/features/characters/bloc/character/character_even
 import 'package:dnd5e_dm_tools/features/characters/presentation/status_tab/widgets/hitdice.dart';
 import 'package:dnd5e_dm_tools/features/characters/presentation/status_tab/widgets/hitpoints.dart';
 import 'package:dnd5e_dm_tools/features/characters/presentation/status_tab/widgets/inspiration.dart';
+import 'package:dnd5e_dm_tools/features/characters/presentation/status_tab/widgets/spellbook_widget.dart';
 import 'package:dnd5e_dm_tools/features/characters/presentation/status_tab/widgets/stats_widget.dart';
+import 'package:dnd5e_dm_tools/features/rules/rules_cubit.dart';
+import 'package:dnd5e_dm_tools/features/rules/rules_state.dart';
 import 'package:dnd5e_dm_tools/features/settings/bloc/settings_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:fluttericon/octicons_icons.dart';
 
 class StatusTab extends StatelessWidget {
   const StatusTab({super.key, required this.character, required this.classs});
@@ -24,6 +30,7 @@ class StatusTab extends StatelessWidget {
 
     final isCaster =
         context.read<SettingsCubit>().state.isCaster ||
+        character.feats.containsKey('magic_initiate') ||
         character.feats.containsKey('magic-initiate');
 
     final Map<String, dynamic> spells = {};
@@ -39,23 +46,32 @@ class StatusTab extends StatelessWidget {
       spellAttackBonus = mod + profBonus;
     }
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        return constraints.maxWidth > wideScreenBreakpoint
-            ? _buildWideLayout(
-                context,
-                isCaster,
-                spells,
-                spellAttackBonus,
-                spellSaveDC,
-              )
-            : _buildNarrowLayout(
-                context,
-                isCaster,
-                spells,
-                spellAttackBonus,
-                spellSaveDC,
-              );
+    return BlocBuilder<RulesCubit, RulesState>(
+      builder: (context, state) {
+        if (state is RulesStateLoading) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (state is! RulesStateLoaded) {
+          return const SizedBox.shrink();
+        }
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            return constraints.maxWidth > wideScreenBreakpoint
+                ? _buildWideLayout(
+                    context,
+                    isCaster,
+                    spells,
+                    spellAttackBonus,
+                    spellSaveDC,
+                  )
+                : _buildNarrowLayout(
+                    context,
+                    isCaster,
+                    spellAttackBonus,
+                    spellSaveDC,
+                  );
+          },
+        );
       },
     );
   }
@@ -84,26 +100,12 @@ class StatusTab extends StatelessWidget {
                   direction: Axis.vertical,
                   children: [
                     if (isCaster)
-                      _buildSpellInfo(
-                        context,
-                        spells,
-                        spellAttackBonus,
-                        spellSaveDC,
-                      ),
-                    // StatsView(
-                    //   onSave: () => context.read<CharacterBloc>().add(
-                    //     CharacterUpdate(
-                    //       character: character,
-                    //       slug: slug,
-                    //       offline: context
-                    //           .read<SettingsCubit>()
-                    //           .state
-                    //           .offlineMode,
-                    //       persistData: true,
-                    //     ),
-                    //   ),
-                    //   character: character,
-                    // ),
+                      _buildSpellInfo(context, spellAttackBonus, spellSaveDC),
+                    StatsWidget(
+                      character: character,
+                      onCharacterUpdated: (updatedCharacter) =>
+                          onCharacterUpdated(updatedCharacter, context),
+                    ),
                   ],
                 ),
               ],
@@ -127,7 +129,6 @@ class StatusTab extends StatelessWidget {
   Widget _buildNarrowLayout(
     BuildContext context,
     bool isCaster,
-    Map<String, dynamic> spells,
     int spellAttackBonus,
     int spellSaveDC,
   ) {
@@ -173,12 +174,7 @@ class StatusTab extends StatelessWidget {
                   direction: Axis.vertical,
                   children: [
                     if (isCaster)
-                      _buildSpellInfo(
-                        context,
-                        spells,
-                        spellAttackBonus,
-                        spellSaveDC,
-                      ),
+                      _buildSpellInfo(context, spellAttackBonus, spellSaveDC),
                     StatsWidget(
                       character: character,
                       onCharacterUpdated: (updatedCharacter) =>
@@ -199,11 +195,75 @@ class StatusTab extends StatelessWidget {
 
   Widget _buildSpellInfo(
     BuildContext context,
-    Map<String, dynamic> spells,
     int spellAttackBonus,
     int spellSaveDC,
   ) {
-    return const Padding(padding: EdgeInsets.only(bottom: 8), child: Column());
+    final rulesState = context.watch<RulesCubit>().state;
+    if (rulesState is! RulesStateLoaded) {
+      return const SizedBox.shrink();
+    }
+    final spells = rulesState.spells;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8.0),
+      child: Column(
+        children: [
+          IconButton.outlined(
+            padding: const EdgeInsets.all(12),
+            iconSize: 36,
+            icon: const Icon(Octicons.book),
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (context) {
+                  return AlertDialog(
+                    title: const Text('Spellbook'),
+                    content: SpellbookWidget(
+                      character: character,
+                      classs: classs,
+                      spells: spells,
+                      onCharacterUpdated: (updatedCharacter) =>
+                          onCharacterUpdated(updatedCharacter, context),
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                        child: const Icon(Icons.done),
+                      ),
+                    ],
+                  );
+                },
+              );
+            },
+          ),
+          const SizedBox(height: 4),
+          Card.filled(
+            child: Row(
+              children: [
+                ConstrainedBox(
+                  constraints: const BoxConstraints(minWidth: 70, maxWidth: 90),
+                  child: _buildSpellStat(
+                    context,
+                    '+$spellAttackBonus',
+                    'Spell Attack Bonus',
+                  ),
+                ),
+                const SizedBox(height: 45, child: VerticalDivider()),
+                ConstrainedBox(
+                  constraints: const BoxConstraints(minWidth: 70, maxWidth: 90),
+                  child: _buildSpellStat(
+                    context,
+                    '$spellSaveDC',
+                    'Spell Save DC',
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildSpellStat(BuildContext context, String value, String label) {

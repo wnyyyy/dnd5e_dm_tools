@@ -60,6 +60,20 @@ String getOrdinal(int number) {
   }
 }
 
+bool classPreparesSpells(String classSlug) {
+  switch (classSlug.toLowerCase()) {
+    case 'artificer':
+    case 'wizard':
+    case 'cleric':
+    case 'druid':
+    case 'paladin':
+    case 'ranger':
+      return true;
+    default:
+      return false;
+  }
+}
+
 int fromOrdinal(String ordinal) {
   return int.tryParse(ordinal.replaceAll(RegExp('[a-zA-Z]'), '')) ?? 0;
 }

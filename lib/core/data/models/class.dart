@@ -151,6 +151,10 @@ class Class extends Equatable {
     );
   }
 
+  Map<int, int> getSpellSlotsForLevel(int level) {
+    return table.getSpellSlotsForLevel(level);
+  }
+
   List<Feat> getFeatures({int level = 20}) {
     List<String> lines = desc.split('\n');
     lines = lines

@@ -42,6 +42,14 @@ class ClassTable extends Equatable {
   }
   final Map<int, ClassTableRow> levelData;
 
+  Map<int, int> getSpellSlotsForLevel(int level) {
+    final row = levelData[level];
+    if (row != null) {
+      return row.spellSlots ?? {};
+    }
+    return {};
+  }
+
   @override
   List<Object?> get props => [levelData];
 }
