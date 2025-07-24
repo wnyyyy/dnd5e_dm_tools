@@ -9,8 +9,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class AddItemButton extends StatefulWidget {
-  const AddItemButton({super.key, required this.onAdd});
+  const AddItemButton({
+    super.key,
+    required this.onAdd,
+    required this.onCreateItem,
+  });
   final void Function(Item) onAdd;
+  final void Function(Item) onCreateItem;
 
   @override
   State<AddItemButton> createState() => _AddItemButtonState();
@@ -151,7 +156,7 @@ class _AddItemButtonState extends State<AddItemButton> {
                           ),
                           child: CustomItemButton(
                             onAdd: (item) {
-                              widget.onAdd(item);
+                              widget.onCreateItem(item);
                             },
                           ),
                         ),

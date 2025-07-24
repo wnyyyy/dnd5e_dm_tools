@@ -104,10 +104,10 @@ class SettingsCubit extends Cubit<SettingsState> {
         orElse: () => EquipFilter.all,
       );
       final selectedEquipSortName =
-          await readConfig('selected_equip_sort') ?? EquipSort.name.name;
+          await readConfig('selected_equip_sort') ?? EquipSort.type.name;
       final selectedEquipSort = EquipSort.values.firstWhere(
         (e) => e.name == selectedEquipSortName,
-        orElse: () => EquipSort.name,
+        orElse: () => EquipSort.type,
       );
       logBloc('Settings loaded', level: Level.info);
 

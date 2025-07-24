@@ -130,6 +130,9 @@ class ItemWidgetState extends State<ItemWidget> {
     }
     final TextStyle textStyle = Theme.of(context).textTheme.bodyMedium!;
     final Color unitColor = item.cost.unit.color;
+    final costNormal = widget.backpackItem.item?.cost.costNormalized;
+    final costTotal =
+        (costNormal?.quantity ?? 1) * widget.backpackItem.quantity;
 
     return IntrinsicWidth(
       child: Container(
@@ -145,7 +148,7 @@ class ItemWidgetState extends State<ItemWidget> {
                   color: unitColor,
                 ),
               ),
-              TextSpan(text: '  ${cost.quantity}', style: textStyle),
+              TextSpan(text: '  $costTotal', style: textStyle),
             ],
           ),
         ),

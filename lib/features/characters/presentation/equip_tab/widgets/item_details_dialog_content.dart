@@ -1,4 +1,3 @@
-
 import 'package:dnd5e_dm_tools/core/data/models/backpack_item.dart';
 import 'package:dnd5e_dm_tools/core/data/models/item.dart';
 import 'package:dnd5e_dm_tools/core/util/enum.dart';
@@ -46,12 +45,20 @@ class ItemDetailsDialogContent extends StatelessWidget {
             text: TextSpan(
               children: [
                 WidgetSpan(
-                  alignment: PlaceholderAlignment.middle,
-                  child: item.icon,
+                  child: Padding(
+                    padding: const EdgeInsets.only(right: 12.0),
+                    child: Icon(
+                      item.icon.icon,
+                      size: 26,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                  ),
                 ),
                 TextSpan(
-                  text: '  ${item.name}',
-                  style: Theme.of(context).textTheme.headlineSmall,
+                  text: item.name,
+                  style: item.name.length > 20
+                      ? Theme.of(context).textTheme.titleLarge
+                      : Theme.of(context).textTheme.headlineSmall,
                 ),
                 if (backpackItem.quantity > 1)
                   TextSpan(
@@ -61,13 +68,28 @@ class ItemDetailsDialogContent extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: 16),
-          Text(
-            item.rarity.name,
-            style: Theme.of(
-              context,
-            ).textTheme.labelSmall!.copyWith(color: item.rarity.color),
+          const SizedBox(height: 4),
+          SizedBox(
+            width: double.infinity,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                if (item.rarity != Rarity.common)
+                  Text(
+                    item.rarity.name,
+                    style: Theme.of(
+                      context,
+                    ).textTheme.labelLarge!.copyWith(color: item.rarity.color),
+                  ),
+                const SizedBox(height: 4),
+                Text(
+                  item.descriptor,
+                  style: Theme.of(context).textTheme.labelLarge,
+                ),
+              ],
+            ),
           ),
+
           const SizedBox(height: 8),
           SingleChildScrollView(
             child: ListBody(
@@ -76,28 +98,12 @@ class ItemDetailsDialogContent extends StatelessWidget {
                   inputText: descStr,
                   baseStyle: Theme.of(context).textTheme.bodyMedium!,
                 ),
+
                 if (item.desc.isNotEmpty)
                   const SizedBox(height: 32, child: Divider()),
                 Row(
-                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [_getItemValue(context), _getItemWeight(context)],
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      ...labels.map(
-                        (label) => Padding(
-                          padding: const EdgeInsets.only(top: 8.0),
-                          child: Text(
-                            label,
-                            style: Theme.of(context).textTheme.titleMedium,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
                 ),
                 if (isWeapon) _getWeaponInfo(context),
                 if (isArmor) _getArmorInfo(context),
@@ -118,13 +124,21 @@ class ItemDetailsDialogContent extends StatelessWidget {
     if (weapon.longRange != null) {
       rangeStr += '/${weapon.longRange}';
     }
+    final versatile = weapon.properties.any(
+      (prop) => prop == WeaponProperty.versatile,
+    );
 
     return Container(
       padding: const EdgeInsets.all(8.0),
       width: double.infinity,
       child: Card.outlined(
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.only(
+            left: 16.0,
+            right: 16.0,
+            top: 8.0,
+            bottom: 8.0,
+          ),
           child: Column(
             children: [
               Text(
@@ -133,33 +147,43 @@ class ItemDetailsDialogContent extends StatelessWidget {
               ),
               Padding(
                 padding: const EdgeInsets.only(top: 4, bottom: 6),
-                child: Column(
+                child: Wrap(
+                  spacing: 6,
                   children: weapon.properties
                       .map(
-                        (prop) => Padding(
-                          padding: const EdgeInsets.only(top: 8.0),
-                          child: Text(
-                            prop.name,
-                            style: Theme.of(context).textTheme.bodySmall,
-                          ),
+                        (prop) => Chip(
+                          labelPadding: EdgeInsets.zero,
+                          labelStyle: Theme.of(context).textTheme.labelSmall,
+                          visualDensity: VisualDensity.compact,
+                          label: Text(prop.name),
                         ),
                       )
                       .toList(),
                 ),
               ),
-              const SizedBox(height: 12, child: Divider()),
-              Container(
+              SizedBox(
                 width: double.infinity,
-                padding: const EdgeInsets.only(top: 8),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'Damage: ${weapon.damage.dice} ${weapon.damage.type.name}',
-                      style: Theme.of(context).textTheme.bodyMedium,
+                    Column(
+                      children: [
+                        Text(
+                          'Damage: ${weapon.damage.dice} ${weapon.damage.type.name}',
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                        if (versatile && weapon.twoHandedDamage != null)
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 4.0),
+                            child: Text(
+                              'Two-Handed: ${weapon.twoHandedDamage?.dice}',
+                              style: Theme.of(context).textTheme.labelMedium,
+                            ),
+                          ),
+                      ],
                     ),
                     Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      padding: const EdgeInsets.symmetric(vertical: 6),
                       child: Text(
                         'Range: $rangeStr ft',
                         style: Theme.of(context).textTheme.bodyMedium,
@@ -245,26 +269,25 @@ class ItemDetailsDialogContent extends StatelessWidget {
       return const SizedBox();
     }
     final costNormal = backpackItem.item?.cost.costNormalized;
+    final costTotal = (costNormal?.quantity ?? 1) * backpackItem.quantity;
 
-    return IntrinsicWidth(
-      child: Container(
-        constraints: const BoxConstraints(minWidth: 80),
-        child: RichText(
-          text: TextSpan(
-            children: [
-              WidgetSpan(
-                alignment: PlaceholderAlignment.middle,
-                child: Icon(
-                  FontAwesome5.coins,
-                  size: textStyle.fontSize,
-                  color: unitColor ?? textStyle.color,
-                ),
-              ),
-              TextSpan(text: '  ${costNormal?.quantity}', style: textStyle),
-              TextSpan(text: ' ${costNormal?.unit.symbol.toUpperCase()}'),
-            ],
+    return RichText(
+      text: TextSpan(
+        children: [
+          WidgetSpan(
+            alignment: PlaceholderAlignment.middle,
+            child: Icon(
+              FontAwesome5.coins,
+              size: textStyle.fontSize,
+              color: unitColor ?? textStyle.color,
+            ),
           ),
-        ),
+          TextSpan(text: '  $costTotal', style: textStyle),
+          TextSpan(
+            text: ' ${costNormal?.unit.symbol.toUpperCase()}',
+            style: textStyle,
+          ),
+        ],
       ),
     );
   }
@@ -278,28 +301,22 @@ class ItemDetailsDialogContent extends StatelessWidget {
       return const SizedBox();
     }
 
-    return IntrinsicWidth(
-      child: Container(
-        constraints: const BoxConstraints(minWidth: 80),
-        child: RichText(
-          text: TextSpan(
-            children: [
-              WidgetSpan(
-                alignment: PlaceholderAlignment.middle,
-                child: Icon(
-                  FontAwesome5.weight_hanging,
-                  size: textStyle.fontSize,
-                  color: textStyle.color,
-                ),
-              ),
-              TextSpan(
-                text:
-                    '  ${isInt ? weight.toInt() : weight.toStringAsFixed(1)} lb',
-                style: textStyle,
-              ),
-            ],
+    return RichText(
+      text: TextSpan(
+        children: [
+          WidgetSpan(
+            alignment: PlaceholderAlignment.middle,
+            child: Icon(
+              FontAwesome5.weight_hanging,
+              size: textStyle.fontSize,
+              color: textStyle.color,
+            ),
           ),
-        ),
+          TextSpan(
+            text: '  ${isInt ? weight.toInt() : weight.toStringAsFixed(1)} lb',
+            style: textStyle,
+          ),
+        ],
       ),
     );
   }

@@ -1,4 +1,5 @@
 import 'package:dnd5e_dm_tools/core/data/models/backpack.dart';
+import 'package:dnd5e_dm_tools/core/data/models/item.dart';
 import 'package:equatable/equatable.dart';
 
 abstract class EquipmentState extends Equatable {
@@ -25,9 +26,24 @@ class EquipmentLoaded extends EquipmentState {
   final String characterSlug;
 
   EquipmentLoaded copyWith({Backpack? backpack}) {
-    return EquipmentLoaded(backpack: backpack ?? this.backpack, characterSlug: characterSlug);
+    return EquipmentLoaded(
+      backpack: backpack ?? this.backpack,
+      characterSlug: characterSlug,
+    );
   }
 
   @override
   List<Object> get props => [backpack, characterSlug];
+}
+
+class EquipmentCustomItemCreated extends EquipmentState {
+  const EquipmentCustomItemCreated({
+    required this.item,
+    required this.updatedBackpack,
+  });
+  final Item item;
+  final Backpack updatedBackpack;
+
+  @override
+  List<Object> get props => [item, updatedBackpack];
 }

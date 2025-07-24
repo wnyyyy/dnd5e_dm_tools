@@ -14,6 +14,8 @@ import 'package:dnd5e_dm_tools/features/characters/bloc/equipment/equipment_stat
 import 'package:dnd5e_dm_tools/features/characters/presentation/equip_tab/widgets/add_item_button.dart';
 import 'package:dnd5e_dm_tools/features/characters/presentation/equip_tab/widgets/coins_widget.dart';
 import 'package:dnd5e_dm_tools/features/characters/presentation/equip_tab/widgets/item_widget.dart';
+import 'package:dnd5e_dm_tools/features/rules/rules_cubit.dart';
+import 'package:dnd5e_dm_tools/features/rules/rules_state.dart';
 import 'package:dnd5e_dm_tools/features/settings/bloc/settings_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -33,7 +35,7 @@ class BackpackWidget extends StatefulWidget {
 }
 
 class _BackpackWidgetState extends State<BackpackWidget> {
-  EquipSort sortCriteria = EquipSort.name;
+  EquipSort sortCriteria = EquipSort.type;
   EquipFilter filterCriteria = EquipFilter.all;
   Map<String, Map<String, dynamic>> items = {};
 
@@ -111,6 +113,7 @@ class _BackpackWidgetState extends State<BackpackWidget> {
 
   List<DropdownMenuItem<EquipSort>> get dropdownItems {
     return [
+      const DropdownMenuItem(value: EquipSort.type, child: Text('Type')),
       const DropdownMenuItem(value: EquipSort.name, child: Text('Name')),
       const DropdownMenuItem(value: EquipSort.value, child: Text('Value')),
       const DropdownMenuItem(
@@ -121,6 +124,10 @@ class _BackpackWidgetState extends State<BackpackWidget> {
   }
 
   Widget buildAddItemButton(BuildContext context) {
+    final rulesState = context.watch<RulesCubit>().state;
+    if (rulesState is! RulesStateLoaded) {
+      return const SizedBox.shrink();
+    }
     return AddItemButton(
       onAdd: (item) {
         if (item is GenericItem) {
@@ -135,8 +142,14 @@ class _BackpackWidgetState extends State<BackpackWidget> {
           });
         } else {
           _addItemToBackpack(context, item, 1);
-          Navigator.pop(context);
         }
+      },
+      onCreateItem: (item) {
+        context.read<EquipmentBloc>().add(
+          CreateCustomItem(item: item, currentBackpack: widget.backpack),
+        );
+        context.read<RulesCubit>().reloadRule('items');
+        Navigator.pop(context);
       },
     );
   }
@@ -289,6 +302,15 @@ class _BackpackWidgetState extends State<BackpackWidget> {
           if (!aEquip && bEquip) return 1;
           return 0;
         });
+      case EquipSort.type:
+        sorted.sort((a, b) {
+          final aType = a.item?.itemType;
+          final bType = b.item?.itemType;
+          if (aType == bType) return 0;
+          if (aType == null) return 1;
+          if (bType == null) return -1;
+          return aType.name.compareTo(bType.name);
+        });
     }
     return sorted;
   }
@@ -355,9 +377,9 @@ class _BackpackWidgetState extends State<BackpackWidget> {
               items: dropdownItems,
               onChanged: (EquipSort? value) {
                 setState(() {
-                  sortCriteria = value ?? EquipSort.name;
+                  sortCriteria = value ?? EquipSort.type;
                   context.read<SettingsCubit>().toggleEquipSort(
-                    value ?? EquipSort.name,
+                    value ?? EquipSort.type,
                   );
                 });
               },

@@ -2,9 +2,11 @@ import 'dart:convert';
 
 import 'package:dnd5e_dm_tools/features/characters/bloc/character/character_bloc.dart';
 import 'package:dnd5e_dm_tools/features/characters/bloc/character/character_event.dart';
+import 'package:dnd5e_dm_tools/features/characters/bloc/character/character_state.dart';
 import 'package:dnd5e_dm_tools/features/database_editor/bloc/database_editor_cubit.dart';
 import 'package:dnd5e_dm_tools/features/database_editor/bloc/database_editor_state.dart';
 import 'package:dnd5e_dm_tools/features/rules/rules_cubit.dart';
+import 'package:dnd5e_dm_tools/features/rules/rules_state.dart';
 import 'package:dnd5e_dm_tools/features/settings/bloc/settings_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -12,6 +14,48 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 class DatabaseEditorScreen extends StatelessWidget {
   const DatabaseEditorScreen({super.key});
 
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<CharacterBloc, CharacterState>(
+      builder: (context, characterState) {
+        if (characterState is CharacterLoading) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (characterState is CharacterError) {
+          return Center(
+            child: ErrorWidget(
+              'Error loading character: ${characterState.error}',
+            ),
+          );
+        }
+        if (characterState is! CharacterLoaded) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        return BlocBuilder<RulesCubit, RulesState>(
+          builder: (context, rulesState) {
+            if (rulesState is RulesStateLoading) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            if (rulesState is RulesStateError) {
+              return Center(
+                child: ErrorWidget(
+                  'Error loading rules: ${rulesState.message}',
+                ),
+              );
+            }
+            if (rulesState is! RulesStateLoaded) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            // Only show the editor if both are loaded
+            return _DatabaseEditorLoadedContent();
+          },
+        );
+      },
+    );
+  }
+}
+
+class _DatabaseEditorLoadedContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<DatabaseEditorCubit, DatabaseEditorState>(

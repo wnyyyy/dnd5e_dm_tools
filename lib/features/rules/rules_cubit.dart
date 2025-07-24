@@ -136,6 +136,41 @@ class RulesCubit extends Cubit<RulesState> {
     return Future.value();
   }
 
+  Future<void> addCustomItem(Item item) async {
+    if (state is RulesStateLoaded) {
+      try {
+        final prevState = state as RulesStateLoaded;
+        emit(RulesStateLoading());
+        await itemsRepository.save(item.slug, item, false);
+        final updatedItems = await itemsRepository.getAll();
+        final weapons = updatedItems.whereType<Weapon>().toList();
+        final armors = updatedItems.whereType<Armor>().toList();
+        final weaponTemplates = updatedItems
+            .whereType<WeaponTemplate>()
+            .toList();
+        final genericItems = updatedItems.whereType<GenericItem>().toList();
+        emit(
+          RulesStateLoaded(
+            conditions: prevState.conditions,
+            feats: prevState.feats,
+            spells: prevState.spells,
+            spellLists: prevState.spellLists,
+            genericItems: genericItems,
+            weaponTemplates: weaponTemplates,
+            armors: armors,
+            weapons: weapons,
+            allItems: updatedItems,
+          ),
+        );
+      } catch (e) {
+        logBloc('Error adding custom item: $e', level: Level.error);
+        emit(RulesStateError('Failed to add custom item: $e'));
+      }
+    } else {
+      logBloc('Cannot add custom item, rules not loaded', level: Level.warning);
+    }
+  }
+
   Future<void> invalidateCache(List<String> types) async {
     emit(RulesStateLoading());
     for (final type in types) {

@@ -11,6 +11,7 @@ import 'package:logger/logger.dart';
 class EquipmentBloc extends Bloc<EquipmentEvent, EquipmentState> {
   EquipmentBloc({required this.itemsRepository}) : super(EquipmentInitial()) {
     on<BuildBackpack>(_onBuildBackpack);
+    on<CreateCustomItem>(_onCreateCustomItem);
   }
   final ItemsRepository itemsRepository;
 
@@ -57,5 +58,35 @@ class EquipmentBloc extends Bloc<EquipmentEvent, EquipmentState> {
       );
     }
     return newItemList;
+  }
+
+  Future<void> _onCreateCustomItem(
+    CreateCustomItem event,
+    Emitter<EquipmentState> emit,
+  ) async {
+    try {
+      emit(EquipmentLoading());
+      final item = event.item;
+      if (item.slug.isEmpty) {
+        throw Exception('Item slug cannot be empty');
+      }
+      final updatedBackpack = event.currentBackpack.copyWith(
+        items: [
+          ...event.currentBackpack.items,
+          BackpackItem(itemSlug: item.slug, quantity: 1, item: item),
+        ],
+      );
+      await itemsRepository.save(item.slug, item, false);
+      logBloc('Custom item created: ${item.slug}');
+      emit(
+        EquipmentCustomItemCreated(
+          item: item,
+          updatedBackpack: updatedBackpack,
+        ),
+      );
+    } catch (error) {
+      logBloc('Error creating custom item: $error', level: Level.error);
+      emit(EquipmentError(error: 'Failed to create custom item - $error'));
+    }
   }
 }

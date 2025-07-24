@@ -7,8 +7,6 @@ import 'package:dnd5e_dm_tools/features/database_editor/database_editor_screen.d
 import 'package:dnd5e_dm_tools/features/main_screen/bloc/main_screen_cubit.dart';
 import 'package:dnd5e_dm_tools/features/main_screen/bloc/main_screen_state.dart';
 import 'package:dnd5e_dm_tools/features/onboarding/onboarding_screen.dart';
-import 'package:dnd5e_dm_tools/features/rules/rules_cubit.dart';
-import 'package:dnd5e_dm_tools/features/rules/rules_state.dart';
 import 'package:dnd5e_dm_tools/features/settings/bloc/settings_cubit.dart';
 import 'package:dnd5e_dm_tools/features/settings/bloc/settings_states.dart';
 import 'package:dnd5e_dm_tools/features/settings/settings_screen.dart';
@@ -43,28 +41,9 @@ class MainScreen extends StatelessWidget {
                 appBar: const Header(),
                 drawer: const AppDrawer(),
                 body: PopScope(
-                  child: BlocBuilder<RulesCubit, RulesState>(
-                    builder: (context, rulesState) {
-                      if (rulesState is RulesStateInitial ||
-                          rulesState is RulesStateLoading) {
-                        return const Center(child: CircularProgressIndicator());
-                      }
-                      if (rulesState is RulesStateError) {
-                        return ErrorHandler(error: rulesState.message);
-                      }
-                      if (rulesState is RulesStateLoaded) {
-                        return BlocBuilder<MainScreenCubit, MainScreenState>(
-                          builder: (context, mainScreenState) {
-                            return _buildMainContent(mainScreenState);
-                          },
-                        );
-                      }
-                      if (rulesState is RulesStatePendingRestart) {
-                        return const Center(
-                          child: Text('Restart pending.'),
-                        );
-                      }
-                      return Container();
+                  child: BlocBuilder<MainScreenCubit, MainScreenState>(
+                    builder: (context, mainScreenState) {
+                      return _buildMainContent(mainScreenState);
                     },
                   ),
                 ),

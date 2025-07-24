@@ -59,7 +59,7 @@ abstract class Item extends Equatable {
     final variant = json['variant'] as bool? ?? false;
     final variants =
         (json['variants'] as List<dynamic>?)?.map((e) {
-          final itemJson = e as Map<String, dynamic>;
+          final itemJson = (e as Map).cast<String, dynamic>();
           return itemJson['index']?.toString() ?? '';
         }).toList() ??
         [];
@@ -197,22 +197,21 @@ abstract class Item extends Equatable {
   }
 
   Icon get icon {
-    final bows = [
-      'crossbow-light',
-      'crossbow-heavy',
-      'crossbow-hand',
-      'longbow',
-      'shortbow',
-    ];
     final expressions = slug
         .toLowerCase()
         .replaceAll(' ', '-')
         .replaceAll("'", '')
         .split('-');
-    for (final expression in expressions) {
-      if (bows.contains(expression)) {
-        return const Icon(RpgAwesome.crossbow);
-      }
+    if (expressions.contains('bolt') || expressions.contains('arrow')) {
+      return const Icon(RpgAwesome.broadhead_arrow);
+    }
+    if (expressions.contains('case') && expressions.contains('bolt')) {
+      return const Icon(RpgAwesome.arrow_cluster);
+    }
+    if (expressions.contains('scroll') &&
+        (expressions.contains('pedigree') ||
+            expressions.contains('pedrigree'))) {
+      return const Icon(FontAwesome5.scroll);
     }
     if (expressions.contains('clothes')) {
       return const Icon(FontAwesome5.tshirt);
@@ -231,6 +230,12 @@ abstract class Item extends Equatable {
     }
     if (expressions.contains('greataxe')) {
       return const Icon(RpgAwesome.axe);
+    }
+    final bows = ['crossbow', 'longbow', 'shortbow'];
+    for (final expression in expressions) {
+      if (bows.contains(expression)) {
+        return const Icon(RpgAwesome.crossbow);
+      }
     }
     if (this is Armor &&
         ((this as Armor).armorCategory == ArmorCategory.medium ||
@@ -303,11 +308,19 @@ abstract class Item extends Equatable {
       'gear_category': itemType.gearCategory,
       'equipment_category': itemType.equipmentCategory,
       'weight': weight,
+      'rarity': {'name': rarity.name},
     };
   }
 
   String get descriptor {
     switch (itemType) {
+      case EquipmentType.backpack:
+      case EquipmentType.adventure:
+      case EquipmentType.bedroll:
+      case EquipmentType.torch:
+      case EquipmentType.waterskin:
+        return 'Adventuring Gear';
+
       case EquipmentType.armor:
         return 'Armor';
       case EquipmentType.shield:
@@ -316,25 +329,29 @@ abstract class Item extends Equatable {
       case EquipmentType.rangedWeapons:
         return 'Weapon';
       case EquipmentType.magic:
-        return 'Magic Item';
+        return 'Magic';
       case EquipmentType.profession:
-        return 'Tool';
-      case EquipmentType.adventure:
-        return 'Adventuring Gear';
+        return "Artisan's Tools";
       case EquipmentType.mount:
         return 'Mount';
       case EquipmentType.music:
         return 'Musical Instrument';
       case EquipmentType.special:
-        return 'Special Item';
+        return 'Special';
       case EquipmentType.potion:
         return 'Consumable';
       case EquipmentType.accessories:
         return 'Accessory';
       case EquipmentType.scroll:
         return 'Scroll';
-      default:
+      case EquipmentType.ammunition:
+        return 'Ammunition';
+      case EquipmentType.misc:
+      case EquipmentType.clothes:
+      case EquipmentType.unknown:
         return 'Misc';
+      case EquipmentType.food:
+        return 'Food';
     }
   }
 

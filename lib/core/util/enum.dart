@@ -6,20 +6,20 @@ import 'package:fluttericon/octicons_icons.dart';
 import 'package:fluttericon/rpg_awesome_icons.dart';
 
 enum EquipmentType {
-  ammunition,
-  adventure,
-  magic,
   armor,
+  shield,
+  accessories,
+  rangedWeapons,
+  meleeWeapons,
+  ammunition,
+  scroll,
+  magic,
+  potion,
+  adventure,
   profession,
   misc,
   mount,
-  rangedWeapons,
-  meleeWeapons,
   special,
-  potion,
-  accessories,
-  shield,
-  scroll,
   music,
   torch,
   backpack,
@@ -253,7 +253,7 @@ enum ActionMenuMode { all, abilities, items, spells }
 
 enum EquipFilter { all, equipped, canEquip }
 
-enum EquipSort { name, value, canEquip }
+enum EquipSort { name, value, canEquip, type }
 
 enum ResourceType { item, shortRest, longRest, spell, none }
 

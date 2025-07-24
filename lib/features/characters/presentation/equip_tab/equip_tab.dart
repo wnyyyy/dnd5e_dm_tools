@@ -29,6 +29,20 @@ class EquipTab extends StatelessWidget {
                 if (state is EquipmentLoading) {
                   return const Center(child: CircularProgressIndicator());
                 }
+                if (state is EquipmentCustomItemCreated) {
+                  final updatedCharacter = character.copyWith(
+                    backpack: state.updatedBackpack,
+                  );
+                  context.read<CharacterBloc>().add(
+                    CharacterUpdate(
+                      character: updatedCharacter,
+                      persistData: true,
+                    ),
+                  );
+                  context.read<EquipmentBloc>().add(
+                    BuildBackpack(character: updatedCharacter),
+                  );
+                }
 
                 if (state is EquipmentLoaded) {
                   final characterBlocState = context

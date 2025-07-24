@@ -13,7 +13,7 @@ class BackpackItem extends Equatable {
     return BackpackItem(
       itemSlug: documentId,
       quantity: json['quantity'] as int? ?? 1,
-      isEquipped: json['is_equipped'] as bool? ?? false,
+      isEquipped: json['is_equipped'] as bool? ?? true,
     );
   }
 
