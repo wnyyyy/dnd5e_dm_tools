@@ -155,6 +155,13 @@ class Class extends Equatable {
     return table.getSpellSlotsForLevel(level);
   }
 
+  int getHighestSpellSlotLevel(int level) {
+    final slots = table.getSpellSlotsForLevel(level);
+    return slots.keys.isNotEmpty
+        ? slots.keys.reduce((a, b) => a > b ? a : b)
+        : 0;
+  }
+
   List<Feat> getFeatures({int level = 20}) {
     List<String> lines = desc.split('\n');
     lines = lines

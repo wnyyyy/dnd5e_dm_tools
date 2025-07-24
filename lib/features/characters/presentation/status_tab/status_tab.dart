@@ -220,7 +220,6 @@ class StatusTab extends StatelessWidget {
                     content: SpellbookWidget(
                       character: character,
                       classs: classs,
-                      spells: spells,
                       onCharacterUpdated: (updatedCharacter) =>
                           onCharacterUpdated(updatedCharacter, context),
                     ),

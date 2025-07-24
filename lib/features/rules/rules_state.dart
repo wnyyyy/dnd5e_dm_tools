@@ -46,6 +46,9 @@ class RulesStateLoaded extends RulesState {
     required this.armors,
     required this.weapons,
     required this.allItems,
+    required this.itemMap,
+    required this.spellMap,
+    required this.spellMapByLevel,
   });
   final List<Condition> conditions;
   final List<Feat> feats;
@@ -56,6 +59,9 @@ class RulesStateLoaded extends RulesState {
   final List<Armor> armors;
   final List<Weapon> weapons;
   final List<Item> allItems;
+  final Map<String, Item> itemMap;
+  final Map<String, Spell> spellMap;
+  final Map<int, List<Spell>> spellMapByLevel;
 
   RulesStateLoaded copyWith({
     List<Condition>? conditions,
@@ -67,6 +73,9 @@ class RulesStateLoaded extends RulesState {
     List<Weapon>? weapons,
     List<GenericItem>? genericItems,
     List<Item>? allItems,
+    Map<String, Item>? itemMap,
+    Map<String, Spell>? spellMap,
+    Map<int, List<Spell>>? spellMapByLevel,
   }) {
     return RulesStateLoaded(
       conditions: conditions ?? this.conditions,
@@ -78,6 +87,9 @@ class RulesStateLoaded extends RulesState {
       armors: armors ?? this.armors,
       weapons: weapons ?? this.weapons,
       allItems: allItems ?? this.allItems,
+      itemMap: itemMap ?? this.itemMap,
+      spellMap: spellMap ?? this.spellMap,
+      spellMapByLevel: spellMapByLevel ?? this.spellMapByLevel,
     );
   }
 
@@ -92,5 +104,8 @@ class RulesStateLoaded extends RulesState {
     armors,
     weapons,
     allItems,
+    itemMap,
+    spellMap,
+    spellMapByLevel,
   ];
 }

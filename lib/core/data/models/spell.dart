@@ -22,13 +22,17 @@ class Spell extends Equatable {
     if (name == null || name.isEmpty) {
       throw ArgumentError('Required field "name" is missing or empty');
     }
+    final concentrationStr = json['concentration'] as String? ?? '';
+    final ritualStr = json['ritual'] as String? ?? '';
 
     return Spell(
       slug: documentId,
       name: name,
       level: json['level_int'] as int? ?? 0,
       castingTime: json['casting_time'] as String? ?? '',
-      concentration: json['concentration'] as bool? ?? false,
+      concentration:
+          concentrationStr.toLowerCase() == 'yes' ||
+          concentrationStr.toLowerCase() == 'true',
       components: json['components'] as String? ?? '',
       desc: json['desc'] as String? ?? '',
       duration: json['duration'] as String? ?? '',
@@ -39,7 +43,8 @@ class Spell extends Equatable {
         orElse: () => SpellSchool.abjuration,
       ),
       range: json['range'] as String? ?? '',
-      ritual: json['ritual'] as bool? ?? false,
+      ritual:
+          ritualStr.toLowerCase() == 'yes' || ritualStr.toLowerCase() == 'true',
     );
   }
 

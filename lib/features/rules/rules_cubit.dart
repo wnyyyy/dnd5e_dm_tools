@@ -60,17 +60,24 @@ class RulesCubit extends Cubit<RulesState> {
       emit(RulesStateError(e.toString()));
     }
     final itemList = results[4] as List<Item>;
+    final spells = results[1] as List<Spell>;
     final weapons = itemList.whereType<Weapon>().toList();
     final armors = itemList.whereType<Armor>().toList();
     final weaponTemplates = itemList.whereType<WeaponTemplate>().toList();
     final genericItems = itemList.whereType<GenericItem>().toList();
+    final itemMap = {for (final item in itemList) item.slug: item};
+    final spellMap = {for (final spell in spells) spell.slug: spell};
+    final spellMapByLevel = <int, List<Spell>>{};
+    for (final spell in spells) {
+      spellMapByLevel.putIfAbsent(spell.level, () => []).add(spell);
+    }
 
     try {
       logBloc('Rules loaded successfully');
       emit(
         RulesStateLoaded(
           conditions: results[0] as List<Condition>,
-          spells: results[1] as List<Spell>,
+          spells: spells,
           feats: results[2] as List<Feat>,
           spellLists: results[3] as List<SpellList>,
           genericItems: genericItems,
@@ -78,6 +85,9 @@ class RulesCubit extends Cubit<RulesState> {
           armors: armors,
           weapons: weapons,
           allItems: itemList,
+          itemMap: itemMap,
+          spellMap: spellMap,
+          spellMapByLevel: spellMapByLevel,
         ),
       );
     } catch (e) {
@@ -98,7 +108,18 @@ class RulesCubit extends Cubit<RulesState> {
           return Future.value();
         case 'spells':
           spellsRepository.getAll(online: true).then((spells) {
-            emit(currState.copyWith(spells: spells));
+            final spellMap = {for (final spell in spells) spell.slug: spell};
+            final spellMapByLevel = <int, List<Spell>>{};
+            for (final spell in spells) {
+              spellMapByLevel.putIfAbsent(spell.level, () => []).add(spell);
+            }
+            emit(
+              currState.copyWith(
+                spells: spells,
+                spellMap: spellMap,
+                spellMapByLevel: spellMapByLevel,
+              ),
+            );
           });
           return Future.value();
         case 'feats':
@@ -117,6 +138,7 @@ class RulesCubit extends Cubit<RulesState> {
             final armors = items.whereType<Armor>().toList();
             final weaponTemplates = items.whereType<WeaponTemplate>().toList();
             final genericItems = items.whereType<GenericItem>().toList();
+            final itemMap = {for (final item in items) item.slug: item};
             emit(
               currState.copyWith(
                 weapons: weapons,
@@ -124,6 +146,7 @@ class RulesCubit extends Cubit<RulesState> {
                 weaponTemplates: weaponTemplates,
                 genericItems: genericItems,
                 allItems: items,
+                itemMap: itemMap,
               ),
             );
           });
@@ -149,6 +172,7 @@ class RulesCubit extends Cubit<RulesState> {
             .whereType<WeaponTemplate>()
             .toList();
         final genericItems = updatedItems.whereType<GenericItem>().toList();
+        final itemMap = {for (final item in updatedItems) item.slug: item};
         emit(
           RulesStateLoaded(
             conditions: prevState.conditions,
@@ -160,6 +184,9 @@ class RulesCubit extends Cubit<RulesState> {
             armors: armors,
             weapons: weapons,
             allItems: updatedItems,
+            itemMap: itemMap,
+            spellMap: prevState.spellMap,
+            spellMapByLevel: prevState.spellMapByLevel,
           ),
         );
       } catch (e) {

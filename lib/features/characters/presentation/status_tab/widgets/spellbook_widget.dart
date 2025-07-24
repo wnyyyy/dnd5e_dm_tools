@@ -3,7 +3,10 @@ import 'package:dnd5e_dm_tools/core/data/models/class.dart';
 import 'package:dnd5e_dm_tools/core/data/models/spell.dart';
 import 'package:dnd5e_dm_tools/core/util/helper.dart';
 import 'package:dnd5e_dm_tools/core/util/logger.dart';
+import 'package:dnd5e_dm_tools/features/rules/rules_cubit.dart';
+import 'package:dnd5e_dm_tools/features/rules/rules_state.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:logger/logger.dart';
 
 class SpellbookWidget extends StatefulWidget {
@@ -11,12 +14,10 @@ class SpellbookWidget extends StatefulWidget {
     super.key,
     required this.character,
     required this.classs,
-    required this.spells,
     required this.onCharacterUpdated,
   });
   final Character character;
   final Class classs;
-  final List<Spell> spells;
   final ValueChanged<Character> onCharacterUpdated;
 
   @override
@@ -29,7 +30,6 @@ class SpellbookWidgetState extends State<SpellbookWidget> {
 
   late List<String> knownSpells;
   late Map<String, bool> preparedSpells;
-  late Map<int, List<Spell>> spellMap;
 
   @override
   void initState() {
@@ -41,20 +41,26 @@ class SpellbookWidgetState extends State<SpellbookWidget> {
         knownSpells.map((spell) => MapEntry(spell, true)),
       );
     }
-    for (final spell in widget.spells) {
-      spellMap[spell.level] ??= [];
-      spellMap[spell.level]!.add(spell);
-    }
   }
 
-  List<Widget> _buildSearchResults() {
+  List<Widget> _buildSearchResults(int maxSpellLevel) {
+    final rulesState = context.read<RulesCubit>().state;
+    if (rulesState is! RulesStateLoaded) {
+      logUI('Rules not loaded', level: Level.warning);
+      return [];
+    }
+    final spellList = <Spell>[];
+    for (int i = 0; i <= maxSpellLevel; i++) {
+      final spells = rulesState.spellMapByLevel[i] ?? [];
+      spellList.addAll(spells);
+    }
     final List<Widget> searchResults = [];
     if (searchText.isEmpty) {
       return searchResults;
     }
 
     final List<Spell> matchingEntries = [];
-    for (final entry in widget.spells) {
+    for (final entry in spellList) {
       if (entry.name.toLowerCase().contains(searchText.toLowerCase())) {
         matchingEntries.add(entry);
       }
@@ -87,7 +93,7 @@ class SpellbookWidgetState extends State<SpellbookWidget> {
     return searchResults;
   }
 
-  Widget _buildSpellList(int level) {
+  Widget _buildSpellList(int level, Map<int, List<Spell>> spellMap) {
     final List<dynamic> spellSlugs = widget.character.knownSpells;
     if (spellSlugs.isEmpty) {
       return Container();
@@ -324,7 +330,24 @@ class SpellbookWidgetState extends State<SpellbookWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final searchResults = _buildSearchResults();
+    final rulesState = context.read<RulesCubit>().state;
+    if (rulesState is! RulesStateLoaded) {
+      logUI('Rules not loaded', level: Level.warning);
+      return const SizedBox.shrink();
+    }
+    final spellsMapByLevel = rulesState.spellMapByLevel;
+    int highestSpellSlotLevel = widget.classs.getHighestSpellSlotLevel(
+      widget.character.level,
+    );
+    if (highestSpellSlotLevel == 0) {
+      if (widget.character.feats.containsKey('magic_initiate') ||
+          widget.character.feats.containsKey('magic-initiate')) {
+        highestSpellSlotLevel = 1;
+      } else {
+        return const SizedBox.shrink();
+      }
+    }
+    final searchResults = _buildSearchResults(highestSpellSlotLevel);
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
     return ConstrainedBox(
@@ -417,7 +440,8 @@ class SpellbookWidgetState extends State<SpellbookWidget> {
                             ),
                             child: ListView(
                               children: [
-                                for (int i = 0; i < 10; i++) _buildSpellList(i),
+                                for (int i = 0; i < 10; i++)
+                                  _buildSpellList(i, spellsMapByLevel),
                               ],
                             ),
                           ),
