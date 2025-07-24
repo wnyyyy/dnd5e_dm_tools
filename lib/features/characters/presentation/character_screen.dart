@@ -5,6 +5,7 @@ import 'package:dnd5e_dm_tools/features/characters/bloc/character/character_stat
 import 'package:dnd5e_dm_tools/features/characters/presentation/bio_tab/bio_tab.dart';
 import 'package:dnd5e_dm_tools/features/characters/presentation/equip_tab/equip_tab.dart';
 import 'package:dnd5e_dm_tools/features/characters/presentation/skills_tab/skills_tab.dart';
+import 'package:dnd5e_dm_tools/features/characters/presentation/status_tab/status_tab.dart';
 import 'package:dnd5e_dm_tools/features/rules/rules_cubit.dart';
 import 'package:dnd5e_dm_tools/features/rules/rules_state.dart';
 import 'package:dnd5e_dm_tools/features/settings/bloc/settings_cubit.dart';
@@ -145,7 +146,10 @@ class _CharacterScreenState extends State<CharacterScreen>
                               classs: state.classs,
                               race: state.race,
                             ),
-                            Container(),
+                            StatusTab(
+                              character: state.character,
+                              classs: state.classs,
+                            ),
                             SkillsTab(
                               character: state.character,
                               classs: state.classs,

@@ -3,7 +3,6 @@ import 'package:dnd5e_dm_tools/core/data/models/backpack.dart';
 import 'package:dnd5e_dm_tools/core/data/models/character_stats.dart';
 import 'package:dnd5e_dm_tools/core/data/models/feat.dart';
 import 'package:dnd5e_dm_tools/core/data/models/proficiency.dart';
-import 'package:dnd5e_dm_tools/core/util/helper.dart';
 import 'package:equatable/equatable.dart';
 
 class Character extends Equatable {
@@ -59,8 +58,10 @@ class Character extends Equatable {
     final asi = ASI.fromJson(json['asi'] as Map<String, dynamic>? ?? {});
 
     final characterStats = CharacterStats.fromJson(
-      json['character_stats'] as Map<String, dynamic>? ?? {},
-      10 + getModifier(asi.dexterity),
+      Map<String, dynamic>.from(json['character_stats'] as Map? ?? {}),
+      asi: asi,
+      level: json['level'] as int? ?? 1,
+      proficiency: proficiency,
     );
 
     final backpack = Backpack.fromJson(

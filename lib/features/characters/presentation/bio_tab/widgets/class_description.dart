@@ -99,10 +99,10 @@ class ClassDescription extends StatelessWidget {
                   classs.profArmor,
                   context,
                 ),
-                if (classs.spellCastingAbility?.isNotEmpty ?? false)
+                if (classs.spellCastingAbility != null)
                   _buildGridCard(
                     'Spellcasting\nAbility',
-                    classs.spellCastingAbility!,
+                    classs.spellCastingAbility?.name ?? 'None',
                     context,
                   ),
                 _buildGridCard(

@@ -34,7 +34,6 @@ class ItemDetailsDialogContent extends StatelessWidget {
     final bool isArmor = item is Armor;
     final bool hasContents = item.contents.isNotEmpty;
     final double screenWidth = MediaQuery.of(context).size.width;
-    final double screenHeight = MediaQuery.of(context).size.height;
 
     return ConstrainedBox(
       constraints: BoxConstraints(
@@ -168,7 +167,6 @@ class ItemDetailsDialogContent extends StatelessWidget {
     final versatile = weapon.properties.any(
       (prop) => prop == WeaponProperty.versatile,
     );
-    final screenHeight = MediaQuery.of(context).size.height;
 
     return Container(
       padding: const EdgeInsets.all(8.0),

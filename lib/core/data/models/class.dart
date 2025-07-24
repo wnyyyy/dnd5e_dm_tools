@@ -46,7 +46,15 @@ class Class extends Equatable {
     final profTools = json['prof_tools'] as String? ?? '';
     final profArmor = json['prof_armor'] as String? ?? '';
     final profSkills = json['prof_skills'] as String? ?? '';
-    final spellCastingAbility = json['spellcasting_ability'] as String?;
+    Attribute? spellCastingAbility;
+    try {
+      spellCastingAbility = Attribute.values.firstWhere(
+        (e) => e.name == (json['spellcasting_ability'] as String?),
+      );
+    } catch (e) {
+      spellCastingAbility = null;
+    }
+
     final desc = json['desc'] as String? ?? '';
 
     final List<Archetype> archetypes;
@@ -90,7 +98,7 @@ class Class extends Equatable {
   final String profTools;
   final String profArmor;
   final String profSkills;
-  final String? spellCastingAbility;
+  final Attribute? spellCastingAbility;
 
   Map<String, dynamic> toJson() {
     return {
@@ -104,7 +112,7 @@ class Class extends Equatable {
       'prof_tools': profTools,
       'prof_armor': profArmor,
       'prof_skills': profSkills,
-      'spellcasting_ability': spellCastingAbility,
+      'spellcasting_ability': spellCastingAbility?.name,
     };
   }
 

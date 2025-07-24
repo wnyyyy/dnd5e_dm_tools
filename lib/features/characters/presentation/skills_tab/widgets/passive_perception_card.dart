@@ -1,21 +1,19 @@
 import 'package:dnd5e_dm_tools/core/data/models/character.dart';
+import 'package:dnd5e_dm_tools/features/characters/bloc/character/character_bloc.dart';
+import 'package:dnd5e_dm_tools/features/characters/bloc/character/character_event.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class PassivePerceptionCard extends StatelessWidget {
-  const PassivePerceptionCard({
-    super.key,
-    required this.character,
-    this.onLongPress,
-  });
+  const PassivePerceptionCard({super.key, required this.character});
   final Character character;
-  final VoidCallback? onLongPress;
 
   @override
   Widget build(BuildContext context) {
     return Card.outlined(
       child: GestureDetector(
-        onLongPress: onLongPress,
+        onLongPress: () => _showPassivePerceptionDialog(context),
         child: Column(
           children: [
             Padding(
@@ -60,6 +58,50 @@ class PassivePerceptionCard extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  void _showPassivePerceptionDialog(BuildContext context) {
+    final controller = TextEditingController(
+      text: character.stats.passivePerception.toString(),
+    );
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Set Passive Perception'),
+          content: TextField(
+            controller: controller,
+            keyboardType: TextInputType.number,
+            decoration: const InputDecoration(labelText: 'Passive Perception'),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                final value = int.tryParse(controller.text);
+                if (value != null) {
+                  context.read<CharacterBloc>().add(
+                    CharacterUpdate(
+                      character: character.copyWith(
+                        stats: character.stats.copyWith(
+                          passivePerception: value,
+                        ),
+                      ),
+                      persistData: true,
+                    ),
+                  );
+                }
+                Navigator.of(context).pop();
+              },
+              child: const Text('Save'),
+            ),
+          ],
+        );
+      },
     );
   }
 }
