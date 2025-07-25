@@ -397,7 +397,7 @@ class ActionWidgetState extends State<ActionWidget> {
             }
             final ammoBackpackItem = backpack.getItemBySlug(ammo);
             final ammoQuantity = ammoBackpackItem?.quantity ?? 0;
-            ammoStr = '${ammoQuantity}x ${ammoItem.name}';
+            ammoStr = '${ammoQuantity}x ${ammoItem.name.split(' ').last}';
           } else {
             ammoStr = '';
           }
@@ -579,7 +579,9 @@ class ActionWidgetState extends State<ActionWidget> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     ItemDetailsDialogContent(
-                                      backpackItem: backpackItem,
+                                      backpackItem: backpackItem.copyWith(
+                                        item: item,
+                                      ),
                                     ),
                                   ],
                                 );

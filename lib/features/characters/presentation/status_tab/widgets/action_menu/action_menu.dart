@@ -170,8 +170,8 @@ class _ActionMenuState extends State<ActionMenu> {
                                 onUse: onUseAction,
                                 classs: widget.classs,
                                 race: widget.race,
-                                isEditMode: false,
-                                onActionsChanged: (List<Action> value) {},
+                                isEditMode: _isEditMode,
+                                onActionsChanged: onActionsChanged,
                               ),
                             );
                           }),

@@ -384,6 +384,29 @@ class _AddActionDialogState extends State<_AddActionDialog> {
                   _durationController.text = spell.duration;
                   _castTimeController.text = spell.castingTime;
                 }
+                if (_selected == ActionType.item && entry.value is Item) {
+                  if (entry.value is Weapon) {
+                    final weapon = entry.value as Weapon;
+                    _rangeController.text = '${weapon.range}';
+                    if (weapon.longRange != null) {
+                      _rangeController.text += '| ${weapon.longRange} ft';
+                    } else {
+                      _rangeController.text += ' ft';
+                    }
+                    _damageController.text = weapon.damage.dice;
+                    if (weapon.twoHandedDamage != null) {
+                      _damageController.text +=
+                          '|${weapon.twoHandedDamage?.dice ?? ''}';
+                    }
+                    final isDex =
+                        weapon.weaponCategory == WeaponCategory.martialRanged ||
+                        weapon.weaponCategory == WeaponCategory.simpleRanged;
+                    _damageController.text += isDex ? '+dex' : '+str';
+                    _attackController.text = isDex ? 'dex' : 'str';
+                    _attackController.text += '+prof';
+                    _typeController.text = weapon.damage.type.name;
+                  }
+                }
               } else {
                 _selectedEntry = 'none';
                 _titleController.clear();

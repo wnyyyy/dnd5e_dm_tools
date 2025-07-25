@@ -324,7 +324,7 @@ class ActionAbility extends Action {
     final json = super.toJson();
     json['ability'] = ability;
     json['requires_resource'] = requiresResource;
-    json['resource_type'] = resourceType;
+    json['resource_type'] = resourceType.index;
     json['used_count'] = usedCount;
     json['resource_formula'] = resourceFormula;
     json['resource_count'] = resourceCount;
