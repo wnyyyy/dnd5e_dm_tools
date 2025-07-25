@@ -826,8 +826,18 @@ class ActionWidgetState extends State<ActionWidget> {
       return const SizedBox();
     }
     if (remaining == 0 && requiresResource) {
-      return ActionChip(label: const Text('Recharge'), onPressed: () {});
+      return ActionChip(
+        label: const Text('Recharge'),
+        onPressed: () {
+          widget.onUse?.call(action: widget.action, recharge: true);
+        },
+      );
     }
-    return ActionChip(label: const Text('Use'), onPressed: () {});
+    return ActionChip(
+      label: const Text('Use'),
+      onPressed: () {
+        widget.onUse?.call(action: widget.action);
+      },
+    );
   }
 }

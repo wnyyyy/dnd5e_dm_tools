@@ -64,6 +64,16 @@ class Backpack extends Equatable {
     return copyWith(items: updatedItems);
   }
 
+  Backpack updateItemQuantity(String itemSlug, {required int quantity}) {
+    final updatedItems = items.map((item) {
+      if (item.itemSlug == itemSlug) {
+        return item.copyWith(quantity: quantity);
+      }
+      return item;
+    }).toList();
+    return copyWith(items: updatedItems);
+  }
+
   Backpack copyWith({
     List<BackpackItem>? items,
     int? copper,

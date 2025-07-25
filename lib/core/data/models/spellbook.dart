@@ -1,3 +1,4 @@
+import 'package:dnd5e_dm_tools/core/data/models/spell.dart';
 import 'package:equatable/equatable.dart';
 
 class Spellbook extends Equatable {
@@ -29,6 +30,20 @@ class Spellbook extends Equatable {
       'prepared_spells': preparedSpells,
       'expended_spell_slots': expendedSpellSlots,
     };
+  }
+
+  Spellbook useSlot(int level) {
+    final updatedSlots = Map<int, int>.from(expendedSpellSlots);
+    updatedSlots[level] = (updatedSlots[level] ?? 0) + 1;
+    return copyWith(expendedSpellSlots: updatedSlots);
+  }
+
+  Spellbook resetSlots() {
+    final updatedSlots = Map<int, int>.from(expendedSpellSlots);
+    for (final level in updatedSlots.keys) {
+      updatedSlots[level] = 0;
+    }
+    return copyWith(expendedSpellSlots: updatedSlots);
   }
 
   Spellbook copyWith({

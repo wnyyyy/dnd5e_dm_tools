@@ -1,4 +1,5 @@
 import 'package:dnd5e_dm_tools/core/data/models/action.dart';
+import 'package:dnd5e_dm_tools/core/data/models/backpack.dart';
 import 'package:dnd5e_dm_tools/core/data/models/character.dart';
 import 'package:dnd5e_dm_tools/core/data/models/class.dart';
 import 'package:dnd5e_dm_tools/core/data/models/race.dart';
@@ -7,7 +8,10 @@ import 'package:dnd5e_dm_tools/core/util/enum.dart';
 import 'package:dnd5e_dm_tools/features/characters/presentation/status_tab/widgets/action_menu/action_category_row.dart';
 import 'package:dnd5e_dm_tools/features/characters/presentation/status_tab/widgets/action_menu/action_widget.dart';
 import 'package:dnd5e_dm_tools/features/characters/presentation/status_tab/widgets/action_menu/add_action_button.dart';
+import 'package:dnd5e_dm_tools/features/rules/rules_cubit.dart';
+import 'package:dnd5e_dm_tools/features/rules/rules_state.dart';
 import 'package:flutter/material.dart' hide Action;
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class ActionMenu extends StatefulWidget {
   const ActionMenu({
@@ -188,7 +192,83 @@ class _ActionMenuState extends State<ActionMenu> {
     );
   }
 
-  void onUseAction({required Action action, bool recharge = false}) {}
+  void onUseAction({required Action action, bool recharge = false}) {
+    switch (action.type) {
+      case ActionType.ability:
+        final updatedAction = action.copyWith(
+          usedCount: recharge ? 0 : (action as ActionAbility).usedCount + 1,
+        );
+        final updatedActions = widget.character.actions.map((a) {
+          if (a.slug == action.slug) {
+            return updatedAction;
+          }
+          return a;
+        }).toList();
+        final updatedCharacter = widget.character.copyWith(
+          actions: updatedActions,
+        );
+        widget.onCharacterUpdated(updatedCharacter);
+      case ActionType.item:
+        if (recharge) {
+          return;
+        }
+        Backpack updatedBackpack = widget.character.backpack;
+        if ((action as ActionItem).expendable) {
+          final itemSlug = action.itemSlug;
+          final backpackItem = widget.character.backpack.getItemBySlug(
+            itemSlug,
+          );
+          if (backpackItem != null && backpackItem.quantity > 0) {
+            updatedBackpack = widget.character.backpack.updateItemQuantity(
+              itemSlug,
+              quantity: backpackItem.quantity - 1,
+            );
+          }
+        }
+        if (action.ammo != null) {
+          final ammoSlug = action.ammo!;
+          final ammoItem = widget.character.backpack.getItemBySlug(ammoSlug);
+          if (ammoItem != null && ammoItem.quantity > 0) {
+            updatedBackpack = updatedBackpack.updateItemQuantity(
+              ammoSlug,
+              quantity: ammoItem.quantity - 1,
+            );
+          }
+        }
+        final updatedCharacter = widget.character.copyWith(
+          backpack: updatedBackpack,
+        );
+        widget.onCharacterUpdated(updatedCharacter);
+      case ActionType.spell:
+        if (recharge) {
+          final updatedSpellbook = widget.character.spellbook.resetSlots();
+          final updatedCharacter = widget.character.copyWith(
+            spellbook: updatedSpellbook,
+          );
+          widget.onCharacterUpdated(updatedCharacter);
+          return;
+        }
+        final rulesState = context.read<RulesCubit>().state;
+        if (rulesState is! RulesStateLoaded) {
+          return;
+        }
+        if ((action as ActionSpell).spellSlug.isNotEmpty) {
+          final spellMap = rulesState.spellMap;
+          final spell = spellMap[action.spellSlug];
+          if (spell == null) {
+            return;
+          }
+          final level = spell.level;
+          if (level > 0) {
+            final updatedSpellbook = widget.character.spellbook.useSlot(level);
+            final updatedCharacter = widget.character.copyWith(
+              spellbook: updatedSpellbook,
+            );
+            widget.onCharacterUpdated(updatedCharacter);
+          }
+        }
+    }
+  }
 
   void onActionsChanged(List<Action> actions) {
     setState(() {
