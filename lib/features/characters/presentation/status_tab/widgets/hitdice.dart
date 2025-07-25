@@ -1,6 +1,8 @@
+import 'package:dnd5e_dm_tools/core/data/models/action.dart';
 import 'package:dnd5e_dm_tools/core/data/models/character.dart';
 import 'package:dnd5e_dm_tools/core/data/models/class.dart';
-import 'package:flutter/material.dart';
+import 'package:dnd5e_dm_tools/core/data/models/spellbook.dart';
+import 'package:flutter/material.dart' hide Action;
 
 class HitDice extends StatelessWidget {
   const HitDice({
@@ -188,17 +190,26 @@ class HitDice extends StatelessWidget {
                     onPressed: () {
                       Navigator.of(context).pop();
                       final int newCurrentHd;
+                      List<Action> updatedActions = character.actions;
+                      Spellbook updatedSpellbook = character.spellbook;
                       if (isShort) {
                         if (currHitDieInput > 0) {
                           newCurrentHd = currentHd - currHitDieInput;
                         } else {
                           newCurrentHd = currentHd;
                         }
+                        updatedActions = character.restoreActions(
+                          shortRest: true,
+                        );
                       } else {
                         newCurrentHd = maxHitDie;
+                        updatedActions = character.restoreActions();
+                        updatedSpellbook = updatedSpellbook.resetSlots();
                       }
                       final updatedCharacter = character.copyWith(
                         stats: character.stats.copyWith(hdCurr: newCurrentHd),
+                        actions: updatedActions,
+                        spellbook: updatedSpellbook,
                       );
                       onCharacterUpdated(updatedCharacter);
                     },

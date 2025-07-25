@@ -5,6 +5,7 @@ import 'package:dnd5e_dm_tools/core/data/models/character_stats.dart';
 import 'package:dnd5e_dm_tools/core/data/models/feat.dart';
 import 'package:dnd5e_dm_tools/core/data/models/proficiency.dart';
 import 'package:dnd5e_dm_tools/core/data/models/spellbook.dart';
+import 'package:dnd5e_dm_tools/core/util/enum.dart';
 import 'package:equatable/equatable.dart';
 
 class Character extends Equatable {
@@ -148,6 +149,21 @@ class Character extends Equatable {
       'spellbook': spellbook.toJson(),
       'actions': actions.map((e) => e.toJson()).toList(),
     };
+  }
+
+  List<Action> restoreActions({bool shortRest = false}) {
+    return actions.map((action) {
+      if (action.type == ActionType.ability) {
+        final abilityAction = action as ActionAbility;
+        if (abilityAction.resourceType == ResourceType.shortRest) {
+          return abilityAction.copyWith(usedCount: 0);
+        }
+        if (abilityAction.resourceType == ResourceType.longRest && !shortRest) {
+          return abilityAction.copyWith(usedCount: 0);
+        }
+      }
+      return action;
+    }).toList();
   }
 
   Character copyWith({
