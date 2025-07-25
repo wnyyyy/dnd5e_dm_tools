@@ -248,7 +248,7 @@ class SpellbookWidgetState extends State<SpellbookWidget> {
                   itemBuilder: (context, index) {
                     final level = index + 1;
                     final max = total[level] ?? 0;
-                    final curr = (slots[level] ?? max) - (expended[level] ?? 0);
+                    final curr = slots[level] ?? max;
 
                     return ListTile(
                       title: Text('${getOrdinal(level)} Level'),
