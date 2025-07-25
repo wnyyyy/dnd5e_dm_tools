@@ -1,12 +1,11 @@
 import 'package:dnd5e_dm_tools/core/data/models/character.dart';
 import 'package:dnd5e_dm_tools/core/data/models/class.dart';
-import 'package:dnd5e_dm_tools/core/data/models/spell.dart';
-import 'package:dnd5e_dm_tools/core/data/models/spellbook.dart';
 import 'package:dnd5e_dm_tools/core/util/const.dart';
 import 'package:dnd5e_dm_tools/core/util/enum.dart';
 import 'package:dnd5e_dm_tools/core/util/helper.dart';
 import 'package:dnd5e_dm_tools/features/characters/bloc/character/character_bloc.dart';
 import 'package:dnd5e_dm_tools/features/characters/bloc/character/character_event.dart';
+import 'package:dnd5e_dm_tools/features/characters/presentation/status_tab/widgets/action_menu/action_menu.dart';
 import 'package:dnd5e_dm_tools/features/characters/presentation/status_tab/widgets/hitdice.dart';
 import 'package:dnd5e_dm_tools/features/characters/presentation/status_tab/widgets/hitpoints.dart';
 import 'package:dnd5e_dm_tools/features/characters/presentation/status_tab/widgets/inspiration.dart';
@@ -184,9 +183,13 @@ class StatusTab extends StatelessWidget {
                 ),
               ],
             ),
-            // const SizedBox(height: 16),
-            // ActionMenu(character: character, slug: slug),
-            // const SizedBox(height: 400),
+            ActionMenu(
+              character: character,
+              classs: classs,
+              onCharacterUpdated: (updatedCharacter) =>
+                  onCharacterUpdated(updatedCharacter, context),
+            ),
+            const SizedBox(height: 400),
           ],
         ),
       ),
@@ -202,7 +205,6 @@ class StatusTab extends StatelessWidget {
     if (rulesState is! RulesStateLoaded) {
       return const SizedBox.shrink();
     }
-    final spells = rulesState.spells;
     return Padding(
       padding: const EdgeInsets.only(bottom: 8.0),
       child: Column(

@@ -1,4 +1,6 @@
-class ArmorClass {
+import 'package:equatable/equatable.dart';
+
+class ArmorClass extends Equatable {
   const ArmorClass({
     required this.base,
     required this.dexterityBonus,
@@ -31,4 +33,7 @@ class ArmorClass {
       'max_bonus': maxDexterityBonus,
     };
   }
+
+  @override
+  List<Object?> get props => [base, dexterityBonus, maxDexterityBonus];
 }

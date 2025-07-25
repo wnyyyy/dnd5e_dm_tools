@@ -1,5 +1,8 @@
+import 'package:dnd5e_dm_tools/core/data/models/asi.dart';
 import 'package:dnd5e_dm_tools/core/data/models/feat.dart';
+import 'package:dnd5e_dm_tools/core/util/enum.dart';
 import 'package:dnd5e_dm_tools/core/util/logger.dart';
+import 'package:petitparser/petitparser.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 Future<String?> readConfig(String key) async {
@@ -78,6 +81,57 @@ int fromOrdinal(String ordinal) {
   return int.tryParse(ordinal.replaceAll(RegExp('[a-zA-Z]'), '')) ?? 0;
 }
 
+String parseFormula(String description, ASI asi, int prof, int level) {
+  final Map<String, int> values = {'prof': prof, 'level': level};
+  final attributes = {
+    Attribute.strength: asi.strength,
+    Attribute.dexterity: asi.dexterity,
+    Attribute.constitution: asi.constitution,
+    Attribute.intelligence: asi.intelligence,
+    Attribute.wisdom: asi.wisdom,
+    Attribute.charisma: asi.charisma,
+  };
+
+  for (final entry in attributes.entries) {
+    final prefix = entry.key.name.substring(0, 3).toLowerCase();
+    final modifier = getModifier(entry.value);
+    values[prefix] = modifier;
+  }
+
+  final RegExp regExp = RegExp(r'\b(?:str|dex|con|int|wis|cha|prof|level)\b');
+
+  String processed = description.replaceAllMapped(regExp, (match) {
+    return values[match.group(0)]!.toString();
+  });
+
+  processed = processed.replaceAll('+-', '-');
+
+  final diceRegex = RegExp(r'\d+d\d+');
+  final dicePlaceholders = <String>[];
+  int diceIndex = 0;
+
+  processed = processed.replaceAllMapped(diceRegex, (match) {
+    final placeholder = '__DICE__${diceIndex}__';
+    dicePlaceholders.add(match.group(0)!);
+    diceIndex++;
+    return placeholder;
+  });
+
+  processed = _processFormula(processed);
+
+  processed = processed.splitMapJoin(
+    RegExp(r'([+\-*/])'),
+    onMatch: (m) => ' ${m.group(0)} ',
+    onNonMatch: (n) => n,
+  );
+
+  for (int i = 0; i < dicePlaceholders.length; i++) {
+    processed = processed.replaceAll('__DICE__${i}__', dicePlaceholders[i]);
+  }
+
+  return processed;
+}
+
 List<Feat> buildFeatList(List<String> lines) {
   final featMap = _buildFeatMap(lines, '###');
   final List<Feat> featList = [];
@@ -153,4 +207,56 @@ Map<String, Map<String, dynamic>> _buildFeatMap(
     }
   }
   return featMap;
+}
+
+String _processFormula(String formula) {
+  final arithmeticRegex = RegExp(r'(?<!\d)d|(?<![d])(\d+[\+\-\*/]\d+)');
+
+  String currentFormula = formula;
+  String previousFormula;
+
+  do {
+    previousFormula = currentFormula;
+    currentFormula = currentFormula.replaceAllMapped(arithmeticRegex, (match) {
+      if (match.group(0)!.contains('d')) {
+        return match.group(0)!;
+      } else {
+        return _evaluateExpression(match.group(0)!).toString();
+      }
+    });
+  } while (currentFormula != previousFormula);
+
+  return currentFormula;
+}
+
+num _evaluateExpression(String expression) {
+  final parser = _buildParser();
+  final result = parser.parse(expression);
+
+  if (result is Success) {
+    return result.value;
+  } else {
+    throw ArgumentError('Invalid expression: $expression');
+  }
+}
+
+Parser<num> _buildParser() {
+  final builder = ExpressionBuilder<num>();
+
+  builder.primitive(
+    (char('(') & ref0(_buildParser) & char(')')).map(
+      (values) => values[1] as num? ?? 0,
+    ),
+  );
+  builder.primitive(digit().plus().flatten().trim().map(num.parse));
+
+  builder.group()
+    ..left(char('*').trim(), (a, op, b) => a * b)
+    ..left(char('/').trim(), (a, op, b) => a / b);
+
+  builder.group()
+    ..left(char('+').trim(), (a, op, b) => a + b)
+    ..left(char('-').trim(), (a, op, b) => a - b);
+
+  return builder.build().end();
 }

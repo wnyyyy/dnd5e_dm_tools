@@ -1,6 +1,7 @@
 import 'package:dnd5e_dm_tools/core/util/enum.dart';
+import 'package:equatable/equatable.dart';
 
-class Cost {
+class Cost extends Equatable {
   const Cost({required this.quantity, required this.unit});
 
   factory Cost.fromJson(Map<String, dynamic> json) {
@@ -65,5 +66,5 @@ class Cost {
   }
 
   @override
-  String toString() => '$quantity ${unit.symbol}';
+  List<Object?> get props => [quantity, unit];
 }

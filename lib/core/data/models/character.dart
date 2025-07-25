@@ -1,3 +1,4 @@
+import 'package:dnd5e_dm_tools/core/data/models/action.dart';
 import 'package:dnd5e_dm_tools/core/data/models/asi.dart';
 import 'package:dnd5e_dm_tools/core/data/models/backpack.dart';
 import 'package:dnd5e_dm_tools/core/data/models/character_stats.dart';
@@ -20,6 +21,7 @@ class Character extends Equatable {
     required this.stats,
     required this.backpack,
     required this.spellbook,
+    required this.actions,
     this.color,
     this.archetype,
   });
@@ -68,6 +70,15 @@ class Character extends Equatable {
       (json['spellbook'] as Map<String, dynamic>?) ?? {},
     );
 
+    final actions =
+        (json['actions'] as List<dynamic>?)
+            ?.map(
+              (e) =>
+                  Action.fromJson(Map<String, dynamic>.from(e as Map? ?? {})),
+            )
+            .toList() ??
+        [];
+
     return Character(
       slug: documentId,
       name: name,
@@ -83,6 +94,7 @@ class Character extends Equatable {
       stats: characterStats,
       backpack: backpack,
       spellbook: spellbook,
+      actions: actions,
     );
   }
 
@@ -117,6 +129,7 @@ class Character extends Equatable {
   final CharacterStats stats;
   final Backpack backpack;
   final Spellbook spellbook;
+  final List<Action> actions;
 
   Map<String, dynamic> toJson() {
     return {
@@ -144,6 +157,7 @@ class Character extends Equatable {
     CharacterStats? stats,
     Backpack? backpack,
     Spellbook? spellbook,
+    List<Action>? actions,
   }) {
     return Character(
       slug: slug,
@@ -160,6 +174,7 @@ class Character extends Equatable {
       stats: stats ?? this.stats,
       backpack: backpack ?? this.backpack,
       spellbook: spellbook ?? this.spellbook,
+      actions: actions ?? this.actions,
     );
   }
 
@@ -179,6 +194,7 @@ class Character extends Equatable {
     stats,
     backpack,
     spellbook,
+    actions,
   ];
 
   @override

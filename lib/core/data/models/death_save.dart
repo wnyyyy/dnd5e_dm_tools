@@ -1,4 +1,6 @@
-class DeathSave {
+import 'package:equatable/equatable.dart';
+
+class DeathSave extends Equatable {
   const DeathSave({required this.successes, required this.fails});
 
   factory DeathSave.fromJson(Map<String, dynamic> json) {
@@ -23,5 +25,5 @@ class DeathSave {
   }
 
   @override
-  String toString() => 'DeathSave successes: $successes, fails: $fails';
+  List<Object?> get props => [successes, fails];
 }

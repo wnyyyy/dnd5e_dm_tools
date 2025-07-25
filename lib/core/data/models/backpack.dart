@@ -52,6 +52,11 @@ class Backpack extends Equatable {
   final int silver;
   final int gold;
 
+  BackpackItem? getItemBySlug(String itemSlug) {
+    final item = items.where((item) => item.itemSlug == itemSlug).firstOrNull;
+    return item;
+  }
+
   Backpack removeBySlug(String itemSlug) {
     final updatedItems = items
         .where((item) => item.itemSlug != itemSlug)

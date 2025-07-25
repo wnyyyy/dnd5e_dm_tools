@@ -1,6 +1,7 @@
 import 'package:dnd5e_dm_tools/core/util/enum.dart';
+import 'package:equatable/equatable.dart';
 
-class Damage {
+class Damage extends Equatable {
   const Damage({required this.dice, required this.type});
 
   factory Damage.fromJson(Map<String, dynamic> json) {
@@ -33,5 +34,5 @@ class Damage {
   }
 
   @override
-  String toString() => 'Damage $dice ${type.name}';
+  List<Object?> get props => [dice, type];
 }

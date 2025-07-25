@@ -1,3 +1,4 @@
+import 'package:dnd5e_dm_tools/core/data/models/action.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttericon/font_awesome5_icons.dart';
 import 'package:fluttericon/font_awesome_icons.dart';
@@ -356,6 +357,34 @@ extension RarityColor on Rarity {
 }
 
 enum ActionMenuMode { all, abilities, items, spells }
+
+extension ActionMenuModeName on ActionMenuMode {
+  String get name {
+    switch (this) {
+      case ActionMenuMode.all:
+        return 'All';
+      case ActionMenuMode.abilities:
+        return 'Abilities';
+      case ActionMenuMode.items:
+        return 'Items';
+      case ActionMenuMode.spells:
+        return 'Spells';
+    }
+  }
+
+  List<ActionType> get types {
+    switch (this) {
+      case ActionMenuMode.all:
+        return ActionType.values;
+      case ActionMenuMode.abilities:
+        return [ActionType.ability];
+      case ActionMenuMode.items:
+        return [ActionType.item];
+      case ActionMenuMode.spells:
+        return [ActionType.spell];
+    }
+  }
+}
 
 enum EquipFilter { all, equipped, canEquip }
 
