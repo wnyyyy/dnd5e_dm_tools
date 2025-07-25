@@ -31,19 +31,6 @@ class FeatList extends StatelessWidget {
     final allFeats = rulesState.feats;
     final charFeats = character.getFeatList(allFeats);
 
-    void onItemsChanged(List<Feat> newFeats) {
-      final featsSlug = newFeats.fold<Map<String, String>>({}, (map, feat) {
-        map[feat.slug] = feat.descOverride ?? '';
-        return map;
-      });
-      context.read<CharacterBloc>().add(
-        CharacterUpdate(
-          character: character.copyWith(feats: featsSlug),
-          persistData: true,
-        ),
-      );
-    }
-
     void onAddItem() {
       showDialog(
         context: context,
@@ -79,7 +66,28 @@ class FeatList extends StatelessWidget {
                   baseStyle: Theme.of(context).textTheme.bodyMedium!,
                 ),
               ),
+              actionsAlignment: MainAxisAlignment.spaceBetween,
               actions: [
+                TextButton(
+                  onPressed: () {
+                    final characterState = context.read<CharacterBloc>().state;
+                    if (characterState is! CharacterLoaded) return;
+                    final character = characterState.character;
+                    final updatedFeats = Map<String, String>.from(
+                      character.feats,
+                    );
+                    updatedFeats.remove(feat.slug);
+                    updatedFeats.remove(feat.name);
+                    context.read<CharacterBloc>().add(
+                      CharacterUpdate(
+                        character: character.copyWith(feats: updatedFeats),
+                        persistData: true,
+                      ),
+                    );
+                    Navigator.of(context).pop();
+                  },
+                  child: const Icon(Icons.delete),
+                ),
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(),
                   child: const Icon(Icons.close),
@@ -93,8 +101,8 @@ class FeatList extends StatelessWidget {
 
     return GenericList(
       items: charFeats,
-      onItemsChanged: (newList) => onItemsChanged(newList),
       onAddItem: () => onAddItem(),
+      onItemsChanged: null,
       tableName: 'Feats',
       onSelectItem: (feat) => onFeatSelected(feat),
       emptyMessage: 'None',

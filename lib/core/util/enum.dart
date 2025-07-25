@@ -418,6 +418,23 @@ extension AttributeName on Attribute {
         return 'Charisma';
     }
   }
+
+  String get prefix {
+    switch (this) {
+      case Attribute.strength:
+        return 'str';
+      case Attribute.dexterity:
+        return 'dex';
+      case Attribute.constitution:
+        return 'con';
+      case Attribute.intelligence:
+        return 'int';
+      case Attribute.wisdom:
+        return 'wis';
+      case Attribute.charisma:
+        return 'cha';
+    }
+  }
 }
 
 enum ProficiencyLevel { proficient, expert, none }

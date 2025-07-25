@@ -146,6 +146,7 @@ class Character extends Equatable {
       'character_stats': stats.toJson(),
       'backpack': backpack.toJson(),
       'spellbook': spellbook.toJson(),
+      'actions': actions.map((e) => e.toJson()).toList(),
     };
   }
 

@@ -69,7 +69,7 @@ class _SpellInfoState extends State<SpellInfo> {
               ),
               const SizedBox(height: 24, child: Divider()),
               DescriptionText(
-                inputText: widget.spell.desc,
+                inputText: widget.spell.fullDesc,
                 baseStyle: Theme.of(context).textTheme.bodyMedium!,
               ),
               const SizedBox(height: 24, child: Divider()),

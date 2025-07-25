@@ -78,6 +78,11 @@ class Spell extends Equatable {
     };
   }
 
+  String get fullDesc {
+    return desc +
+        (higherLevel.isNotEmpty ? '\n\n*At Higher Levels: $higherLevel*' : '');
+  }
+
   Spell copyWith({
     String? slug,
     String? name,

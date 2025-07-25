@@ -15,7 +15,7 @@ class GenericList<T> extends StatefulWidget {
   });
 
   final List<T> items;
-  final void Function(List<T>) onItemsChanged;
+  final void Function(List<T>)? onItemsChanged;
   final void Function() onAddItem;
   final void Function(T) onSelectItem;
   final String tableName;
@@ -81,7 +81,7 @@ class _GenericListState<T> extends State<GenericList<T>> {
                     updated['description'] = descriptionController.text;
                     setState(() {
                       widget.items[index] = updated as T;
-                      widget.onItemsChanged(widget.items);
+                      widget.onItemsChanged?.call(widget.items);
                     });
                   }
                   if (item is Feat) {
@@ -94,7 +94,7 @@ class _GenericListState<T> extends State<GenericList<T>> {
                     );
                     setState(() {
                       widget.items[index] = newFeat as T;
-                      widget.onItemsChanged(widget.items);
+                      widget.onItemsChanged?.call(widget.items);
                     });
                   }
                   Navigator.of(context).pop();
@@ -106,7 +106,7 @@ class _GenericListState<T> extends State<GenericList<T>> {
               onPressed: () {
                 setState(() {
                   widget.items.removeAt(index);
-                  widget.onItemsChanged(widget.items);
+                  widget.onItemsChanged?.call(widget.items);
                 });
                 Navigator.of(context).pop();
               },
@@ -185,7 +185,7 @@ class _GenericListState<T> extends State<GenericList<T>> {
             return ListTile(
               title: Text(widget.displayKeyGetter(item)),
               onTap: () => widget.onSelectItem(item),
-              trailing: _isEditMode
+              trailing: _isEditMode && widget.onItemsChanged != null
                   ? IconButton(
                       icon: const Icon(Icons.edit),
                       onPressed: () => _editItem(index, item),

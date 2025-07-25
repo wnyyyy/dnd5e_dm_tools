@@ -1,10 +1,12 @@
 import 'package:dnd5e_dm_tools/core/data/models/action.dart';
 import 'package:dnd5e_dm_tools/core/data/models/character.dart';
 import 'package:dnd5e_dm_tools/core/data/models/class.dart';
+import 'package:dnd5e_dm_tools/core/data/models/race.dart';
 import 'package:dnd5e_dm_tools/core/util/enum.dart';
 import 'package:dnd5e_dm_tools/core/util/helper.dart';
 import 'package:dnd5e_dm_tools/core/widgets/description_text.dart';
 import 'package:dnd5e_dm_tools/features/characters/presentation/equip_tab/widgets/item_details_dialog_content.dart';
+import 'package:dnd5e_dm_tools/features/characters/presentation/status_tab/widgets/action_menu/add_action_button.dart';
 import 'package:dnd5e_dm_tools/features/rules/rules_cubit.dart';
 import 'package:dnd5e_dm_tools/features/rules/rules_state.dart';
 import 'package:flutter/material.dart' hide Action;
@@ -22,6 +24,7 @@ class ActionWidget extends StatefulWidget {
     required this.action,
     required this.character,
     required this.classs,
+    required this.race,
     required this.isEditMode,
     required this.onActionsChanged,
     required this.onUse,
@@ -29,6 +32,7 @@ class ActionWidget extends StatefulWidget {
   final Action action;
   final Character character;
   final Class classs;
+  final Race race;
   final bool isEditMode;
   final ValueChanged<List<Action>> onActionsChanged;
   final OnUseActionCallback? onUse;
@@ -50,7 +54,10 @@ class ActionWidgetState extends State<ActionWidget> {
     final backpack = widget.character.backpack;
     final action = widget.action;
     final classs = widget.classs;
-    final spellSlots = classs.getSpellSlotsForLevel(widget.character.level);
+    final spellSlots = classs.getSpellSlotsForLevel(
+      widget.character.level,
+      feats: widget.character.feats,
+    );
     final expendedSpellSlots = widget.character.spellbook.expendedSpellSlots;
     final type = action.type;
 
@@ -237,6 +244,7 @@ class ActionWidgetState extends State<ActionWidget> {
             break;
           }
           final level = spell.level;
+          final levelText = spell.levelText;
           final school = spell.school;
           if (level == 0) {
             children.add(
@@ -244,11 +252,13 @@ class ActionWidgetState extends State<ActionWidget> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    school.toString().sentenceCase,
+                    school.name,
                     softWrap: false,
-                    style: boldThemeMedium,
+                    style: Theme.of(
+                      context,
+                    ).textTheme.labelMedium!.copyWith(color: school.color),
                   ),
-                  Text('$level', softWrap: false, style: boldThemeMedium),
+                  Text(levelText, softWrap: false, style: boldThemeMedium),
                 ],
               ),
             );
@@ -258,23 +268,16 @@ class ActionWidgetState extends State<ActionWidget> {
                 totalSlots - (expendedSpellSlots[level] ?? 0);
             children.add(
               Column(
-                mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    school.toString().sentenceCase,
+                    school.name,
+                    style: Theme.of(
+                      context,
+                    ).textTheme.labelMedium!.copyWith(color: school.color),
                     softWrap: false,
-                    style: Theme.of(context).textTheme.labelMedium!.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
                   ),
-                  Text(
-                    '$level',
-                    softWrap: false,
-                    style: Theme.of(context).textTheme.labelMedium!.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(width: 36, child: Divider(height: 6)),
+                  Text(levelText, softWrap: false, style: boldThemeMedium),
+                  const SizedBox(width: 36, child: Divider(height: 8)),
                   Padding(
                     padding: const EdgeInsets.only(bottom: 2),
                     child: Row(
@@ -456,10 +459,7 @@ class ActionWidgetState extends State<ActionWidget> {
               children: List.generate(children.length, (index) {
                 return Card.outlined(
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 4),
                     child: children[index],
                   ),
                 );
@@ -473,10 +473,7 @@ class ActionWidgetState extends State<ActionWidget> {
                   crossAxisCellCount: 1,
                   child: Card.outlined(
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 4),
                       child: children[index],
                     ),
                   ),
@@ -542,10 +539,7 @@ class ActionWidgetState extends State<ActionWidget> {
             Align(
               child: SizedBox(width: screenWidth * 0.8, child: const Divider()),
             ),
-            Padding(
-              padding: const EdgeInsets.only(left: 6, right: 6),
-              child: buildSubtitle(context),
-            ),
+            buildSubtitle(context),
             AnimatedCrossFade(
               firstChild: Container(),
               secondChild: Column(
@@ -736,7 +730,8 @@ class ActionWidgetState extends State<ActionWidget> {
       children.add(_buildVerticalField('Range', range, context));
     }
 
-    if (actionFields.duration?.isNotEmpty ?? false) {
+    if ((actionFields.duration?.isNotEmpty ?? false) &&
+        actionFields.duration?.toLowerCase() != 'instantaneous') {
       final duration = actionFields.duration?.sentenceCase ?? '';
       children.add(_buildVerticalField('Duration', duration, context));
     }
@@ -772,8 +767,17 @@ class ActionWidgetState extends State<ActionWidget> {
     }
 
     if (actionFields.castTime?.isNotEmpty ?? false) {
-      final castTime = actionFields.castTime?.titleCase ?? '';
-      children.add(_buildVerticalField('Cast Time', castTime, context));
+      final castTimeStr = actionFields.castTime?.toLowerCase();
+      final castTime = castTimeStr == '1 action'
+          ? 'action'
+          : castTimeStr == '1 bonus action'
+          ? 'bonus action'
+          : castTimeStr == '1 reaction'
+          ? 'reaction'
+          : castTimeStr ?? '';
+      children.add(
+        _buildVerticalField('Cast Time', castTime.titleCase, context),
+      );
     }
 
     return children;
@@ -807,15 +811,15 @@ class ActionWidgetState extends State<ActionWidget> {
     bool requiresResource,
   ) {
     final editMode = widget.isEditMode;
-    // if (editMode) {
-    //   return AddActionButton(
-    //     character: widget.character,
-    //     slug: widget.characterSlug,
-    //     action: widget.action,
-    //     actionSlug: widget.actionSlug,
-    //     onActionsChanged: widget.onActionsChanged,
-    //   );
-    // }
+    if (editMode) {
+      return AddActionButton(
+        character: widget.character,
+        action: widget.action,
+        classs: widget.classs,
+        race: widget.race,
+        onActionsChanged: widget.onActionsChanged,
+      );
+    }
     if (!usable) {
       return const SizedBox();
     }

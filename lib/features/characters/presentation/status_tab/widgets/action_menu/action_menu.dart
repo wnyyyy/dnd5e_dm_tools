@@ -1,10 +1,12 @@
 import 'package:dnd5e_dm_tools/core/data/models/action.dart';
 import 'package:dnd5e_dm_tools/core/data/models/character.dart';
 import 'package:dnd5e_dm_tools/core/data/models/class.dart';
+import 'package:dnd5e_dm_tools/core/data/models/race.dart';
 import 'package:dnd5e_dm_tools/core/util/const.dart';
 import 'package:dnd5e_dm_tools/core/util/enum.dart';
 import 'package:dnd5e_dm_tools/features/characters/presentation/status_tab/widgets/action_menu/action_category_row.dart';
 import 'package:dnd5e_dm_tools/features/characters/presentation/status_tab/widgets/action_menu/action_widget.dart';
+import 'package:dnd5e_dm_tools/features/characters/presentation/status_tab/widgets/action_menu/add_action_button.dart';
 import 'package:flutter/material.dart' hide Action;
 
 class ActionMenu extends StatefulWidget {
@@ -12,11 +14,13 @@ class ActionMenu extends StatefulWidget {
     super.key,
     required this.character,
     required this.classs,
+    required this.race,
     required this.onCharacterUpdated,
     this.height,
   });
   final Character character;
   final Class classs;
+  final Race race;
   final double? height;
   final ValueChanged<Character> onCharacterUpdated;
 
@@ -25,9 +29,16 @@ class ActionMenu extends StatefulWidget {
 }
 
 class _ActionMenuState extends State<ActionMenu> {
+  bool _isEditMode = false;
   ActionMenuMode _mode = ActionMenuMode.all;
   late List<Action> actions;
   late ScrollController _scrollController;
+
+  void _enableEditMode() {
+    setState(() {
+      _isEditMode = !_isEditMode;
+    });
+  }
 
   @override
   void initState() {
@@ -101,6 +112,23 @@ class _ActionMenuState extends State<ActionMenu> {
                                   ).colorScheme.onSecondaryContainer,
                                 ),
                           ),
+                          Row(
+                            children: [
+                              IconButton(
+                                onPressed: _enableEditMode,
+                                icon: Icon(
+                                  _isEditMode ? Icons.check : Icons.edit,
+                                ),
+                              ),
+                              if (_isEditMode)
+                                AddActionButton(
+                                  character: widget.character,
+                                  onActionsChanged: onActionsChanged,
+                                  classs: widget.classs,
+                                  race: widget.race,
+                                ),
+                            ],
+                          ),
                         ],
                       ),
                     ),
@@ -141,6 +169,7 @@ class _ActionMenuState extends State<ActionMenu> {
                                 character: widget.character,
                                 onUse: onUseAction,
                                 classs: widget.classs,
+                                race: widget.race,
                                 isEditMode: false,
                                 onActionsChanged: (List<Action> value) {},
                               ),

@@ -149,6 +149,7 @@ class _CharacterScreenState extends State<CharacterScreen>
                             StatusTab(
                               character: state.character,
                               classs: state.classs,
+                              race: state.race,
                             ),
                             SkillsTab(
                               character: state.character,

@@ -1,5 +1,6 @@
 import 'package:dnd5e_dm_tools/core/data/models/character.dart';
 import 'package:dnd5e_dm_tools/core/data/models/class.dart';
+import 'package:dnd5e_dm_tools/core/data/models/race.dart';
 import 'package:dnd5e_dm_tools/core/util/const.dart';
 import 'package:dnd5e_dm_tools/core/util/enum.dart';
 import 'package:dnd5e_dm_tools/core/util/helper.dart';
@@ -19,9 +20,15 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttericon/octicons_icons.dart';
 
 class StatusTab extends StatelessWidget {
-  const StatusTab({super.key, required this.character, required this.classs});
+  const StatusTab({
+    super.key,
+    required this.character,
+    required this.classs,
+    required this.race,
+  });
   final Character character;
   final Class classs;
+  final Race race;
 
   @override
   Widget build(BuildContext context) {
@@ -186,6 +193,7 @@ class StatusTab extends StatelessWidget {
             ActionMenu(
               character: character,
               classs: classs,
+              race: race,
               onCharacterUpdated: (updatedCharacter) =>
                   onCharacterUpdated(updatedCharacter, context),
             ),

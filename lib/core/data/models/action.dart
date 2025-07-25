@@ -54,6 +54,7 @@ abstract class Action extends Equatable {
           resourceType: ResourceType.values[json['resource_type'] as int? ?? 0],
           usedCount: json['used_count'] as int? ?? 0,
           resourceFormula: json['resource_formula'] as String? ?? '',
+          resourceCount: json['resource_count'] as int?,
         );
     }
   }
@@ -88,6 +89,7 @@ abstract class Action extends Equatable {
     int? usedCount,
     String? resourceFormula,
     String? description,
+    int? resourceCount,
   }) {
     switch (type) {
       case ActionType.item:
@@ -122,6 +124,7 @@ abstract class Action extends Equatable {
           usedCount: usedCount ?? (this as ActionAbility).usedCount,
           resourceFormula:
               resourceFormula ?? (this as ActionAbility).resourceFormula,
+          resourceCount: resourceCount ?? (this as ActionAbility).resourceCount,
         );
     }
   }
@@ -292,6 +295,7 @@ class ActionAbility extends Action {
     this.requiresResource = false,
     this.resourceType = ResourceType.none,
     this.usedCount = 0,
+    this.resourceCount,
     required this.resourceFormula,
   }) : super(type: ActionType.ability);
 
@@ -300,6 +304,7 @@ class ActionAbility extends Action {
   final ResourceType resourceType;
   final int usedCount;
   final String resourceFormula;
+  final int? resourceCount;
 
   @override
   Map<String, dynamic> toJson() {
@@ -309,6 +314,7 @@ class ActionAbility extends Action {
     json['resource_type'] = resourceType;
     json['used_count'] = usedCount;
     json['resource_formula'] = resourceFormula;
+    json['resource_count'] = resourceCount;
     return json;
   }
 
@@ -322,5 +328,6 @@ class ActionAbility extends Action {
     resourceType,
     usedCount,
     resourceFormula,
+    resourceCount,
   ];
 }

@@ -151,8 +151,20 @@ class Class extends Equatable {
     );
   }
 
-  Map<int, int> getSpellSlotsForLevel(int level) {
-    return table.getSpellSlotsForLevel(level);
+  Map<int, int> getSpellSlotsForLevel(
+    int level, {
+    Map<String, String?>? feats,
+  }) {
+    final slots = table.getSpellSlotsForLevel(level);
+    if (slots.isEmpty && feats != null) {
+      final isMagicInitiate =
+          feats.containsKey('magic_initiate') ||
+          feats.containsKey('magic-initiate');
+      if (isMagicInitiate) {
+        return {1: 1};
+      }
+    }
+    return slots;
   }
 
   int getHighestSpellSlotLevel(int level) {
@@ -160,6 +172,10 @@ class Class extends Equatable {
     return slots.keys.isNotEmpty
         ? slots.keys.reduce((a, b) => a > b ? a : b)
         : 0;
+  }
+
+  Archetype? getArchetype(String slug) {
+    return archetypes.where((archetype) => archetype.slug == slug).firstOrNull;
   }
 
   List<Feat> getFeatures({int level = 20}) {
