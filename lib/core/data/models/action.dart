@@ -3,6 +3,19 @@ import 'package:equatable/equatable.dart';
 
 enum ActionType { item, spell, ability }
 
+extension ActionTypeOrder on ActionType {
+  int get order {
+    switch (this) {
+      case ActionType.ability:
+        return 0;
+      case ActionType.item:
+        return 1;
+      case ActionType.spell:
+        return 2;
+    }
+  }
+}
+
 abstract class Action extends Equatable {
   const Action({
     required this.slug,

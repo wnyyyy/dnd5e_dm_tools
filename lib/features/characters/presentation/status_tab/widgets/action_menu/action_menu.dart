@@ -198,22 +198,25 @@ class _ActionMenuState extends State<ActionMenu> {
   }
 
   List<Action> _getFilteredItems(List<Action> actions) {
+    List<Action> filtered;
     if (_mode == ActionMenuMode.all) {
-      return actions;
+      filtered = List<Action>.from(actions);
+    } else {
+      filtered = [
+        for (final action in actions)
+          if (_mode == ActionMenuMode.abilities &&
+              action.type == ActionType.ability)
+            action
+          else if (_mode == ActionMenuMode.items &&
+              action.type == ActionType.item)
+            action
+          else if (_mode == ActionMenuMode.spells &&
+              action.type == ActionType.spell)
+            action,
+      ];
     }
-    final filtered = List<Action>.empty(growable: true);
-    for (final action in actions) {
-      if (_mode == ActionMenuMode.abilities &&
-          action.type == ActionType.ability) {
-        filtered.add(action);
-      } else if (_mode == ActionMenuMode.items &&
-          action.type == ActionType.item) {
-        filtered.add(action);
-      } else if (_mode == ActionMenuMode.spells &&
-          action.type == ActionType.spell) {
-        filtered.add(action);
-      }
-    }
+
+    filtered.sort((a, b) => a.type.order.compareTo(b.type.order));
     return filtered;
   }
 }

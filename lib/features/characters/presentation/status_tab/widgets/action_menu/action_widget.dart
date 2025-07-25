@@ -487,7 +487,7 @@ class ActionWidgetState extends State<ActionWidget> {
 
     final screenWidth = MediaQuery.of(context).size.width;
     final TextStyle? baseTitleTheme;
-    if (screenWidth < 1200 && action.title.length > 16) {
+    if (screenWidth < 1200 && action.title.length > 24) {
       baseTitleTheme = Theme.of(context).textTheme.titleMedium;
     } else {
       baseTitleTheme = Theme.of(context).textTheme.titleLarge;
