@@ -179,6 +179,9 @@ class SpellbookWidgetState extends State<SpellbookWidget> {
 
     final List<Padding> texts = [];
     for (final entry in slots.entries) {
+      if (entry.value == 0) {
+        continue;
+      }
       texts.add(
         Padding(
           padding: const EdgeInsets.all(8.0),

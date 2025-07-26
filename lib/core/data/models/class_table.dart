@@ -81,6 +81,30 @@ class ClassTableRow extends Equatable {
       );
     }
 
+    final Map<int, int> spellSlots = {};
+    for (var i = 1; i <= 9; i++) {
+      final key = '${i}th';
+      if (i == 1) {
+        // "1st" instead of "1th"
+        if (map.containsKey('1st')) {
+          final value = int.tryParse(map['1st'].toString()) ?? 0;
+          if (value > 0) spellSlots[1] = value;
+        }
+      } else if (map.containsKey(key)) {
+        final value = int.tryParse(map[key].toString()) ?? 0;
+        if (value > 0) spellSlots[i] = value;
+      }
+    }
+
+    int? cantripsKnown;
+    if (map.containsKey('Cantrips Known')) {
+      cantripsKnown = int.tryParse(map['Cantrips Known'].toString());
+    }
+    int? spellsKnown;
+    if (map.containsKey('Spells Known')) {
+      spellsKnown = int.tryParse(map['Spells Known'].toString());
+    }
+
     const standardFields = [
       'lv.',
       'level',
@@ -115,6 +139,9 @@ class ClassTableRow extends Equatable {
       proficiencyBonus: proficiencyBonus,
       features: features,
       classSpecificFeatures: classSpecific,
+      spellSlots: spellSlots.isNotEmpty ? spellSlots : null,
+      cantripsKnown: cantripsKnown,
+      spellsKnown: spellsKnown,
     );
   }
 
