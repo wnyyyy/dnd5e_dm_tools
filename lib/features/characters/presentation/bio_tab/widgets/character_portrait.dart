@@ -6,11 +6,11 @@ import 'package:dnd5e_dm_tools/features/characters/bloc/character/character_bloc
 import 'package:dnd5e_dm_tools/features/characters/bloc/character/character_event.dart';
 import 'package:dnd5e_dm_tools/features/characters/presentation/bio_tab/widgets/class_description.dart';
 import 'package:dnd5e_dm_tools/features/settings/bloc/settings_cubit.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
 
 class CharacterPortrait extends StatelessWidget {
   const CharacterPortrait({

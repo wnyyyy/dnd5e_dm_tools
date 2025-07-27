@@ -1,4 +1,3 @@
-import 'package:dnd5e_dm_tools/core/data/models/spell.dart';
 import 'package:equatable/equatable.dart';
 
 class Spellbook extends Equatable {

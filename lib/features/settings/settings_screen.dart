@@ -5,23 +5,29 @@ import 'package:dnd5e_dm_tools/features/settings/bloc/settings_states.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class SettingsScreen extends StatelessWidget {
-  SettingsScreen({super.key});
+class SettingsScreen extends StatefulWidget {
+  const SettingsScreen({super.key});
 
+  @override
+  State<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends State<SettingsScreen> {
   final TextEditingController _nameController = TextEditingController();
+  bool? _isCasterDraft;
+
+  @override
+  void didChangeDependencies() {
+    final state = context.read<SettingsCubit>().state;
+    _isCasterDraft = state.isCaster;
+    _nameController.text = state.name;
+    super.didChangeDependencies();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<SettingsCubit, SettingsState>(
-      listenWhen: (previous, current) => previous.name != current.name,
-      listener: (context, state) {
-        _nameController.text = state.name;
-      },
-      buildWhen: (previous, current) => previous.name != current.name,
+    return BlocBuilder<SettingsCubit, SettingsState>(
       builder: (context, state) {
-        if (_nameController.text != state.name) {
-          _nameController.text = state.name;
-        }
         return SingleChildScrollView(
           child: Flex(
             direction: Axis.vertical,
@@ -34,19 +40,19 @@ class SettingsScreen extends StatelessWidget {
                       horizontal: 32,
                       vertical: 16,
                     ),
-                    child: _buildNameField(context),
+                    child: _buildNameField(context, state),
                   ),
                   Padding(
                     padding: EdgeInsets.symmetric(
                       horizontal: MediaQuery.of(context).size.width * 0.2,
                     ),
-                    child: _buildIsCasterToggle(context),
+                    child: _buildIsCasterToggle(context, state),
                   ),
                 ],
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 32),
-                child: _buildEditButton(context),
+                child: _buildEditButton(context, state),
               ),
             ],
           ),
@@ -55,91 +61,83 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildNameField(BuildContext context) {
+  Widget _buildNameField(BuildContext context, SettingsState state) {
     return TextFormField(
       controller: _nameController,
       decoration: const InputDecoration(labelText: 'Name'),
-      readOnly: !BlocProvider.of<SettingsCubit>(context).state.isEditMode,
+      readOnly: !state.isEditMode,
     );
   }
 
-  Widget _buildIsCasterToggle(BuildContext context) {
-    return BlocBuilder<SettingsCubit, SettingsState>(
-      builder: (context, state) {
-        return Column(
-          children: [
-            SwitchListTile(
-              title: const Text('Is Caster'),
-              value: state.isCaster,
-              onChanged: (value) {
-                BlocProvider.of<SettingsCubit>(context).toggleIsCaster();
-              },
-            ),
-            Visibility(
-              visible: state.isCaster,
-              child: SwitchListTile(
-                title: const Text('Class-only spells'),
-                value: state.classOnlySpells,
-                onChanged: (value) {
-                  BlocProvider.of<SettingsCubit>(
-                    context,
-                  ).toggleClassOnlySpells();
-                },
-              ),
-            ),
-          ],
-        );
-      },
+  Widget _buildIsCasterToggle(BuildContext context, SettingsState state) {
+    return Column(
+      children: [
+        SwitchListTile(
+          title: const Text('Is Caster'),
+          value: _isCasterDraft ?? state.isCaster,
+          onChanged: state.isEditMode
+              ? (value) {
+                  setState(() {
+                    _isCasterDraft = value;
+                  });
+                }
+              : null,
+        ),
+      ],
     );
   }
 
-  Widget _buildEditButton(BuildContext context) {
-    return BlocBuilder<SettingsCubit, SettingsState>(
-      builder: (context, state) {
-        if (state.isEditMode) {
-          return Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              ElevatedButton(
-                onPressed: () {
-                  BlocProvider.of<SettingsCubit>(
-                    context,
-                  ).changeName(name: _nameController.text);
-                  BlocProvider.of<CharacterBloc>(
-                    context,
-                  ).add(CharacterLoad(_nameController.text));
-                  BlocProvider.of<SettingsCubit>(context).toggleEditMode();
-                  BlocProvider.of<CharacterBloc>(
-                    context,
-                  ).add(const PersistCharacter());
-                },
-                child: const Text('Save'),
-              ),
-              const SizedBox(width: 16),
-              ElevatedButton(
-                onPressed: () {
-                  BlocProvider.of<SettingsCubit>(context).toggleEditMode();
-                  BlocProvider.of<CharacterBloc>(
-                    context,
-                  ).add(CharacterLoad(state.name));
-                },
-                child: const Text('Cancel'),
-              ),
-            ],
-          );
-        } else {
-          return Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              ElevatedButton(
-                onPressed: () =>
-                    BlocProvider.of<SettingsCubit>(context).toggleEditMode(),
-                child: const Text('Edit'),
-              ),
-            ],
-          );
-        }
-      },
-    );
+  Widget _buildEditButton(BuildContext context, SettingsState state) {
+    if (state.isEditMode) {
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          ElevatedButton(
+            onPressed: () {
+              BlocProvider.of<SettingsCubit>(
+                context,
+              ).changeName(name: _nameController.text);
+              if (_isCasterDraft != null && _isCasterDraft != state.isCaster) {
+                BlocProvider.of<SettingsCubit>(
+                  context,
+                ).setIsCaster(_isCasterDraft!);
+              }
+              BlocProvider.of<CharacterBloc>(
+                context,
+              ).add(CharacterLoad(_nameController.text));
+              BlocProvider.of<SettingsCubit>(context).toggleEditMode();
+              BlocProvider.of<CharacterBloc>(
+                context,
+              ).add(const PersistCharacter());
+            },
+            child: const Text('Save'),
+          ),
+          const SizedBox(width: 16),
+          ElevatedButton(
+            onPressed: () {
+              setState(() {
+                _isCasterDraft = state.isCaster;
+              });
+              BlocProvider.of<SettingsCubit>(context).toggleEditMode();
+              BlocProvider.of<CharacterBloc>(
+                context,
+              ).add(CharacterLoad(state.name));
+            },
+            child: const Text('Cancel'),
+          ),
+        ],
+      );
+    } else {
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          ElevatedButton(
+            onPressed: () =>
+                BlocProvider.of<SettingsCubit>(context).toggleEditMode(),
+            child: const Text('Edit'),
+          ),
+        ],
+      );
+    }
   }
 }

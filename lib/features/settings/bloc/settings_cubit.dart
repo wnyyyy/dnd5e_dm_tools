@@ -45,9 +45,8 @@ class SettingsCubit extends Cubit<SettingsState> {
     emit((state as SettingsLoaded).copyWith(isEditMode: !state.isEditMode));
   }
 
-  Future<void> toggleIsCaster() async {
+  Future<void> setIsCaster(bool isCaster) async {
     if (state is! SettingsLoaded) return;
-    final isCaster = !state.isCaster;
     await saveConfig('is_caster', isCaster.toString());
     emit((state as SettingsLoaded).copyWith(isCaster: isCaster));
   }

@@ -66,7 +66,7 @@ class MainScreen extends StatelessWidget {
       return const CharacterScreen();
     }
     if (state is MainScreenStateSettings) {
-      return SettingsScreen();
+      return const SettingsScreen();
     }
     if (state is MainScreenStateDatabase) {
       return const DatabaseEditorScreen();
