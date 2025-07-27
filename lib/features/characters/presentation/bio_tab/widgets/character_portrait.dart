@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 class CharacterPortrait extends StatelessWidget {
   const CharacterPortrait({
@@ -88,6 +89,13 @@ class CharacterPortrait extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final String url;
+    if (kIsWeb) {
+      url =
+          'https://images.weserv.nl/?url=${Uri.encodeComponent(character.imageUrl)}';
+    } else {
+      url = character.imageUrl;
+    }
     return Column(
       children: [
         ClipRRect(
@@ -101,7 +109,8 @@ class CharacterPortrait extends StatelessWidget {
               ),
             ),
             child: CachedNetworkImage(
-              imageUrl: character.imageUrl,
+              imageUrl: url,
+              fit: BoxFit.cover,
               placeholder: (context, url) =>
                   const Center(child: CircularProgressIndicator()),
               errorWidget: (context, url, error) =>

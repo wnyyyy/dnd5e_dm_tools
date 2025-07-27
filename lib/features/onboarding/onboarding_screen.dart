@@ -7,6 +7,7 @@ import 'package:dnd5e_dm_tools/features/onboarding/bloc/onboarding_cubit.dart';
 import 'package:dnd5e_dm_tools/features/onboarding/bloc/onboarding_state.dart';
 import 'package:dnd5e_dm_tools/features/settings/bloc/settings_cubit.dart';
 import 'package:dnd5e_dm_tools/features/settings/bloc/settings_states.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -75,8 +76,15 @@ class OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   Widget _buildCharacterImage(Character character) {
+    final String url;
+    if (kIsWeb) {
+      url =
+          'https://images.weserv.nl/?url=${Uri.encodeComponent(character.imageUrl)}';
+    } else {
+      url = character.imageUrl;
+    }
     return CachedNetworkImage(
-      imageUrl: character.imageUrl,
+      imageUrl: url,
       fit: BoxFit.cover,
       placeholder: (context, url) =>
           const Center(child: CircularProgressIndicator()),
