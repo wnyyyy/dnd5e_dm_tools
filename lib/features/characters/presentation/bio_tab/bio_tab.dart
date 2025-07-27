@@ -2,6 +2,7 @@ import 'package:dnd5e_dm_tools/core/data/models/archetype.dart';
 import 'package:dnd5e_dm_tools/core/data/models/character.dart';
 import 'package:dnd5e_dm_tools/core/data/models/class.dart';
 import 'package:dnd5e_dm_tools/core/data/models/race.dart';
+import 'package:dnd5e_dm_tools/core/util/const.dart';
 import 'package:dnd5e_dm_tools/features/characters/presentation/bio_tab/widgets/character_portrait.dart';
 import 'package:dnd5e_dm_tools/features/characters/presentation/bio_tab/widgets/feat_list.dart';
 import 'package:dnd5e_dm_tools/features/characters/presentation/bio_tab/widgets/proficiency_list.dart';
@@ -23,11 +24,12 @@ class BioTab extends StatelessWidget {
     final Archetype? archetype = classs.archetypes
         .where((element) => element.slug == character.archetype)
         .firstOrNull;
-    return OrientationBuilder(
-      builder: (context, orientation) {
-        return orientation == Orientation.portrait
-            ? _buildPortraitContent(context, archetype)
-            : _buildLandscapeContent(context, archetype);
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return constraints.maxWidth > wideScreenBreakpoint
+            ? _buildLandscapeContent(context, archetype)
+            : _buildPortraitContent(context, archetype);
       },
     );
   }
