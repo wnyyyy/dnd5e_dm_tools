@@ -1,3 +1,4 @@
+import 'package:dnd5e_dm_tools/core/util/helper.dart';
 import 'package:equatable/equatable.dart';
 
 class ClassTable extends Equatable {
@@ -40,6 +41,7 @@ class ClassTable extends Equatable {
 
     return ClassTable(levelData: levelData);
   }
+
   final Map<int, ClassTableRow> levelData;
 
   Map<int, int> getSpellSlotsForLevel(int level) {
@@ -83,14 +85,8 @@ class ClassTableRow extends Equatable {
 
     final Map<int, int> spellSlots = {};
     for (var i = 1; i <= 9; i++) {
-      final key = '${i}th';
-      if (i == 1) {
-        // "1st" instead of "1th"
-        if (map.containsKey('1st')) {
-          final value = int.tryParse(map['1st'].toString()) ?? 0;
-          if (value > 0) spellSlots[1] = value;
-        }
-      } else if (map.containsKey(key)) {
+      final key = getOrdinal(i);
+      if (map.containsKey(key)) {
         final value = int.tryParse(map[key].toString()) ?? 0;
         if (value > 0) spellSlots[i] = value;
       }
