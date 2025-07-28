@@ -48,6 +48,22 @@ class ActionCategoryRowState extends State<ActionCategoryRow> {
               },
             ),
           ),
+        if (widget.showSpells)
+          Padding(
+            padding: const EdgeInsets.all(8),
+            child: ChoiceChip(
+              showCheckmark: false,
+              label: const Icon(FontAwesome5.hat_wizard),
+              selected: _selected == ActionMenuMode.spells,
+              onSelected: (selected) {
+                setState(() {
+                  _selected = ActionMenuMode.spells;
+                  context.read<SettingsCubit>().toggleActionFilter(_selected);
+                  widget.onSelected(_selected);
+                });
+              },
+            ),
+          ),
         Padding(
           padding: const EdgeInsets.all(8),
           child: ChoiceChip(
@@ -78,22 +94,6 @@ class ActionCategoryRowState extends State<ActionCategoryRow> {
             },
           ),
         ),
-        if (widget.showSpells)
-          Padding(
-            padding: const EdgeInsets.all(8),
-            child: ChoiceChip(
-              showCheckmark: false,
-              label: const Icon(FontAwesome5.hat_wizard),
-              selected: _selected == ActionMenuMode.spells,
-              onSelected: (selected) {
-                setState(() {
-                  _selected = ActionMenuMode.spells;
-                  context.read<SettingsCubit>().toggleActionFilter(_selected);
-                  widget.onSelected(_selected);
-                });
-              },
-            ),
-          ),
       ],
     );
   }

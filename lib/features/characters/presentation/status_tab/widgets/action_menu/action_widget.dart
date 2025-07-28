@@ -249,7 +249,7 @@ class ActionWidgetState extends State<ActionWidget> {
           if (level == 0) {
             children.add(
               Column(
-                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
                     school.name,
@@ -268,6 +268,7 @@ class ActionWidgetState extends State<ActionWidget> {
                 totalSlots - (expendedSpellSlots[level] ?? 0);
             children.add(
               Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
                     school.name,
@@ -448,39 +449,36 @@ class ActionWidgetState extends State<ActionWidget> {
       }
 
       final actionFields = _buildFields(context);
-      children.addAll(actionFields);
+      //children.addAll(actionFields);
 
       return LayoutBuilder(
-        builder: (context, constraints) {
-          final int crossAxisCount =
-              3 + ((constraints.maxWidth - 300) / 80).floor();
-          if (constraints.maxWidth > 900) {
-            return Wrap(
-              children: List.generate(children.length, (index) {
-                return Card.outlined(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 4),
-                    child: children[index],
+        builder: (context, c) {
+          final w = c.maxWidth;
+          final cols = w >= 1400
+              ? 5
+              : w >= 900
+              ? 4
+              : 3;
+
+          return MasonryGridView.count(
+            crossAxisCount: cols,
+            mainAxisSpacing: 2,
+            crossAxisSpacing: 2,
+            itemCount: children.length,
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemBuilder: (context, i) {
+              return Card.outlined(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 4,
+                    horizontal: 4,
                   ),
-                );
-              }),
-            );
-          } else {
-            return StaggeredGrid.count(
-              crossAxisCount: crossAxisCount,
-              children: List.generate(children.length, (index) {
-                return StaggeredGridTile.fit(
-                  crossAxisCellCount: 1,
-                  child: Card.outlined(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 4),
-                      child: children[index],
-                    ),
-                  ),
-                );
-              }),
-            );
-          }
+                  child: children[i],
+                ),
+              );
+            },
+          );
         },
       );
     }
@@ -636,9 +634,9 @@ class ActionWidgetState extends State<ActionWidget> {
           _buildVerticalField(
             'Damage',
             damage,
+            context,
             extra: typeWidget,
             valueTheme: boldTheme,
-            context,
           ),
         );
       } else {

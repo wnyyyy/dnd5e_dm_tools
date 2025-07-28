@@ -5,6 +5,7 @@ import 'package:dnd5e_dm_tools/core/data/models/class.dart';
 import 'package:dnd5e_dm_tools/core/data/models/race.dart';
 import 'package:dnd5e_dm_tools/core/util/const.dart';
 import 'package:dnd5e_dm_tools/core/util/enum.dart';
+import 'package:dnd5e_dm_tools/core/util/helper.dart';
 import 'package:dnd5e_dm_tools/features/characters/presentation/status_tab/widgets/action_menu/action_category_row.dart';
 import 'package:dnd5e_dm_tools/features/characters/presentation/status_tab/widgets/action_menu/action_widget.dart';
 import 'package:dnd5e_dm_tools/features/characters/presentation/status_tab/widgets/action_menu/add_action_button.dart';
@@ -153,32 +154,17 @@ class _ActionMenuState extends State<ActionMenu> {
                                 'No actions.',
                                 style: Theme.of(context).textTheme.bodyLarge,
                               ),
-                            ),
-                          ...filteredActions.map((action) {
-                            final isLastItem = filteredActions.last == action;
-                            return Container(
-                              decoration: BoxDecoration(
-                                border: Border(
-                                  bottom: isLastItem
-                                      ? BorderSide.none
-                                      : BorderSide(
-                                          color: Theme.of(
-                                            context,
-                                          ).colorScheme.outline,
-                                        ),
-                                ),
-                              ),
-                              child: ActionWidget(
-                                action: action,
-                                character: widget.character,
-                                onUse: onUseAction,
-                                classs: widget.classs,
-                                race: widget.race,
-                                isEditMode: _isEditMode,
-                                onActionsChanged: onActionsChanged,
-                              ),
-                            );
-                          }),
+                            )
+                          else if (_mode == ActionMenuMode.spells &&
+                              context.read<RulesCubit>().state
+                                  is RulesStateLoaded)
+                            ..._buildSpellSections(
+                              filteredActions,
+                              context.read<RulesCubit>().state
+                                  as RulesStateLoaded,
+                            )
+                          else
+                            ..._buildPlainActions(filteredActions, context),
                         ],
                       ),
                     ),
@@ -190,6 +176,59 @@ class _ActionMenuState extends State<ActionMenu> {
         ],
       ),
     );
+  }
+
+  List<Widget> _buildPlainActions(List<Action> actions, BuildContext context) {
+    return actions.map((action) {
+      final isLastItem = actions.last == action;
+      return Container(
+        decoration: BoxDecoration(
+          border: Border(
+            bottom: isLastItem
+                ? BorderSide.none
+                : BorderSide(color: Theme.of(context).colorScheme.outline),
+          ),
+        ),
+        child: ActionWidget(
+          action: action,
+          character: widget.character,
+          onUse: onUseAction,
+          classs: widget.classs,
+          race: widget.race,
+          isEditMode: _isEditMode,
+          onActionsChanged: onActionsChanged,
+        ),
+      );
+    }).toList();
+  }
+
+  List<Widget> _buildSpellSections(
+    List<Action> actions,
+    RulesStateLoaded rulesState,
+  ) {
+    final spellMap = rulesState.spellMap;
+
+    final Map<int, List<Action>> byLevel = {};
+
+    for (final a in actions) {
+      if (a.type != ActionType.spell) continue;
+      final spellSlug = (a as ActionSpell).spellSlug;
+      final lvl = spellMap[spellSlug]?.level ?? 0;
+      (byLevel[lvl] ??= []).add(a);
+    }
+
+    final levels = byLevel.keys.toList()..sort();
+
+    return [
+      for (final lvl in levels)
+        ExpansionTile(
+          key: ValueKey('spell_lvl_$lvl'),
+          title: Text(
+            lvl == 0 ? 'Cantrips' : '${getOrdinal(lvl)}-level Spells',
+          ),
+          children: _buildPlainActions(byLevel[lvl]!, context),
+        ),
+    ];
   }
 
   void onUseAction({required Action action, bool recharge = false}) {
