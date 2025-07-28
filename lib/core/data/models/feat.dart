@@ -53,7 +53,7 @@ class Feat extends Equatable {
     return {
       'slug': slug,
       'name': name,
-      'description': description,
+      'desc': description,
       'effects_desc': effectsDesc,
       'prerequisite': prerequisite,
     };
@@ -87,17 +87,22 @@ class Feat extends Equatable {
       'Feat $slug(name: $name, description: $description, effectsDesc: $effectsDesc, prerequisite: $prerequisite)';
 
   static (String, List<String>) buildFromDescription(String description) {
-    final lines = description.split('\n');
+    final lines = description.split('\n').toList();
     final effectsDesc = <String>[];
     final StringBuffer currDesc = StringBuffer();
     bool isDesc = true;
     for (final line in lines) {
-      if (isDesc) {
-        currDesc.write(line.trim());
-      }
       if (line.startsWith('-')) {
         effectsDesc.add(line.substring(1).trim());
         isDesc = false;
+      }
+      if (isDesc) {
+        currDesc.writeln(line);
+      } else {
+        if (!line.startsWith('-')) {
+          final lineAux = line.trim();
+          effectsDesc.last += '\n$lineAux';
+        }
       }
     }
     return (currDesc.toString(), effectsDesc);

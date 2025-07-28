@@ -46,29 +46,16 @@ class _FeatListState extends State<FeatList> {
     final classs = characterState.classs;
     final character = characterState.character;
 
-    void onItemsChanged(List<Feat> items, {bool persist = true}) {
-      bool changed = false;
-      if (items.length != character.feats.length) {
-        changed = true;
-      } else {
-        for (int i = 0; i < items.length; i++) {
-          if (items[i] != character.feats[i]) {
-            changed = true;
-            break;
-          }
-        }
-      }
+    void onItemsChanged(List<Feat> items) {
       setState(() {
         _feats = items;
       });
-      if (changed && persist) {
-        context.read<CharacterBloc>().add(
-          CharacterUpdate(
-            character: character.copyWith(feats: items),
-            persistData: true,
-          ),
-        );
-      }
+      context.read<CharacterBloc>().add(
+        CharacterUpdate(
+          character: character.copyWith(feats: items),
+          persistData: true,
+        ),
+      );
     }
 
     void onAddItem() {
@@ -114,7 +101,12 @@ class _FeatListState extends State<FeatList> {
               maxHeight: screenHeight * 0.8,
             ),
             child: AlertDialog(
-              title: Text(feat.name),
+              title: Text(
+                feat.name,
+                style: feat.name.length > 24
+                    ? Theme.of(context).textTheme.titleMedium
+                    : Theme.of(context).textTheme.titleLarge,
+              ),
               content: SingleChildScrollView(
                 child: DescriptionText(
                   inputText: feat.fullDescription,
@@ -156,6 +148,7 @@ class _FeatListState extends State<FeatList> {
       emptyMessage: 'None',
       displayKeyGetter: (feat) => feat.name,
       descriptionGetter: (feat) => feat.fullDescription,
+      slugGetter: (feat) => feat.slug,
       onChangeEditMode: (isEditMode) {
         setState(() {
           _isEditMode = isEditMode;

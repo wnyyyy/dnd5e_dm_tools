@@ -103,6 +103,16 @@ class DescriptionText extends StatelessWidget {
     }
 
     result = result.replaceAllMapped(
+      RegExp(r'(^|\n)(\*.*?\*)(\n|$)', dotAll: true),
+      (match) {
+        final before = match[1] ?? '';
+        final content = match[2] ?? '';
+        final after = match[3] ?? '';
+        return '$before$content\n\u200B$after';
+      },
+    );
+
+    result = result.replaceAllMapped(
       RegExp(r'\b(\d*d\d+)\b', caseSensitive: false),
       (match) {
         final start = match.start;

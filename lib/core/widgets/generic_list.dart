@@ -10,19 +10,21 @@ class GenericList<T> extends StatefulWidget {
     required this.onEditItem,
     required this.tableName,
     required this.displayKeyGetter,
+    required this.slugGetter,
     required this.descriptionGetter,
     this.emptyMessage = 'No items',
     this.onChangeEditMode,
   });
 
   final List<T> items;
-  final void Function(List<T>, {bool persist})? onItemsChanged;
+  final void Function(List<T>)? onItemsChanged;
   final void Function() onAddItem;
   final void Function(T) onSelectItem;
   final void Function(T, String, String) onEditItem;
   final String tableName;
   final String Function(T) displayKeyGetter;
   final String Function(T) descriptionGetter;
+  final String Function(T) slugGetter;
   final String emptyMessage;
   final void Function(bool)? onChangeEditMode;
 
@@ -114,7 +116,7 @@ class _GenericListState<T> extends State<GenericList<T>> {
     } else {
       reordered.insert(newIndex, moved);
     }
-    widget.onItemsChanged?.call(reordered, persist: false);
+    widget.onItemsChanged?.call(reordered);
   }
 
   @override
@@ -190,14 +192,12 @@ class _GenericListState<T> extends State<GenericList<T>> {
               for (int index = 0; index < widget.items.length; index++)
                 ListTile(
                   contentPadding: const EdgeInsetsDirectional.only(start: 16),
-                  key: ValueKey(widget.displayKeyGetter(widget.items[index])),
+                  key: ValueKey(widget.slugGetter(widget.items[index])),
                   title: Padding(
                     padding: const EdgeInsets.only(right: 8),
                     child: Text(widget.displayKeyGetter(widget.items[index])),
                   ),
-                  onTap: () => _isEditMode
-                      ? () {}
-                      : widget.onSelectItem(widget.items[index]),
+                  onTap: () => widget.onSelectItem(widget.items[index]),
                   trailing: _isEditMode && widget.onItemsChanged != null
                       ? Row(
                           mainAxisSize: MainAxisSize.min,

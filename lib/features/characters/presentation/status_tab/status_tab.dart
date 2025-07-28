@@ -37,8 +37,9 @@ class StatusTab extends StatelessWidget {
     final isCaster =
         context.read<SettingsCubit>().state.isCaster ||
         character.feats.any(
-          (feat) => feat.name.toLowerCase().contains('magic_initiate') ||
-                    feat.name.toLowerCase().contains('magic-initiate'),
+          (feat) =>
+              feat.name.toLowerCase().contains('magic_initiate') ||
+              feat.name.toLowerCase().contains('magic-initiate'),
         );
 
     final Map<String, dynamic> spells = {};
@@ -119,16 +120,18 @@ class StatusTab extends StatelessWidget {
               ],
             ),
           ),
-          // Expanded(
-          //   child: Padding(
-          //     padding: const EdgeInsets.all(16.0),
-          //     child: ActionMenu(
-          //       character: character,
-          //       slug: slug,
-          //       height: MediaQuery.of(context).size.height * 0.6,
-          //     ),
-          //   ),
-          // ),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: ActionMenu(
+                character: character,
+                classs: classs,
+                race: race,
+                onCharacterUpdated: (updatedCharacter) =>
+                    onCharacterUpdated(updatedCharacter, context),
+              ),
+            ),
+          ),
         ],
       ),
     );

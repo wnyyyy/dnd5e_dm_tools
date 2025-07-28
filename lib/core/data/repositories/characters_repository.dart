@@ -11,7 +11,7 @@ class CharactersRepository {
   final DatabaseProvider databaseProvider;
   final path = firebaseCharactersPath;
   Timer? _debounceTimer;
-  final Duration _debounceDuration = const Duration(seconds: 1);
+  final Duration _debounceDuration = const Duration(seconds: 30);
 
   Future<Character> get(String slug) async {
     final data = await databaseProvider.getDocument(path: '$path/$slug');
