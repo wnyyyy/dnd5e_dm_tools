@@ -44,11 +44,33 @@ class Character extends Equatable {
     final imageUrl = json['image_url'] as String? ?? '';
     final color = json['color'] as String?;
 
-    final feats =
-        (json['feats'] as Map<String, dynamic>?)?.map(
-          (key, value) => MapEntry(key, value as String?),
-        ) ??
-        <String, String>{};
+    final List<Feat> feats = [];
+    final featsData = json['feats'];
+    if (featsData is Map) {
+      final featsMap = featsData.map(
+        (key, value) => MapEntry(key as String, value as String),
+      );
+      feats.addAll(
+        featsMap.entries.map((entry) {
+          return Feat(
+            slug: entry.key,
+            name: entry.key,
+            description: entry.value,
+            effectsDesc: const [],
+          );
+        }),
+      );
+    }
+    if (featsData is List) {
+      feats.addAll(
+        featsData.map(
+          (e) => Feat.fromJson(
+            Map.from(e as Map? ?? {}),
+            (e ?? {})['slug'] as String,
+          ),
+        ),
+      );
+    }
 
     final proficiency = Proficiency.fromJson(
       json['proficiency'] as Map<String, dynamic>? ?? {},
@@ -99,23 +121,6 @@ class Character extends Equatable {
     );
   }
 
-  List<Feat> getFeatList(List<Feat> allFeats) {
-    final charFeats = <Feat>[];
-    feats.forEach((key, value) {
-      final feat = allFeats.firstWhere(
-        (f) => f.slug == key,
-        orElse: () => Feat(
-          slug: key.toLowerCase().trim().replaceAll(' ', '_'),
-          name: key,
-          description: value ?? '',
-          effectsDesc: const [],
-        ),
-      );
-      charFeats.add(feat.copyWith(descOverride: value));
-    });
-    return charFeats;
-  }
-
   final String slug;
   final String name;
   final String imageUrl;
@@ -124,7 +129,7 @@ class Character extends Equatable {
   final String race;
   final int level;
   final String? archetype;
-  final Map<String, String?> feats;
+  final List<Feat> feats;
   final Proficiency proficiency;
   final ASI asi;
   final CharacterStats stats;
@@ -141,7 +146,7 @@ class Character extends Equatable {
       'race': race,
       'level': level,
       'archetype': archetype,
-      'feats': feats,
+      'feats': feats.map((e) => e.toJson()).toList(),
       'proficiency': proficiency.toJson(),
       'asi': asi.toJson(),
       'character_stats': stats.toJson(),
@@ -168,7 +173,7 @@ class Character extends Equatable {
 
   Character copyWith({
     int? level,
-    Map<String, String?>? feats,
+    List<Feat>? feats,
     Proficiency? proficiency,
     ASI? asi,
     CharacterStats? stats,

@@ -151,15 +151,14 @@ class Class extends Equatable {
     );
   }
 
-  Map<int, int> getSpellSlotsForLevel(
-    int level, {
-    Map<String, String?>? feats,
-  }) {
+  Map<int, int> getSpellSlotsForLevel(int level, {List<Feat>? feats}) {
     final slots = table.getSpellSlotsForLevel(level);
     if (slots.isEmpty && feats != null) {
-      final isMagicInitiate =
-          feats.containsKey('magic_initiate') ||
-          feats.containsKey('magic-initiate');
+      final isMagicInitiate = feats.any(
+        (feat) =>
+            feat.name.toLowerCase().contains('magic_initiate') ||
+            feat.name.toLowerCase().contains('magic-initiate'),
+      );
       if (isMagicInitiate) {
         return {1: 1};
       }

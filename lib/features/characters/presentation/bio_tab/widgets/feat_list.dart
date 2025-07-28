@@ -13,10 +13,27 @@ import 'package:dnd5e_dm_tools/features/rules/rules_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class FeatList extends StatelessWidget {
+class FeatList extends StatefulWidget {
   const FeatList({super.key, required this.slug, this.archetype});
   final String slug;
   final Archetype? archetype;
+
+  @override
+  State<FeatList> createState() => _FeatListState();
+}
+
+class _FeatListState extends State<FeatList> {
+  bool _isEditMode = false;
+  List<Feat> _feats = [];
+
+  @override
+  void initState() {
+    super.initState();
+    final characterState = context.read<CharacterBloc>().state;
+    if (characterState is CharacterLoaded) {
+      _feats = characterState.character.feats;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -28,8 +45,31 @@ class FeatList extends StatelessWidget {
     final race = characterState.race;
     final classs = characterState.classs;
     final character = characterState.character;
-    final allFeats = rulesState.feats;
-    final charFeats = character.getFeatList(allFeats);
+
+    void onItemsChanged(List<Feat> items, {bool persist = true}) {
+      bool changed = false;
+      if (items.length != character.feats.length) {
+        changed = true;
+      } else {
+        for (int i = 0; i < items.length; i++) {
+          if (items[i] != character.feats[i]) {
+            changed = true;
+            break;
+          }
+        }
+      }
+      setState(() {
+        _feats = items;
+      });
+      if (changed && persist) {
+        context.read<CharacterBloc>().add(
+          CharacterUpdate(
+            character: character.copyWith(feats: items),
+            persistData: true,
+          ),
+        );
+      }
+    }
 
     void onAddItem() {
       showDialog(
@@ -38,9 +78,24 @@ class FeatList extends StatelessWidget {
           character: character,
           race: race,
           classs: classs,
-          archetype: archetype,
+          archetype: widget.archetype,
+          onItemsChanged: onItemsChanged,
         ),
       );
+    }
+
+    void onEditItem(Feat feat, String title, String description) {
+      final updatedFeats = List<Feat>.from(character.feats);
+      final index = updatedFeats.indexOf(feat);
+      if (index != -1) {
+        final (desFeat, effectsDesc) = Feat.buildFromDescription(description);
+        updatedFeats[index] = feat.copyWith(
+          name: title,
+          description: desFeat,
+          effectsDesc: effectsDesc,
+        );
+        onItemsChanged(updatedFeats);
+      }
     }
 
     void onFeatSelected(Feat feat) {
@@ -68,25 +123,17 @@ class FeatList extends StatelessWidget {
               ),
               actionsAlignment: MainAxisAlignment.spaceBetween,
               actions: [
-                TextButton(
-                  onPressed: () {
-                    final characterState = context.read<CharacterBloc>().state;
-                    if (characterState is! CharacterLoaded) return;
-                    final character = characterState.character;
-                    final updatedFeats = Map<String, String>.from(
-                      character.feats,
-                    );
-                    updatedFeats.remove(feat.slug);
-                    updatedFeats.remove(feat.name);
-                    context.read<CharacterBloc>().add(
-                      CharacterUpdate(
-                        character: character.copyWith(feats: updatedFeats),
-                        persistData: true,
-                      ),
-                    );
-                    Navigator.of(context).pop();
-                  },
-                  child: const Icon(Icons.delete),
+                Visibility(
+                  visible: _isEditMode,
+                  child: TextButton(
+                    onPressed: () {
+                      final updatedFeats = List<Feat>.from(character.feats);
+                      updatedFeats.removeWhere((f) => f.slug == feat.slug);
+                      onItemsChanged(updatedFeats);
+                      Navigator.of(context).pop();
+                    },
+                    child: const Icon(Icons.delete),
+                  ),
                 ),
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(),
@@ -100,14 +147,23 @@ class FeatList extends StatelessWidget {
     }
 
     return GenericList(
-      items: charFeats,
+      items: _feats,
       onAddItem: () => onAddItem(),
-      onItemsChanged: null,
+      onItemsChanged: onItemsChanged,
       tableName: 'Feats',
-      onSelectItem: (feat) => onFeatSelected(feat),
+      onSelectItem: onFeatSelected,
+      onEditItem: onEditItem,
       emptyMessage: 'None',
       displayKeyGetter: (feat) => feat.name,
       descriptionGetter: (feat) => feat.fullDescription,
+      onChangeEditMode: (isEditMode) {
+        setState(() {
+          _isEditMode = isEditMode;
+        });
+        if (!isEditMode) {
+          onItemsChanged(_feats);
+        }
+      },
     );
   }
 }
@@ -117,12 +173,14 @@ class _AddFeatDialog extends StatefulWidget {
     required this.character,
     required this.race,
     required this.classs,
+    required this.onItemsChanged,
     this.archetype,
   });
 
   final Character character;
   final Race race;
   final Class classs;
+  final void Function(List<Feat>) onItemsChanged;
   final Archetype? archetype;
 
   @override
@@ -294,16 +352,17 @@ class _AddFeatDialogState extends State<_AddFeatDialog> {
           ),
           TextButton(
             onPressed: () {
-              final newFeats = Map<String, String>.from(widget.character.feats);
-              if (defaultFeatDesc.trim() == descriptionController.text.trim()) {
-                newFeats[selectedFeat] = '';
-              } else {
-                newFeats[selectedFeat] = descriptionController.text.trim();
-              }
-              context.read<CharacterBloc>().add(
-                CharacterUpdate(
-                  character: widget.character.copyWith(feats: newFeats),
-                  persistData: true,
+              final (description, effectsDesc) = Feat.buildFromDescription(
+                descriptionController.text,
+              );
+              widget.onItemsChanged(
+                widget.character.feats..add(
+                  Feat(
+                    slug: titleController.text,
+                    name: titleController.text,
+                    description: description,
+                    effectsDesc: effectsDesc,
+                  ),
                 ),
               );
               Navigator.of(context).pop();

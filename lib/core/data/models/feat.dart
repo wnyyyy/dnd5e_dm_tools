@@ -7,7 +7,6 @@ class Feat extends Equatable {
     required this.description,
     required this.effectsDesc,
     this.prerequisite,
-    this.descOverride,
   });
 
   factory Feat.fromJson(Map<String, dynamic> json, String documentId) {
@@ -34,12 +33,8 @@ class Feat extends Equatable {
   final String description;
   final List<String> effectsDesc;
   final String? prerequisite;
-  final String? descOverride;
 
   String get fullDescription {
-    if (descOverride != null && descOverride!.isNotEmpty) {
-      return descOverride!;
-    }
     final StringBuffer builder = StringBuffer();
     builder.write(description);
     if (effectsDesc.isNotEmpty) {
@@ -56,6 +51,7 @@ class Feat extends Equatable {
 
   Map<String, dynamic> toJson() {
     return {
+      'slug': slug,
       'name': name,
       'description': description,
       'effects_desc': effectsDesc,
@@ -63,14 +59,17 @@ class Feat extends Equatable {
     };
   }
 
-  Feat copyWith({String? name, String? description, String? descOverride}) {
+  Feat copyWith({
+    String? name,
+    String? description,
+    List<String>? effectsDesc,
+  }) {
     return Feat(
       slug: slug,
       name: name ?? this.name,
       description: description ?? this.description,
-      effectsDesc: effectsDesc,
+      effectsDesc: effectsDesc ?? this.effectsDesc,
       prerequisite: prerequisite,
-      descOverride: descOverride ?? this.descOverride,
     );
   }
 
@@ -81,10 +80,26 @@ class Feat extends Equatable {
     description,
     effectsDesc,
     prerequisite ?? '',
-    descOverride ?? '',
   ];
 
   @override
   String toString() =>
       'Feat $slug(name: $name, description: $description, effectsDesc: $effectsDesc, prerequisite: $prerequisite)';
+
+  static (String, List<String>) buildFromDescription(String description) {
+    final lines = description.split('\n');
+    final effectsDesc = <String>[];
+    final StringBuffer currDesc = StringBuffer();
+    bool isDesc = true;
+    for (final line in lines) {
+      if (isDesc) {
+        currDesc.write(line.trim());
+      }
+      if (line.startsWith('-')) {
+        effectsDesc.add(line.substring(1).trim());
+        isDesc = false;
+      }
+    }
+    return (currDesc.toString(), effectsDesc);
+  }
 }

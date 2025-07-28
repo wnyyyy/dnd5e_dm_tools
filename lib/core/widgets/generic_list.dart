@@ -1,4 +1,3 @@
-import 'package:dnd5e_dm_tools/core/data/models/feat.dart';
 import 'package:flutter/material.dart';
 
 class GenericList<T> extends StatefulWidget {
@@ -8,20 +7,24 @@ class GenericList<T> extends StatefulWidget {
     required this.onItemsChanged,
     required this.onAddItem,
     required this.onSelectItem,
+    required this.onEditItem,
     required this.tableName,
     required this.displayKeyGetter,
     required this.descriptionGetter,
     this.emptyMessage = 'No items',
+    this.onChangeEditMode,
   });
 
   final List<T> items;
-  final void Function(List<T>)? onItemsChanged;
+  final void Function(List<T>, {bool persist})? onItemsChanged;
   final void Function() onAddItem;
   final void Function(T) onSelectItem;
+  final void Function(T, String, String) onEditItem;
   final String tableName;
   final String Function(T) displayKeyGetter;
   final String Function(T) descriptionGetter;
   final String emptyMessage;
+  final void Function(bool)? onChangeEditMode;
 
   @override
   State<GenericList<T>> createState() => _GenericListState<T>();
@@ -33,6 +36,7 @@ class _GenericListState<T> extends State<GenericList<T>> {
   void _enableEditMode() {
     setState(() {
       _isEditMode = !_isEditMode;
+      widget.onChangeEditMode?.call(_isEditMode);
     });
   }
 
@@ -68,42 +72,6 @@ class _GenericListState<T> extends State<GenericList<T>> {
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Icon(Icons.close),
-            ),
-            TextButton(
-              onPressed: () {
-                if (titleController.text.isNotEmpty) {
-                  if (item is Map) {
-                    final updated = Map<String, dynamic>.from(item);
-                    updated['name'] = titleController.text;
-                    updated['description'] = descriptionController.text;
-                    setState(() {
-                      widget.items[index] = updated as T;
-                      widget.onItemsChanged?.call(widget.items);
-                    });
-                  }
-                  if (item is Feat) {
-                    final newFeat = Feat(
-                      slug: titleController.text,
-                      name: titleController.text,
-                      description: '',
-                      effectsDesc: const [],
-                      descOverride: descriptionController.text,
-                    );
-                    setState(() {
-                      widget.items[index] = newFeat as T;
-                      widget.onItemsChanged?.call(widget.items);
-                    });
-                  }
-                  Navigator.of(context).pop();
-                }
-              },
-              child: const Icon(Icons.save),
-            ),
-            TextButton(
-              onPressed: () {
                 setState(() {
                   widget.items.removeAt(index);
                   widget.onItemsChanged?.call(widget.items);
@@ -112,10 +80,41 @@ class _GenericListState<T> extends State<GenericList<T>> {
               },
               child: const Icon(Icons.delete),
             ),
+            TextButton(
+              onPressed: () {
+                if (titleController.text.isNotEmpty) {
+                  widget.onEditItem(
+                    item,
+                    titleController.text,
+                    descriptionController.text,
+                  );
+                  Navigator.of(context).pop();
+                }
+              },
+              child: const Icon(Icons.save),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Icon(Icons.close),
+            ),
           ],
         );
       },
     );
+  }
+
+  void _onReorder(int oldIndex, int newIndex) {
+    final List<T> reordered = List<T>.from(widget.items);
+    final T moved = reordered.removeAt(oldIndex);
+
+    if (oldIndex < newIndex) {
+      reordered.insert(newIndex - 1, moved);
+    } else {
+      reordered.insert(newIndex, moved);
+    }
+    widget.onItemsChanged?.call(reordered, persist: false);
   }
 
   @override
@@ -180,19 +179,51 @@ class _GenericListState<T> extends State<GenericList<T>> {
                 style: Theme.of(context).textTheme.bodyLarge,
               ),
             ),
-          ...List.generate(widget.items.length, (index) {
-            final item = widget.items[index];
-            return ListTile(
-              title: Text(widget.displayKeyGetter(item)),
-              onTap: () => widget.onSelectItem(item),
-              trailing: _isEditMode && widget.onItemsChanged != null
-                  ? IconButton(
-                      icon: const Icon(Icons.edit),
-                      onPressed: () => _editItem(index, item),
-                    )
-                  : null,
-            );
-          }),
+          ReorderableListView(
+            shrinkWrap: true,
+            buildDefaultDragHandles: false,
+            physics: const NeverScrollableScrollPhysics(),
+            onReorder: _isEditMode && widget.onItemsChanged != null
+                ? _onReorder
+                : (_, _) {},
+            children: [
+              for (int index = 0; index < widget.items.length; index++)
+                ListTile(
+                  contentPadding: const EdgeInsetsDirectional.only(start: 16),
+                  key: ValueKey(widget.displayKeyGetter(widget.items[index])),
+                  title: Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: Text(widget.displayKeyGetter(widget.items[index])),
+                  ),
+                  onTap: () => _isEditMode
+                      ? () {}
+                      : widget.onSelectItem(widget.items[index]),
+                  trailing: _isEditMode && widget.onItemsChanged != null
+                      ? Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.edit),
+                              onPressed: () =>
+                                  _editItem(index, widget.items[index]),
+                            ),
+                            ReorderableDragStartListener(
+                              index: index,
+                              child: GestureDetector(
+                                behavior: HitTestBehavior.opaque,
+                                child: Container(
+                                  height: double.infinity,
+                                  padding: const EdgeInsets.only(right: 16),
+                                  child: const Icon(Icons.drag_handle),
+                                ),
+                              ),
+                            ),
+                          ],
+                        )
+                      : null,
+                ),
+            ],
+          ),
         ],
       ),
     );

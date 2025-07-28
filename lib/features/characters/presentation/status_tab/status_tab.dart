@@ -36,8 +36,10 @@ class StatusTab extends StatelessWidget {
 
     final isCaster =
         context.read<SettingsCubit>().state.isCaster ||
-        character.feats.containsKey('magic_initiate') ||
-        character.feats.containsKey('magic-initiate');
+        character.feats.any(
+          (feat) => feat.name.toLowerCase().contains('magic_initiate') ||
+                    feat.name.toLowerCase().contains('magic-initiate'),
+        );
 
     final Map<String, dynamic> spells = {};
     int spellAttackBonus = 0;
