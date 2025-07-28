@@ -31,7 +31,9 @@ class CharacterBloc extends Bloc<CharacterEvent, CharacterState> {
     logBloc('Loading char: ${event.slug}');
     emit(CharacterLoading(slug: event.slug));
     try {
-      final Character character = await charactersRepository.get(event.slug);
+      final Character character = await charactersRepository.get(
+        event.slug.trim().toLowerCase(),
+      );
       logBloc('Loading class for character: ${character.slug}');
       final Class classs = await classesRepository.get(character.classs);
       logBloc('Loading race for character: ${character.slug}');
