@@ -1,4 +1,5 @@
 import 'package:dnd5e_dm_tools/core/data/models/action.dart';
+import 'package:dnd5e_dm_tools/core/data/models/action_resource.dart';
 import 'package:dnd5e_dm_tools/core/data/models/asi.dart';
 import 'package:dnd5e_dm_tools/core/data/models/backpack.dart';
 import 'package:dnd5e_dm_tools/core/data/models/character_stats.dart';
@@ -23,6 +24,7 @@ class Character extends Equatable {
     required this.backpack,
     required this.spellbook,
     required this.actions,
+    required this.sharedActionResources,
     this.color,
     this.archetype,
   });
@@ -102,6 +104,18 @@ class Character extends Equatable {
             .toList() ??
         [];
 
+    final sharedActionResources =
+        Map<String, dynamic>.from(
+          json['shared_action_resources'] as Map? ?? {},
+        ).map(
+          (key, value) => MapEntry(
+            key,
+            ActionResource.fromJson(
+              Map<String, dynamic>.from(value as Map? ?? {}),
+            ),
+          ),
+        );
+
     return Character(
       slug: documentId,
       name: name,
@@ -118,6 +132,7 @@ class Character extends Equatable {
       backpack: backpack,
       spellbook: spellbook,
       actions: actions,
+      sharedActionResources: sharedActionResources,
     );
   }
 
@@ -136,6 +151,7 @@ class Character extends Equatable {
   final Backpack backpack;
   final Spellbook spellbook;
   final List<Action> actions;
+  final Map<String, ActionResource> sharedActionResources;
 
   Map<String, dynamic> toJson() {
     return {
@@ -153,6 +169,9 @@ class Character extends Equatable {
       'backpack': backpack.toJson(),
       'spellbook': spellbook.toJson(),
       'actions': actions.map((e) => e.toJson()).toList(),
+      'shared_action_resources': sharedActionResources.map(
+        (key, value) => MapEntry(key, value.toJson()),
+      ),
     };
   }
 
@@ -180,6 +199,7 @@ class Character extends Equatable {
     Backpack? backpack,
     Spellbook? spellbook,
     List<Action>? actions,
+    Map<String, ActionResource>? sharedActionResources,
   }) {
     return Character(
       slug: slug,
@@ -197,6 +217,8 @@ class Character extends Equatable {
       backpack: backpack ?? this.backpack,
       spellbook: spellbook ?? this.spellbook,
       actions: actions ?? this.actions,
+      sharedActionResources:
+          sharedActionResources ?? this.sharedActionResources,
     );
   }
 
@@ -217,6 +239,7 @@ class Character extends Equatable {
     backpack,
     spellbook,
     actions,
+    sharedActionResources,
   ];
 
   @override

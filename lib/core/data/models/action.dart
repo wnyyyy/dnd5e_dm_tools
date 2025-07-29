@@ -1,3 +1,4 @@
+import 'package:dnd5e_dm_tools/core/data/models/action_resource.dart';
 import 'package:dnd5e_dm_tools/core/util/enum.dart';
 import 'package:equatable/equatable.dart';
 
@@ -36,6 +37,13 @@ abstract class Action extends Equatable {
     final fields = ActionFields.fromJson(
       Map<String, dynamic>.from(json['fields'] as Map? ?? {}),
     );
+
+    final customResource = json['custom_resource'] != null
+        ? ActionResource.fromJson(
+            Map<String, dynamic>.from(json['custom_resource'] as Map? ?? {}),
+          )
+        : null;
+
     switch (type) {
       case ActionType.item:
         return ActionItem(
@@ -68,6 +76,7 @@ abstract class Action extends Equatable {
           usedCount: json['used_count'] as int? ?? 0,
           resourceFormula: json['resource_formula'] as String? ?? '',
           resourceCount: json['resource_count'] as int?,
+          customResource: customResource,
         );
     }
   }
@@ -103,6 +112,7 @@ abstract class Action extends Equatable {
     String? resourceFormula,
     String? description,
     int? resourceCount,
+    ActionResource? customResource,
   }) {
     switch (type) {
       case ActionType.item:
@@ -138,6 +148,8 @@ abstract class Action extends Equatable {
           resourceFormula:
               resourceFormula ?? (this as ActionAbility).resourceFormula,
           resourceCount: resourceCount ?? (this as ActionAbility).resourceCount,
+          customResource:
+              customResource ?? (this as ActionAbility).customResource,
         );
     }
   }
@@ -309,6 +321,7 @@ class ActionAbility extends Action {
     this.resourceType = ResourceType.none,
     this.usedCount = 0,
     this.resourceCount,
+    this.customResource,
     required this.resourceFormula,
   }) : super(type: ActionType.ability);
 
@@ -318,6 +331,7 @@ class ActionAbility extends Action {
   final int usedCount;
   final String resourceFormula;
   final int? resourceCount;
+  final ActionResource? customResource;
 
   @override
   Map<String, dynamic> toJson() {
@@ -328,6 +342,7 @@ class ActionAbility extends Action {
     json['used_count'] = usedCount;
     json['resource_formula'] = resourceFormula;
     json['resource_count'] = resourceCount;
+    json['custom_resource'] = customResource?.toJson();
     return json;
   }
 
@@ -342,5 +357,6 @@ class ActionAbility extends Action {
     usedCount,
     resourceFormula,
     resourceCount,
+    customResource,
   ];
 }

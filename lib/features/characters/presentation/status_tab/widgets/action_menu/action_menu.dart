@@ -1,4 +1,5 @@
 import 'package:dnd5e_dm_tools/core/data/models/action.dart';
+import 'package:dnd5e_dm_tools/core/data/models/action_resource.dart';
 import 'package:dnd5e_dm_tools/core/data/models/backpack.dart';
 import 'package:dnd5e_dm_tools/core/data/models/character.dart';
 import 'package:dnd5e_dm_tools/core/data/models/class.dart';
@@ -246,6 +247,9 @@ class _ActionMenuState extends State<ActionMenu> {
         final updatedCharacter = widget.character.copyWith(
           actions: updatedActions,
         );
+        setState(() {
+          actions = updatedActions;
+        });
         widget.onCharacterUpdated(updatedCharacter);
       case ActionType.item:
         if (recharge) {
@@ -310,10 +314,58 @@ class _ActionMenuState extends State<ActionMenu> {
   }
 
   void onActionsChanged(List<Action> actions) {
+    final sharedResources = actions
+        .where((action) => action.type == ActionType.ability)
+        .map((action) => (action as ActionAbility).customResource)
+        .whereType<ActionResource>()
+        .where((resource) => resource.name.isNotEmpty)
+        .toList();
+    final currSharedResources = Map<String, ActionResource>.from(
+      widget.character.sharedActionResources,
+    );
+    final Map<String, ActionResource> updatedResources = {};
+
+    for (final resource in sharedResources) {
+      final existing = currSharedResources[resource.name];
+      if (existing == null) {
+        updatedResources[resource.name] = resource;
+      } else if (resource != currSharedResources[resource.name]) {
+        updatedResources[resource.name] = resource;
+      }
+    }
+
+    final updatedActions = <Action>[];
+
+    for (final action in actions) {
+      if (action is ActionAbility &&
+          action.customResource != null &&
+          action.resourceType == ResourceType.custom &&
+          action.customResource!.name.isNotEmpty) {
+        final resourceName = action.customResource!.name;
+        if (!updatedResources.containsKey(resourceName)) {
+          updatedResources[resourceName] = action.customResource!;
+        }
+        updatedActions.add(
+          action.copyWith(
+            customResource: updatedResources[resourceName],
+            resourceFormula: updatedResources[resourceName]!.formula,
+          ),
+        );
+      } else {
+        updatedActions.add(action);
+      }
+    }
+
     setState(() {
-      this.actions = actions;
+      this.actions = updatedActions;
     });
-    widget.onCharacterUpdated(widget.character.copyWith(actions: actions));
+
+    widget.onCharacterUpdated(
+      widget.character.copyWith(
+        actions: updatedActions,
+        sharedActionResources: updatedResources,
+      ),
+    );
   }
 
   List<Action> _getFilteredItems(List<Action> actions) {

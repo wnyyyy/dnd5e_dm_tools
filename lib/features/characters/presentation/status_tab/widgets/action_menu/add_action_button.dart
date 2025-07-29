@@ -1,4 +1,5 @@
 import 'package:dnd5e_dm_tools/core/data/models/action.dart';
+import 'package:dnd5e_dm_tools/core/data/models/action_resource.dart';
 import 'package:dnd5e_dm_tools/core/data/models/character.dart';
 import 'package:dnd5e_dm_tools/core/data/models/class.dart';
 import 'package:dnd5e_dm_tools/core/data/models/feat.dart';
@@ -81,6 +82,12 @@ class _AddActionDialogState extends State<_AddActionDialog> {
   final TextEditingController _castTimeController = TextEditingController();
   final TextEditingController _typeController = TextEditingController();
   final TextEditingController _formulaController = TextEditingController();
+  final TextEditingController _sharedResourceController =
+      TextEditingController();
+  final TextEditingController _customResourceShortRestController =
+      TextEditingController();
+  final TextEditingController _customResourceLongRestController =
+      TextEditingController();
 
   ActionType _selected = ActionType.ability;
   ResourceType _resourceType = ResourceType.none;
@@ -172,6 +179,13 @@ class _AddActionDialogState extends State<_AddActionDialog> {
             orElse: () => ResourceType.none,
           );
           _resourceCount = action.resourceCount ?? 0;
+          _formulaController.text = action.resourceFormula;
+          _customResourceLongRestController.text =
+              action.customResource?.longRest ?? 'all';
+          _customResourceShortRestController.text =
+              action.customResource?.shortRest ?? '0';
+          _sharedResourceController.text =
+              action.customResource?.name ?? 'None';
         case ActionType.item:
           _selectedEntry = (action as ActionItem).itemSlug;
           _requiresResource = action.mustEquip;
@@ -201,7 +215,9 @@ class _AddActionDialogState extends State<_AddActionDialog> {
           ),
           child: Scrollbar(
             thumbVisibility: true,
+            controller: _scrollController,
             child: SingleChildScrollView(
+              controller: _scrollController,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -259,7 +275,7 @@ class _AddActionDialogState extends State<_AddActionDialog> {
           controller: _descriptionController,
           decoration: const InputDecoration(labelText: 'Description'),
           minLines: 3,
-          maxLines: 5,
+          maxLines: 10,
         ),
       ],
     );
@@ -318,18 +334,10 @@ class _AddActionDialogState extends State<_AddActionDialog> {
         border: Border.all(color: Theme.of(context).colorScheme.outline),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 2),
-      height: 200,
       width: double.infinity,
-      child: Scrollbar(
-        controller: _scrollController,
-        thumbVisibility: true,
-        child: SingleChildScrollView(
-          controller: _scrollController,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: options,
-          ),
-        ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: options,
       ),
     );
   }
@@ -527,6 +535,25 @@ class _AddActionDialogState extends State<_AddActionDialog> {
   }
 
   Widget _buildAddAbility() {
+    final sharedResources = widget.character.sharedActionResources;
+    final List<DropdownMenuEntry<String>> sharedResourceItems = [
+      const DropdownMenuEntry<String>(value: 'None', label: 'None'),
+      ...sharedResources.values.map(
+        (sr) => DropdownMenuEntry<String>(value: sr.name, label: sr.name),
+      ),
+    ];
+    // Ensure the current value is present
+    if (_sharedResourceController.text.isNotEmpty &&
+        !sharedResourceItems.any(
+          (e) => e.value == _sharedResourceController.text,
+        )) {
+      sharedResourceItems.add(
+        DropdownMenuEntry<String>(
+          value: _sharedResourceController.text,
+          label: _sharedResourceController.text,
+        ),
+      );
+    }
     return Column(
       children: [
         Row(
@@ -551,61 +578,221 @@ class _AddActionDialogState extends State<_AddActionDialog> {
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: Theme.of(context).colorScheme.outline,
+              if (_resourceType == ResourceType.custom)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: Theme.of(context).colorScheme.outline,
+                      ),
+                      borderRadius: BorderRadius.circular(4),
                     ),
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: Column(
-                    children: [
-                      Text(
-                        'Resource\ncount',
-                        style: Theme.of(context).textTheme.bodySmall,
-                        textAlign: TextAlign.center,
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 200),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              Text(
+                                'Shared resource',
+                                style: Theme.of(context).textTheme.bodySmall,
+                                textAlign: TextAlign.start,
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.add),
+                                tooltip: 'Add new shared resource',
+                                onPressed: () async {
+                                  final TextEditingController
+                                  newResourceController =
+                                      TextEditingController();
+                                  final result = await showDialog<String>(
+                                    context: context,
+                                    builder: (context) => AlertDialog(
+                                      title: const Text('Add Shared Resource'),
+                                      titleTextStyle: Theme.of(
+                                        context,
+                                      ).textTheme.titleSmall,
+                                      content: TextField(
+                                        controller: newResourceController,
+                                        decoration: const InputDecoration(
+                                          labelText: 'Resource Name',
+                                        ),
+                                      ),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () =>
+                                              Navigator.of(context).pop(),
+                                          child: const Text('Cancel'),
+                                        ),
+                                        TextButton(
+                                          onPressed: () {
+                                            Navigator.of(context).pop(
+                                              newResourceController.text.trim(),
+                                            );
+                                          },
+                                          child: const Text('Add'),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                  if (result != null && result.isNotEmpty) {
+                                    setState(() {
+                                      _sharedResourceController.text = result;
+                                    });
+                                  }
+                                },
+                              ),
+                            ],
+                          ),
+                          DropdownMenu<String>(
+                            initialSelection:
+                                _sharedResourceController.text.isEmpty
+                                ? 'None'
+                                : _sharedResourceController.text,
+                            controller: _sharedResourceController,
+                            dropdownMenuEntries: sharedResourceItems,
+                            onSelected: (String? value) {
+                              setState(() {
+                                _sharedResourceController.text = value ?? '';
+                                final customResource =
+                                    widget
+                                        .character
+                                        .sharedActionResources[_sharedResourceController
+                                        .text];
+                                if (customResource != null) {
+                                  _customResourceShortRestController.text =
+                                      customResource.shortRest;
+                                  _customResourceLongRestController.text =
+                                      customResource.longRest;
+                                  _formulaController.text =
+                                      customResource.formula;
+                                } else {
+                                  _customResourceShortRestController.text = '0';
+                                  _customResourceLongRestController.text =
+                                      'all';
+                                  _formulaController.clear();
+                                }
+                              });
+                            },
+                            textStyle: Theme.of(context).textTheme.bodySmall,
+                          ),
+                          const SizedBox(height: 8),
+                          const SizedBox(height: 8, child: Divider()),
+                          const SizedBox(height: 16),
+                          Text(
+                            'Recharge',
+                            style: Theme.of(context).textTheme.bodySmall,
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 8),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: TextFormField(
+                                  controller:
+                                      _customResourceShortRestController,
+                                  decoration: InputDecoration(
+                                    isDense: true,
+                                    labelStyle: Theme.of(
+                                      context,
+                                    ).textTheme.labelMedium,
+                                    labelText: 'Short rest',
+                                    border: const OutlineInputBorder(),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 2),
+                              Expanded(
+                                child: TextFormField(
+                                  controller: _customResourceLongRestController,
+                                  decoration: InputDecoration(
+                                    isDense: true,
+                                    labelText: 'Long rest',
+                                    labelStyle: Theme.of(
+                                      context,
+                                    ).textTheme.labelMedium,
+                                    border: const OutlineInputBorder(),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 2),
+                          TextFormField(
+                            controller: _formulaController,
+                            decoration: InputDecoration(
+                              isDense: true,
+                              labelText: 'Resource count formula',
+                              labelStyle: Theme.of(context).textTheme.bodySmall,
+                              border: const OutlineInputBorder(),
+                            ),
+                          ),
+                        ],
                       ),
-                      IconButton(
-                        onPressed: () {
-                          setState(() {
-                            if (_formulaController.text.isNotEmpty) {
-                              _formulaController.clear();
-                            }
-                            _resourceCount++;
-                          });
-                        },
-                        icon: const Icon(Icons.add),
-                      ),
-                      Text(
-                        _formulaController.text.isEmpty
-                            ? _resourceCount.toString()
-                            : 'x',
-                        style: Theme.of(context).textTheme.titleLarge,
-                      ),
-                      IconButton(
-                        onPressed: () {
-                          setState(() {
-                            if (_formulaController.text.isNotEmpty) {
-                              _formulaController.clear();
-                            }
-                            if (_resourceCount > 0) {
-                              _resourceCount--;
-                            }
-                          });
-                        },
-                        icon: const Icon(Icons.remove),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.edit),
-                        onPressed: () => _showFormulaDialog(context),
-                      ),
-                    ],
+                    ),
                   ),
                 ),
-              ),
+              if (_resourceType != ResourceType.custom)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: Theme.of(context).colorScheme.outline,
+                      ),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Column(
+                      children: [
+                        Text(
+                          'Resource\ncount',
+                          style: Theme.of(context).textTheme.bodySmall,
+                          textAlign: TextAlign.center,
+                        ),
+                        IconButton(
+                          onPressed: () {
+                            setState(() {
+                              if (_formulaController.text.isNotEmpty) {
+                                _formulaController.clear();
+                              }
+                              _resourceCount++;
+                            });
+                          },
+                          icon: const Icon(Icons.add),
+                        ),
+                        Text(
+                          _formulaController.text.isEmpty
+                              ? _resourceCount.toString()
+                              : 'x',
+                          style: Theme.of(context).textTheme.titleLarge,
+                        ),
+                        IconButton(
+                          onPressed: () {
+                            setState(() {
+                              if (_formulaController.text.isNotEmpty) {
+                                _formulaController.clear();
+                              }
+                              if (_resourceCount > 0) {
+                                _resourceCount--;
+                              }
+                            });
+                          },
+                          icon: const Icon(Icons.remove),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.edit),
+                          onPressed: () => _showFormulaDialog(context),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               Column(
                 children: [
                   ChoiceChip(
@@ -614,6 +801,10 @@ class _AddActionDialogState extends State<_AddActionDialog> {
                     onSelected: (selected) {
                       setState(() {
                         _resourceType = ResourceType.shortRest;
+                        _formulaController.clear();
+                        _sharedResourceController.text = 'None';
+                        _customResourceShortRestController.text = '0';
+                        _customResourceLongRestController.text = 'all';
                       });
                     },
                   ),
@@ -624,6 +815,26 @@ class _AddActionDialogState extends State<_AddActionDialog> {
                     onSelected: (selected) {
                       setState(() {
                         _resourceType = ResourceType.longRest;
+                        _formulaController.clear();
+                        _sharedResourceController.clear();
+                        _sharedResourceController.text = 'None';
+                        _customResourceShortRestController.text = '0';
+                        _customResourceLongRestController.text = 'all';
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 8),
+                  ChoiceChip(
+                    label: const Text('Custom'),
+                    selected: _resourceType == ResourceType.custom,
+                    onSelected: (selected) {
+                      setState(() {
+                        _resourceType = ResourceType.custom;
+                        _formulaController.clear();
+                        _sharedResourceController.clear();
+                        _sharedResourceController.text = 'None';
+                        _customResourceShortRestController.text = '0';
+                        _customResourceLongRestController.text = 'all';
                       });
                     },
                   ),
@@ -961,6 +1172,11 @@ class _AddActionDialogState extends State<_AddActionDialog> {
 
             switch (actionType) {
               case ActionType.ability:
+                if (!_requiresResource) {
+                  _resourceCount = 0;
+                  _formulaController.clear();
+                  _resourceType = ResourceType.none;
+                }
                 newAction = ActionAbility(
                   slug: widget.action?.slug ?? actionSlug,
                   title: title,
@@ -975,6 +1191,14 @@ class _AddActionDialogState extends State<_AddActionDialog> {
                   resourceFormula: _formulaController.text.isNotEmpty
                       ? _formulaController.text
                       : '',
+                  customResource: _resourceType == ResourceType.custom
+                      ? ActionResource(
+                          name: _sharedResourceController.text,
+                          formula: _formulaController.text,
+                          shortRest: _customResourceShortRestController.text,
+                          longRest: _customResourceLongRestController.text,
+                        )
+                      : null,
                 );
               case ActionType.item:
                 newAction = ActionItem(
@@ -1070,6 +1294,9 @@ class _AddActionDialogState extends State<_AddActionDialog> {
     _castTimeController.dispose();
     _typeController.dispose();
     _formulaController.dispose();
+    _sharedResourceController.dispose();
+    _customResourceShortRestController.dispose();
+    _customResourceLongRestController.dispose();
     super.dispose();
   }
 }

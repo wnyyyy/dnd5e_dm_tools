@@ -390,7 +390,7 @@ enum EquipFilter { all, equipped, canEquip }
 
 enum EquipSort { name, value, canEquip, type }
 
-enum ResourceType { item, shortRest, longRest, spell, none }
+enum ResourceType { item, shortRest, longRest, spell, custom, none }
 
 enum Attribute {
   strength,
@@ -646,6 +646,37 @@ extension DamageTypeName on DamageType {
         return 'slashing';
       case DamageType.thunder:
         return 'thunder';
+    }
+  }
+
+  Color get color {
+    switch (this) {
+      case DamageType.acid:
+        return Colors.green[700]!;
+      case DamageType.bludgeoning:
+        return Colors.blueGrey;
+      case DamageType.cold:
+        return Colors.cyan;
+      case DamageType.fire:
+        return Colors.deepOrange;
+      case DamageType.force:
+        return Colors.lightGreen;
+      case DamageType.lightning:
+        return Colors.yellow;
+      case DamageType.necrotic:
+        return Colors.deepPurple;
+      case DamageType.piercing:
+        return Colors.blueGrey;
+      case DamageType.poison:
+        return Colors.lime;
+      case DamageType.psychic:
+        return Colors.deepPurpleAccent;
+      case DamageType.radiant:
+        return Colors.yellow;
+      case DamageType.slashing:
+        return Colors.blueGrey;
+      case DamageType.thunder:
+        return Colors.blueAccent;
     }
   }
 }

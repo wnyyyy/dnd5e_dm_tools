@@ -17,6 +17,14 @@ class DescriptionText extends StatelessWidget {
   final TextAlign textAlign;
 
   static final Map<String, Color> _staticKeywordColors = {
+    'success': Colors.green,
+    'successful': Colors.green,
+    'fail': Colors.red,
+    'failed': Colors.red,
+    'failure': Colors.red,
+  };
+
+  static final Map<String, Color> _staticDamageColors = {
     'acid': Colors.green[700]!,
     'bludgeoning': Colors.blueGrey,
     'cold': Colors.cyan,
@@ -30,11 +38,6 @@ class DescriptionText extends StatelessWidget {
     'radiant': Colors.yellow,
     'slashing': Colors.blueGrey,
     'thunder': Colors.blueAccent,
-    'success': Colors.green,
-    'successful': Colors.green,
-    'fail': Colors.red,
-    'failed': Colors.red,
-    'failure': Colors.red,
   };
 
   static final wordsToAttributes = {
@@ -112,6 +115,16 @@ class DescriptionText extends StatelessWidget {
       },
     );
 
+    for (final damageType in _staticDamageColors.keys) {
+      result = result.replaceAllMapped(
+        RegExp(
+          r'\b(' + RegExp.escape(damageType) + r') damage\b',
+          caseSensitive: false,
+        ),
+        (match) => '[[${match[1]}]] damage',
+      );
+    }
+
     result = result.replaceAllMapped(
       RegExp(r'\b(\d*d\d+)\b', caseSensitive: false),
       (match) {
@@ -142,7 +155,11 @@ class DescriptionText extends StatelessWidget {
       },
     );
 
-    for (final keyword in allKeywords) {
+    final Set<String> nonDamageKeywords = allKeywords.difference(
+      _staticDamageColors.keys.toSet(),
+    );
+
+    for (final keyword in nonDamageKeywords) {
       result = result.replaceAllMapped(
         RegExp(r'\b' + RegExp.escape(keyword) + r'\b', caseSensitive: false),
         (match) {
@@ -178,6 +195,8 @@ class DescriptionText extends StatelessWidget {
     };
 
     final Map<String, Color> keywordColors = {..._staticKeywordColors};
+
+    keywordColors.addAll(_staticDamageColors);
 
     wordsToAttributes.forEach((attribute, words) {
       final color = attributeColors[attribute];

@@ -80,17 +80,20 @@ class ActionWidgetState extends State<ActionWidget> {
       case ActionType.ability:
         final abilityAction = action as ActionAbility;
         final resourceFormula = abilityAction.resourceFormula;
-        resourceCount = resourceFormula.isNotEmpty
-            ? int.tryParse(
-                    parseFormula(
-                      resourceFormula,
-                      widget.character.asi,
-                      getProfBonus(widget.character.level),
-                      widget.character.level,
-                    ),
-                  ) ??
-                  1
-            : 1;
+        if (resourceFormula.isEmpty) {
+          resourceCount = abilityAction.resourceCount ?? 1;
+        } else {
+          resourceCount =
+              int.tryParse(
+                parseFormula(
+                  resourceFormula,
+                  widget.character.asi,
+                  getProfBonus(widget.character.level),
+                  widget.character.level,
+                ),
+              ) ??
+              1;
+        }
       case ActionType.item:
         final itemSlug = (action as ActionItem).itemSlug;
         final backpackItem = backpack.getItemBySlug(itemSlug);
@@ -188,7 +191,15 @@ class ActionWidgetState extends State<ActionWidget> {
                     ),
                   ),
                   const SizedBox(height: 8, width: 32, child: Divider()),
-                  if (remaining > 0)
+                  if (action.customResource?.name.isNotEmpty ?? false)
+                    Text(
+                      action.customResource!.name,
+                      style: Theme.of(context).textTheme.labelMedium!.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.center,
+                    )
+                  else if (remaining > 0)
                     Text(
                       'Available\nUses',
                       style: Theme.of(context).textTheme.labelSmall,
@@ -232,6 +243,59 @@ class ActionWidgetState extends State<ActionWidget> {
                         'Long Rest',
                         style: Theme.of(context).textTheme.labelMedium,
                         textAlign: TextAlign.center,
+                      ),
+                  ],
+                ),
+              );
+            }
+            if (resourceType == ResourceType.custom &&
+                action.customResource != null) {
+              children.add(
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'Recharge',
+                      style: Theme.of(context).textTheme.labelSmall,
+                      textAlign: TextAlign.center,
+                      softWrap: false,
+                    ),
+                    const SizedBox(height: 2),
+                    if (action.customResource!.longRest == 'all')
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 2.0),
+                        child: Text(
+                          'Long Rest',
+                          style: Theme.of(context).textTheme.labelMedium,
+                          textAlign: TextAlign.center,
+                        ),
+                      )
+                    else if (action.customResource!.longRest.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 2.0),
+                        child: Text(
+                          '${action.customResource!.longRest}/Long Rest',
+                          style: Theme.of(context).textTheme.labelMedium,
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    if (action.customResource!.shortRest == 'all')
+                      Padding(
+                        padding: const EdgeInsets.only(top: 2.0),
+                        child: Text(
+                          'Short Rest',
+                          style: Theme.of(context).textTheme.labelMedium,
+                          textAlign: TextAlign.center,
+                        ),
+                      )
+                    else if (action.customResource!.shortRest.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 2.0),
+                        child: Text(
+                          '${action.customResource!.shortRest}/Short Rest',
+                          style: Theme.of(context).textTheme.labelMedium,
+                          textAlign: TextAlign.center,
+                        ),
                       ),
                   ],
                 ),
@@ -449,7 +513,7 @@ class ActionWidgetState extends State<ActionWidget> {
       }
 
       final actionFields = _buildFields(context);
-      //children.addAll(actionFields);
+      children.addAll(actionFields);
 
       return LayoutBuilder(
         builder: (context, c) {
@@ -626,9 +690,15 @@ class ActionWidgetState extends State<ActionWidget> {
       final damage = parseFormula(actionFields.damage ?? '', asi, prof, level);
       if (actionFields.type?.isNotEmpty ?? false) {
         final type = actionFields.type?.sentenceCase ?? '';
-        final typeWidget = DescriptionText(
-          inputText: type,
-          baseStyle: Theme.of(context).textTheme.labelSmall!,
+        final typeColor = DamageType.values
+            .where((e) => e.name.toLowerCase() == type.toLowerCase())
+            .firstOrNull
+            ?.color;
+        final typeWidget = Text(
+          type,
+          style: Theme.of(context).textTheme.labelMedium!.copyWith(
+            color: typeColor ?? Theme.of(context).colorScheme.onSurface,
+          ),
         );
         children.add(
           _buildVerticalField(
@@ -686,7 +756,7 @@ class ActionWidgetState extends State<ActionWidget> {
           ],
         );
 
-        if (actionFields.halfOnSuccess?.toString().isNotEmpty ?? false) {
+        if (actionFields.halfOnSuccess?.toString() == 'true') {
           children.add(
             Column(
               mainAxisSize: MainAxisSize.min,
