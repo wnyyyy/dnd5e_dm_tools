@@ -186,11 +186,21 @@ class Class extends Equatable {
 
     final List<Feat> featList = buildFeatList(lines);
 
-    final featNamesLeveled = [];
+    final featNamesLeveledAux = <String>[];
     for (int i = 1; i <= level; i++) {
       final levelEntry = table.levelData[i];
       if (levelEntry != null) {
-        featNamesLeveled.addAll(levelEntry.features);
+        featNamesLeveledAux.addAll(levelEntry.features);
+      }
+    }
+
+    final featNamesLeveled = <String>[];
+    for (final entry in featNamesLeveledAux) {
+      final feat = featList.where((f) => entry.contains(f.name)).firstOrNull;
+      if (feat != null) {
+        featNamesLeveled.add(feat.name);
+      } else {
+        featNamesLeveled.add(entry);
       }
     }
 

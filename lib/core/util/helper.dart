@@ -149,13 +149,34 @@ List<Feat> buildFeatList(List<String> lines) {
       final subfeatDesc = List<String>.from(
         subfeatureVal['description'] as List? ?? [],
       );
-      subfeats.add('**$subfeatName**.\n${subfeatDesc.join('\n\n')}');
+
+      final StringBuffer descBuffer = StringBuffer();
+      for (final line in subfeatDesc) {
+        if (line.isNotEmpty) {
+          if (line.startsWith('|')) {
+            descBuffer.writeln(line);
+          } else {
+            descBuffer.writeln('\n$line');
+          }
+        }
+      }
+      subfeats.add('**$subfeatName**.\n${descBuffer.toString().trim()}');
+    }
+    final StringBuffer descBuffer = StringBuffer();
+    for (final line in featDesc) {
+      if (line.isNotEmpty) {
+        if (line.startsWith('|')) {
+          descBuffer.writeln(line);
+        } else {
+          descBuffer.writeln('\n$line');
+        }
+      }
     }
 
     featList.add(
       Feat(
         name: featName,
-        description: featDesc.join('\n\n'),
+        description: descBuffer.toString().trim(),
         slug: featName,
         effectsDesc: subfeats,
       ),
