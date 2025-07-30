@@ -113,11 +113,6 @@ class _DatabaseEditorLoadedContent extends StatelessWidget {
                               ? () {
                                   cubit.sync(type, state.slug);
                                   context.read<RulesCubit>().reloadRule(type);
-                                  context.read<CharacterBloc>().add(
-                                    CharacterLoad(
-                                      context.read<SettingsCubit>().state.name,
-                                    ),
-                                  );
                                 }
                               : null,
                         ),
