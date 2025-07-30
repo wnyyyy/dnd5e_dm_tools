@@ -155,6 +155,22 @@ class RulesCubit extends Cubit<RulesState> {
           emit(RulesStateError('Unknown rule type: $type'));
           return Future.value();
       }
+      emit(
+        RulesStateLoaded(
+          conditions: currState.conditions,
+          feats: currState.feats,
+          spells: currState.spells,
+          spellLists: currState.spellLists,
+          genericItems: currState.genericItems,
+          weaponTemplates: currState.weaponTemplates,
+          armors: currState.armors,
+          weapons: currState.weapons,
+          allItems: currState.allItems,
+          itemMap: currState.itemMap,
+          spellMap: currState.spellMap,
+          spellMapByLevel: currState.spellMapByLevel,
+        ),
+      );
     }
     return Future.value();
   }

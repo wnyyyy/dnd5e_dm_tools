@@ -1,13 +1,11 @@
 import 'dart:convert';
 
 import 'package:dnd5e_dm_tools/features/characters/bloc/character/character_bloc.dart';
-import 'package:dnd5e_dm_tools/features/characters/bloc/character/character_event.dart';
 import 'package:dnd5e_dm_tools/features/characters/bloc/character/character_state.dart';
 import 'package:dnd5e_dm_tools/features/database_editor/bloc/database_editor_cubit.dart';
 import 'package:dnd5e_dm_tools/features/database_editor/bloc/database_editor_state.dart';
 import 'package:dnd5e_dm_tools/features/rules/rules_cubit.dart';
 import 'package:dnd5e_dm_tools/features/rules/rules_state.dart';
-import 'package:dnd5e_dm_tools/features/settings/bloc/settings_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -58,6 +56,10 @@ class DatabaseEditorScreen extends StatelessWidget {
 class _DatabaseEditorLoadedContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final characterState = context.read<CharacterBloc>().state;
+    if (characterState is! CharacterLoaded) {
+      return const Center(child: Text('No character loaded'));
+    }
     return BlocBuilder<DatabaseEditorCubit, DatabaseEditorState>(
       builder: (context, state) {
         final cubit = context.read<DatabaseEditorCubit>();
@@ -112,7 +114,6 @@ class _DatabaseEditorLoadedContent extends StatelessWidget {
                           onPressed: state is DatabaseEditorLoaded
                               ? () {
                                   cubit.sync(type, state.slug);
-                                  context.read<RulesCubit>().reloadRule(type);
                                 }
                               : null,
                         ),
@@ -158,6 +159,12 @@ class _DatabaseEditorLoadedContent extends StatelessWidget {
   ) {
     if (state is DatabaseEditorLoading) {
       return const CircularProgressIndicator();
+    }
+    if (state is DatabaseEditorSynced) {
+      if (state.type != null) {
+        context.read<RulesCubit>().reloadRule(state.type!);
+      }
+      context.read<DatabaseEditorCubit>().fetch(state.previousState.slug, type);
     }
     if (state is DatabaseEditorLoaded) {
       return _buildInputs(context, state, type);

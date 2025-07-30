@@ -68,6 +68,10 @@ class DatabaseEditorCubit extends Cubit<DatabaseEditorState> {
   }
 
   Future<void> sync(String type, String slug) async {
+    if (state is! DatabaseEditorLoaded) {
+      return;
+    }
+    final prevState = (state as DatabaseEditorLoaded).copyWith();
     emit(DatabaseEditorLoading(selectedIndex: state.selectedIndex));
     final Map<String, dynamic> entry;
     switch (type) {
@@ -105,10 +109,9 @@ class DatabaseEditorCubit extends Cubit<DatabaseEditorState> {
     }
     entry['slug'] = slug;
     emit(
-      DatabaseEditorLoaded(
-        entry: entry,
-        originalEntry: Map<String, dynamic>.from(entry),
-        slug: slug,
+      DatabaseEditorSynced(
+        type: type,
+        previousState: prevState,
         selectedIndex: state.selectedIndex,
       ),
     );
