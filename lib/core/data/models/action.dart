@@ -1,4 +1,6 @@
 import 'package:dnd5e_dm_tools/core/data/models/action_resource.dart';
+import 'package:dnd5e_dm_tools/core/data/models/character.dart';
+import 'package:dnd5e_dm_tools/core/data/models/class.dart';
 import 'package:dnd5e_dm_tools/core/util/enum.dart';
 import 'package:equatable/equatable.dart';
 
@@ -86,6 +88,23 @@ abstract class Action extends Equatable {
   final ActionType type;
   final ActionFields fields;
   final String description;
+
+  List<String> getExtraBoldWords(Class classs, Character character) {
+    final List<String> extraBoldWords = [];
+    if (type == ActionType.ability && this is ActionAbility) {
+      final sharedAbilityResources = character.sharedActionResources;
+      for (final resource in sharedAbilityResources.entries) {
+        final resourceName = resource.value.name.toLowerCase();
+        if (resourceName.contains('dice') || resourceName.contains('die')) {
+          extraBoldWords.add(resourceName.replaceAll('dice', 'die'));
+          extraBoldWords.add(resourceName.replaceAll('die', 'dice'));
+        } else {
+          extraBoldWords.add(resourceName);
+        }
+      }
+    }
+    return extraBoldWords;
+  }
 
   Map<String, dynamic> toJson() {
     return {

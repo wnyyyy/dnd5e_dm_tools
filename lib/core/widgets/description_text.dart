@@ -10,11 +10,33 @@ class DescriptionText extends StatelessWidget {
     required this.inputText,
     required this.baseStyle,
     this.textAlign = TextAlign.left,
+    this.extraBoldWords = const [],
   });
 
   final String inputText;
   final TextStyle baseStyle;
   final TextAlign textAlign;
+  final List<String> extraBoldWords;
+
+  static final List<String> defaultBoldWords = [
+    'feet',
+    'foot',
+    'ft',
+    'hour',
+    'minutes',
+    'minute',
+    'hours',
+    'saves',
+    'reaction',
+    'radius',
+    'successful',
+    'failed',
+    'failure',
+    'fail',
+    'success',
+  ];
+
+  List<String> get boldWords => [...defaultBoldWords, ...extraBoldWords];
 
   static final Map<String, Color> _staticKeywordColors = {
     'success': Colors.green,
@@ -68,26 +90,9 @@ class DescriptionText extends StatelessWidget {
     ],
   };
 
-  static final boldWords = [
-    'feet',
-    'foot',
-    'ft',
-    'hour',
-    'minutes',
-    'minute',
-    'hours',
-    'saves',
-    'reaction',
-    'radius',
-    'successful',
-    'failed',
-    'failure',
-    'fail',
-    'success',
-  ];
-
   String _highlightKeywords(String text, Map<String, Color> keywordColors) {
     var result = text;
+    result = result.replaceAll(r'\n', '\n\u200B');
     final Set<String> allKeywords = {...keywordColors.keys, ...boldWords};
 
     final List<String> placeholders = [];

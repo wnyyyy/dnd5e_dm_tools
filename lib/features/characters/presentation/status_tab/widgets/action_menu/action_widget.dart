@@ -620,6 +620,10 @@ class ActionWidgetState extends State<ActionWidget> {
                         DescriptionText(
                           inputText: action.description,
                           baseStyle: Theme.of(context).textTheme.bodySmall!,
+                          extraBoldWords: action.getExtraBoldWords(
+                            widget.classs,
+                            widget.character,
+                          ),
                         ),
                         if (action.type == ActionType.item &&
                             action is ActionItem &&
