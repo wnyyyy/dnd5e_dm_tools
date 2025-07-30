@@ -696,14 +696,26 @@ class ActionWidgetState extends State<ActionWidget> {
     ).textTheme.labelLarge!.copyWith(fontWeight: FontWeight.bold);
 
     if (actionFields.heal?.isNotEmpty ?? false) {
-      final heal = parseFormula(actionFields.heal ?? '', asi, prof, level, widget.classs.table);
+      final heal = parseFormula(
+        actionFields.heal ?? '',
+        asi,
+        prof,
+        level,
+        widget.classs.table,
+      );
       children.add(
         _buildVerticalField('Heal', heal, context, valueTheme: boldTheme),
       );
     }
 
     if (actionFields.damage?.isNotEmpty ?? false) {
-      final damage = parseFormula(actionFields.damage ?? '', asi, prof, level, widget.classs.table);
+      final damage = parseFormula(
+        actionFields.damage ?? '',
+        asi,
+        prof,
+        level,
+        widget.classs.table,
+      );
       if (actionFields.type?.isNotEmpty ?? false) {
         final type = actionFields.type?.sentenceCase ?? '';
         final typeColor = DamageType.values
@@ -733,7 +745,13 @@ class ActionWidgetState extends State<ActionWidget> {
     }
 
     if (actionFields.attack?.isNotEmpty ?? false) {
-      final attack = parseFormula(actionFields.attack ?? '', asi, prof, level, widget.classs.table);
+      final attack = parseFormula(
+        actionFields.attack ?? '',
+        asi,
+        prof,
+        level,
+        widget.classs.table,
+      );
       final attackStr = (int.tryParse(attack) ?? 0) > 0 ? '+$attack' : attack;
       children.add(
         _buildVerticalField(
@@ -907,22 +925,27 @@ class ActionWidgetState extends State<ActionWidget> {
         onActionsChanged: widget.onActionsChanged,
       );
     }
-    if (!usable) {
-      return const SizedBox();
-    }
     if (remaining == 0 && requiresResource) {
       return ActionChip(
+        visualDensity: VisualDensity.compact,
         label: const Text('Recharge'),
         onPressed: () {
           widget.onUse?.call(action: widget.action, recharge: true);
         },
       );
     }
-    return ActionChip(
-      label: const Text('Use'),
-      onPressed: () {
-        widget.onUse?.call(action: widget.action);
-      },
+    return Visibility(
+      maintainSize: true,
+      maintainAnimation: true,
+      maintainState: true,
+      visible: usable,
+      child: ActionChip(
+        visualDensity: VisualDensity.compact,
+        label: const Text('Use'),
+        onPressed: () {
+          widget.onUse?.call(action: widget.action);
+        },
+      ),
     );
   }
 }
