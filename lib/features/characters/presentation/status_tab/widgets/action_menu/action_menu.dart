@@ -60,6 +60,16 @@ class _ActionMenuState extends State<ActionMenu> {
   }
 
   @override
+  void didUpdateWidget(covariant ActionMenu oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.character != oldWidget.character) {
+      setState(() {
+        actions = widget.character.actions;
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final filteredActions = _getFilteredItems(actions);
     final screenWidth = MediaQuery.of(context).size.width;
