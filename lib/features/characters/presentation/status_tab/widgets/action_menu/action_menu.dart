@@ -12,6 +12,7 @@ import 'package:dnd5e_dm_tools/features/characters/presentation/status_tab/widge
 import 'package:dnd5e_dm_tools/features/characters/presentation/status_tab/widgets/action_menu/add_action_button.dart';
 import 'package:dnd5e_dm_tools/features/rules/rules_cubit.dart';
 import 'package:dnd5e_dm_tools/features/rules/rules_state.dart';
+import 'package:dnd5e_dm_tools/features/settings/bloc/settings_cubit.dart';
 import 'package:flutter/material.dart' hide Action;
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -36,6 +37,7 @@ class ActionMenu extends StatefulWidget {
 
 class _ActionMenuState extends State<ActionMenu> {
   bool _isEditMode = false;
+  bool _isCompactMode = false;
   ActionMenuMode _mode = ActionMenuMode.all;
   late List<Action> actions;
   late ScrollController _scrollController;
@@ -46,10 +48,19 @@ class _ActionMenuState extends State<ActionMenu> {
     });
   }
 
+  void _enableCompactMode() {
+    setState(() {
+      _isCompactMode = !_isCompactMode;
+    });
+    final settingsCubit = context.read<SettingsCubit>();
+    settingsCubit.setCompactMode(_isCompactMode);
+  }
+
   @override
   void initState() {
     super.initState();
     actions = widget.character.actions;
+    _isCompactMode = context.read<SettingsCubit>().state.actionsCompactMode;
     _scrollController = ScrollController();
   }
 
@@ -130,6 +141,34 @@ class _ActionMenuState extends State<ActionMenu> {
                           ),
                           Row(
                             children: [
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    'Compact',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodyLarge!
+                                        .copyWith(
+                                          color: Theme.of(
+                                            context,
+                                          ).colorScheme.onSecondaryContainer,
+                                        ),
+                                  ),
+                                  Checkbox(
+                                    value: _isCompactMode,
+                                    onChanged: (value) {
+                                      if (value != null) {
+                                        _enableCompactMode();
+                                      }
+                                    },
+                                    activeColor: Theme.of(
+                                      context,
+                                    ).colorScheme.primary,
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(width: 8),
                               IconButton(
                                 onPressed: _enableEditMode,
                                 icon: Icon(
@@ -208,6 +247,7 @@ class _ActionMenuState extends State<ActionMenu> {
           race: widget.race,
           isEditMode: _isEditMode,
           onActionsChanged: onActionsChanged,
+          compactMode: _isCompactMode,
         ),
       );
     }).toList();

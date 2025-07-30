@@ -13,6 +13,7 @@ abstract class SettingsState {
   ActionMenuMode selectedActionFilter = ActionMenuMode.all;
   EquipFilter selectedEquipFilter = EquipFilter.all;
   EquipSort selectedEquipSort = EquipSort.name;
+  bool actionsCompactMode = false;
 }
 
 class SettingsInitial extends SettingsState {}
@@ -36,6 +37,7 @@ class SettingsLoaded extends SettingsState {
     required ActionMenuMode selectedActionFilter,
     required EquipFilter selectedEquipFilter,
     required EquipSort selectedEquipSort,
+    required bool actionsCompactMode,
   }) {
     this.name = name;
     this.isEditMode = isEditMode;
@@ -47,6 +49,7 @@ class SettingsLoaded extends SettingsState {
     this.selectedActionFilter = selectedActionFilter;
     this.selectedEquipFilter = selectedEquipFilter;
     this.selectedEquipSort = selectedEquipSort;
+    this.actionsCompactMode = actionsCompactMode;
   }
 
   SettingsLoaded copyWith({
@@ -60,6 +63,7 @@ class SettingsLoaded extends SettingsState {
     ActionMenuMode? selectedActionFilter,
     EquipFilter? selectedEquipFilter,
     EquipSort? selectedEquipSort,
+    bool? actionsCompactMode,
   }) {
     return SettingsLoaded(
       name: name ?? this.name,
@@ -72,6 +76,7 @@ class SettingsLoaded extends SettingsState {
       selectedActionFilter: selectedActionFilter ?? this.selectedActionFilter,
       selectedEquipFilter: selectedEquipFilter ?? this.selectedEquipFilter,
       selectedEquipSort: selectedEquipSort ?? this.selectedEquipSort,
+      actionsCompactMode: actionsCompactMode ?? this.actionsCompactMode,
     );
   }
 }

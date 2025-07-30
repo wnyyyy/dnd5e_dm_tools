@@ -28,6 +28,7 @@ class ActionWidget extends StatefulWidget {
     required this.isEditMode,
     required this.onActionsChanged,
     required this.onUse,
+    this.compactMode = false,
   });
   final Action action;
   final Character character;
@@ -36,6 +37,7 @@ class ActionWidget extends StatefulWidget {
   final bool isEditMode;
   final ValueChanged<List<Action>> onActionsChanged;
   final OnUseActionCallback? onUse;
+  final bool compactMode;
 
   @override
   ActionWidgetState createState() => ActionWidgetState();
@@ -162,7 +164,6 @@ class ActionWidgetState extends State<ActionWidget> {
           }
         }
     }
-
     Widget buildSubtitle(BuildContext context) {
       final boldTheme = Theme.of(
         context,
@@ -598,15 +599,31 @@ class ActionWidgetState extends State<ActionWidget> {
                 ],
               ),
             ),
-            Align(
-              child: SizedBox(width: screenWidth * 0.8, child: const Divider()),
-            ),
-            buildSubtitle(context),
+            if (!widget.compactMode)
+              Align(
+                child: SizedBox(
+                  width: screenWidth * 0.8,
+                  child: const Divider(),
+                ),
+              ),
+            if (!widget.compactMode) buildSubtitle(context),
             AnimatedCrossFade(
               firstChild: Container(),
               secondChild: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  if (widget.compactMode)
+                    Column(
+                      children: [
+                        Align(
+                          child: SizedBox(
+                            width: screenWidth * 0.8,
+                            child: const Divider(),
+                          ),
+                        ),
+                        buildSubtitle(context),
+                      ],
+                    ),
                   Align(
                     child: SizedBox(
                       width: screenWidth * 0.8,

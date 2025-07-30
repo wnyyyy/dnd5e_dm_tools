@@ -76,6 +76,12 @@ class SettingsCubit extends Cubit<SettingsState> {
     emit((state as SettingsLoaded).copyWith(selectedEquipSort: selected));
   }
 
+  Future<void> setCompactMode(bool compact) async {
+    if (state is! SettingsLoaded) return;
+    await saveConfig('actions_compact_mode', compact.toString());
+    emit((state as SettingsLoaded).copyWith(actionsCompactMode: compact));
+  }
+
   Future<void> init() async {
     emit(SettingsLoading());
     try {
@@ -108,6 +114,9 @@ class SettingsCubit extends Cubit<SettingsState> {
         (e) => e.name == selectedEquipSortName,
         orElse: () => EquipSort.type,
       );
+      final actionsCompactMode =
+          await readConfig('actions_compact_mode') ?? 'false';
+
       logBloc('Settings loaded', level: Level.info);
 
       emit(
@@ -122,6 +131,7 @@ class SettingsCubit extends Cubit<SettingsState> {
           selectedActionFilter: selectedActionFilter,
           selectedEquipFilter: selectedEquipFilter,
           selectedEquipSort: selectedEquipSort,
+          actionsCompactMode: actionsCompactMode == 'true',
         ),
       );
     } catch (error) {
