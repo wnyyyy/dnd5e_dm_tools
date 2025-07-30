@@ -255,8 +255,17 @@ abstract class Item extends Equatable {
     if (expressions.contains('maul')) {
       return const Icon(RpgAwesome.large_hammer);
     }
-    if (expressions.contains('axe')) {
+    if (expressions.contains('mace')) {
+      return const Icon(RpgAwesome.spiked_mace);
+    }
+    if (expressions.contains('namis') || expressions.contains('nami')) {
+      return const Icon(RpgAwesome.ocean_emblem);
+    }
+    if (expressions.contains('axe') || expressions.contains('handaxe')) {
       return const Icon(RpgAwesome.battered_axe);
+    }
+    if (expressions.contains('javelin')) {
+      return const Icon(RpgAwesome.spear_head);
     }
     if (expressions.contains('greataxe')) {
       return const Icon(RpgAwesome.axe);
