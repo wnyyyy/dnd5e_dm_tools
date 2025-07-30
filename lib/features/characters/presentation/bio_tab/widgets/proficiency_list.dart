@@ -144,12 +144,13 @@ class _ProficiencyListState extends State<ProficiencyList> {
                         context.read<CharacterBloc>().add(
                           CharacterUpdate(
                             character: widget.character.copyWith(
-                              proficiency: widget.character.proficiency.copyWith(
-                                languages: _languagesController.text,
-                                weapons: _weaponsController.text,
-                                armor: _armorController.text,
-                                tools: _toolsController.text,
-                              ),
+                              proficiency: widget.character.proficiency
+                                  .copyWith(
+                                    languages: _languagesController.text.trim(),
+                                    weapons: _weaponsController.text.trim(),
+                                    armor: _armorController.text.trim(),
+                                    tools: _toolsController.text.trim(),
+                                  ),
                             ),
                             persistData: true,
                           ),
