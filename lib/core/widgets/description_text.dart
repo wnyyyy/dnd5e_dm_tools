@@ -19,14 +19,6 @@ class DescriptionText extends StatelessWidget {
   final List<String> extraBoldWords;
 
   static final List<String> defaultBoldWords = [
-    'feet',
-    'foot',
-    'ft',
-    'hour',
-    'minutes',
-    'minute',
-    'hours',
-    'saves',
     'reaction',
     'radius',
     'successful',
@@ -34,6 +26,16 @@ class DescriptionText extends StatelessWidget {
     'failure',
     'fail',
     'success',
+  ];
+
+  static final List<String> afterNumberBoldWords = [
+    'feet',
+    'foot',
+    'ft',
+    'hour',
+    'minutes',
+    'minute',
+    'hours',
   ];
 
   List<String> get boldWords => [...defaultBoldWords, ...extraBoldWords];
@@ -96,7 +98,23 @@ class DescriptionText extends StatelessWidget {
     final Set<String> allKeywords = {...keywordColors.keys, ...boldWords};
 
     final List<String> placeholders = [];
-    for (final keyword in boldWords) {
+    for (final keyword in afterNumberBoldWords) {
+      result = result.replaceAllMapped(
+        RegExp(
+          r'(\b\d+\s*)(' + RegExp.escape(keyword) + r')\b',
+          caseSensitive: false,
+        ),
+        (match) {
+          final placeholder = '<<${placeholders.length}>>';
+          placeholders.add('[[${match[1]}${match[2]}]]');
+          return placeholder;
+        },
+      );
+    }
+
+    for (final keyword in boldWords.where(
+      (w) => !afterNumberBoldWords.contains(w),
+    )) {
       result = result.replaceAllMapped(
         RegExp(
           r'(\b\d+\s+)(' + RegExp.escape(keyword) + r')\b',
