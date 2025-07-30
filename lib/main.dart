@@ -34,7 +34,6 @@ void main() async {
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  // Initialize Hive with platform-specific configuration
   if (kIsWeb) {
     await Hive.initFlutter(hiveWebSubdir);
   } else {
@@ -120,9 +119,8 @@ Future<void> _initializeMobileHiveFiles(List<String> hiveFileNames) async {
       } catch (e) {
         logStart(
           'Error copying $fileName.hive from assets: $e',
-          level: Level.error,
+          level: Level.warning,
         );
-        throw Exception('Error copying $fileName.hive from assets: $e');
       }
     }
   }
