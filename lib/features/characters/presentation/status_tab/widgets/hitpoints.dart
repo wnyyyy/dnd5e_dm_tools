@@ -23,6 +23,7 @@ class HitpointsState extends State<Hitpoints> {
   late int tempHp;
   late int prevHp;
   Timer? _timer;
+  Timer? _tempHpModeTimer;
   bool tempHpMode = false;
 
   @override
@@ -37,7 +38,31 @@ class HitpointsState extends State<Hitpoints> {
   @override
   void dispose() {
     _timer?.cancel();
+    _tempHpModeTimer?.cancel();
     super.dispose();
+  }
+
+  void _activateTempHpMode() {
+    setState(() {
+      tempHpMode = true;
+    });
+    _tempHpModeTimer?.cancel();
+    _tempHpModeTimer = Timer(const Duration(seconds: 20), () {
+      setState(() {
+        tempHpMode = false;
+      });
+    });
+  }
+
+  void _resetTempHpModeTimer() {
+    if (tempHpMode) {
+      _tempHpModeTimer?.cancel();
+      _tempHpModeTimer = Timer(const Duration(seconds: 20), () {
+        setState(() {
+          tempHpMode = false;
+        });
+      });
+    }
   }
 
   void _startTimer(int delta) {
@@ -59,27 +84,23 @@ class HitpointsState extends State<Hitpoints> {
         child: Column(
           children: [
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 GestureDetector(
-                  onLongPress: () => setState(() {
-                    tempHpMode = !tempHpMode;
-                  }),
+                  onTap: () => _activateTempHpMode(),
                   child: Icon(
                     color: tempHpMode ? Colors.blue : null,
                     Icons.favorite_outline,
                   ),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: 12),
                 Text(
                   'Hit Points',
                   style: Theme.of(context).textTheme.titleSmall,
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: 12),
                 GestureDetector(
-                  onLongPress: () => setState(() {
-                    tempHpMode = !tempHpMode;
-                  }),
+                  onTap: () => _activateTempHpMode(),
                   child: Icon(
                     color: tempHpMode ? Colors.blue : null,
                     Icons.favorite_outline,
@@ -89,43 +110,74 @@ class HitpointsState extends State<Hitpoints> {
             ),
             const SizedBox(height: 8),
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisSize: MainAxisSize.min,
               children: [
-                GestureDetector(
-                  onLongPress: () => _startTimer(-1),
-                  onLongPressEnd: (details) => _stopTimer(),
-                  child: Padding(
-                    padding: const EdgeInsets.only(right: 6),
+                Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: GestureDetector(
+                    onLongPress: () {
+                      _startTimer(-1);
+                      _resetTempHpModeTimer();
+                    },
+                    onLongPressEnd: (details) => _stopTimer(),
                     child: IconButton(
-                      onPressed: () => _updateHp(-1),
+                      onPressed: () {
+                        _updateHp(-1);
+                        _resetTempHpModeTimer();
+                      },
                       iconSize: 32,
                       icon: const Icon(Icons.remove_circle_outline),
                     ),
                   ),
                 ),
-                GestureDetector(
-                  onDoubleTap: () => _showAdjustHpModal(context),
-                  child: Text(
-                    '$currentHp'.padLeft(2, '0'),
-                    style: Theme.of(context).textTheme.displaySmall!.copyWith(
-                      color: currentHp <= maxHp / 3
-                          ? Colors.redAccent
-                          : currentHp <= maxHp / 2
-                          ? Colors.orange
-                          : currentHp <= maxHp / 1.5
-                          ? Colors.orangeAccent
-                          : Colors.green,
-                    ),
+                SizedBox(
+                  width: currentHp > 100 ? 110 : 90,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      GestureDetector(
+                        onDoubleTap: () => _showAdjustHpModal(context),
+                        child: Text(
+                          '$currentHp'.padLeft(2, '0'),
+                          style: Theme.of(context).textTheme.displaySmall!
+                              .copyWith(
+                                color: currentHp <= maxHp / 3
+                                    ? Colors.redAccent
+                                    : currentHp <= maxHp / 2
+                                    ? Colors.orange
+                                    : currentHp <= maxHp / 1.5
+                                    ? Colors.orangeAccent
+                                    : Colors.green,
+                              ),
+                        ),
+                      ),
+                      if (tempHp > 0)
+                        Positioned(
+                          top: 0,
+                          right: 0,
+                          child: Text(
+                            '+$tempHp',
+                            style: Theme.of(context).textTheme.titleLarge!
+                                .copyWith(color: Colors.blue, fontSize: 18),
+                          ),
+                        ),
+                    ],
                   ),
                 ),
-                GestureDetector(
-                  onLongPress: () => _startTimer(1),
-                  onLongPressEnd: (details) => _stopTimer(),
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 6.0),
+                Padding(
+                  padding: const EdgeInsets.only(left: 8.0),
+                  child: GestureDetector(
+                    onLongPress: () {
+                      _startTimer(1);
+                      _resetTempHpModeTimer();
+                    },
+                    onLongPressEnd: (details) => _stopTimer(),
                     child: IconButton(
                       iconSize: 32,
-                      onPressed: () => _updateHp(1),
+                      onPressed: () {
+                        _updateHp(1);
+                        _resetTempHpModeTimer();
+                      },
                       icon: const Icon(Icons.add_circle_outline),
                     ),
                   ),
@@ -140,13 +192,6 @@ class HitpointsState extends State<Hitpoints> {
                 style: Theme.of(context).textTheme.displaySmall,
               ),
             ),
-            if (tempHp > 0)
-              Text(
-                '+$tempHp',
-                style: Theme.of(
-                  context,
-                ).textTheme.titleLarge!.copyWith(color: Colors.blue),
-              ),
             if (currentHp < 1) _buildDeathSave(),
           ],
         ),
