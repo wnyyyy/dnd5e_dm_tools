@@ -867,7 +867,7 @@ class _AddActionDialogState extends State<_AddActionDialog> {
                         var valid = true;
                         try {
                           final asi = widget.character.asi;
-                          final t = parseFormula(value, asi, 0, 0);
+                          final t = parseFormula(value, asi, 0, 0, widget.classs.table);
                           final _ = int.parse(t);
                         } catch (e) {
                           valid = false;

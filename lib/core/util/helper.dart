@@ -1,4 +1,5 @@
 import 'package:dnd5e_dm_tools/core/data/models/asi.dart';
+import 'package:dnd5e_dm_tools/core/data/models/class_table.dart';
 import 'package:dnd5e_dm_tools/core/data/models/feat.dart';
 import 'package:dnd5e_dm_tools/core/util/enum.dart';
 import 'package:dnd5e_dm_tools/core/util/logger.dart';
@@ -81,7 +82,13 @@ int fromOrdinal(String ordinal) {
   return int.tryParse(ordinal.replaceAll(RegExp('[a-zA-Z]'), '')) ?? 0;
 }
 
-String parseFormula(String description, ASI asi, int prof, int level) {
+String parseFormula(
+  String description,
+  ASI asi,
+  int prof,
+  int level,
+  ClassTable classTable,
+) {
   final Map<String, int> values = {'prof': prof, 'level': level};
   final attributes = {
     Attribute.strength: asi.strength,
@@ -98,9 +105,28 @@ String parseFormula(String description, ASI asi, int prof, int level) {
     values[prefix] = modifier;
   }
 
+  final RegExp bracketRegExp = RegExp(r'\[([^\]]+)\]');
+  String processed = description.replaceAllMapped(bracketRegExp, (match) {
+    final key = match.group(1)?.toLowerCase();
+    final classTableRow = classTable.levelData[level];
+    if (key != null &&
+        classTableRow != null &&
+        classTableRow.classSpecificFeatures != null) {
+      final features = classTableRow.classSpecificFeatures!;
+      final foundKey = features.keys.firstWhere(
+        (k) => k.toLowerCase() == key.toLowerCase(),
+        orElse: () => '',
+      );
+      if (foundKey.isNotEmpty) {
+        return features[foundKey]!.toString();
+      }
+    }
+    return match.group(0)!;
+  });
+
   final RegExp regExp = RegExp(r'\b(?:str|dex|con|int|wis|cha|prof|level)\b');
 
-  String processed = description.replaceAllMapped(regExp, (match) {
+  processed = processed.replaceAllMapped(regExp, (match) {
     return values[match.group(0)]!.toString();
   });
 
