@@ -153,13 +153,8 @@ class Class extends Equatable {
 
   Map<int, int> getSpellSlotsForLevel(int level, {List<Feat>? feats}) {
     final slots = table.getSpellSlotsForLevel(level);
-    if (slots.isEmpty && feats != null) {
-      final isMagicInitiate = feats.any(
-        (feat) =>
-            feat.name.toLowerCase().contains('magic_initiate') ||
-            feat.name.toLowerCase().contains('magic-initiate'),
-      );
-      if (isMagicInitiate) {
+    if (slots.isEmpty && feats != null) {      
+      if (isMagicInitiate(feats)) {
         return {1: 1};
       }
     }

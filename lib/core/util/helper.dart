@@ -132,6 +132,15 @@ String parseFormula(String description, ASI asi, int prof, int level) {
   return processed;
 }
 
+bool isMagicInitiate(List<Feat> feats) {
+  return feats.any(
+    (feat) =>
+        feat.name.toLowerCase() == 'magic initiate' ||
+        feat.slug.toLowerCase() == 'magic-initiate' ||
+        feat.slug.toLowerCase() == 'magic_initiate',
+  );
+}
+
 List<Feat> buildFeatList(List<String> lines) {
   final featMap = _buildFeatMap(lines, '###');
   final List<Feat> featList = [];

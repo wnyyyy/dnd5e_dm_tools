@@ -160,12 +160,7 @@ class SpellbookWidgetState extends State<SpellbookWidget> {
       widget.character.level,
     );
     if (classsSpellSlots.isEmpty) {
-      final isMagicInitiate = widget.character.feats.any(
-        (feat) =>
-            feat.name.toLowerCase().contains('magic_initiate') ||
-            feat.name.toLowerCase().contains('magic-initiate'),
-      );
-      if (isMagicInitiate) {
+      if (isMagicInitiate(widget.character.feats)) {
         slots[1] = 1;
       }
     } else {
@@ -356,11 +351,7 @@ class SpellbookWidgetState extends State<SpellbookWidget> {
       widget.character.level,
     );
     if (highestSpellSlotLevel == 0) {
-      if (widget.character.feats.any(
-        (feat) =>
-            feat.name.toLowerCase().contains('magic_initiate') ||
-            feat.name.toLowerCase().contains('magic-initiate'),
-      )) {
+      if (isMagicInitiate(widget.character.feats)) {
         highestSpellSlotLevel = 1;
       } else {
         return const SizedBox.shrink();

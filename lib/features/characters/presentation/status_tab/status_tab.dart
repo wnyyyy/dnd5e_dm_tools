@@ -36,11 +36,7 @@ class StatusTab extends StatelessWidget {
 
     final isCaster =
         context.read<SettingsCubit>().state.isCaster ||
-        character.feats.any(
-          (feat) =>
-              feat.name.toLowerCase().contains('magic_initiate') ||
-              feat.name.toLowerCase().contains('magic-initiate'),
-        );
+        isMagicInitiate(character.feats);
 
     int spellAttackBonus = 0;
     int spellSaveDC = 0;
