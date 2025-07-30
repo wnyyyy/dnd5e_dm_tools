@@ -235,22 +235,49 @@ class _ActionMenuState extends State<ActionMenu> {
   void onUseAction({required Action action, bool recharge = false}) {
     switch (action.type) {
       case ActionType.ability:
+        final abilityAction = action as ActionAbility;
         final updatedAction = action.copyWith(
-          usedCount: recharge ? 0 : (action as ActionAbility).usedCount + 1,
+          usedCount: recharge ? 0 : action.usedCount + 1,
         );
-        final updatedActions = widget.character.actions.map((a) {
-          if (a.slug == action.slug) {
-            return updatedAction;
+        final List<Action> updatedActions;
+
+        if (abilityAction.resourceType == ResourceType.custom &&
+            abilityAction.customResource != null &&
+            abilityAction.customResource!.name.isNotEmpty) {
+          final resourceName = abilityAction.customResource!.name;
+          final actions = widget.character.actions;
+          updatedActions = [];
+
+          for (final action in actions) {
+            if (action is ActionAbility &&
+                action.customResource != null &&
+                action.resourceType == ResourceType.custom &&
+                action.customResource!.name == resourceName) {
+              final updatedAction = action.copyWith(
+                customResource: abilityAction.customResource,
+                resourceFormula: abilityAction.customResource!.formula,
+                usedCount: recharge ? 0 : action.usedCount + 1,
+              );
+              updatedActions.add(updatedAction);
+            } else {
+              updatedActions.add(action);
+            }
           }
-          return a;
-        }).toList();
-        final updatedCharacter = widget.character.copyWith(
-          actions: updatedActions,
-        );
+        } else {
+          updatedActions = widget.character.actions.map((a) {
+            if (a.slug == action.slug) {
+              return updatedAction;
+            }
+            return a;
+          }).toList();
+        }
+
         setState(() {
           actions = updatedActions;
         });
-        widget.onCharacterUpdated(updatedCharacter);
+        widget.onCharacterUpdated(
+          widget.character.copyWith(actions: updatedActions),
+        );
       case ActionType.item:
         if (recharge) {
           return;
