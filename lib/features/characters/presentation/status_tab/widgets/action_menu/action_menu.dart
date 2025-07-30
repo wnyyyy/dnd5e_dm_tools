@@ -276,7 +276,11 @@ class _ActionMenuState extends State<ActionMenu> {
           key: ValueKey('spell_lvl_$lvl'),
           title: Text(
             lvl == 0 ? 'Cantrips' : '${getOrdinal(lvl)}-level Spells',
+            style: Theme.of(
+              context,
+            ).textTheme.titleLarge!.copyWith(fontWeight: FontWeight.bold),
           ),
+
           children: _buildPlainActions(byLevel[lvl]!, context),
         ),
     ];
