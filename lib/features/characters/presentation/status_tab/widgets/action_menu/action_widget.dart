@@ -527,8 +527,6 @@ class ActionWidgetState extends State<ActionWidget> {
 
           return MasonryGridView.count(
             crossAxisCount: cols,
-            mainAxisSpacing: 2,
-            crossAxisSpacing: 2,
             itemCount: children.length,
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
@@ -549,143 +547,138 @@ class ActionWidgetState extends State<ActionWidget> {
     }
 
     final screenWidth = MediaQuery.of(context).size.width;
-    final TextStyle? baseTitleTheme;
-    if (screenWidth < 1200 && action.title.length > 24) {
-      baseTitleTheme = Theme.of(context).textTheme.titleMedium;
-    } else {
-      baseTitleTheme = Theme.of(context).textTheme.titleLarge;
-    }
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: GestureDetector(
-        onTap: () {
-          setState(() {
-            isExpanded = !isExpanded;
-          });
-        },
-        behavior: HitTestBehavior.opaque,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SizedBox(
-              height: 60,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Padding(
-                      padding: const EdgeInsets.only(top: 12, left: 24),
-                      child: Text(
-                        action.title,
-                        style: baseTitleTheme!.copyWith(
-                          fontFamily: GoogleFonts.montserrat().fontFamily,
-                        ),
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          isExpanded = !isExpanded;
+        });
+      },
+      behavior: HitTestBehavior.opaque,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 24),
+                    child: Text(
+                      action.title,
+                      style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                        fontFamily: GoogleFonts.montserrat().fontFamily,
                       ),
                     ),
                   ),
-                  Align(
-                    alignment: Alignment.bottomRight,
-                    child: Padding(
-                      padding: const EdgeInsets.only(right: 18),
-                      child: _buildUse(
-                        context,
-                        usable,
-                        remaining,
-                        requiresResource,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            if (!widget.compactMode)
-              Align(
-                child: SizedBox(
-                  width: screenWidth * 0.8,
-                  child: const Divider(),
                 ),
-              ),
-            if (!widget.compactMode) buildSubtitle(context),
-            AnimatedCrossFade(
-              firstChild: Container(),
-              secondChild: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (widget.compactMode)
-                    Column(
-                      children: [
-                        Align(
-                          child: SizedBox(
-                            width: screenWidth * 0.8,
-                            child: const Divider(),
-                          ),
-                        ),
-                        buildSubtitle(context),
-                      ],
-                    ),
-                  Align(
-                    child: SizedBox(
-                      width: screenWidth * 0.8,
-                      child: const Divider(),
+                Align(
+                  alignment: Alignment.bottomRight,
+                  child: Padding(
+                    padding: const EdgeInsets.only(right: 18),
+                    child: _buildUse(
+                      context,
+                      usable,
+                      remaining,
+                      requiresResource,
                     ),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Column(
-                      children: [
-                        DescriptionText(
-                          inputText: action.description,
-                          baseStyle: Theme.of(context).textTheme.bodySmall!,
-                          extraBoldWords: action.getExtraBoldWords(
-                            widget.classs,
-                            widget.character,
-                          ),
-                        ),
-                        if (action.type == ActionType.item &&
-                            action is ActionItem &&
-                            action.itemSlug.isNotEmpty)
-                          BlocBuilder<RulesCubit, RulesState>(
-                            builder: (context, state) {
-                              if (state is! RulesStateLoaded) {
-                                return Container();
-                              }
-                              final item = state.itemMap[action.itemSlug];
-                              if (item != null) {
-                                final backpackItem = backpack.getItemBySlug(
-                                  action.itemSlug,
-                                );
-                                if (backpackItem == null) {
-                                  return Container();
-                                }
-                                return Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    ItemDetailsDialogContent(
-                                      backpackItem: backpackItem.copyWith(
-                                        item: item,
-                                      ),
-                                    ),
-                                  ],
-                                );
-                              } else {
-                                return Container();
-                              }
-                            },
-                          ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                ],
-              ),
-              crossFadeState: isExpanded
-                  ? CrossFadeState.showSecond
-                  : CrossFadeState.showFirst,
-              duration: const Duration(milliseconds: 150),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+          if (!widget.compactMode)
+            Align(
+              child: SizedBox(
+                width: screenWidth * 0.8,
+                child: const Divider(height: 6),
+              ),
+            ),
+          if (!widget.compactMode)
+            Column(
+              children: [buildSubtitle(context), const SizedBox(height: 4)],
+            ),
+          AnimatedCrossFade(
+            firstChild: Container(),
+            secondChild: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (widget.compactMode)
+                  Column(
+                    children: [
+                      Align(
+                        alignment: Alignment.topCenter,
+                        child: SizedBox(
+                          width: screenWidth * 0.8,
+                          child: const Divider(height: 2),
+                        ),
+                      ),
+                      buildSubtitle(context),
+                    ],
+                  ),
+                Align(
+                  child: SizedBox(
+                    width: screenWidth * 0.8,
+                    child: const Divider(),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Column(
+                    children: [
+                      DescriptionText(
+                        inputText: action.description,
+                        baseStyle: Theme.of(context).textTheme.bodySmall!,
+                        extraBoldWords: action.getExtraBoldWords(
+                          widget.classs,
+                          widget.character,
+                        ),
+                      ),
+                      if (action.type == ActionType.item &&
+                          action is ActionItem &&
+                          action.itemSlug.isNotEmpty)
+                        BlocBuilder<RulesCubit, RulesState>(
+                          builder: (context, state) {
+                            if (state is! RulesStateLoaded) {
+                              return Container();
+                            }
+                            final item = state.itemMap[action.itemSlug];
+                            if (item != null) {
+                              final backpackItem = backpack.getItemBySlug(
+                                action.itemSlug,
+                              );
+                              if (backpackItem == null) {
+                                return Container();
+                              }
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  ItemDetailsDialogContent(
+                                    backpackItem: backpackItem.copyWith(
+                                      item: item,
+                                    ),
+                                  ),
+                                ],
+                              );
+                            } else {
+                              return Container();
+                            }
+                          },
+                        ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 4),
+              ],
+            ),
+            crossFadeState: isExpanded
+                ? CrossFadeState.showSecond
+                : CrossFadeState.showFirst,
+            duration: const Duration(milliseconds: 150),
+          ),
+        ],
       ),
     );
   }
