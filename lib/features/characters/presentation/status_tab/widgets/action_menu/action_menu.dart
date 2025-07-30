@@ -84,6 +84,7 @@ class _ActionMenuState extends State<ActionMenu> {
   Widget build(BuildContext context) {
     final filteredActions = _getFilteredItems(actions);
     final screenWidth = MediaQuery.of(context).size.width;
+    final isCaster = widget.character.spellbook.knownSpells.isNotEmpty;
     return Container(
       decoration: BoxDecoration(
         border: Border(
@@ -101,6 +102,7 @@ class _ActionMenuState extends State<ActionMenu> {
                 _mode = mode;
               });
             },
+            showSpells: isCaster,
           ),
           DecoratedBox(
             decoration: BoxDecoration(
