@@ -69,7 +69,6 @@ class StatusTab extends StatelessWidget {
                 ? _buildWideLayout(
                     context,
                     isCaster,
-                    spells,
                     spellAttackBonus,
                     spellSaveDC,
                   )
@@ -88,39 +87,56 @@ class StatusTab extends StatelessWidget {
   Widget _buildWideLayout(
     BuildContext context,
     bool isCaster,
-    Map<String, dynamic> spells,
     int spellAttackBonus,
     int spellSaveDC,
   ) {
+    final screenWidth = MediaQuery.of(context).size.width;
     return SingleChildScrollView(
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Flex(
-              direction: Axis.horizontal,
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Flex(direction: Axis.vertical),
-                const SizedBox(width: 16),
-                Flex(
-                  direction: Axis.vertical,
-                  children: [
-                    if (isCaster)
-                      _buildSpellInfo(context, spellAttackBonus, spellSaveDC),
-                    StatsWidget(
-                      character: character,
-                      onCharacterUpdated: (updatedCharacter) =>
-                          onCharacterUpdated(updatedCharacter, context),
-                    ),
-                  ],
-                ),
-              ],
+          Expanded(
+            flex: screenWidth > 1200 ? 1 : 0,
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Flex(
+                direction: Axis.vertical,
+                children: [
+                  Hitpoints(
+                    character: character,
+                    onCharacterUpdated: (updatedCharacter) =>
+                        onCharacterUpdated(updatedCharacter, context),
+                  ),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      HitDice(
+                        character: character,
+                        classs: classs,
+                        onCharacterUpdated: (updatedCharacter) =>
+                            onCharacterUpdated(updatedCharacter, context),
+                      ),
+                      Inspiration(
+                        character: character,
+                        onCharacterUpdated: (updatedCharacter) =>
+                            onCharacterUpdated(updatedCharacter, context),
+                      ),
+                      if (isCaster)
+                        _buildSpellInfo(context, spellAttackBonus, spellSaveDC),
+                    ],
+                  ),
+                  StatsWidget(
+                    character: character,
+                    onCharacterUpdated: (updatedCharacter) =>
+                        onCharacterUpdated(updatedCharacter, context),
+                  ),
+                ],
+              ),
             ),
           ),
           Expanded(
+            flex: screenWidth > 1550 ? 5 : 3,
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: ActionMenu(
@@ -254,6 +270,7 @@ class StatusTab extends StatelessWidget {
           const SizedBox(height: 4),
           Card.filled(
             child: Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
                 ConstrainedBox(
                   constraints: const BoxConstraints(minWidth: 70, maxWidth: 90),
