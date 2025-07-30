@@ -42,7 +42,6 @@ class StatusTab extends StatelessWidget {
               feat.name.toLowerCase().contains('magic-initiate'),
         );
 
-    final Map<String, dynamic> spells = {};
     int spellAttackBonus = 0;
     int spellSaveDC = 0;
     final profBonus = getProfBonus(character.level);
@@ -107,25 +106,57 @@ class StatusTab extends StatelessWidget {
                     onCharacterUpdated: (updatedCharacter) =>
                         onCharacterUpdated(updatedCharacter, context),
                   ),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      HitDice(
-                        character: character,
-                        classs: classs,
-                        onCharacterUpdated: (updatedCharacter) =>
-                            onCharacterUpdated(updatedCharacter, context),
-                      ),
-                      Inspiration(
-                        character: character,
-                        onCharacterUpdated: (updatedCharacter) =>
-                            onCharacterUpdated(updatedCharacter, context),
-                      ),
-                      if (isCaster)
-                        _buildSpellInfo(context, spellAttackBonus, spellSaveDC),
-                    ],
-                  ),
+                  if (screenWidth > 1200)
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        HitDice(
+                          character: character,
+                          classs: classs,
+                          onCharacterUpdated: (updatedCharacter) =>
+                              onCharacterUpdated(updatedCharacter, context),
+                        ),
+                        Inspiration(
+                          character: character,
+                          onCharacterUpdated: (updatedCharacter) =>
+                              onCharacterUpdated(updatedCharacter, context),
+                        ),
+                        if (isCaster)
+                          _buildSpellInfo(
+                            context,
+                            spellAttackBonus,
+                            spellSaveDC,
+                          ),
+                      ],
+                    ),
+                  if (screenWidth <= 1200)
+                    Column(
+                      children: [
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            HitDice(
+                              character: character,
+                              classs: classs,
+                              onCharacterUpdated: (updatedCharacter) =>
+                                  onCharacterUpdated(updatedCharacter, context),
+                            ),
+                            Inspiration(
+                              character: character,
+                              onCharacterUpdated: (updatedCharacter) =>
+                                  onCharacterUpdated(updatedCharacter, context),
+                            ),
+                          ],
+                        ),
+                        if (isCaster)
+                          _buildSpellInfo(
+                            context,
+                            spellAttackBonus,
+                            spellSaveDC,
+                          ),
+                      ],
+                    ),
                   StatsWidget(
                     character: character,
                     onCharacterUpdated: (updatedCharacter) =>
@@ -136,7 +167,7 @@ class StatusTab extends StatelessWidget {
             ),
           ),
           Expanded(
-            flex: screenWidth > 1550 ? 5 : 3,
+            flex: screenWidth > 1750 ? 3 : 2,
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: ActionMenu(
