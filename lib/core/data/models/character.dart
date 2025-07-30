@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:dnd5e_dm_tools/core/data/models/action.dart';
 import 'package:dnd5e_dm_tools/core/data/models/action_resource.dart';
 import 'package:dnd5e_dm_tools/core/data/models/asi.dart';
@@ -184,6 +186,24 @@ class Character extends Equatable {
         }
         if (abilityAction.resourceType == ResourceType.longRest && !shortRest) {
           return abilityAction.copyWith(usedCount: 0);
+        }
+        if (abilityAction.resourceType == ResourceType.custom) {
+          final String perRestStr;
+          if (shortRest) {
+            perRestStr = abilityAction.customResource?.shortRest ?? '0';
+          } else {
+            perRestStr = abilityAction.customResource?.longRest ?? '0';
+          }
+          if (perRestStr == 'all') {
+            return abilityAction.copyWith(usedCount: 0);
+          } else {
+            final perRest = int.tryParse(perRestStr) ?? 0;
+            if (perRest > 0) {
+              return abilityAction.copyWith(
+                usedCount: max(0, abilityAction.usedCount - perRest),
+              );
+            }
+          }
         }
       }
       return action;
