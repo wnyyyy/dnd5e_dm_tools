@@ -40,10 +40,10 @@ class _ProficiencyListState extends State<ProficiencyList> {
   }
 
   void _resetFields() {
-    _languagesController.text = widget.character.proficiency.languages;
-    _weaponsController.text = widget.character.proficiency.weapons;
-    _armorController.text = widget.character.proficiency.armor;
-    _toolsController.text = widget.character.proficiency.tools;
+    _languagesController.text = widget.character.proficiency.languages.trim();
+    _weaponsController.text = widget.character.proficiency.weapons.trim();
+    _armorController.text = widget.character.proficiency.armor.trim();
+    _toolsController.text = widget.character.proficiency.tools.trim();
   }
 
   @override
