@@ -469,50 +469,49 @@ class ActionWidgetState extends State<ActionWidget> {
           } else {
             ammoStr = '';
           }
-          children.add(
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                if (requiresEquipped)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 4),
-                    child: Text(
-                      equippedStr,
-                      style: Theme.of(context).textTheme.labelMedium!.copyWith(
-                        fontWeight: FontWeight.bold,
+          if (requiresEquipped || expendable || ammoStr.isNotEmpty) {
+            children.add(
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  if (requiresEquipped)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4),
+                      child: Text(
+                        equippedStr,
+                        style: Theme.of(context).textTheme.labelMedium!
+                            .copyWith(fontWeight: FontWeight.bold),
+                        softWrap: false,
+                        textAlign: TextAlign.center,
                       ),
-                      softWrap: false,
-                      textAlign: TextAlign.center,
                     ),
-                  ),
-                if (expendable)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 4),
-                    child: Text(
-                      quantityStr,
-                      style: Theme.of(context).textTheme.labelMedium!.copyWith(
-                        fontWeight: FontWeight.bold,
+                  if (expendable)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4),
+                      child: Text(
+                        quantityStr,
+                        style: Theme.of(context).textTheme.labelMedium!
+                            .copyWith(fontWeight: FontWeight.bold),
+                        softWrap: false,
+                        textAlign: TextAlign.center,
                       ),
-                      softWrap: false,
-                      textAlign: TextAlign.center,
                     ),
-                  ),
-                if (ammoStr.isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 4),
-                    child: Text(
-                      ammoStr,
-                      style: Theme.of(context).textTheme.labelMedium!.copyWith(
-                        fontWeight: FontWeight.bold,
+                  if (ammoStr.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4),
+                      child: Text(
+                        ammoStr,
+                        style: Theme.of(context).textTheme.labelMedium!
+                            .copyWith(fontWeight: FontWeight.bold),
+                        softWrap: false,
+                        textAlign: TextAlign.center,
                       ),
-                      softWrap: false,
-                      textAlign: TextAlign.center,
                     ),
-                  ),
-              ],
-            ),
-          );
+                ],
+              ),
+            );
+          }
       }
 
       final actionFields = _buildFields(context);
