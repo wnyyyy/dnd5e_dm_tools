@@ -107,7 +107,7 @@ class RulesCubit extends Cubit<RulesState> {
           });
           return Future.value();
         case 'spells':
-          spellsRepository.getAll(online: true).then((spells) {
+          spellsRepository.getAll().then((spells) {
             final spellMap = {for (final spell in spells) spell.slug: spell};
             final spellMapByLevel = <int, List<Spell>>{};
             for (final spell in spells) {
@@ -123,7 +123,7 @@ class RulesCubit extends Cubit<RulesState> {
           });
           return Future.value();
         case 'feats':
-          featsRepository.getAll(online: true).then((feats) {
+          featsRepository.getAll().then((feats) {
             emit(currState.copyWith(feats: feats));
           });
           return Future.value();
@@ -133,7 +133,7 @@ class RulesCubit extends Cubit<RulesState> {
           });
           return Future.value();
         case 'items':
-          itemsRepository.getAll(online: true).then((items) {
+          itemsRepository.getAll().then((items) {
             final weapons = items.whereType<Weapon>().toList();
             final armors = items.whereType<Armor>().toList();
             final weaponTemplates = items.whereType<WeaponTemplate>().toList();

@@ -68,106 +68,117 @@ class _CharacterScreenState extends State<CharacterScreen>
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<RulesCubit, RulesState>(
-      listener: (context, state) {
-        // TODO: implement listener
-      },
-      child: BlocBuilder<RulesCubit, RulesState>(
-        builder: (context, rulesState) {
-          if (rulesState is RulesStateInitial ||
-              rulesState is RulesStateLoading) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (rulesState is RulesStateError) {
-            return ErrorHandler(
-              error: rulesState.message,
-              onRetry: () {
-                context.read<RulesCubit>().loadRules();
-              },
-            );
-          }
-          return BlocBuilder<CharacterBloc, CharacterState>(
-            builder: (context, state) {
-              if (state is CharacterInitial) {
-                final slug = context.read<SettingsCubit>().state.name;
-                context.read<CharacterBloc>().add(CharacterLoad(slug));
-                return Container();
-              }
-              if (state is CharacterLoading) {
-                return const Center(child: CircularProgressIndicator());
-              }
-              if (state is CharacterError) {
-                return ErrorHandler(
-                  error: state.error,
-                  onRetry: () {
-                    final slug = context.read<SettingsCubit>().state.name;
-                    context.read<CharacterBloc>().add(CharacterLoad(slug));
-                  },
-                );
-              }
-              if (state is CharacterLoaded) {
-                if (_tabController.length != 4 ||
-                    _tabController.index != _tabIndex) {
-                  _tabController.dispose();
-                  _tabController = TabController(
-                    length: 4,
-                    vsync: this,
-                    initialIndex: _tabIndex,
-                  );
-                  _tabController.addListener(() {
-                    if (_tabController.indexIsChanging) {
-                      setState(() {
-                        _tabIndex = _tabController.index;
-                      });
-                    }
-                  });
-                }
-                return DefaultTabController(
-                  length: 4,
-                  initialIndex: _tabIndex,
-                  child: Column(
-                    children: [
-                      TabBar(
-                        controller: _tabController,
-                        tabs: const [
-                          Tab(text: 'Bio'),
-                          Tab(text: 'Status'),
-                          Tab(text: 'Skills'),
-                          Tab(text: 'Equip'),
-                        ],
-                      ),
-                      Expanded(
-                        child: TabBarView(
-                          controller: _tabController,
-                          physics: const NoScrollPhysics(),
-                          children: [
-                            BioTab(
-                              character: state.character,
-                              classs: state.classs,
-                              race: state.race,
-                            ),
-                            StatusTab(
-                              character: state.character,
-                              classs: state.classs,
-                              race: state.race,
-                            ),
-                            SkillsTab(
-                              character: state.character,
-                              classs: state.classs,
-                            ),
-                            EquipTab(character: state.character),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              }
-              return Container();
+    return BlocBuilder<RulesCubit, RulesState>(
+      builder: (context, rulesState) {
+        if (rulesState is RulesStateInitial ||
+            rulesState is RulesStateLoading) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (rulesState is RulesStateError) {
+          return ErrorHandler(
+            error: rulesState.message,
+            onRetry: () {
+              context.read<RulesCubit>().loadRules();
             },
           );
-        },
-      ),
+        }
+        return BlocBuilder<CharacterBloc, CharacterState>(
+          builder: (context, state) {
+            if (state is CharacterInitial) {
+              final slug = context.read<SettingsCubit>().state.name;
+              context.read<CharacterBloc>().add(CharacterLoad(slug));
+              return Container();
+            }
+            if (state is CharacterLoading) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            if (state is CharacterPostStart) {
+              if (state.reloadItems) {
+                context.read<RulesCubit>().reloadRule('items');
+              }
+              if (state.reloadSpells) {
+                context.read<RulesCubit>().reloadRule('spells');
+              }
+              context.read<CharacterBloc>().add(
+                CharacterPostLoad(
+                  character: state.character,
+                  classs: state.classs,
+                  race: state.race,
+                ),
+              );
+              return const Center(child: CircularProgressIndicator());
+            }
+            if (state is CharacterError) {
+              return ErrorHandler(
+                error: state.error,
+                onRetry: () {
+                  final slug = context.read<SettingsCubit>().state.name;
+                  context.read<CharacterBloc>().add(CharacterLoad(slug));
+                },
+              );
+            }
+            if (state is CharacterLoaded) {
+              if (_tabController.length != 4 ||
+                  _tabController.index != _tabIndex) {
+                _tabController.dispose();
+                _tabController = TabController(
+                  length: 4,
+                  vsync: this,
+                  initialIndex: _tabIndex,
+                );
+                _tabController.addListener(() {
+                  if (_tabController.indexIsChanging) {
+                    setState(() {
+                      _tabIndex = _tabController.index;
+                    });
+                  }
+                });
+              }
+              return DefaultTabController(
+                length: 4,
+                initialIndex: _tabIndex,
+                child: Column(
+                  children: [
+                    TabBar(
+                      controller: _tabController,
+                      tabs: const [
+                        Tab(text: 'Bio'),
+                        Tab(text: 'Status'),
+                        Tab(text: 'Skills'),
+                        Tab(text: 'Equip'),
+                      ],
+                    ),
+                    Expanded(
+                      child: TabBarView(
+                        controller: _tabController,
+                        physics: const NoScrollPhysics(),
+                        children: [
+                          BioTab(
+                            character: state.character,
+                            classs: state.classs,
+                            race: state.race,
+                          ),
+                          StatusTab(
+                            character: state.character,
+                            classs: state.classs,
+                            race: state.race,
+                          ),
+                          SkillsTab(
+                            character: state.character,
+                            classs: state.classs,
+                          ),
+                          EquipTab(character: state.character),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }
+            return Container();
+          },
+        );
+      },
     );
   }
 }

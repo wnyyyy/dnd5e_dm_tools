@@ -40,6 +40,14 @@ class ItemsRepository {
     return data;
   }
 
+  Future<bool> existsInLocal(String slug) async {
+    final exists = await databaseProvider.existsInLocal(
+      path: '$firebaseItemsPath/$slug',
+      cacheBoxName: cacheItemsName,
+    );
+    return exists;
+  }
+
   Future<List<Item>> getAll({bool online = false}) async {
     final data = await databaseProvider.getCollection(
       path: firebaseItemsPath,

@@ -60,6 +60,31 @@ class DatabaseProvider {
     return null;
   }
 
+  Future<bool> existsInLocal({
+    required String path,
+    required String cacheBoxName,
+  }) async {
+    logDB('Checking if document exists in cache: $path');
+    final slug = path.split('/').last;
+    final cacheBox = Hive.box<Map>(cacheBoxName);
+    final cachedData = cacheBox.get(slug);
+    if (cachedData != null) {
+      logDB('Found cache data for $slug in $cacheBoxName');
+      return true;
+    }
+
+    logDB('No cache data found for $slug // fetching from Firestore...');
+    final reference = _firebaseDB.doc(path);
+    final snapshot = await reference.get();
+    if (snapshot.exists) {
+      final cacheBox = Hive.box<Map>(cacheBoxName);
+      await cacheBox.put(slug, snapshot.data()!);
+      logDB('Cache updated for $slug in $cacheBoxName');
+      logDB('Fetched $path from Firestore');
+    }
+    return false;
+  }
+
   Future<Map<String, Map<String, dynamic>>> getCollection({
     required String path,
     String? cacheBoxName,

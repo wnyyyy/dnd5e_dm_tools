@@ -1,5 +1,7 @@
 import 'package:dnd5e_dm_tools/core/data/models/backpack.dart';
 import 'package:dnd5e_dm_tools/core/data/models/character.dart';
+import 'package:dnd5e_dm_tools/core/data/models/class.dart';
+import 'package:dnd5e_dm_tools/core/data/models/race.dart';
 import 'package:equatable/equatable.dart';
 
 abstract class CharacterEvent extends Equatable {
@@ -15,6 +17,20 @@ class CharacterLoad extends CharacterEvent {
 
   @override
   List<Object> get props => [];
+}
+
+class CharacterPostLoad extends CharacterEvent {
+  const CharacterPostLoad({
+    required this.character,
+    required this.classs,
+    required this.race,
+  });
+  final Character character;
+  final Class classs;
+  final Race race;
+
+  @override
+  List<Object> get props => [character, classs, race];
 }
 
 class CharacterUpdate extends CharacterEvent {

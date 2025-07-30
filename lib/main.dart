@@ -173,6 +173,8 @@ class Dnd5eDmTools extends StatelessWidget {
           ),
           BlocProvider<CharacterBloc>(
             create: (context) => CharacterBloc(
+              itemsRepository: context.read<ItemsRepository>(),
+              spellsRepository: context.read<SpellsRepository>(),
               charactersRepository: context.read<CharactersRepository>(),
               classesRepository: context.read<ClassesRepository>(),
               racesRepository: context.read<RacesRepository>(),

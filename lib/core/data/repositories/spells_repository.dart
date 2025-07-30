@@ -27,6 +27,14 @@ class SpellsRepository {
     return spell;
   }
 
+  Future<bool> existsInLocal(String slug) async {
+    final exists = await databaseProvider.existsInLocal(
+      path: '$firebaseSpellsPath/$slug',
+      cacheBoxName: cacheSpellsName,
+    );
+    return exists;
+  }
+
   Future<Map<String, dynamic>> getData(
     String slug, {
     bool online = false,
