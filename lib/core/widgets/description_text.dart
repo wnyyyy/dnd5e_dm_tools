@@ -90,6 +90,7 @@ class DescriptionText extends StatelessWidget {
       'performance',
       'persuasion',
     ],
+    'constitution': ['con', 'constitution'],
   };
 
   String _highlightKeywords(String text, Map<String, Color> keywordColors) {
