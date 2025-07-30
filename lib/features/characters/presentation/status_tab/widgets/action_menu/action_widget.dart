@@ -262,7 +262,8 @@ class ActionWidgetState extends State<ActionWidget> {
                       softWrap: false,
                     ),
                     const SizedBox(height: 2),
-                    if (action.customResource!.longRest == 'all')
+                    if (action.customResource!.longRest == 'all' &&
+                        action.customResource!.shortRest != 'all')
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 2.0),
                         child: Text(
@@ -271,7 +272,8 @@ class ActionWidgetState extends State<ActionWidget> {
                           textAlign: TextAlign.center,
                         ),
                       )
-                    else if (action.customResource!.longRest.isNotEmpty)
+                    else if (action.customResource!.longRest.isNotEmpty &&
+                        action.customResource!.shortRest != 'all')
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 2.0),
                         child: Text(
