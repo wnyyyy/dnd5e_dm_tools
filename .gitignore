@@ -65,4 +65,3 @@ windows/runner/resources/app_icon.ico
 .env
 _old
 firebase_key.json
-assets/precache/
