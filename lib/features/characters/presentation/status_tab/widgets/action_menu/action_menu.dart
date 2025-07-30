@@ -414,7 +414,11 @@ class _ActionMenuState extends State<ActionMenu> {
       ];
     }
 
-    filtered.sort((a, b) => a.type.order.compareTo(b.type.order));
+    filtered.sort((a, b) {
+      final typeCompare = a.type.order.compareTo(b.type.order);
+      if (typeCompare != 0) return typeCompare;
+      return a.title.toLowerCase().compareTo(b.title.toLowerCase());
+    });
     return filtered;
   }
 }
