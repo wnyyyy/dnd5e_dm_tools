@@ -78,6 +78,7 @@ class HitpointsState extends State<Hitpoints> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -113,7 +114,7 @@ class HitpointsState extends State<Hitpoints> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Padding(
-                  padding: const EdgeInsets.only(right: 8),
+                  padding: EdgeInsets.only(right: screenWidth > 600 ? 8 : 0),
                   child: GestureDetector(
                     onLongPress: () {
                       _startTimer(-1);
@@ -131,7 +132,9 @@ class HitpointsState extends State<Hitpoints> {
                   ),
                 ),
                 SizedBox(
-                  width: currentHp > 100 ? 110 : 90,
+                  width: screenWidth > 600
+                      ? (currentHp > 100 ? 110 : 90)
+                      : (currentHp > 100 ? 90 : 95),
                   child: Stack(
                     alignment: Alignment.center,
                     children: [
@@ -153,8 +156,8 @@ class HitpointsState extends State<Hitpoints> {
                       ),
                       if (tempHp > 0)
                         Positioned(
-                          top: 0,
-                          right: 0,
+                          top: screenWidth > 600 ? 0 : -4,
+                          right: screenWidth > 600 ? 0 : 0,
                           child: Text(
                             '+$tempHp',
                             style: Theme.of(context).textTheme.titleLarge!
@@ -165,7 +168,7 @@ class HitpointsState extends State<Hitpoints> {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.only(left: 8.0),
+                  padding: EdgeInsets.only(left: screenWidth > 600 ? 8 : 0),
                   child: GestureDetector(
                     onLongPress: () {
                       _startTimer(1);

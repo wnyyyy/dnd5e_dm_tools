@@ -191,15 +191,22 @@ class StatusTab extends StatelessWidget {
         padding: const EdgeInsets.all(8.0),
         child: Column(
           children: [
-            Flex(
-              direction: Axis.horizontal,
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            Row(
               children: [
-                Flex(
-                  direction: Axis.vertical,
-                  mainAxisAlignment: MainAxisAlignment.end,
+                Column(
                   children: [
                     Hitpoints(
+                      character: character,
+                      onCharacterUpdated: (updatedCharacter) =>
+                          onCharacterUpdated(updatedCharacter, context),
+                    ),
+                    if (isCaster)
+                      _buildSpellInfo(context, spellAttackBonus, spellSaveDC),
+                  ],
+                ),
+                Column(
+                  children: [
+                    StatsWidget(
                       character: character,
                       onCharacterUpdated: (updatedCharacter) =>
                           onCharacterUpdated(updatedCharacter, context),
@@ -224,20 +231,9 @@ class StatusTab extends StatelessWidget {
                     ),
                   ],
                 ),
-                Flex(
-                  direction: Axis.vertical,
-                  children: [
-                    if (isCaster)
-                      _buildSpellInfo(context, spellAttackBonus, spellSaveDC),
-                    StatsWidget(
-                      character: character,
-                      onCharacterUpdated: (updatedCharacter) =>
-                          onCharacterUpdated(updatedCharacter, context),
-                    ),
-                  ],
-                ),
               ],
             ),
+
             ActionMenu(
               character: character,
               classs: classs,
@@ -265,6 +261,31 @@ class StatusTab extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 8.0),
       child: Column(
         children: [
+          Card.filled(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ConstrainedBox(
+                  constraints: const BoxConstraints(minWidth: 70, maxWidth: 90),
+                  child: _buildSpellStat(
+                    context,
+                    '+$spellAttackBonus',
+                    'Spell Attack Bonus',
+                  ),
+                ),
+                const SizedBox(height: 45, child: VerticalDivider()),
+                ConstrainedBox(
+                  constraints: const BoxConstraints(minWidth: 70, maxWidth: 90),
+                  child: _buildSpellStat(
+                    context,
+                    '$spellSaveDC',
+                    'Spell Save DC',
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 4),
           IconButton.outlined(
             padding: const EdgeInsets.all(12),
             iconSize: 36,
@@ -293,31 +314,6 @@ class StatusTab extends StatelessWidget {
                 },
               );
             },
-          ),
-          const SizedBox(height: 4),
-          Card.filled(
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                ConstrainedBox(
-                  constraints: const BoxConstraints(minWidth: 70, maxWidth: 90),
-                  child: _buildSpellStat(
-                    context,
-                    '+$spellAttackBonus',
-                    'Spell Attack Bonus',
-                  ),
-                ),
-                const SizedBox(height: 45, child: VerticalDivider()),
-                ConstrainedBox(
-                  constraints: const BoxConstraints(minWidth: 70, maxWidth: 90),
-                  child: _buildSpellStat(
-                    context,
-                    '$spellSaveDC',
-                    'Spell Save DC',
-                  ),
-                ),
-              ],
-            ),
           ),
         ],
       ),
