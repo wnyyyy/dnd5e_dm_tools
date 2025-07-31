@@ -18,6 +18,7 @@ class CharacterStats extends Equatable {
     required this.speed,
     required this.deathSave,
     required this.inspiration,
+    required this.exhaustion,
   });
 
   factory CharacterStats.fromJson(
@@ -54,6 +55,7 @@ class CharacterStats extends Equatable {
       Map<String, dynamic>.from(json['death_save'] as Map? ?? {}),
     );
     final inspiration = json['inspiration'] as int? ?? 0;
+    final exhaustion = json['exhaustion'] as int? ?? 0;
 
     return CharacterStats(
       passivePerception: passivePerception,
@@ -67,6 +69,7 @@ class CharacterStats extends Equatable {
       speed: speed,
       deathSave: deathSave,
       inspiration: inspiration,
+      exhaustion: exhaustion,
     );
   }
 
@@ -83,6 +86,7 @@ class CharacterStats extends Equatable {
       'speed': speed,
       'death_save': deathSave.toJson(),
       'inspiration': inspiration,
+      'exhaustion': exhaustion,
     };
   }
 
@@ -98,6 +102,7 @@ class CharacterStats extends Equatable {
     int? speed,
     int? inspiration,
     DeathSave? deathSave,
+    int? exhaustion,
   }) {
     return CharacterStats(
       passivePerception: passivePerception ?? this.passivePerception,
@@ -111,6 +116,7 @@ class CharacterStats extends Equatable {
       speed: speed ?? this.speed,
       deathSave: deathSave ?? this.deathSave,
       inspiration: inspiration ?? this.inspiration,
+      exhaustion: exhaustion ?? this.exhaustion,
     );
   }
 
@@ -125,6 +131,7 @@ class CharacterStats extends Equatable {
   final int speed;
   final DeathSave deathSave;
   final int inspiration;
+  final int exhaustion;
 
   @override
   List<Object> get props => [
@@ -139,5 +146,6 @@ class CharacterStats extends Equatable {
     speed,
     deathSave,
     inspiration,
+    exhaustion,
   ];
 }

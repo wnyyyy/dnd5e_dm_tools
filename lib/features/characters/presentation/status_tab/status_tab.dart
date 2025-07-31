@@ -215,12 +215,12 @@ class StatusTab extends StatelessWidget {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          HitDice(
-                            character: character,
-                            classs: classs,
-                            onCharacterUpdated: (updatedCharacter) =>
-                                onCharacterUpdated(updatedCharacter, context),
-                          ),
+                          // HitDice(
+                          //   character: character,
+                          //   classs: classs,
+                          //   onCharacterUpdated: (updatedCharacter) =>
+                          //       onCharacterUpdated(updatedCharacter, context),
+                          // ),
                           Inspiration(
                             character: character,
                             onCharacterUpdated: (updatedCharacter) =>
