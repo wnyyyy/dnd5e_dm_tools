@@ -44,14 +44,16 @@ class HitpointsState extends State<Hitpoints> {
 
   void _activateTempHpMode() {
     setState(() {
-      tempHpMode = true;
+      tempHpMode = !tempHpMode;
     });
     _tempHpModeTimer?.cancel();
-    _tempHpModeTimer = Timer(const Duration(seconds: 20), () {
-      setState(() {
-        tempHpMode = false;
+    if (tempHpMode) {
+      _tempHpModeTimer = Timer(const Duration(seconds: 20), () {
+        setState(() {
+          tempHpMode = false;
+        });
       });
-    });
+    }
   }
 
   void _resetTempHpModeTimer() {
@@ -122,11 +124,12 @@ class HitpointsState extends State<Hitpoints> {
                     },
                     onLongPressEnd: (details) => _stopTimer(),
                     child: IconButton(
+                      visualDensity: VisualDensity.compact,
                       onPressed: () {
                         _updateHp(-1);
                         _resetTempHpModeTimer();
                       },
-                      iconSize: 32,
+                      iconSize: 24,
                       icon: const Icon(Icons.remove_circle_outline),
                     ),
                   ),
@@ -134,7 +137,7 @@ class HitpointsState extends State<Hitpoints> {
                 SizedBox(
                   width: screenWidth > 600
                       ? (currentHp > 100 ? 110 : 90)
-                      : (currentHp > 100 ? 90 : 95),
+                      : (currentHp > 100 ? 95 : 87),
                   child: Stack(
                     alignment: Alignment.center,
                     children: [
@@ -176,7 +179,8 @@ class HitpointsState extends State<Hitpoints> {
                     },
                     onLongPressEnd: (details) => _stopTimer(),
                     child: IconButton(
-                      iconSize: 32,
+                      visualDensity: VisualDensity.compact,
+                      iconSize: 24,
                       onPressed: () {
                         _updateHp(1);
                         _resetTempHpModeTimer();
