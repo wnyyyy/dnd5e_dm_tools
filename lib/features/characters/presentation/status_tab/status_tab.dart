@@ -50,6 +50,8 @@ class StatusTab extends StatelessWidget {
       spellAttackBonus = mod + profBonus;
     }
 
+    final orientation = MediaQuery.of(context).orientation;
+    final screenWidth = MediaQuery.of(context).size.width;
     return BlocBuilder<RulesCubit, RulesState>(
       builder: (context, state) {
         if (state is RulesStateLoading) {
@@ -60,7 +62,8 @@ class StatusTab extends StatelessWidget {
         }
         return LayoutBuilder(
           builder: (context, constraints) {
-            return constraints.maxWidth > wideScreenBreakpoint
+            return (screenWidth > wideScreenBreakpoint &&
+                    orientation == Orientation.landscape)
                 ? _buildWideLayout(
                     context,
                     isCaster,
@@ -102,17 +105,17 @@ class StatusTab extends StatelessWidget {
                     onCharacterUpdated: (updatedCharacter) =>
                         onCharacterUpdated(updatedCharacter, context),
                   ),
+                  HitDice(
+                    character: character,
+                    classs: classs,
+                    onCharacterUpdated: (updatedCharacter) =>
+                        onCharacterUpdated(updatedCharacter, context),
+                  ),
                   if (screenWidth > 1200)
                     Wrap(
                       spacing: 8,
                       runSpacing: 8,
                       children: [
-                        HitDice(
-                          character: character,
-                          classs: classs,
-                          onCharacterUpdated: (updatedCharacter) =>
-                              onCharacterUpdated(updatedCharacter, context),
-                        ),
                         Inspiration(
                           character: character,
                           onCharacterUpdated: (updatedCharacter) =>
@@ -132,12 +135,6 @@ class StatusTab extends StatelessWidget {
                         Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            HitDice(
-                              character: character,
-                              classs: classs,
-                              onCharacterUpdated: (updatedCharacter) =>
-                                  onCharacterUpdated(updatedCharacter, context),
-                            ),
                             Inspiration(
                               character: character,
                               onCharacterUpdated: (updatedCharacter) =>
@@ -192,6 +189,7 @@ class StatusTab extends StatelessWidget {
         child: Column(
           children: [
             Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Column(
                   children: [
@@ -200,8 +198,25 @@ class StatusTab extends StatelessWidget {
                       onCharacterUpdated: (updatedCharacter) =>
                           onCharacterUpdated(updatedCharacter, context),
                     ),
-                    if (isCaster)
-                      _buildSpellInfo(context, spellAttackBonus, spellSaveDC),
+                    SizedBox(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (isCaster)
+                            HitDice(
+                              character: character,
+                              classs: classs,
+                              onCharacterUpdated: (updatedCharacter) =>
+                                  onCharacterUpdated(updatedCharacter, context),
+                            ),
+                          Inspiration(
+                            character: character,
+                            onCharacterUpdated: (updatedCharacter) =>
+                                onCharacterUpdated(updatedCharacter, context),
+                          ),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
                 Column(
@@ -211,24 +226,15 @@ class StatusTab extends StatelessWidget {
                       onCharacterUpdated: (updatedCharacter) =>
                           onCharacterUpdated(updatedCharacter, context),
                     ),
-                    SizedBox(
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          // HitDice(
-                          //   character: character,
-                          //   classs: classs,
-                          //   onCharacterUpdated: (updatedCharacter) =>
-                          //       onCharacterUpdated(updatedCharacter, context),
-                          // ),
-                          Inspiration(
-                            character: character,
-                            onCharacterUpdated: (updatedCharacter) =>
-                                onCharacterUpdated(updatedCharacter, context),
-                          ),
-                        ],
+                    if (isCaster)
+                      _buildSpellInfo(context, spellAttackBonus, spellSaveDC),
+                    if (!isCaster)
+                      HitDice(
+                        character: character,
+                        classs: classs,
+                        onCharacterUpdated: (updatedCharacter) =>
+                            onCharacterUpdated(updatedCharacter, context),
                       ),
-                    ),
                   ],
                 ),
               ],
