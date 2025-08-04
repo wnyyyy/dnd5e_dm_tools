@@ -3,12 +3,14 @@ import 'package:dnd5e_dm_tools/core/data/models/feat.dart';
 import 'package:dnd5e_dm_tools/core/data/models/item.dart';
 import 'package:dnd5e_dm_tools/core/data/models/spell.dart';
 import 'package:dnd5e_dm_tools/core/data/models/spell_list.dart';
+import 'package:dnd5e_dm_tools/core/data/models/update.dart';
 import 'package:dnd5e_dm_tools/core/data/repositories/classes_repository.dart';
 import 'package:dnd5e_dm_tools/core/data/repositories/conditions_repository.dart';
 import 'package:dnd5e_dm_tools/core/data/repositories/feats_repository.dart';
 import 'package:dnd5e_dm_tools/core/data/repositories/items_repository.dart';
 import 'package:dnd5e_dm_tools/core/data/repositories/races_repository.dart';
 import 'package:dnd5e_dm_tools/core/data/repositories/spells_repository.dart';
+import 'package:dnd5e_dm_tools/core/data/repositories/updates_repository.dart';
 import 'package:dnd5e_dm_tools/core/util/logger.dart';
 import 'package:dnd5e_dm_tools/features/rules/rules_state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -22,6 +24,7 @@ class RulesCubit extends Cubit<RulesState> {
     required this.itemsRepository,
     required this.classesRepository,
     required this.racesRepository,
+    required this.updatesRepository,
   }) : super(RulesStateInitial());
   final ConditionsRepository conditionsRepository;
   final FeatsRepository featsRepository;
@@ -29,6 +32,7 @@ class RulesCubit extends Cubit<RulesState> {
   final ItemsRepository itemsRepository;
   final ClassesRepository classesRepository;
   final RacesRepository racesRepository;
+  final UpdatesRepository updatesRepository;
 
   Future<void> loadRules() async {
     emit(RulesStateLoading());
@@ -39,8 +43,11 @@ class RulesCubit extends Cubit<RulesState> {
     await itemsRepository.init();
     await classesRepository.init();
     await racesRepository.init();
+    await updatesRepository.init();
 
     var results = [];
+    final updates = await _loadUpdates();
+
     try {
       logBloc('Loading rules...');
       final conditions = conditionsRepository.getAll();
@@ -59,6 +66,7 @@ class RulesCubit extends Cubit<RulesState> {
       logBloc('Error loading rules: $e', level: Level.error);
       emit(RulesStateError(e.toString()));
     }
+
     final itemList = results[4] as List<Item>;
     final spells = results[1] as List<Spell>;
     final weapons = itemList.whereType<Weapon>().toList();
@@ -88,11 +96,118 @@ class RulesCubit extends Cubit<RulesState> {
           itemMap: itemMap,
           spellMap: spellMap,
           spellMapByLevel: spellMapByLevel,
+          updates: updates,
         ),
       );
     } catch (e) {
       logBloc('Error processing loaded rules: $e', level: Level.error);
       emit(RulesStateError(e.toString()));
+    }
+  }
+
+  Future<List<Update>> _loadUpdates() async {
+    try {
+      logBloc('Loading updates...');
+      final localUpdates = await updatesRepository.getAll(online: false);
+      localUpdates.sort((a, b) => a.timestamp.compareTo(b.timestamp));
+      final upstreamUpdates = await updatesRepository.getAll(online: true);
+      upstreamUpdates.sort((a, b) => a.timestamp.compareTo(b.timestamp));
+      logBloc(
+        'Loaded ${localUpdates.length} local updates and ${upstreamUpdates.length} upstream updates',
+      );
+      for (int i = 0; i < upstreamUpdates.length; i++) {
+        final update = upstreamUpdates[i];
+        if (localUpdates.length > i && localUpdates[i].id == update.id) {
+          logBloc('Skipping already applied update: ${update.id}');
+          continue;
+        }
+        logBloc('Applying update: ${update.id}');
+        await _processUpdate(update);
+      }
+      await updatesRepository.clearCache();
+      await updatesRepository.set(upstreamUpdates);
+      return upstreamUpdates;
+    } catch (e) {
+      logBloc('Error loading updates: $e', level: Level.error);
+      emit(RulesStateError(e.toString()));
+    }
+    return [];
+  }
+
+  Future<void> _processUpdate(Update update) async {
+    for (final updateEntry in update.updatedEntries) {
+      try {
+        switch (updateEntry.collection) {
+          case 'spells':
+            for (final spellSlug in updateEntry.documents) {
+              try {
+                await spellsRepository.sync(spellSlug);
+              } catch (e) {
+                logBloc(
+                  'Spell $spellSlug not found for update',
+                  level: Level.warning,
+                );
+                continue;
+              }
+            }
+          case 'feats':
+            for (final featSlug in updateEntry.documents) {
+              try {
+                await featsRepository.sync(featSlug);
+              } catch (e) {
+                logBloc(
+                  'Feat $featSlug not found for update',
+                  level: Level.warning,
+                );
+                continue;
+              }
+            }
+          case 'classes':
+            for (final classSlug in updateEntry.documents) {
+              try {
+                await classesRepository.sync(classSlug);
+              } catch (e) {
+                logBloc(
+                  'Class $classSlug not found for update',
+                  level: Level.warning,
+                );
+                continue;
+              }
+            }
+          case 'items':
+          case 'equipment':
+            for (final itemSlug in updateEntry.documents) {
+              try {
+                await itemsRepository.sync(itemSlug);
+              } catch (e) {
+                logBloc(
+                  'Item $itemSlug not found for update',
+                  level: Level.warning,
+                );
+                continue;
+              }
+            }
+          case 'races':
+            for (final raceSlug in updateEntry.documents) {
+              try {
+                await racesRepository.sync(raceSlug);
+              } catch (e) {
+                logBloc(
+                  'Race $raceSlug not found for update',
+                  level: Level.warning,
+                );
+                continue;
+              }
+            }
+          default:
+            logBloc(
+              'Unknown update type: ${updateEntry.collection}',
+              level: Level.warning,
+            );
+        }
+      } catch (e) {
+        logBloc('Error processing update entry: $e', level: Level.error);
+      }
     }
   }
 
@@ -169,6 +284,7 @@ class RulesCubit extends Cubit<RulesState> {
           itemMap: currState.itemMap,
           spellMap: currState.spellMap,
           spellMapByLevel: currState.spellMapByLevel,
+          updates: currState.updates,
         ),
       );
     }
@@ -203,6 +319,7 @@ class RulesCubit extends Cubit<RulesState> {
             itemMap: itemMap,
             spellMap: prevState.spellMap,
             spellMapByLevel: prevState.spellMapByLevel,
+            updates: prevState.updates,
           ),
         );
       } catch (e) {

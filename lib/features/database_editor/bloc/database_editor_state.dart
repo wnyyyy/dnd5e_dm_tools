@@ -1,24 +1,27 @@
 import 'package:equatable/equatable.dart';
 
 abstract class DatabaseEditorState extends Equatable {
-  const DatabaseEditorState({required this.selectedIndex});
+  const DatabaseEditorState({required this.selectedIndex, required this.selectedUpdate});
   final int selectedIndex;
+  final bool selectedUpdate;
+
   @override
-  List<Object?> get props => [selectedIndex];
+  List<Object?> get props => [selectedIndex, selectedUpdate];
 }
 
 class DatabaseEditorInitial extends DatabaseEditorState {
-  const DatabaseEditorInitial({required super.selectedIndex});
+  const DatabaseEditorInitial({required super.selectedIndex, required super.selectedUpdate});
 }
 
 class DatabaseEditorError extends DatabaseEditorState {
-  const DatabaseEditorError({required super.selectedIndex, this.message});
+  const DatabaseEditorError({required super.selectedIndex, required super.selectedUpdate, this.message});
   final String? message;
 }
 
 class DatabaseEditorSynced extends DatabaseEditorState {
   const DatabaseEditorSynced({
     required super.selectedIndex,
+    required super.selectedUpdate,
     this.type,
     required this.previousState,
   });
@@ -26,11 +29,11 @@ class DatabaseEditorSynced extends DatabaseEditorState {
   final String? type;
   final DatabaseEditorLoaded previousState;
   @override
-  List<Object?> get props => [selectedIndex, type, previousState];
+  List<Object?> get props => [selectedIndex, selectedUpdate, type, previousState];
 }
 
 class DatabaseEditorLoading extends DatabaseEditorState {
-  const DatabaseEditorLoading({required super.selectedIndex});
+  const DatabaseEditorLoading({required super.selectedIndex, required super.selectedUpdate});
 }
 
 class DatabaseEditorLoaded extends DatabaseEditorState {
@@ -39,6 +42,7 @@ class DatabaseEditorLoaded extends DatabaseEditorState {
     required this.originalEntry,
     required this.slug,
     required super.selectedIndex,
+    required super.selectedUpdate,
   });
   final Map<String, dynamic> entry;
   final Map<String, dynamic> originalEntry;
@@ -54,9 +58,10 @@ class DatabaseEditorLoaded extends DatabaseEditorState {
       originalEntry: originalEntry ?? this.originalEntry,
       slug: slug ?? this.slug,
       selectedIndex: selectedIndex,
+      selectedUpdate: selectedUpdate,
     );
   }
 
   @override
-  List<Object?> get props => [entry, originalEntry, slug, selectedIndex];
+  List<Object?> get props => [entry, originalEntry, slug, selectedIndex, selectedUpdate];
 }

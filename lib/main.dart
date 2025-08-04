@@ -8,6 +8,7 @@ import 'package:dnd5e_dm_tools/core/data/repositories/feats_repository.dart';
 import 'package:dnd5e_dm_tools/core/data/repositories/items_repository.dart';
 import 'package:dnd5e_dm_tools/core/data/repositories/races_repository.dart';
 import 'package:dnd5e_dm_tools/core/data/repositories/spells_repository.dart';
+import 'package:dnd5e_dm_tools/core/data/repositories/updates_repository.dart';
 import 'package:dnd5e_dm_tools/core/util/const.dart';
 import 'package:dnd5e_dm_tools/core/util/logger.dart';
 import 'package:dnd5e_dm_tools/features/characters/bloc/character/character_bloc.dart';
@@ -155,6 +156,9 @@ class Dnd5eDmTools extends StatelessWidget {
         RepositoryProvider<FeatsRepository>(
           create: (_) => FeatsRepository(databaseProvider),
         ),
+        RepositoryProvider<UpdatesRepository>(
+          create: (_) => UpdatesRepository(databaseProvider),
+        ),
       ],
       child: MultiBlocProvider(
         providers: [
@@ -201,6 +205,7 @@ class Dnd5eDmTools extends StatelessWidget {
               featsRepository: context.read<FeatsRepository>(),
               classesRepository: context.read<ClassesRepository>(),
               racesRepository: context.read<RacesRepository>(),
+              updatesRepository: context.read<UpdatesRepository>(),
             )..loadRules(),
           ),
         ],

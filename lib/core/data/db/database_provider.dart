@@ -93,26 +93,24 @@ class DatabaseProvider {
     logDB('Getting collection: $path');
     if (cacheBoxName != null) {
       final cacheBox = Hive.box<Map>(cacheBoxName);
-      if (cacheBox.isNotEmpty) {
-        for (final key in cacheBox.keys) {
-          try {
-            final map = cacheBox.get(key);
-            if (map != null) {
-              final Map<String, dynamic> castedMap = {};
-              map.forEach((k, v) {
-                if (k is String) {
-                  castedMap[k] = v;
-                }
-              });
-              data[key.toString()] = castedMap;
-            }
-          } catch (e) {
-            logDB('Error getting cache data: $e', level: Level.warning);
+      for (final key in cacheBox.keys) {
+        try {
+          final map = cacheBox.get(key);
+          if (map != null) {
+            final Map<String, dynamic> castedMap = {};
+            map.forEach((k, v) {
+              if (k is String) {
+                castedMap[k] = v;
+              }
+            });
+            data[key.toString()] = castedMap;
           }
+        } catch (e) {
+          logDB('Error getting cache data: $e', level: Level.warning);
         }
-        logDB('Found cache data for $path // returning ${data.length} items');
-        return data;
       }
+      logDB('Found cache data for $path // returning ${data.length} items');
+      return data;
     }
     logDB(
       cacheBoxName != null

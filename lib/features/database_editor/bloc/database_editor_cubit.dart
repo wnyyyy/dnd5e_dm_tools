@@ -18,7 +18,9 @@ class DatabaseEditorCubit extends Cubit<DatabaseEditorState> {
     required this.classesRepository,
     required this.racesRepository,
     required this.itemsRepository,
-  }) : super(const DatabaseEditorInitial(selectedIndex: 0));
+  }) : super(
+         const DatabaseEditorInitial(selectedIndex: 0, selectedUpdate: false),
+       );
   final SpellsRepository spellsRepository;
   final FeatsRepository featsRepository;
   final ClassesRepository classesRepository;
@@ -26,11 +28,28 @@ class DatabaseEditorCubit extends Cubit<DatabaseEditorState> {
   final ItemsRepository itemsRepository;
 
   void setSelectedIndex(int index) {
-    emit(DatabaseEditorInitial(selectedIndex: index));
+    emit(DatabaseEditorInitial(selectedIndex: index, selectedUpdate: false));
+  }
+
+  void setSelectedUpdate(bool update) {
+    emit(
+      DatabaseEditorInitial(
+        selectedIndex: state.selectedIndex,
+        selectedUpdate: update,
+      ),
+    );
   }
 
   Future<void> fetch(String slug, String type) async {
-    emit(DatabaseEditorLoading(selectedIndex: state.selectedIndex));
+    if (state.selectedUpdate) {
+      return;
+    }
+    emit(
+      DatabaseEditorLoading(
+        selectedIndex: state.selectedIndex,
+        selectedUpdate: false,
+      ),
+    );
     try {
       final Map<String, dynamic> entry;
       switch (type) {
@@ -45,7 +64,12 @@ class DatabaseEditorCubit extends Cubit<DatabaseEditorState> {
         case 'items':
           entry = await itemsRepository.getData(slug, online: true);
         default:
-          emit(DatabaseEditorError(selectedIndex: state.selectedIndex));
+          emit(
+            DatabaseEditorError(
+              selectedIndex: state.selectedIndex,
+              selectedUpdate: false,
+            ),
+          );
           return;
       }
       entry['slug'] = slug;
@@ -55,12 +79,14 @@ class DatabaseEditorCubit extends Cubit<DatabaseEditorState> {
           originalEntry: Map<String, dynamic>.from(entry),
           slug: slug,
           selectedIndex: state.selectedIndex,
+          selectedUpdate: false,
         ),
       );
     } catch (e) {
       emit(
         DatabaseEditorError(
           selectedIndex: state.selectedIndex,
+          selectedUpdate: false,
           message: e.toString(),
         ),
       );
@@ -72,7 +98,12 @@ class DatabaseEditorCubit extends Cubit<DatabaseEditorState> {
       return;
     }
     final prevState = (state as DatabaseEditorLoaded).copyWith();
-    emit(DatabaseEditorLoading(selectedIndex: state.selectedIndex));
+    emit(
+      DatabaseEditorLoading(
+        selectedIndex: state.selectedIndex,
+        selectedUpdate: false,
+      ),
+    );
     final Map<String, dynamic> entry;
     switch (type) {
       case 'spells':
@@ -94,6 +125,7 @@ class DatabaseEditorCubit extends Cubit<DatabaseEditorState> {
         emit(
           DatabaseEditorError(
             selectedIndex: state.selectedIndex,
+            selectedUpdate: false,
             message: 'Character syncing is not supported',
           ),
         );
@@ -102,6 +134,7 @@ class DatabaseEditorCubit extends Cubit<DatabaseEditorState> {
         emit(
           DatabaseEditorError(
             selectedIndex: state.selectedIndex,
+            selectedUpdate: false,
             message: 'Unknown type: $type',
           ),
         );
@@ -113,6 +146,7 @@ class DatabaseEditorCubit extends Cubit<DatabaseEditorState> {
         type: type,
         previousState: prevState,
         selectedIndex: state.selectedIndex,
+        selectedUpdate: false,
       ),
     );
   }
@@ -126,7 +160,12 @@ class DatabaseEditorCubit extends Cubit<DatabaseEditorState> {
       return;
     }
     final originalEntry = (state as DatabaseEditorLoaded).originalEntry;
-    emit(DatabaseEditorLoading(selectedIndex: state.selectedIndex));
+    emit(
+      DatabaseEditorLoading(
+        selectedIndex: state.selectedIndex,
+        selectedUpdate: false,
+      ),
+    );
     try {
       switch (type) {
         case 'spells':
@@ -163,7 +202,12 @@ class DatabaseEditorCubit extends Cubit<DatabaseEditorState> {
         case 'items':
           await itemsRepository.save(slug, Item.fromJson(editedEntry), false);
         default:
-          emit(DatabaseEditorError(selectedIndex: state.selectedIndex));
+          emit(
+            DatabaseEditorError(
+              selectedIndex: state.selectedIndex,
+              selectedUpdate: false,
+            ),
+          );
           return;
       }
       emit(
@@ -172,12 +216,14 @@ class DatabaseEditorCubit extends Cubit<DatabaseEditorState> {
           originalEntry: originalEntry,
           slug: slug,
           selectedIndex: state.selectedIndex,
+          selectedUpdate: false,
         ),
       );
     } catch (e) {
       emit(
         DatabaseEditorError(
           selectedIndex: state.selectedIndex,
+          selectedUpdate: false,
           message: e.toString(),
         ),
       );
