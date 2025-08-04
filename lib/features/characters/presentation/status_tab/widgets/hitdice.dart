@@ -227,21 +227,28 @@ class HitDice extends StatelessWidget {
       child: Card(
         child: SizedBox(
           child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Column(
+            padding: const EdgeInsets.only(left: 8.0, top: 2.0, bottom: 2.0),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  'Hit Dice\n($hd)',
-                  style: Theme.of(context).textTheme.titleSmall,
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 8),
                 Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      '$currentHd/$maxHd',
-                      style: Theme.of(context).textTheme.displaySmall,
+                      'Hit Dice',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                    Text('($hd)', style: Theme.of(context).textTheme.bodySmall),
+                  ],
+                ),
+                const SizedBox(width: 14.0),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      '$currentHd | $maxHd',
+                      style: Theme.of(context).textTheme.titleLarge,
                     ),
                   ],
                 ),

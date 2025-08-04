@@ -84,6 +84,7 @@ class _ActionMenuState extends State<ActionMenu> {
   Widget build(BuildContext context) {
     final filteredActions = _getFilteredItems(actions);
     final screenWidth = MediaQuery.of(context).size.width;
+    final orientation = MediaQuery.of(context).orientation;
     final isCaster = widget.character.spellbook.knownSpells.isNotEmpty;
     return Container(
       decoration: BoxDecoration(
@@ -92,7 +93,9 @@ class _ActionMenuState extends State<ActionMenu> {
         ),
       ),
       child: Column(
-        crossAxisAlignment: screenWidth > wideScreenBreakpoint
+        crossAxisAlignment:
+            (screenWidth > wideScreenBreakpoint &&
+                orientation == Orientation.landscape)
             ? CrossAxisAlignment.start
             : CrossAxisAlignment.center,
         children: [

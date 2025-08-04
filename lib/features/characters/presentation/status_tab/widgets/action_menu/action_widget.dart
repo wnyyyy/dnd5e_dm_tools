@@ -549,6 +549,9 @@ class ActionWidgetState extends State<ActionWidget> {
     }
 
     final screenWidth = MediaQuery.of(context).size.width;
+    final baseStyle = action.title.length > 20
+        ? Theme.of(context).textTheme.titleSmall!
+        : Theme.of(context).textTheme.titleMedium!;
     return GestureDetector(
       onTap: () {
         setState(() {
@@ -564,14 +567,19 @@ class ActionWidgetState extends State<ActionWidget> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 24),
-                    child: Text(
-                      action.title,
-                      style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                        fontFamily: GoogleFonts.montserrat().fontFamily,
+                Expanded(
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 24),
+                      child: Text(
+                        action.title,
+                        style: baseStyle.copyWith(
+                          fontFamily: GoogleFonts.montserrat().fontFamily,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 2,
+                        softWrap: true,
                       ),
                     ),
                   ),

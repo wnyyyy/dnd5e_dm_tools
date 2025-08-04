@@ -64,6 +64,7 @@ class _DatabaseEditorLoadedContent extends StatelessWidget {
       builder: (context, state) {
         final cubit = context.read<DatabaseEditorCubit>();
         final selectedIndex = state.selectedIndex;
+        final selectedUpdate = state.selectedUpdate;
         final List<String> categories = [
           'Feat',
           'Race',
@@ -101,7 +102,7 @@ class _DatabaseEditorLoadedContent extends StatelessWidget {
                     ...List.generate(categories.length, (index) {
                       return ChoiceChip(
                         label: Text(categories[index]),
-                        selected: selectedIndex == index,
+                        selected: selectedIndex == index && !selectedUpdate,
                         onSelected: (selected) {
                           cubit.setSelectedIndex(index);
                         },
@@ -137,6 +138,14 @@ class _DatabaseEditorLoadedContent extends StatelessWidget {
                             }
                           },
                         ),
+                        const SizedBox(width: 10),
+                        ChoiceChip(
+                          label: const Text('Updates'),
+                          selected: selectedUpdate,
+                          onSelected: (selected) {
+                            cubit.setSelectedUpdate(selected);
+                          },
+                        ),
                       ],
                     ),
                   ],
@@ -157,6 +166,9 @@ class _DatabaseEditorLoadedContent extends StatelessWidget {
     String type,
     BuildContext context,
   ) {
+    if (state is DatabaseEditorInitial && state.selectedUpdate) {
+      _buildUpdateList(context);
+    }
     if (state is DatabaseEditorLoading) {
       return const CircularProgressIndicator();
     }
@@ -178,6 +190,27 @@ class _DatabaseEditorLoadedContent extends StatelessWidget {
       );
     }
     return const Center();
+  }
+
+  Widget _buildUpdateList(BuildContext context) {
+    final rulesState = context.read<RulesCubit>().state;
+    if (rulesState is! RulesStateLoaded) {
+      return const SizedBox.shrink();
+    }
+    final updates = rulesState.updates;
+    return ListView.builder(
+      shrinkWrap: true,
+      itemCount: updates.length,
+      itemBuilder: (context, index) {
+        final update = updates[index];
+        return ListTile(
+          title: Text(update.timestamp.toDate().toString()),
+          subtitle: Text(
+            '${update.id}\nEntries: ${update.updatedEntries.length}',
+          ),
+        );
+      },
+    );
   }
 
   Widget _buildInputs(

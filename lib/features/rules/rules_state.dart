@@ -3,6 +3,7 @@ import 'package:dnd5e_dm_tools/core/data/models/feat.dart';
 import 'package:dnd5e_dm_tools/core/data/models/item.dart';
 import 'package:dnd5e_dm_tools/core/data/models/spell.dart';
 import 'package:dnd5e_dm_tools/core/data/models/spell_list.dart';
+import 'package:dnd5e_dm_tools/core/data/models/update.dart';
 import 'package:equatable/equatable.dart';
 
 abstract class RulesState extends Equatable {
@@ -49,6 +50,7 @@ class RulesStateLoaded extends RulesState {
     required this.itemMap,
     required this.spellMap,
     required this.spellMapByLevel,
+    required this.updates,
   });
   final List<Condition> conditions;
   final List<Feat> feats;
@@ -62,6 +64,7 @@ class RulesStateLoaded extends RulesState {
   final Map<String, Item> itemMap;
   final Map<String, Spell> spellMap;
   final Map<int, List<Spell>> spellMapByLevel;
+  final List<Update> updates;
 
   RulesStateLoaded copyWith({
     List<Condition>? conditions,
@@ -76,6 +79,7 @@ class RulesStateLoaded extends RulesState {
     Map<String, Item>? itemMap,
     Map<String, Spell>? spellMap,
     Map<int, List<Spell>>? spellMapByLevel,
+    List<Update>? updates,
   }) {
     return RulesStateLoaded(
       conditions: conditions ?? this.conditions,
@@ -90,6 +94,7 @@ class RulesStateLoaded extends RulesState {
       itemMap: itemMap ?? this.itemMap,
       spellMap: spellMap ?? this.spellMap,
       spellMapByLevel: spellMapByLevel ?? this.spellMapByLevel,
+      updates: updates ?? this.updates,
     );
   }
 
@@ -107,5 +112,6 @@ class RulesStateLoaded extends RulesState {
     itemMap,
     spellMap,
     spellMapByLevel,
+    updates,
   ];
 }
