@@ -14,7 +14,9 @@ class Spellbook extends Equatable {
         json['prepared_spells'] as Map? ?? {},
       ),
       expendedSpellSlots: Map<int, int>.from(
-        json['expended_spell_slots'] as Map? ?? {},
+        (json['expended_spell_slots'] as Map? ?? {}).map(
+          (key, value) => MapEntry(int.parse(key as String), value as int),
+        ),
       ),
     );
   }
@@ -27,7 +29,11 @@ class Spellbook extends Equatable {
     return {
       'known_spells': knownSpells,
       'prepared_spells': preparedSpells,
-      'expended_spell_slots': expendedSpellSlots,
+      'expended_spell_slots': Map<String, int>.fromEntries(
+        expendedSpellSlots.entries.map(
+          (e) => MapEntry(e.key.toString(), e.value),
+        ),
+      ),
     };
   }
 
