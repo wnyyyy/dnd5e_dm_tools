@@ -1,2 +1,6 @@
 firebase_key.json
 custom_db.json
+input_model.json
+output_model.json
+.venv/
+key.json
